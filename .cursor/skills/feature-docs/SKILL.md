@@ -8,7 +8,9 @@ description: >-
 
 # opengd77-map feature documentation
 
-Canonical feature docs live under **`docs/features/<topic>/`**. User-facing tool overview stays in each HTML page and [`README.md`](../../../README.md); feature docs target contributors and agents.
+Canonical feature docs live under **`docs/features/<topic>/`**. Tools live under **`tools/<topic>/`**. User-facing overview stays in [`README.md`](../../../README.md) and the live site; feature docs target contributors and agents.
+
+Deploy and release: [docs/build/README.md](../../../docs/build/README.md).
 
 Read [progress-tracking](../progress-tracking/SKILL.md) when an initiative needs execution handoff files.
 
@@ -49,7 +51,7 @@ Use for CSV formats, rendering behaviour, UI interaction, etc.
 | Section | Contents |
 | --- | --- |
 | **Purpose** | What this slice covers vs the hub README |
-| **Code anchors** | HTML file, main functions or sections (by name or line region) |
+| **Code anchors** | `tools/<topic>/` — `index.html`, sidecar `.js`, main functions by name |
 | **Inputs** | CSV files and columns (matched by header name, not index) |
 | **Behaviour** | Filters, defaults, edge cases (e.g. skip `0,0`, case-sensitive channel names) |
 | **Browser storage** | `localStorage` keys (e.g. Mapbox token) — never commit values |

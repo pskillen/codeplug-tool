@@ -12,7 +12,7 @@ Documents parsing, filtering, grouping, and rendering of OpenGD77 channel rows. 
 
 | Symbol / region | File | Role |
 | --- | --- | --- |
-| `COL` | `opengd77-channel-map.html` | Header names for channel columns |
+| `COL` | `tools/channel-map/channel-map.js` | Header names for channel columns |
 | `parseCsv` | same | RFC-style CSV parser (quoted fields, BOM strip) |
 | `parseChannelsCsv` | same | Build channel objects from rows |
 | `applyFilters` | same | Plot vs skip by coordinates and `Use Location` |
@@ -127,7 +127,7 @@ Channel CSV content is **not** persisted — reload the file after a page refres
 ## Manual verify
 
 1. Copy `Channels.csv` from an OpenGD77 export into `sample-exports/`.
-2. Open `opengd77-channel-map.html` in a browser.
+2. Open `tools/channel-map/index.html` in a browser (or the [live site](https://pskillen.github.io/opengd77-map/tools/channel-map/)).
 3. Load `Channels.csv` via dropzone or file picker.
 4. Confirm markers appear for known repeaters; open popups for frequency/contact fields.
 5. Toggle **Skip 0,0** and **Use Location** — skipped list and marker count should update.
