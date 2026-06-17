@@ -11,9 +11,9 @@ description: >-
 
 ## Overview
 
-This repo is a **small monorepo**: static HTML/JS tools, no build step, deployed from `main` via **GitHub Pages**. One issue, one branch, one PR — no cross-repo coordination.
+This repo is a **small monorepo**: static HTML/JS tools under `tools/`, no application bundler, deployed to **GitHub Pages** on **`v*` release tags**. One issue, one branch, one PR — no cross-repo coordination.
 
-Workflow: plan → issue (when non-trivial) → branch → commit → PR → merge to `main` (publishes to Pages).
+Workflow: plan → issue (when non-trivial) → branch → commit → PR → merge to `main` → tag release to publish Pages.
 
 Use the **`user-github-personal`** MCP for issues and PRs. The `gh` CLI is not available on this machine.
 
@@ -28,7 +28,7 @@ For larger initiatives, pair with [progress-tracking](../progress-tracking/SKILL
 **Features and multi-commit work:** create one GitHub issue in `pskillen/opengd77-map` with:
 
 - Problem and intended outcome
-- Which tool(s) are affected (HTML file name)
+- Which tool(s) are affected (`tools/<name>/`)
 - Link to a Cursor plan if one exists
 - For non-trivial scope: links to `docs/features/<topic>/` progress files
 
@@ -117,7 +117,7 @@ When work is ready:
 
 1. Open one PR in `pskillen/opengd77-map` via `user-github-personal` MCP
 2. Link the issue (`Closes #N`) when applicable
-3. Note which HTML tool(s) changed and how to smoke-test locally (open file or GitHub Pages preview URL)
+3. Note which tool(s) changed and how to smoke-test locally (`tools/<name>/` or GitHub Pages URL)
 
 **PR description template:**
 
@@ -126,7 +126,7 @@ When work is ready:
 - …
 
 ## Test plan
-- [ ] Open `<tool>.html` locally with sample Channels.csv / Zones.csv
+- [ ] Open `tools/<name>/` locally with sample Channels.csv / Zones.csv
 - [ ] …
 ```
 
@@ -141,4 +141,4 @@ When work is ready:
 | Pre-commit | Browser smoke-test; no secrets in diff |
 | Commit | Conventional commits; atomic; Shell `working_directory` = repo root |
 | PR | One PR in this repo; link issue; describe manual test steps |
-| Deploy | Merge to `main` → GitHub Pages |
+| Deploy | Merge to `main`, then push `v*` tag → GitHub Pages |

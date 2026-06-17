@@ -86,7 +86,7 @@ Leave accurate **Status** lines, open PR URLs, branch names, and a **Next:** sec
 
 **Tracking:** [opengd77-map#NNN](https://github.com/pskillen/opengd77-map/issues/NNN)
 **Plan:** `.cursor/plans/<plan-file>.plan.md` or GitHub issue
-**Tool:** `opengd77-<tool>.html`
+**Tool:** `tools/<tool>/` (e.g. `tools/channel-map/`)
 
 ---
 
@@ -109,7 +109,7 @@ Leave accurate **Status** lines, open PR URLs, branch names, and a **Next:** sec
 
 **Verify**
 
-- Open `opengd77-<tool>.html` with sample CSVs from `sample-exports/`
+- Open `tools/<tool>/index.html` with sample CSVs from `sample-exports/`
 - …
 
 ---

@@ -8,9 +8,9 @@ alwaysApply: false
 
 Read [`AGENTS.md`](../../AGENTS.md) first. For git, plans, and docs see [`.cursor/skills/`](../skills/).
 
-## Channel map (`opengd77-channel-map.html`)
+## Channel map (`tools/channel-map/`)
 
-- Single-page tool: inline CSS/JS is fine; Leaflet from CDN is the current pattern.
+- HTML in `index.html`; application logic in `channel-map.js`. CSS may stay inline; Leaflet from CDN.
 - Parse OpenGD77 CSV by **column header name**, not index.
 - Zone hulls use the same coordinate filters as channel markers (`Use Location`, skip `0,0`).
 - A channel may appear in multiple zones — each zone hull includes shared members independently.
@@ -18,5 +18,5 @@ Read [`AGENTS.md`](../../AGENTS.md) first. For git, plans, and docs see [`.curso
 
 ## Scope
 
-- No build toolchain unless explicitly requested.
+- No JS bundler unless explicitly requested. GitHub Pages deploy is tag-triggered — see `docs/build/README.md`.
 - Do not add committed sample codeplugs; use gitignored `sample-exports/` for local CSVs.
