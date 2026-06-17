@@ -18,11 +18,17 @@
       background: var(--bg);
       color: var(--text);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 2rem;
     }
     main { max-width: 36rem; }
+    .site-footer {
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
     h1 { font-size: 1.5rem; margin: 0 0 0.5rem; }
     p { color: var(--muted); line-height: 1.5; }
     ul { padding-left: 1.25rem; line-height: 1.8; }
@@ -37,5 +43,10 @@
       <li><a href="tools/channel-map/">Channel map</a> — plot <code>Channels.csv</code> and zone hulls from <code>Zones.csv</code></li>
     </ul>
   </main>
+  <footer class="site-footer" id="build-info-footer" aria-label="Build info"></footer>
+  <script src="build-info.js"></script>
+  <script>
+    document.getElementById("build-info-footer").textContent = BUILD_INFO.label();
+  </script>
 </body>
 </html>

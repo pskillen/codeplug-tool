@@ -25,9 +25,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Prepare site
+        env:
+          BUILD_ENV: prod
+          BUILD_VERSION: ${{ github.ref_name }}
         run: |
+          VERSION="${BUILD_VERSION#v}"
+          sed -i "s|__BUILD_ENV__|${BUILD_ENV}|g" site/build-info.js
+          sed -i "s|__BUILD_VERSION__|${VERSION}|g" site/build-info.js
           mkdir -p _site
           cp site/index.html _site/index.html
+          cp site/build-info.js _site/build-info.js
           cp -r tools _site/tools
 
       - name: Upload Pages artifact
