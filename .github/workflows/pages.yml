@@ -1,9 +1,8 @@
 name: Deploy GitHub Pages
 
 on:
-  push:
-    tags:
-      - "v*"
+  release:
+    types: [released]
 
 permissions:
   contents: read
@@ -12,7 +11,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -22,12 +21,12 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Prepare site
         env:
           BUILD_ENV: prod
-          BUILD_VERSION: ${{ github.ref_name }}
+          BUILD_VERSION: ${{ github.event.release.tag_name }}
         run: |
           VERSION="${BUILD_VERSION#v}"
           sed -i "s|__BUILD_ENV__|${BUILD_ENV}|g" site/build-info.js
@@ -38,10 +37,10 @@ jobs:
           cp -r tools _site/tools
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
