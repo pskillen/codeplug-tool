@@ -15,7 +15,9 @@ This repo is intentionally small: static HTML/JS pages, no build step, no backen
 | `README.md` | User-facing overview and usage |
 | `AGENTS.md` | This file — agent workflow |
 | `opengd77-channel-map.html` | Channel + zone map viewer (on feature branches as added) |
+| `docs/features/` | Contributor feature docs and progress logs |
 | `.cursor/rules/` | File-scoped editor rules |
+| `.cursor/skills/` | Agent skills — git workflow, progress tracking, feature docs |
 
 ## OpenGD77 CSV inputs
 
@@ -36,9 +38,20 @@ Do not commit operator codeplug exports unless the user explicitly asks. Use `sa
 
 ## Git workflow
 
+Follow [`.cursor/skills/git-workflow/SKILL.md`](.cursor/skills/git-workflow/SKILL.md) for branching, commits, and PRs.
+
 - Prefer **atomic conventional commits** per logical change.
-- Branch + pull request for features; `main` stays releasable.
+- Branch + pull request for features; `main` stays releasable and publishes to **GitHub Pages**.
+- Use **`user-github-personal`** MCP for issues and PRs (not `gh` CLI).
 - Do not commit `.env`, secrets, or personal `sample-exports/`.
+
+## Plans and feature docs
+
+For multi-commit or multi-PR work:
+
+- Document tools under `docs/features/<topic>/` per [feature-docs](.cursor/skills/feature-docs/SKILL.md).
+- Maintain `*-progress.md` and `*-outstanding.md` per [progress-tracking](.cursor/skills/progress-tracking/SKILL.md).
+- Index new topics in [`docs/features/README.md`](docs/features/README.md).
 
 ## Disclaimer
 

@@ -6,7 +6,7 @@ alwaysApply: false
 
 # opengd77-map edits
 
-Read [`AGENTS.md`](../AGENTS.md) first.
+Read [`AGENTS.md`](../../AGENTS.md) first. For git, plans, and docs see [`.cursor/skills/`](../skills/).
 
 ## Channel map (`opengd77-channel-map.html`)
 
