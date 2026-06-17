@@ -6,17 +6,21 @@ OpenGD77 CPS exports include latitude/longitude on channels and zone membership 
 
 The primary goal is to help you **set up OpenGD77 codeplugs** — spot missing coordinates, see which repeaters sit near each other, and check whether zone boundaries match the geography you intend.
 
+**Live site:** [pskillen.github.io/opengd77-map](https://pskillen.github.io/opengd77-map/) (updated when a `v*` release tag is pushed).
+
 ## Development
 
-See [`AGENTS.md`](AGENTS.md) for agent/editor conventions. Local CPS exports for testing go in `sample-exports/` (gitignored).
+See [`AGENTS.md`](AGENTS.md) for agent/editor conventions. Local CPS exports for testing go in `sample-exports/` (gitignored). Build and deploy details: [`docs/build/README.md`](docs/build/README.md).
 
 ## Channel map
 
-`opengd77-channel-map.html` — single-page map viewer for CPS `Channels.csv` and `Zones.csv` exports.
+[`tools/channel-map/`](tools/channel-map/) — map viewer for CPS `Channels.csv` and `Zones.csv` exports.
+
+**Online:** [channel map](https://pskillen.github.io/opengd77-map/tools/channel-map/)
 
 ### Use
 
-1. Open the HTML file in a browser (double-click or drag into Chrome/Firefox/Edge).
+1. Open the tool locally (`tools/channel-map/index.html`) or use the live link above.
 2. Load `Channels.csv` from an OpenGD77 CPS export via the file picker or drag-and-drop.
 3. Optionally load `Zones.csv` from the same export (after channels). Each zone gets a coloured convex hull around its geolocated members; channels in multiple zones contribute to each hull.
 4. Markers show channels with valid coordinates. Popups include name, mode, frequencies, and DMR contact/TG list.
