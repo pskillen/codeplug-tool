@@ -12,7 +12,7 @@ Documents zone CSV parsing, member resolution against plotted channels, hull geo
 
 | Symbol / region | File | Role |
 | --- | --- | --- |
-| `parseZonesCsv` | `opengd77-channel-map.html` | Parse zone rows and `Channel1`…`ChannelN` columns |
+| `parseZonesCsv` | `tools/channel-map/channel-map.js` | Parse zone rows and `Channel1`…`ChannelN` columns |
 | `zoneGeolocatedPoints` | same | Resolve members → lat/lon with skip reasons |
 | `uniqueLatLon` | same | Dedupe sites to 5 decimal places |
 | `convexHullLatLon` | same | Andrew's monotone chain on `[lat, lon]` |
