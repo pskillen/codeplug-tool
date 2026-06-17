@@ -24,6 +24,15 @@
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+    .site-footer {
+      position: fixed;
+      right: 0.5rem;
+      bottom: 0.5rem;
+      z-index: 1000;
+      font-size: 0.7rem;
+      color: var(--muted);
+      pointer-events: none;
+    }
     #app { display: grid; grid-template-columns: 320px 1fr; height: 100%; }
     aside {
       background: var(--panel);
@@ -221,5 +230,10 @@
     crossorigin=""
   ></script>
   <script src="channel-map.js"></script>
+  <footer class="site-footer" id="build-info-footer" aria-label="Build info"></footer>
+  <script src="../../build-info.js"></script>
+  <script>
+    document.getElementById("build-info-footer").textContent = BUILD_INFO.label();
+  </script>
 </body>
 </html>
