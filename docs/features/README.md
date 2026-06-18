@@ -12,6 +12,8 @@ Agent skills for documentation and execution tracking:
 | Topic | Source | Docs | Status |
 | --- | --- | --- | --- |
 | Data model | `src/models/codeplug.ts` | [data-model/](data-model/) | Shipped |
+| Codeplug projects | `src/models/codeplugProject.ts`, `src/state/codeplugStore.tsx` | [codeplug-project/](codeplug-project/) | Shipped (nascent) |
+| Persistence | `src/state/codeplugStorage.ts` | [persistence/](persistence/) | Shipped |
 | Import | `src/lib/import/` | [import/](import/) | Shipped |
 | Map | `src/components/ChannelMap/` | [map/](map/) | Shipped |
 

@@ -15,9 +15,10 @@ Import was hard-wired to OpenGD77 CSV inside the channel map. This refactor intr
 | Internal models | Shipped | [`src/models/codeplug.ts`](../../../src/models/codeplug.ts) |
 | OpenGD77 adapter | Shipped | Channels.csv + Zones.csv |
 | Format registry | Shipped | OpenGD77 only; room for more brands |
-| Multi-file + directory import UI | Shipped | [`ImportPanel`](../../../src/components/ImportPanel/ImportPanel.tsx) |
+| Multi-file + directory import UI | Shipped | [`ImportDropzone`](../../../src/components/ImportDropzone/ImportDropzone.tsx) / [`ImportPanel`](../../../src/components/ImportPanel/ImportPanel.tsx) |
 | Name → id resolution | Shipped | Store reducer + [`src/lib/codeplug.ts`](../../../src/lib/codeplug.ts) |
-| LocalStorage persistence | Deferred | [#9](https://github.com/pskillen/codeplug-tool/issues/9) — serialize helpers exist |
+| LocalStorage persistence | Shipped | [#9](https://github.com/pskillen/codeplug-tool/issues/9) — [persistence/](../persistence/) |
+| Multi-project import | Shipped | Home creates project; map updates active — [codeplug-project/](../codeplug-project/) |
 
 ## Documentation map
 
@@ -27,15 +28,17 @@ Import was hard-wired to OpenGD77 CSV inside the channel map. This refactor intr
 | [opengd77.md](opengd77.md) | OpenGD77 CSV columns, classification, skip/error behaviour |
 | [genericise-import-progress.md](genericise-import-progress.md) | Execution log |
 | [genericise-import-outstanding.md](genericise-import-outstanding.md) | Discovered debt |
+| [persistence/README.md](../persistence/README.md) | LocalStorage envelope |
+| [codeplug-project/README.md](../codeplug-project/README.md) | Project wrapper + CRUD |
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-  UI["ImportPanel"] --> importFiles
+  UI["ImportDropzone / ImportPanel"] --> importFiles
   importFiles --> Adapter["opengd77 adapter"]
   Adapter --> Raw["channels? + ParsedZone[]?"]
-  Raw --> Store["codeplugStore APPLY_IMPORT"]
+  Raw --> Store["codeplugStore — active project"]
   Store --> Resolve["resolveZoneMembers"]
   Resolve --> Codeplug["Codeplug"]
 ```
@@ -57,21 +60,22 @@ flowchart TD
 - **Recognised:** `Channels.csv` and `Zones.csv` (by filename or header signature).
 - **Skipped:** unknown CSVs (e.g. `Contacts.csv`) — listed, not errors.
 - **Errors:** parse failures (missing required columns, empty file).
-- **Clear all:** resets codeplug to `emptyCodeplug()`.
+- **Clear all (map):** empties the **active** project's codeplug; project record kept.
+- Home import creates a **new** codeplug project and opens the map.
 - Channels and zones can be imported together (directory) or sequentially.
 
-## Persistence note
+## Persistence
 
-`serializeCodeplug` / `deserializeCodeplug` and `CODEPLUG_STORAGE_KEY` are exported from the store but **not wired** to LocalStorage yet ([#9](https://github.com/pskillen/codeplug-tool/issues/9)).
+Projects envelope persisted to LocalStorage on every store change — see [persistence/README.md](../persistence/README.md). Import on home → new project; import on map → active project.
 
 ## Manual verify
 
-1. `npm run dev` → `/#/map`
-2. Import `Channels.csv` — markers appear.
-3. Import `Zones.csv` — hulls appear.
-4. Import a whole export folder — both recognised; other files skipped.
-5. Navigate Home → Map — data persists (in-memory store above routes).
-6. Clear all — map empties.
+1. `npm run dev` → home → **Import codeplug** with `Channels.csv` — map opens with markers.
+2. Import `Zones.csv` on the map — hulls appear.
+3. Import a whole export folder — both recognised; other files skipped.
+4. Hard refresh — projects and data restored from LocalStorage.
+5. Home → import a second codeplug — two projects listed; **Open** switches map context.
+6. **Clear all** on map — active project emptied; project still listed on home.
 
 ## Related
 

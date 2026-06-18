@@ -127,7 +127,7 @@ Initial map centre: `[56.5, -4.0]`, zoom `6` (before first load).
 | `opengd77-channel-map.mapboxToken` | Mapbox access token (optional) |
 | `opengd77-channel-map.tileProvider` | `osm` / `mapbox` / `mapbox-sat` |
 
-Channel CSV content persists in the **codeplug store** while navigating routes (`/#/` ↔ `/#/map`) but is **not** written to LocalStorage yet ([#9](https://github.com/pskillen/codeplug-tool/issues/9)).
+Channel CSV content persists via the **codeplug projects store** in LocalStorage ([#9](https://github.com/pskillen/codeplug-tool/issues/9)) — see [persistence/](../persistence/README.md). The map reads the **active** project's codeplug. Map tile prefs use separate keys below.
 
 ## Manual verify
 

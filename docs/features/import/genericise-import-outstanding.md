@@ -8,7 +8,7 @@ Items **skipped**, **incomplete**, or **discovered during execution** — not fu
 
 ## Persistence
 
-- [ ] Wire `serializeCodeplug` / `deserializeCodeplug` to LocalStorage ([#9](https://github.com/pskillen/codeplug-tool/issues/9))
+- [x] Wire projects envelope to LocalStorage ([#9](https://github.com/pskillen/codeplug-tool/issues/9)) — shipped in `src/state/codeplugStorage.ts`
 
 ## Import
 
@@ -16,4 +16,4 @@ Items **skipped**, **incomplete**, or **discovered during execution** — not fu
 
 ## Store
 
-- [ ] `react-refresh/only-export-components` warnings on `codeplugStore.tsx` — consider splitting serialize helpers to a separate module if it becomes noisy
+- [x] Split serialize helpers to `codeplugStorage.ts` (addresses react-refresh warnings on store)

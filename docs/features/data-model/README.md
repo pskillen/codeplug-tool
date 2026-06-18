@@ -8,6 +8,8 @@ Canonical reference for the vendor-neutral **codeplug** models used across tools
 
 A **codeplug** is the in-memory working set for one CPS layout: channels, zones, and (later) talk groups, TG/RX-group lists, and contacts. Tools consume these models — not raw CSV.
 
+For **switchable, named containers** that hold one codeplug each (multi-project workflow), see [codeplug-project/](../codeplug-project/).
+
 ```mermaid
 erDiagram
   Codeplug ||--o{ Channel : contains
@@ -105,7 +107,7 @@ Future `Zone.memberZoneIds: string[]` will allow zones to contain other zones (a
 
 ### Multi-project codeplugs ([#31](https://github.com/pskillen/codeplug-tool/issues/31))
 
-Multiple codeplug projects with an active-project switcher; persistence will store the project set ([#9](https://github.com/pskillen/codeplug-tool/issues/9), [#32](https://github.com/pskillen/codeplug-tool/issues/32)).
+**Implemented (nascent)** — multiple codeplug projects with an active-project switcher; persistence stores the project set ([#9](https://github.com/pskillen/codeplug-tool/issues/9)). See [codeplug-project/](../codeplug-project/). UI polish (rename, duplicate, new-empty) remains in #31.
 
 ## Related
 
