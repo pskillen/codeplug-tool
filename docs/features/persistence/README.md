@@ -34,9 +34,9 @@ Each `codeplug` object is a full [`Codeplug`](../../src/models/codeplug.ts) (cha
 
 | Key | Purpose |
 | --- | --- |
-| `opengd77-map.codeplug` | Projects envelope (`CODEPLUG_STORAGE_KEY`) |
-| `opengd77-channel-map.mapboxToken` | Mapbox token — separate, map-only |
-| `opengd77-channel-map.tileProvider` | Tile provider preference — separate |
+| `mm9pdy-codeplug-tool.codeplug` | Projects envelope (`CODEPLUG_STORAGE_KEY`) |
+| `mm9pdy-codeplug-tool.channel-map.mapboxToken` | Mapbox token — separate, map-only |
+| `mm9pdy-codeplug-tool.channel-map.tileProvider` | Tile provider preference — separate |
 
 ## Versioning
 
@@ -84,7 +84,7 @@ Unknown or future envelope `version` → boot with an empty project set (no cras
 2. Hard refresh (Cmd+R) — projects and active selection restored.
 3. Import a second codeplug from home — both listed after refresh.
 4. Delete a project — confirm dialog; refresh — deletion persists.
-5. DevTools → Application → Local Storage — confirm `opengd77-map.codeplug` envelope.
+5. DevTools → Application → Local Storage — confirm `mm9pdy-codeplug-tool.codeplug` envelope.
 
 ## Related
 

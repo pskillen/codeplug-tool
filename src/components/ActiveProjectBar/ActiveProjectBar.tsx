@@ -6,6 +6,8 @@ export default function ActiveProjectBar() {
   const navigate = useNavigate();
   const { activeProject } = useProjects();
 
+  if (!activeProject) return null;
+
   return (
     <Stack gap="xs">
       <Group justify="space-between" align="center" wrap="nowrap">
@@ -14,18 +16,13 @@ export default function ActiveProjectBar() {
             Active codeplug
           </Text>
           <Text fw={600} truncate>
-            {activeProject?.name ?? 'No codeplug selected'}
+            {activeProject.name}
           </Text>
         </Stack>
         <Button size="compact-sm" variant="default" onClick={() => navigate('/')}>
           Switch
         </Button>
       </Group>
-      {!activeProject ? (
-        <Text size="sm" c="dimmed">
-          Import or open a codeplug from the home page to start.
-        </Text>
-      ) : null}
     </Stack>
   );
 }

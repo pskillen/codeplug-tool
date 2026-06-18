@@ -15,7 +15,7 @@ Import was hard-wired to OpenGD77 CSV inside the channel map. This refactor intr
 | Internal models | Shipped | [`src/models/codeplug.ts`](../../../src/models/codeplug.ts) |
 | OpenGD77 adapter | Shipped | Channels.csv + Zones.csv |
 | Format registry | Shipped | OpenGD77 only; room for more brands |
-| Multi-file + directory import UI | Shipped | [`ImportDropzone`](../../../src/components/ImportDropzone/ImportDropzone.tsx) / [`ImportPanel`](../../../src/components/ImportPanel/ImportPanel.tsx) |
+| Multi-file + directory import UI | Shipped | [`ImportDropzone`](../../../src/components/ImportDropzone/ImportDropzone.tsx) on home |
 | Name → id resolution | Shipped | Store reducer + [`src/lib/codeplug.ts`](../../../src/lib/codeplug.ts) |
 | LocalStorage persistence | Shipped | [#9](https://github.com/pskillen/codeplug-tool/issues/9) — [persistence/](../persistence/) |
 | Multi-project import | Shipped | Home creates project; map updates active — [codeplug-project/](../codeplug-project/) |
@@ -35,7 +35,7 @@ Import was hard-wired to OpenGD77 CSV inside the channel map. This refactor intr
 
 ```mermaid
 flowchart TD
-  UI["ImportDropzone / ImportPanel"] --> importFiles
+  UI["ImportDropzone (home)"] --> importFiles
   importFiles --> Adapter["opengd77 adapter"]
   Adapter --> Raw["channels? + ParsedZone[]?"]
   Raw --> Store["codeplugStore — active project"]

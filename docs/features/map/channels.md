@@ -17,7 +17,7 @@ Documents filtering, grouping, and rendering of channels from the central codepl
 | `applyFilters` | `src/lib/channels.ts` | Plot vs skip by coordinates and `Use Location` |
 | `groupByCoords` | same | Optional merge at identical lat/lon |
 | `buildChannelById` | same | Plotted channels indexed by internal `id` |
-| `ImportPanel` | `src/components/ImportPanel/ImportPanel.tsx` | Multi-file / folder import UI |
+| Import | Home page `ImportDropzone` only (not on map sidebar) |
 | `useCodeplug` | `src/state/codeplugStore.tsx` | Central codeplug state |
 | Marker rendering | `src/components/ChannelMap/ChannelMap.tsx` | react-leaflet `divIcon` markers + popups |
 
@@ -71,7 +71,7 @@ See [data model — Channel](../data-model/README.md#channel). Example:
 
 ## UI controls
 
-Controls are Mantine inputs bound to React state in `ChannelMap.tsx` (no DOM ids). Import is handled by `ImportPanel` (multi-file / folder).
+Controls are Mantine inputs bound to React state in `ChannelMap.tsx` (no DOM ids). Import is on the home page only; the map reads the active project's codeplug.
 
 | Control | State / hook | Default | Effect |
 | --- | --- | --- | --- |
@@ -124,8 +124,8 @@ Initial map centre: `[56.5, -4.0]`, zoom `6` (before first load).
 
 | Key | Purpose |
 | --- | --- |
-| `opengd77-channel-map.mapboxToken` | Mapbox access token (optional) |
-| `opengd77-channel-map.tileProvider` | `osm` / `mapbox` / `mapbox-sat` |
+| `mm9pdy-codeplug-tool.channel-map.mapboxToken` | Mapbox access token (optional) |
+| `mm9pdy-codeplug-tool.channel-map.tileProvider` | `osm` / `mapbox` / `mapbox-sat` |
 
 Channel CSV content persists via the **codeplug projects store** in LocalStorage ([#9](https://github.com/pskillen/codeplug-tool/issues/9)) — see [persistence/](../persistence/README.md). The map reads the **active** project's codeplug. Map tile prefs use separate keys below.
 

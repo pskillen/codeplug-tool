@@ -5,7 +5,7 @@ import {
 import type { CodeplugProject } from '../models/codeplugProject.ts';
 import { newProject } from '../models/codeplugProject.ts';
 
-export const CODEPLUG_STORAGE_KEY = 'opengd77-map.codeplug';
+export const CODEPLUG_STORAGE_KEY = 'mm9pdy-codeplug-tool.codeplug';
 export const CODEPLUG_STORAGE_VERSION = 1;
 
 export interface ProjectsState {
