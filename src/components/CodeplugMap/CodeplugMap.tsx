@@ -29,6 +29,7 @@ import type { Channel, Zone } from '../../models/codeplug.ts';
 import { useDocumentLayoutReady } from '../../hooks/useDocumentLayoutReady.ts';
 import { useMapSettings } from '../../hooks/useMapSettings.ts';
 import MapControls from './MapControls.tsx';
+import MaidenheadGridLayer from './MaidenheadGridLayer.tsx';
 import './CodeplugMap.css';
 
 const DEFAULT_FILTER_OPTS: FilterOptions = {
@@ -222,7 +223,7 @@ export default function CodeplugMap({
   onLocationPick,
 }: CodeplugMapProps) {
   const mapLayoutReady = useDocumentLayoutReady();
-  const { tileProvider, mapboxToken, tileConfig } = useMapSettings();
+  const { tileProvider, mapboxToken, tileConfig, maidenheadGrid } = useMapSettings();
   const [fullChannelName, setFullChannelName] = useState(defaultFullChannelName);
   const [showZoneHulls, setShowZoneHulls] = useState(defaultShowZones);
 
@@ -323,6 +324,8 @@ export default function CodeplugMap({
                   }
                 : {})}
             />
+
+            <MaidenheadGridLayer mode={maidenheadGrid} />
 
             {showZoneHulls
               ? zoneHulls.map((zh) => {
