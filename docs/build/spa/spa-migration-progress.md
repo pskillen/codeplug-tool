@@ -40,6 +40,7 @@
 ## Ticket B — Mantine design system (#19)
 
 **Status:** Complete (pending merge)
+**PR:** https://github.com/pskillen/opengd77-map/pull/24
 
 **Delivered**
 
@@ -67,6 +68,6 @@
 
 ## Next
 
-- Open PR for Ticket B (#19) from `19/paddy/mantine-app-shell`
+- Merge PR #24 (Ticket B)
 - After merge, begin Ticket C (#20) on a new branch from `main`
 - **Do not publish a GitHub release until Ticket C is merged**
