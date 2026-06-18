@@ -16,6 +16,7 @@ import {
 } from '../../lib/reportLookup.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 import { formatOffsetMhz, frequencyOffsetMhz } from '../../lib/bands.ts';
+import { formatFrequencyMhz } from '../../lib/formatFrequency.ts';
 import { coordsToLocator } from '../../lib/maidenhead.ts';
 
 function modeLabel(mode: string): string {
@@ -79,8 +80,8 @@ export default function ChannelDetail() {
     {
       title: 'RF',
       fields: [
-        { label: 'RX frequency', value: channel.rxFrequency ? `${channel.rxFrequency} MHz` : '' },
-        { label: 'TX frequency', value: channel.txFrequency ? `${channel.txFrequency} MHz` : '' },
+        { label: 'RX frequency', value: channel.rxFrequency ? formatFrequencyMhz(channel.rxFrequency) : '' },
+        { label: 'TX frequency', value: channel.txFrequency ? formatFrequencyMhz(channel.txFrequency) : '' },
         {
           label: 'Offset',
           value: offset !== null ? formatOffsetMhz(offset) : '',

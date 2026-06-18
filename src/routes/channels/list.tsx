@@ -6,7 +6,8 @@ import { BandPillForChannel } from '../../components/crud/BandPill.tsx';
 import EntityTable from '../../components/report/EntityTable.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
 import { applyFilters, CHANNEL_COLORS } from '../../lib/channels.ts';
-import { bandFromChannel } from '../../lib/bands.ts';
+import { channelMatchesBandFilter, bandsFromFrequencies, UK_BANDS } from '../../lib/bands.ts';
+import { formatFrequencyMhz } from '../../lib/formatFrequency.ts';
 import { isSimplex } from '../../lib/validation/channel.ts';
 import { coordsToLocator } from '../../lib/maidenhead.ts';
 import { sortByName } from '../../lib/reportLookup.ts';
@@ -58,8 +59,7 @@ export default function ChannelsList() {
   const filtered = useMemo(() => {
     return sortByName(channels).filter((ch) => {
       if (nameFilter && !ch.name.toLowerCase().includes(nameFilter.toLowerCase())) return false;
-      const band = bandFromChannel(ch.rxFrequency, ch.txFrequency);
-      if (bandFilter.length && (!band || !bandFilter.includes(band.id))) return false;
+      if (!channelMatchesBandFilter(ch.rxFrequency, ch.txFrequency, bandFilter)) return false;
       if (modeFilter.length && !modeFilter.includes(ch.mode)) return false;
       if (duplexFilter === 'simplex' && !isSimplex(ch.rxFrequency, ch.txFrequency)) return false;
       if (duplexFilter === 'split' && isSimplex(ch.rxFrequency, ch.txFrequency)) return false;
@@ -69,17 +69,15 @@ export default function ChannelsList() {
 
   const { skipped } = applyFilters(channels, { requireUseLocation: true, skipZero: true });
 
-  const bandOptions = [
-    ...new Set(
-      channels.map((ch) => bandFromChannel(ch.rxFrequency, ch.txFrequency)?.id).filter(Boolean),
-    ),
-  ].map((id) => {
-    const band = bandFromChannel(
-      channels.find((c) => bandFromChannel(c.rxFrequency, c.txFrequency)?.id === id)?.rxFrequency ??
-        '',
-    );
-    return { value: id!, label: band?.label ?? id! };
-  });
+  const bandOptions = useMemo(() => {
+    const ids = new Set<string>();
+    for (const ch of channels) {
+      for (const band of bandsFromFrequencies(ch.rxFrequency, ch.txFrequency)) {
+        ids.add(band.id);
+      }
+    }
+    return UK_BANDS.filter((b) => ids.has(b.id)).map((b) => ({ value: b.id, label: b.label }));
+  }, [channels]);
 
   const optionalColumnDefs = OPTIONAL_COLUMNS.filter((c) => visibleCols.includes(c.key)).map(
     (col) => {
@@ -176,8 +174,8 @@ export default function ChannelsList() {
           columns={[
             { key: 'band', header: 'Band', render: (ch) => <BandPillForChannel channel={ch} /> },
             { key: 'mode', header: 'Mode', render: (ch) => <ModePill mode={ch.mode} /> },
-            { key: 'rx', header: 'RX MHz', render: (ch) => ch.rxFrequency || '—' },
-            { key: 'tx', header: 'TX MHz', render: (ch) => ch.txFrequency || '—' },
+            { key: 'rx', header: 'RX MHz', render: (ch) => (ch.rxFrequency ? formatFrequencyMhz(ch.rxFrequency).replace(' MHz', '') : '—') },
+            { key: 'tx', header: 'TX MHz', render: (ch) => (ch.txFrequency ? formatFrequencyMhz(ch.txFrequency).replace(' MHz', '') : '—') },
             ...optionalColumnDefs,
           ]}
         />
