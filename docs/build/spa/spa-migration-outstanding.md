@@ -17,8 +17,13 @@ Items **skipped**, **incomplete**, or **discovered during execution** — not th
 
 ## Follow-up tickets
 
-- [ ] Ticket B (#19) — Mantine theme and responsive AppShell
+- [x] Ticket B (#19) — Mantine theme and responsive AppShell
 - [ ] Ticket C (#20) — port channel map to `react-leaflet`, delete legacy static tools
+
+## Ticket B debt
+
+- [ ] No light/dark toggle — app is dark-only by design for now
+- [ ] `matchMedia` mock added in `src/test/setup.ts` for jsdom (Mantine color scheme)
 
 ## Documentation
 

@@ -7,16 +7,16 @@
 
 ## Overall status
 
-**Status:** Complete (pending merge)
+**Status:** In progress (Ticket B pending merge)
 
-**Branch:** `18/paddy/spa-scaffold`
+**Branch:** `19/paddy/mantine-app-shell`
 
 ---
 
 ## Ticket A — scaffold SPA, tooling, routing, deploy pipeline (#18)
 
-**Status:** Complete (pending merge)
-**PR:** https://github.com/pskillen/opengd77-map/pull/23
+**Status:** Complete
+**PR:** https://github.com/pskillen/opengd77-map/pull/23 (merged)
 
 **Delivered**
 
@@ -39,9 +39,22 @@
 
 ## Ticket B — Mantine design system (#19)
 
-**Status:** Not started
+**Status:** Complete (pending merge)
+**PR:** https://github.com/pskillen/opengd77-map/pull/24
 
-**Prerequisite:** Ticket A merged to `main`
+**Delivered**
+
+- `feat(spa): add Mantine provider, dark theme, and PostCSS config` — `583cf63`
+- `feat(spa): add responsive AppShell with collapsible navbar` — `1b851bb`
+- `feat(spa): restyle home, map placeholder, and build footer with Mantine` — `53096a5`
+
+**Verify**
+
+- `npm install && npm run build` — Mantine styles bundled in `dist/`
+- `npm run lint && npm run format:check && npm run test` — all pass
+- `npm run dev` — dark theme; navbar persistent at desktop; burger toggles navbar on mobile
+- `BUILD_ENV=prod BUILD_VERSION=v1.2.3 npm run build` — footer shows `prod · 1.2.3`
+- `site/` and `tools/` remain untouched
 
 ---
 
@@ -55,6 +68,6 @@
 
 ## Next
 
-- Merge PR #23 (Ticket A)
-- After merge, begin Ticket B (#19) on a new branch from `main`
+- Merge PR #24 (Ticket B)
+- After merge, begin Ticket C (#20) on a new branch from `main`
 - **Do not publish a GitHub release until Ticket C is merged**
