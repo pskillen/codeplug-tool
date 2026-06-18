@@ -1,26 +1,35 @@
 import { describe, expect, it } from 'vitest';
 import { detectKind } from './opengd77/adapter.ts';
 import { importFiles } from './index.ts';
+import { CHANNEL_HEADERS, CONTACT_HEADERS, RX_GROUP_LIST_HEADERS } from './opengd77/columns.ts';
 
 describe('detectKind', () => {
   it('classifies by filename', () => {
     expect(detectKind('Channels.csv', [])).toBe('channels');
     expect(detectKind('zones.csv', [])).toBe('zones');
+    expect(detectKind('Contacts.csv', [])).toBe('contacts');
+    expect(detectKind('TG_Lists.csv', [])).toBe('rxGroupLists');
+    expect(detectKind('DTMF.csv', [])).toBe('unknown');
   });
 
   it('falls back to header signatures', () => {
     expect(detectKind('data.csv', ['Channel Name', 'Latitude', 'Longitude'])).toBe('channels');
     expect(detectKind('data.csv', ['Zone Name', 'Channel1'])).toBe('zones');
+    expect(detectKind('data.csv', CONTACT_HEADERS)).toBe('contacts');
+    expect(detectKind('data.csv', RX_GROUP_LIST_HEADERS)).toBe('rxGroupLists');
+    expect(detectKind('data.csv', ['Contact Name', 'Code'])).toBe('unknown');
     expect(detectKind('data.csv', ['Foo', 'Bar'])).toBe('unknown');
   });
 });
 
 describe('importFiles', () => {
-  const channelsHeader =
-    'Channel Number,Channel Name,Channel Type,Rx Frequency,Tx Frequency,Contact,TG List,Latitude,Longitude,Use Location';
-  const channelsCsv = `${channelsHeader}
-1,GB3DA DMR,Digital,430,430,None,None,56.5,-4.0,Yes`;
+  const channelsCsv = `${CHANNEL_HEADERS.join(',')}
+1,GB3DA DMR,Digital,430,430,,,,,,,,,,,,,,,,,,,,,56.5,-4.0,Yes`;
   const zonesCsv = `Zone Name,Channel1\nNorth,GB3DA DMR`;
+  const contactsCsv = `${CONTACT_HEADERS.join(',')}
+Local 9,9,Group,Disabled`;
+  const tgListsCsv = `${RX_GROUP_LIST_HEADERS.join(',')}
+Scotland,Local 9,,`;
 
   it('recognises channels and zones from separate files', async () => {
     const result = await importFiles([
@@ -34,14 +43,23 @@ describe('importFiles', () => {
     expect(result.errors).toHaveLength(0);
   });
 
-  it('skips unknown files without error', async () => {
+  it('recognises contacts and TG lists', async () => {
     const result = await importFiles([
-      new File(['Name,Number\nFoo,1'], 'Contacts.csv', { type: 'text/csv' }),
+      new File([contactsCsv], 'Contacts.csv', { type: 'text/csv' }),
+      new File([tgListsCsv], 'TG_Lists.csv', { type: 'text/csv' }),
     ]);
-    expect(result.skipped).toHaveLength(1);
+    expect(result.recognised).toEqual(['Contacts.csv', 'TG_Lists.csv']);
+    expect(result.talkGroups).toHaveLength(1);
+    expect(result.rxGroupLists).toHaveLength(1);
+  });
+
+  it('skips DTMF and unknown files without error', async () => {
+    const result = await importFiles([
+      new File(['Contact Name,Code\n'], 'DTMF.csv', { type: 'text/csv' }),
+      new File(['Name,Number\nFoo,1'], 'Mystery.csv', { type: 'text/csv' }),
+    ]);
+    expect(result.skipped).toHaveLength(2);
     expect(result.errors).toHaveLength(0);
-    expect(result.channels).toBeUndefined();
-    expect(result.zones).toBeUndefined();
   });
 
   it('records parse errors', async () => {

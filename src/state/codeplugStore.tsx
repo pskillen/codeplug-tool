@@ -53,6 +53,18 @@ function applyImportToCodeplug(codeplug: Codeplug, result: ImportResult): Codepl
     });
   }
 
+  const contacts = result.contacts ?? codeplug.contacts;
+  const talkGroups = result.talkGroups ?? codeplug.talkGroups;
+
+  let rxGroupLists = codeplug.rxGroupLists;
+  if (result.rxGroupLists) {
+    rxGroupLists = result.rxGroupLists.map((parsed) => ({
+      id: newId(),
+      name: parsed.name,
+      sourceMemberNames: parsed.sourceMemberNames,
+    }));
+  }
+
   const sourceFiles = [...codeplug.meta.sourceFiles];
   for (const fileName of result.recognised) {
     if (!sourceFiles.includes(fileName)) sourceFiles.push(fileName);
@@ -62,6 +74,9 @@ function applyImportToCodeplug(codeplug: Codeplug, result: ImportResult): Codepl
     ...codeplug,
     channels,
     zones,
+    contacts,
+    talkGroups,
+    rxGroupLists,
     meta: {
       ...codeplug.meta,
       importedAt: result.recognised.length ? new Date().toISOString() : codeplug.meta.importedAt,

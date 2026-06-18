@@ -14,6 +14,8 @@ export async function importFiles(files: File[]): Promise<ImportResult> {
     errors: [],
   };
 
+  const adapter = importAdapters[0];
+
   for (const file of files) {
     const fileName = file.name;
     let text: string;
@@ -28,7 +30,6 @@ export async function importFiles(files: File[]): Promise<ImportResult> {
     }
 
     const headers = headerRow(text);
-    const adapter = importAdapters[0];
     const kind = adapter.detectKind(fileName, headers);
 
     if (kind === 'unknown') {
@@ -37,10 +38,22 @@ export async function importFiles(files: File[]): Promise<ImportResult> {
     }
 
     try {
-      if (kind === 'channels') {
-        result.channels = adapter.parseChannels(text);
-      } else {
-        result.zones = adapter.parseZones(text);
+      switch (kind) {
+        case 'channels':
+          result.channels = adapter.parseChannels(text);
+          break;
+        case 'zones':
+          result.zones = adapter.parseZones(text);
+          break;
+        case 'contacts': {
+          const parsed = adapter.parseContacts(text);
+          result.contacts = parsed.contacts;
+          result.talkGroups = parsed.talkGroups;
+          break;
+        }
+        case 'rxGroupLists':
+          result.rxGroupLists = adapter.parseRxGroupLists(text);
+          break;
       }
       result.recognised.push(fileName);
     } catch (err) {
