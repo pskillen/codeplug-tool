@@ -1,4 +1,4 @@
-import { Button, Group, NumberInput, SegmentedControl, Stack, Text, TextInput, Title } from '@mantine/core';
+import { Button, Group, NumberInput, SegmentedControl, SimpleGrid, Stack, Text, TextInput, Title } from '@mantine/core';
 import { useCallback, useMemo, useState } from 'react';
 import MapLocationPicker from '../../components/MapLocationPicker/MapLocationPicker.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
@@ -131,84 +131,88 @@ export default function MaidenheadConverter() {
           Convert between Maidenhead grid locators and WGS84 coordinates. Updates live as you type.
         </Text>
 
-        <Stack gap="sm">
-          <Title order={4}>Locator</Title>
-          <TextInput
-            label="Maidenhead locator"
-            placeholder="e.g. IO85uk"
-            value={locator}
-            onChange={(e) => handleLocatorChange(e.currentTarget.value)}
-            error={locatorError}
-          />
-        </Stack>
+        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+          <Stack gap="md">
+            <Stack gap="sm">
+              <Title order={4}>Locator</Title>
+              <TextInput
+                label="Maidenhead locator"
+                placeholder="e.g. IO85uk"
+                value={locator}
+                onChange={(e) => handleLocatorChange(e.currentTarget.value)}
+                error={locatorError}
+              />
+            </Stack>
 
-        <Stack gap="sm">
-          <Title order={4}>Coordinates</Title>
-          <SegmentedControl
-            value={String(precision)}
-            onChange={handlePrecisionChange}
-            data={PRECISION_OPTIONS}
-          />
-          <Group grow>
-            <NumberInput
-              label="Latitude"
-              value={lat}
-              onChange={handleLatChange}
-              decimalScale={6}
-              min={-90}
-              max={90}
-            />
-            <NumberInput
-              label="Longitude"
-              value={lon}
-              onChange={handleLonChange}
-              decimalScale={6}
-              min={-180}
-              max={180}
-            />
-          </Group>
-        </Stack>
+            <Stack gap="sm">
+              <Title order={4}>Coordinates</Title>
+              <SegmentedControl
+                value={String(precision)}
+                onChange={handlePrecisionChange}
+                data={PRECISION_OPTIONS}
+              />
+              <Group grow>
+                <NumberInput
+                  label="Latitude"
+                  value={lat}
+                  onChange={handleLatChange}
+                  decimalScale={6}
+                  min={-90}
+                  max={90}
+                />
+                <NumberInput
+                  label="Longitude"
+                  value={lon}
+                  onChange={handleLonChange}
+                  decimalScale={6}
+                  min={-180}
+                  max={180}
+                />
+              </Group>
+            </Stack>
+          </Stack>
 
-        <Stack gap="sm">
-          <Title order={4}>Address lookup</Title>
-          <Text size="sm" c="dimmed">
-            {hasMapboxToken
-              ? 'Geocode an address or postcode. Choose Mapbox or Photon (OpenStreetMap).'
-              : 'Using Photon (OpenStreetMap). Set a Mapbox token in Settings for Mapbox geocoding.'}
-          </Text>
-          <SegmentedControl
-            value={geocodeProvider}
-            onChange={(value) => setGeocodeProvider(value as GeocodeProvider)}
-            data={GEOCODE_PROVIDER_OPTIONS}
-          />
-          <Group align="flex-end" grow>
-            <TextInput
-              label="Address or postcode"
-              placeholder="e.g. G1 1XQ, Glasgow"
-              value={addressQuery}
-              onChange={(e) => setAddressQuery(e.currentTarget.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  void handleGeocode();
-                }
-              }}
-            />
-            <Button onClick={() => void handleGeocode()} loading={geocodeLoading} style={{ flexShrink: 0 }}>
-              Look up
-            </Button>
-          </Group>
-          {geocodeError ? (
-            <Text size="sm" c="red">
-              {geocodeError}
-            </Text>
-          ) : null}
-          {geocodeLabel ? (
+          <Stack gap="sm">
+            <Title order={4}>Address lookup</Title>
             <Text size="sm" c="dimmed">
-              {geocodeLabel}
+              {hasMapboxToken
+                ? 'Geocode an address or postcode. Choose Mapbox or Photon (OpenStreetMap).'
+                : 'Using Photon (OpenStreetMap). Set a Mapbox token in Settings for Mapbox geocoding.'}
             </Text>
-          ) : null}
-        </Stack>
+            <SegmentedControl
+              value={geocodeProvider}
+              onChange={(value) => setGeocodeProvider(value as GeocodeProvider)}
+              data={GEOCODE_PROVIDER_OPTIONS}
+            />
+            <Group align="flex-end" grow>
+              <TextInput
+                label="Address or postcode"
+                placeholder="e.g. G1 1XQ, Glasgow"
+                value={addressQuery}
+                onChange={(e) => setAddressQuery(e.currentTarget.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    void handleGeocode();
+                  }
+                }}
+              />
+              <Button onClick={() => void handleGeocode()} loading={geocodeLoading} style={{ flexShrink: 0 }}>
+                Look up
+              </Button>
+            </Group>
+            {geocodeError ? (
+              <Text size="sm" c="red">
+                {geocodeError}
+              </Text>
+            ) : null}
+            {geocodeLabel ? (
+              <Text size="sm" c="dimmed">
+                {geocodeLabel}
+              </Text>
+            ) : null}
+          </Stack>
+        </SimpleGrid>
 
         <Stack gap="sm">
           <Title order={4}>Map</Title>
