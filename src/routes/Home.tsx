@@ -44,7 +44,7 @@ export default function Home() {
             hint={
               projects.length
                 ? 'Import creates a new codeplug and opens the channel map.'
-                : 'Drop OpenGD77 CSV files or a whole export folder. Channels.csv and Zones.csv are recognised; other files are skipped.'
+                : 'Drop OpenGD77 CSV files or a whole export folder. Channels.csv, Zones.csv, Contacts.csv, and TG_Lists.csv are recognised; DTMF.csv and APRS.csv are skipped.'
             }
           />
         </Stack>
