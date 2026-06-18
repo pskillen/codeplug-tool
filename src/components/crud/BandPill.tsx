@@ -1,5 +1,5 @@
-import { Badge } from '@mantine/core';
-import { bandFromChannel, type BandDefinition } from '../../lib/bands.ts';
+import { Badge, Group } from '@mantine/core';
+import { bandsFromFrequencies, type BandDefinition } from '../../lib/bands.ts';
 import type { Channel } from '../../models/codeplug.ts';
 
 export interface BandPillProps {
@@ -16,6 +16,27 @@ export default function BandPill({ band, size = 'sm' }: BandPillProps) {
   );
 }
 
+export function BandPillsForFrequencies({
+  rxFrequency,
+  txFrequency,
+  size,
+}: {
+  rxFrequency: string;
+  txFrequency: string;
+  size?: BandPillProps['size'];
+}) {
+  const bands = bandsFromFrequencies(rxFrequency, txFrequency);
+  if (!bands.length) return null;
+
+  return (
+    <Group gap={4} wrap="nowrap">
+      {bands.map((band) => (
+        <BandPill key={band.id} band={band} size={size} />
+      ))}
+    </Group>
+  );
+}
+
 export function BandPillForChannel({
   channel,
   size,
@@ -23,5 +44,11 @@ export function BandPillForChannel({
   channel: Channel;
   size?: BandPillProps['size'];
 }) {
-  return <BandPill band={bandFromChannel(channel.rxFrequency, channel.txFrequency)} size={size} />;
+  return (
+    <BandPillsForFrequencies
+      rxFrequency={channel.rxFrequency}
+      txFrequency={channel.txFrequency}
+      size={size}
+    />
+  );
 }

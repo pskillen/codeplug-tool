@@ -67,11 +67,38 @@ export function bandFromFrequencyMhz(mhz: number): BandDefinition | null {
 }
 
 export function bandFromChannel(rxFrequency: string, txFrequency?: string): BandDefinition | null {
-  const rx = parseFloat(rxFrequency);
-  if (Number.isFinite(rx) && rx > 0) return bandFromFrequencyMhz(rx);
-  const tx = parseFloat(txFrequency ?? '');
-  if (Number.isFinite(tx) && tx > 0) return bandFromFrequencyMhz(tx);
-  return null;
+  const bands = bandsFromFrequencies(rxFrequency, txFrequency ?? '');
+  return bands[0] ?? null;
+}
+
+/** Distinct bands for RX and TX (RX first). Empty when neither frequency classifies. */
+export function bandsFromFrequencies(
+  rxFrequency: string,
+  txFrequency: string,
+): BandDefinition[] {
+  const bands: BandDefinition[] = [];
+  const seen = new Set<string>();
+
+  for (const raw of [rxFrequency, txFrequency]) {
+    const mhz = parseFloat(raw);
+    if (!Number.isFinite(mhz) || mhz <= 0) continue;
+    const band = bandFromFrequencyMhz(mhz);
+    if (band && !seen.has(band.id)) {
+      seen.add(band.id);
+      bands.push(band);
+    }
+  }
+
+  return bands;
+}
+
+export function channelMatchesBandFilter(
+  rxFrequency: string,
+  txFrequency: string,
+  bandIds: string[],
+): boolean {
+  if (!bandIds.length) return true;
+  return bandsFromFrequencies(rxFrequency, txFrequency).some((b) => bandIds.includes(b.id));
 }
 
 export function frequencyOffsetMhz(rxFrequency: string, txFrequency: string): number | null {
