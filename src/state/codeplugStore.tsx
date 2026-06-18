@@ -2,29 +2,37 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useReducer,
+  useState,
   type ReactNode,
 } from 'react';
 import { buildNameToChannelId, resolveZoneMembers } from '../lib/codeplug.ts';
 import type { ImportResult } from '../lib/import/types.ts';
+import { emptyCodeplug, newId, type Codeplug, type Zone } from '../models/codeplug.ts';
 import {
-  CODEPLUG_SCHEMA_VERSION,
-  emptyCodeplug,
-  newId,
-  type Codeplug,
-  type Zone,
-} from '../models/codeplug.ts';
+  defaultProjectName,
+  newProject,
+  type CodeplugProject,
+} from '../models/codeplugProject.ts';
+import {
+  clearProjectsStorage,
+  loadProjectsFromStorage,
+  saveProjectsToStorage,
+  StorageQuotaError,
+  type ProjectsState,
+} from './codeplugStorage.ts';
 
-/** #9 will wire this to LocalStorage persistence. */
-export const CODEPLUG_STORAGE_KEY = 'opengd77-map.codeplug';
-
-type CodeplugAction =
+type ProjectsAction =
+  | { type: 'IMPORT_NEW_PROJECT'; result: ImportResult; name?: string }
   | { type: 'APPLY_IMPORT'; result: ImportResult }
+  | { type: 'SET_ACTIVE_PROJECT'; id: string }
+  | { type: 'DELETE_PROJECT'; id: string }
   | { type: 'CLEAR' };
 
-function applyImport(state: Codeplug, result: ImportResult): Codeplug {
-  const channels = result.channels ?? state.channels;
+function applyImportToCodeplug(codeplug: Codeplug, result: ImportResult): Codeplug {
+  const channels = result.channels ?? codeplug.channels;
   const nameToId = buildNameToChannelId(channels);
 
   let zones: Zone[];
@@ -39,79 +47,237 @@ function applyImport(state: Codeplug, result: ImportResult): Codeplug {
       };
     });
   } else {
-    zones = state.zones.map((zone) => {
+    zones = codeplug.zones.map((zone) => {
       const { memberChannelIds } = resolveZoneMembers(zone.sourceMemberNames, nameToId);
       return { ...zone, memberChannelIds };
     });
   }
 
-  const sourceFiles = [...state.meta.sourceFiles];
+  const sourceFiles = [...codeplug.meta.sourceFiles];
   for (const fileName of result.recognised) {
     if (!sourceFiles.includes(fileName)) sourceFiles.push(fileName);
   }
 
   return {
-    ...state,
+    ...codeplug,
     channels,
     zones,
     meta: {
-      ...state.meta,
-      importedAt: result.recognised.length ? new Date().toISOString() : state.meta.importedAt,
+      ...codeplug.meta,
+      importedAt: result.recognised.length ? new Date().toISOString() : codeplug.meta.importedAt,
       sourceFiles,
     },
   };
 }
 
-function codeplugReducer(state: Codeplug, action: CodeplugAction): Codeplug {
+function touchProject(project: CodeplugProject): CodeplugProject {
+  return { ...project, updatedAt: new Date().toISOString() };
+}
+
+function importNewProjectState(
+  state: ProjectsState,
+  result: ImportResult,
+  name?: string,
+): ProjectsState {
+  const projectName = name ?? defaultProjectName(result.recognised);
+  const project = touchProject({
+    ...newProject(projectName),
+    codeplug: applyImportToCodeplug(emptyCodeplug(), result),
+  });
+  return {
+    projects: [...state.projects, project],
+    activeProjectId: project.id,
+  };
+}
+
+function projectsReducer(state: ProjectsState, action: ProjectsAction): ProjectsState {
   switch (action.type) {
-    case 'APPLY_IMPORT':
-      return applyImport(state, action.result);
-    case 'CLEAR':
-      return emptyCodeplug();
+    case 'IMPORT_NEW_PROJECT':
+      return importNewProjectState(state, action.result, action.name);
+
+    case 'APPLY_IMPORT': {
+      if (!state.activeProjectId) {
+        return importNewProjectState(state, action.result);
+      }
+      const activeId = state.activeProjectId;
+      return {
+        ...state,
+        projects: state.projects.map((project) => {
+          if (project.id !== activeId) return project;
+          return touchProject({
+            ...project,
+            codeplug: applyImportToCodeplug(project.codeplug, action.result),
+          });
+        }),
+      };
+    }
+
+    case 'SET_ACTIVE_PROJECT': {
+      if (!state.projects.some((p) => p.id === action.id)) return state;
+      return { ...state, activeProjectId: action.id };
+    }
+
+    case 'DELETE_PROJECT': {
+      const projects = state.projects.filter((p) => p.id !== action.id);
+      let activeProjectId = state.activeProjectId;
+      if (activeProjectId === action.id) {
+        activeProjectId = projects[0]?.id ?? null;
+      }
+      return { projects, activeProjectId };
+    }
+
+    case 'CLEAR': {
+      if (!state.activeProjectId) return state;
+      const activeId = state.activeProjectId;
+      return {
+        ...state,
+        projects: state.projects.map((project) => {
+          if (project.id !== activeId) return project;
+          return touchProject({ ...project, codeplug: emptyCodeplug() });
+        }),
+      };
+    }
+
     default:
       return state;
   }
 }
 
-export function serializeCodeplug(codeplug: Codeplug): string {
-  return JSON.stringify(codeplug);
+function emptyProjectsState(): ProjectsState {
+  return { activeProjectId: null, projects: [] };
 }
 
-export function deserializeCodeplug(json: string): Codeplug | null {
-  try {
-    const parsed = JSON.parse(json) as Codeplug;
-    if (parsed?.meta?.schemaVersion !== CODEPLUG_SCHEMA_VERSION) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
+function activeProject(state: ProjectsState): CodeplugProject | null {
+  if (!state.activeProjectId) return null;
+  return state.projects.find((p) => p.id === state.activeProjectId) ?? null;
 }
 
 interface CodeplugContextValue {
   codeplug: Codeplug;
   applyImport: (result: ImportResult) => void;
   clear: () => void;
+  persistenceError: string | null;
+  clearPersistenceError: () => void;
+}
+
+interface ProjectsContextValue {
+  projects: CodeplugProject[];
+  activeProjectId: string | null;
+  activeProject: CodeplugProject | null;
+  importNewProject: (result: ImportResult, name?: string) => void;
+  applyImportToActive: (result: ImportResult) => void;
+  setActiveProject: (id: string) => void;
+  deleteProject: (id: string) => void;
+  persistenceError: string | null;
+  clearPersistenceError: () => void;
 }
 
 const CodeplugContext = createContext<CodeplugContextValue | null>(null);
+const ProjectsContext = createContext<ProjectsContextValue | null>(null);
 
 export function CodeplugProvider({ children }: { children: ReactNode }) {
-  const [codeplug, dispatch] = useReducer(codeplugReducer, undefined, emptyCodeplug);
+  const [projectsState, dispatch] = useReducer(
+    projectsReducer,
+    undefined,
+    () => loadProjectsFromStorage() ?? emptyProjectsState(),
+  );
+  const [persistenceError, setPersistenceError] = useState<string | null>(null);
 
-  const applyImport = useCallback((result: ImportResult) => {
+  useEffect(() => {
+    try {
+      saveProjectsToStorage(projectsState);
+    } catch (err) {
+      const message =
+        err instanceof StorageQuotaError
+          ? 'Could not save to browser storage (quota exceeded). Your changes work for now but may be lost on reload.'
+          : 'Could not save to browser storage. Your changes may be lost on reload.';
+      queueMicrotask(() => setPersistenceError(message));
+    }
+  }, [projectsState]);
+
+  const clearPersistenceError = useCallback(() => {
+    setPersistenceError(null);
+  }, []);
+
+  const applyImport = useCallback(
+    (result: ImportResult) => {
+      setPersistenceError(null);
+      dispatch({ type: 'APPLY_IMPORT', result });
+    },
+    [],
+  );
+
+  const clear = useCallback(() => {
+    setPersistenceError(null);
+    dispatch({ type: 'CLEAR' });
+    if (!projectsState.activeProjectId) {
+      clearProjectsStorage();
+    }
+  }, [projectsState.activeProjectId]);
+
+  const importNewProject = useCallback((result: ImportResult, name?: string) => {
+    setPersistenceError(null);
+    dispatch({ type: 'IMPORT_NEW_PROJECT', result, name });
+  }, []);
+
+  const applyImportToActive = useCallback((result: ImportResult) => {
+    setPersistenceError(null);
     dispatch({ type: 'APPLY_IMPORT', result });
   }, []);
 
-  const clear = useCallback(() => {
-    dispatch({ type: 'CLEAR' });
+  const setActiveProject = useCallback((id: string) => {
+    setPersistenceError(null);
+    dispatch({ type: 'SET_ACTIVE_PROJECT', id });
   }, []);
 
-  const value = useMemo(
-    () => ({ codeplug, applyImport, clear }),
-    [codeplug, applyImport, clear],
+  const deleteProject = useCallback((id: string) => {
+    setPersistenceError(null);
+    dispatch({ type: 'DELETE_PROJECT', id });
+  }, []);
+
+  const current = activeProject(projectsState);
+  const codeplug = current?.codeplug ?? emptyCodeplug();
+
+  const codeplugValue = useMemo(
+    () => ({
+      codeplug,
+      applyImport,
+      clear,
+      persistenceError,
+      clearPersistenceError,
+    }),
+    [codeplug, applyImport, clear, persistenceError, clearPersistenceError],
   );
 
-  return <CodeplugContext.Provider value={value}>{children}</CodeplugContext.Provider>;
+  const projectsValue = useMemo(
+    () => ({
+      projects: projectsState.projects,
+      activeProjectId: projectsState.activeProjectId,
+      activeProject: current,
+      importNewProject,
+      applyImportToActive,
+      setActiveProject,
+      deleteProject,
+      persistenceError,
+      clearPersistenceError,
+    }),
+    [
+      projectsState,
+      current,
+      importNewProject,
+      applyImportToActive,
+      setActiveProject,
+      deleteProject,
+      persistenceError,
+      clearPersistenceError,
+    ],
+  );
+
+  return (
+    <ProjectsContext.Provider value={projectsValue}>
+      <CodeplugContext.Provider value={codeplugValue}>{children}</CodeplugContext.Provider>
+    </ProjectsContext.Provider>
+  );
 }
 
 export function useCodeplug(): CodeplugContextValue {
@@ -119,3 +285,12 @@ export function useCodeplug(): CodeplugContextValue {
   if (!ctx) throw new Error('useCodeplug must be used within CodeplugProvider');
   return ctx;
 }
+
+export function useProjects(): ProjectsContextValue {
+  const ctx = useContext(ProjectsContext);
+  if (!ctx) throw new Error('useProjects must be used within CodeplugProvider');
+  return ctx;
+}
+
+/** @internal test export */
+export { applyImportToCodeplug, projectsReducer };
