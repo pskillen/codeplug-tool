@@ -21,6 +21,7 @@ Implementation lives in the SPA under `src/components/ChannelMap/` (react-leafle
 | --- | --- |
 | [channels.md](channels.md) | `Channels.csv` parsing, markers, filters, popups, labelling |
 | [zones.md](zones.md) | `Zones.csv` parsing, hull geometry, colours, multi-zone overlap |
+| [troubleshooting.md](troubleshooting.md) | Console warnings — app vs browser extensions |
 
 User-facing quick start remains in the [repository README](../../../README.md).
 
