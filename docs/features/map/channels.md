@@ -68,15 +68,17 @@ Tab characters inside cell values are stripped after trim.
 
 ## UI controls
 
-| Control | Element id | Default | Effect |
-| --- | --- | --- | --- |
-| Channels file dropzone | `dropzone` / `fileChannels` | — | Loads and parses `Channels.csv` |
-| Only `Use Location = Yes` | `requireUseLocation` | on | Skips channels where CPS marked `Use Location` not `Yes` |
-| Skip 0,0 | `skipZero` | on | Skips channels at exactly `0, 0` |
-| Merge same lat/lon | `dedupeCoords` | on | One marker per site; popup lists all co-located channels |
-| Full channel name labels | `fullChannelName` | off | Label uses full `Channel Name`; default is callsign (first word) |
+Controls are Mantine inputs bound to React state in `ChannelMap.tsx` (no DOM ids).
 
-Changing any filter re-runs `refreshMap()` (markers and zone hulls together).
+| Control label | State | Default | Effect |
+| --- | --- | --- | --- |
+| Channels file dropzone | `channels` (via `loadChannelsFile`) | — | Loads and parses `Channels.csv` |
+| Only `Use Location = Yes` | `requireUseLocation` | on | Skips channels where CPS marked `Use Location` not `Yes` |
+| Skip 0,0 coordinates | `skipZero` | on | Skips channels at exactly `0, 0` |
+| Merge markers at same lat/lon | `dedupeCoords` | on | One marker per site; popup lists all co-located channels |
+| Label with full channel name | `fullChannelName` | off | Label uses full `Channel Name`; default is callsign (first word) |
+
+Changing any filter updates state; markers and zone hulls recompute reactively via `useMemo` (no imperative refresh call).
 
 ## Behaviour
 
@@ -111,7 +113,7 @@ Click a marker for:
 
 ### Map bounds
 
-After markers render, `fitMapToLayers()` fits the view to **both** `markerLayer` and `zoneLayer` with padding `[48, 48]` and `maxZoom: 11`.
+The `FitMapBounds` child component (via `useMap`) fits the view to **both** marker and zone-hull points whenever they change. Points are gathered by `collectMapPoints` and the view is computed by `computeMapView` (`src/lib/mapView.ts`) with padding `[48, 48]` and `maxZoom: 11`; degenerate single-point bounds use `setView` at zoom `11` to avoid an infinite tile load.
 
 Initial map centre: `[56.5, -4.0]`, zoom `6` (before first load).
 
