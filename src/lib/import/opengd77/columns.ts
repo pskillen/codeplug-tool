@@ -111,3 +111,30 @@ export const RX_GROUP_LIST_HEADERS = [
   RX_GROUP_LIST_COL.name,
   ...rxGroupListMemberHeaders(),
 ];
+
+export const DTMF_HEADERS = ['Contact Name', 'Code'];
+
+export const APRS_HEADERS = [
+  'APRS config Name',
+  'SSID',
+  'Via1',
+  'Via1 SSID',
+  'Via2',
+  'Via2 SSID',
+  'Icon table',
+  'Icon',
+  'Comment text',
+  'Ambiguity',
+  'Use position',
+  'Latitude',
+  'Longitude',
+  'TX Frequency',
+  'Transmit QSY',
+  'Baud rate setting',
+];
+
+export function zoneMemberHeaders(count = 80): string[] {
+  return Array.from({ length: count }, (_, i) => `Channel${i + 1}`);
+}
+
+export const ZONE_HEADERS = ['Zone Name', ...zoneMemberHeaders()];
