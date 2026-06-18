@@ -1,26 +1,23 @@
 ---
 name: version-number
 description: >-
-  Display build environment and version in page footers for opengd77-map static
-  tools. Covers placeholder injection at GitHub Pages deploy time, local
-  fallbacks, and footer UI. Use when adding build info, wiring pages.yml, or
-  debugging which release a tab is running.
+  Display build environment and version in page footers for opengd77-map SPA.
+  Covers Vite define injection at build time, local fallbacks, and footer UI.
+  Use when adding build info, wiring pages.yml, or debugging which release a
+  tab is running.
 ---
 
 # Build version and environment in footer
 
 opengd77-map displays **build environment** and **build version** in a muted
 page footer so support and contributors can tell at a glance which build a
-browser tab is running. Values are baked into a small shared JS file during the
-GitHub Pages deploy workflow. Local file opens and `python -m http.server`
-previews fall back to `"local"` without any configuration.
-
-Adapted from the MyCare Connect pattern (C# + Docker) for this repo's static
-HTML/JS layout and tag-only GitHub Pages deploy.
+browser tab is running. Values are baked in at **build time** via Vite `define`
+in `vite.config.ts`. Local dev builds fall back to `"local"` without any
+configuration.
 
 Pair with [git-workflow](../git-workflow/SKILL.md) for releases and
 [feature-docs](../feature-docs/SKILL.md) when documenting the feature under
-`docs/features/` or `docs/build/`.
+`docs/build/`.
 
 ---
 
@@ -30,7 +27,7 @@ Pair with [git-workflow](../git-workflow/SKILL.md) for releases and
 | --- | --- |
 | **`BUILD_ENV`** | Deployment environment name. Today: `local` or `prod`. |
 | **`BUILD_VERSION`** | Version shown beside `BUILD_ENV`. |
-| **Placeholder sentinels** | Literal `__BUILD_ENV__` and `__BUILD_VERSION__` in source. If still present at runtime, treat as unbaked local build → fall back to `"local"`. |
+| **Vite `define`** | Build-time constant replacement — `__BUILD_ENV__` and `__BUILD_VERSION__` become string literals in the bundle. |
 
 ### Values by environment
 
@@ -51,17 +48,12 @@ that changes.
 
 | Path | Role |
 | --- | --- |
-| `site/build-info.js` | Single source of truth — placeholder constants + `getBuildInfo()` helper |
-| `site/index.html` | Site hub footer |
-| `tools/<name>/index.html` | Tool footers (load shared script via relative path) |
-| `.github/workflows/pages.yml` | `sed` replacement during **Prepare site** |
+| `vite.config.ts` | Reads `process.env.BUILD_ENV` / `BUILD_VERSION`; sets `define` |
+| `src/vite-env.d.ts` | Declares `__BUILD_ENV__` and `__BUILD_VERSION__` globals |
+| `src/components/BuildFooter.tsx` | Renders `{__BUILD_ENV__} · {__BUILD_VERSION__}` |
+| `src/App.tsx` | Mounts `BuildFooter` on every route |
+| `.github/workflows/pages.yml` | Passes env vars to `npm run build` |
 | `docs/build/README.md` | Document deploy-time injection |
-
-**Relative script path from tools:** `../../build-info.js` (resolves to
-`_site/build-info.js` on Pages and `site/build-info.js` locally).
-
-Do **not** introduce a bundler for this feature alone. No npm, no compile step
-for day-to-day dev.
 
 ---
 
@@ -69,111 +61,96 @@ for day-to-day dev.
 
 When adding or changing build info:
 
-- [ ] Add `site/build-info.js` with placeholders and local fallback
-- [ ] Add muted footer markup + CSS to `site/index.html` and each tool page
-- [ ] Wire `pages.yml` to set `BUILD_ENV=prod` and `BUILD_VERSION` from tag
-- [ ] Copy `site/build-info.js` → `_site/build-info.js` in the prepare step
+- [ ] `vite.config.ts` reads `BUILD_ENV` / `BUILD_VERSION` from `process.env` with `local` defaults
+- [ ] `define` block sets `__BUILD_ENV__` and `__BUILD_VERSION__` via `JSON.stringify`
+- [ ] `src/vite-env.d.ts` declares the globals
+- [ ] `BuildFooter` component renders muted footer text
+- [ ] `pages.yml` sets `BUILD_ENV=prod` and `BUILD_VERSION` from `github.event.release.tag_name`
 - [ ] Update [docs/build/README.md](../../../docs/build/README.md) (build-time vars)
 - [ ] Smoke-test locally (footer shows `local · local`)
-- [ ] Smoke-test after tagging (footer shows `prod · <semver>`)
+- [ ] Smoke-test prod build (`BUILD_ENV=prod BUILD_VERSION=v1.2.3 npm run build`)
+- [ ] Smoke-test after publishing a release (footer shows `prod · <semver>`)
 
 ---
 
-## 1. Shared `build-info.js`
+## 1. Vite `define` in `vite.config.ts`
 
-Keep one small sidecar script. Placeholders must be plain string literals so
-`sed` can replace them.
+```typescript
+const buildEnv = process.env.BUILD_ENV || 'local';
+const buildVersion = (process.env.BUILD_VERSION || 'local').replace(/^v/, '');
 
-```javascript
-(function () {
-  var env = "__BUILD_ENV__";
-  var version = "__BUILD_VERSION__";
-
-  function resolved(value) {
-    return value.indexOf("__") === 0 ? "local" : value;
-  }
-
-  window.BUILD_INFO = {
-    env: resolved(env),
-    version: resolved(version),
-    label: function () {
-      return this.env + " · " + this.version;
-    }
-  };
-})();
+export default defineConfig({
+  // ...
+  define: {
+    __BUILD_ENV__: JSON.stringify(buildEnv),
+    __BUILD_VERSION__: JSON.stringify(buildVersion),
+  },
+});
 ```
 
-Tools and the site hub load this with a plain `<script src="...">` before any
-inline footer script, or call `BUILD_INFO.label()` from inline markup.
+Strip the leading `v` from release tags so the footer matches the previous
+`prod · 1.2.3` format.
 
 ---
 
-## 2. Footer rendering
+## 2. Type declarations
 
-Match existing UI patterns — `system-ui`, dark background, `--muted` colour
-(see `site/index.html` and `tools/channel-map/index.html`).
-
-**Site hub** — add a `<footer>` below `<main>`:
-
-```html
-<footer class="site-footer" id="build-info-footer" aria-label="Build info"></footer>
-<script src="build-info.js"></script>
-<script>
-  document.getElementById("build-info-footer").textContent = BUILD_INFO.label();
-</script>
+```typescript
+// src/vite-env.d.ts
+declare const __BUILD_ENV__: string;
+declare const __BUILD_VERSION__: string;
 ```
 
-**Tools** — same pattern; script `src` is `../../build-info.js`.
+---
+
+## 3. Footer rendering
+
+Match existing UI patterns — `system-ui`, dark background, `--muted` colour.
+
+```tsx
+export default function BuildFooter() {
+  return (
+    <footer className="build-footer" aria-label="Build info">
+      {__BUILD_ENV__} · {__BUILD_VERSION__}
+    </footer>
+  );
+}
+```
 
 Style with muted, small type (e.g. `font-size: 0.75rem; color: var(--muted)`).
 Do not make build info prominent — it is for debugging, not branding.
 
 ---
 
-## 3. `pages.yml` injection
+## 4. `pages.yml` injection
 
-Extend the **Prepare site** step. The workflow runs on `release: types: [released]`.
-Set env vars from the release tag, `sed` the shared JS file, then assemble `_site/`:
+The workflow passes env vars to the build step:
 
 ```yaml
-- name: Prepare site
+- name: Build SPA
   env:
     BUILD_ENV: prod
     BUILD_VERSION: ${{ github.event.release.tag_name }}
-  run: |
-    # Strip leading v from tag (v1.2.3 → 1.2.3)
-    VERSION="${BUILD_VERSION#v}"
-    sed -i "s|__BUILD_ENV__|${BUILD_ENV}|g" site/build-info.js
-    sed -i "s|__BUILD_VERSION__|${VERSION}|g" site/build-info.js
-    mkdir -p _site
-    cp site/index.html _site/index.html
-    cp site/build-info.js _site/build-info.js
-    cp -r tools _site/tools
+  run: npm run build
 ```
 
-**Important:** `sed` mutates the checked-out file in the runner workspace only
-— source in git keeps placeholders. Do not commit the rewritten file.
-
-### Sed delimiter
-
-Always use `|`, not `/`, so version strings containing `/` do not break
-replacement (relevant if prerelease tags are added later, e.g. `v1.2.3-rc.4`).
+Vite reads these at build time via `process.env` in `vite.config.ts`. No `sed`
+or placeholder sentinels in source.
 
 ### Tag source
 
-Workflow triggers on a published full GitHub release (not a pre-release).
-`github.event.release.tag_name` is the release tag (e.g. `v1.0.0`). Strip `v`
-for display.
+Workflow triggers on `release: types: [released]`. `github.event.release.tag_name`
+is the tag (e.g. `v1.0.0`). Strip `v` in `vite.config.ts` for display.
 
 ---
 
-## 4. Local development
+## 5. Local development
 
 | Scenario | Expected footer |
 | --- | --- |
-| Open `site/index.html` or `tools/<name>/index.html` directly | `local · local` |
-| `python -m http.server` from repo root | `local · local` |
-| Simulate CI output | Run the `sed` + `cp` commands locally against a throwaway copy; serve `_site/` |
+| `npm run dev` | `local · local` |
+| `npm run build` (no env) | `local · local` |
+| `BUILD_ENV=prod BUILD_VERSION=v1.2.3 npm run build && npm run preview` | `prod · 1.2.3` |
 
 No workflow or env vars needed for local work.
 
@@ -183,44 +160,37 @@ No workflow or env vars needed for local work.
 
 ```mermaid
 flowchart LR
-  subgraph deploy [Release published]
-    TAG[github.event.release.tag_name] --> WF[pages.yml Prepare site]
-    WF -->|sed replace| BI[site/build-info.js]
-    WF --> ART[_site artifact]
+  subgraph deploy [Published GitHub release]
+    TAG[release.tag_name] --> WF[pages.yml Build SPA]
+    WF -->|process.env| VITE[vite.config.ts define]
+    VITE --> DIST[dist/ bundle]
   end
   subgraph runtime [Browser]
-    HTML[index.html] --> BI2[build-info.js]
-    BI2 --> Footer[muted footer]
+    APP[React app] --> Footer[BuildFooter]
+    Footer --> Text["prod · 1.2.3"]
   end
-  ART --> HTML
-  ART --> BI2
+  DIST --> APP
 ```
 
 ---
 
 ## Edge cases and future extensions
 
-- **Placeholder leakage** — footer shows `__BUILD_ENV__` → `sed` did not run
-  (file moved, placeholder renamed, or prepare step skipped). Check workflow.
+- **Missing env vars** — footer shows `local · local` (defaults in `vite.config.ts`).
 - **No staging yet** — unlike MyCare, there is only prod on Pages. If PR previews
   or a staging host are added later, extend the values table and pass a
   different `BUILD_ENV` in that workflow.
 - **Prerelease tags** — `v1.2.3-rc.1` works as-is; display the tag minus `v`.
-- **Bundler later** — if a build tool is introduced, keep the same placeholder
-  contract or migrate to `define`/env injection; update this skill when that
-  happens.
-- **Multiple tools** — one shared `site/build-info.js`; do not duplicate
-  placeholders per tool.
+- **Legacy static tools** — `site/build-info.js` with `sed` placeholders is
+  retired when `site/` is deleted in SPA migration Ticket C.
 
 ---
 
 ## Documentation
 
-When shipping this feature:
+When shipping build-info changes:
 
-1. Add a **Build-time variables** subsection to
+1. Update the **Build-time variables** subsection in
    [docs/build/README.md](../../../docs/build/README.md).
-2. Optionally add `docs/features/build/version-number.md` (or a section in the
-   build README) with the values table and verify steps.
-3. Note footer verify in post-deploy checklist: open the live site and confirm
-   `prod · <semver>` matches the tag just pushed.
+2. Note footer verify in post-deploy checklist: open the live site and confirm
+   `prod · <semver>` matches the release just published.
