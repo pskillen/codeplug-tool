@@ -1,7 +1,8 @@
-import { Checkbox, ScrollArea, Stack, Text } from '@mantine/core';
+import { Button, Checkbox, Group, ScrollArea, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
+import { useMemo, useState } from 'react';
+import { OPENGD77_MAX_ZONE_MEMBERS } from '../../lib/codeplugMutations.ts';
 import { sortByName } from '../../lib/reportLookup.ts';
 import type { Channel } from '../../models/codeplug.ts';
-import { OPENGD77_MAX_ZONE_MEMBERS } from '../../lib/codeplugMutations.ts';
 
 export interface ZoneMemberPickerProps {
   channels: Channel[];
@@ -9,42 +10,130 @@ export interface ZoneMemberPickerProps {
   onChange: (ids: string[]) => void;
 }
 
+function moveSelectedBlock(ids: string[], selected: Set<string>, direction: 'up' | 'down'): string[] {
+  const next = [...ids];
+  const indices = next
+    .map((id, index) => ({ id, index }))
+    .filter(({ id }) => selected.has(id))
+    .map(({ index }) => index);
+
+  if (direction === 'up') {
+    for (const index of indices.sort((a, b) => a - b)) {
+      if (index === 0) continue;
+      const above = index - 1;
+      if (selected.has(next[above])) continue;
+      [next[above], next[index]] = [next[index], next[above]];
+    }
+  } else {
+    for (const index of indices.sort((a, b) => b - a)) {
+      if (index >= next.length - 1) continue;
+      const below = index + 1;
+      if (selected.has(next[below])) continue;
+      [next[below], next[index]] = [next[index], next[below]];
+    }
+  }
+
+  return next;
+}
+
+function ChannelList({
+  items,
+  checked,
+  onToggle,
+  emptyLabel,
+}: {
+  items: Channel[];
+  checked: Set<string>;
+  onToggle: (id: string) => void;
+  emptyLabel: string;
+}) {
+  if (!items.length) {
+    return (
+      <Text size="sm" c="dimmed" p="xs">
+        {emptyLabel}
+      </Text>
+    );
+  }
+
+  return (
+    <Stack gap={4} p="xs">
+      {items.map((ch) => (
+        <Checkbox
+          key={ch.id}
+          label={ch.name}
+          checked={checked.has(ch.id)}
+          onChange={() => onToggle(ch.id)}
+        />
+      ))}
+    </Stack>
+  );
+}
+
 export default function ZoneMemberPicker({
   channels,
   selectedIds,
   onChange,
 }: ZoneMemberPickerProps) {
-  const sorted = sortByName(channels);
+  const [filter, setFilter] = useState('');
+  const [availableSelected, setAvailableSelected] = useState<string[]>([]);
+  const [inZoneSelected, setInZoneSelected] = useState<string[]>([]);
+
   const atCap = selectedIds.length >= OPENGD77_MAX_ZONE_MEMBERS;
-
-  const toggle = (id: string) => {
-    if (selectedIds.includes(id)) {
-      onChange(selectedIds.filter((x) => x !== id));
-    } else if (!atCap) {
-      onChange([...selectedIds, id]);
-    }
-  };
-
-  const moveUp = (id: string) => {
-    const idx = selectedIds.indexOf(id);
-    if (idx <= 0) return;
-    const next = [...selectedIds];
-    [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
-    onChange(next);
-  };
-
-  const moveDown = (id: string) => {
-    const idx = selectedIds.indexOf(id);
-    if (idx < 0 || idx >= selectedIds.length - 1) return;
-    const next = [...selectedIds];
-    [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
-    onChange(next);
-  };
-
   const selectedSet = new Set(selectedIds);
-  const selectedChannels = selectedIds
-    .map((id) => channels.find((ch) => ch.id === id))
-    .filter((ch): ch is Channel => ch != null);
+  const filterLower = filter.trim().toLowerCase();
+
+  const availableChannels = useMemo(
+    () =>
+      sortByName(channels).filter(
+        (ch) => !selectedSet.has(ch.id) && (!filterLower || ch.name.toLowerCase().includes(filterLower)),
+      ),
+    [channels, selectedIds, filterLower],
+  );
+
+  const inZoneChannels = useMemo(
+    () =>
+      selectedIds
+        .map((id) => channels.find((ch) => ch.id === id))
+        .filter((ch): ch is Channel => ch != null)
+        .filter((ch) => !filterLower || ch.name.toLowerCase().includes(filterLower)),
+    [channels, selectedIds, filterLower],
+  );
+
+  const toggleAvailable = (id: string) => {
+    setAvailableSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
+  const toggleInZone = (id: string) => {
+    setInZoneSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const addSelected = () => {
+    const toAdd = availableSelected.filter((id) => !selectedSet.has(id));
+    if (!toAdd.length) return;
+    const room = OPENGD77_MAX_ZONE_MEMBERS - selectedIds.length;
+    onChange([...selectedIds, ...toAdd.slice(0, room)]);
+    setAvailableSelected([]);
+  };
+
+  const removeSelected = () => {
+    if (!inZoneSelected.length) return;
+    const remove = new Set(inZoneSelected);
+    onChange(selectedIds.filter((id) => !remove.has(id)));
+    setInZoneSelected([]);
+  };
+
+  const moveSelected = (direction: 'up' | 'down') => {
+    if (!inZoneSelected.length) return;
+    onChange(moveSelectedBlock(selectedIds, new Set(inZoneSelected), direction));
+  };
+
+  const canMoveUp = inZoneSelected.some((id) => selectedIds.indexOf(id) > 0);
+  const canMoveDown = inZoneSelected.some((id) => {
+    const index = selectedIds.indexOf(id);
+    return index >= 0 && index < selectedIds.length - 1;
+  });
 
   return (
     <Stack gap="sm">
@@ -52,57 +141,81 @@ export default function ZoneMemberPicker({
         {selectedIds.length} / {OPENGD77_MAX_ZONE_MEMBERS} members
       </Text>
 
-      <Text size="sm" fw={500}>
-        Selected (export order)
-      </Text>
-      {selectedChannels.length === 0 ? (
-        <Text size="sm" c="dimmed">
-          No channels selected
-        </Text>
-      ) : (
-        <Stack gap={4}>
-          {selectedChannels.map((ch) => (
-            <Stack key={ch.id} gap={2}>
-              <Checkbox label={ch.name} checked onChange={() => toggle(ch.id)} />
-              <Text size="xs" c="dimmed" ml="lg">
-                <button
-                  type="button"
-                  onClick={() => moveUp(ch.id)}
-                  disabled={selectedIds[0] === ch.id}
-                >
-                  ↑
-                </button>{' '}
-                <button
-                  type="button"
-                  onClick={() => moveDown(ch.id)}
-                  disabled={selectedIds[selectedIds.length - 1] === ch.id}
-                >
-                  ↓
-                </button>
-              </Text>
-            </Stack>
-          ))}
-        </Stack>
-      )}
+      <TextInput
+        label="Filter channels"
+        placeholder="Search by name…"
+        value={filter}
+        onChange={(e) => setFilter(e.currentTarget.value)}
+      />
 
-      <Text size="sm" fw={500} mt="sm">
-        Available channels
-      </Text>
-      <ScrollArea h={200}>
-        <Stack gap={4}>
-          {sorted
-            .filter((ch) => !selectedSet.has(ch.id))
-            .map((ch) => (
-              <Checkbox
-                key={ch.id}
-                label={ch.name}
-                checked={false}
-                disabled={atCap}
-                onChange={() => toggle(ch.id)}
-              />
-            ))}
+      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
+        <Stack gap="xs">
+          <Text size="sm" fw={500}>
+            Available
+          </Text>
+          <ScrollArea h={240} type="auto" offsetScrollbars style={{ border: '1px solid var(--mantine-color-default-border)', borderRadius: 'var(--mantine-radius-sm)' }}>
+            <ChannelList
+              items={availableChannels}
+              checked={new Set(availableSelected)}
+              onToggle={toggleAvailable}
+              emptyLabel="No channels available"
+            />
+          </ScrollArea>
         </Stack>
-      </ScrollArea>
+
+        <Stack gap="xs" justify="center">
+          <Button
+            type="button"
+            variant="light"
+            onClick={addSelected}
+            disabled={!availableSelected.length || atCap}
+          >
+            Add →
+          </Button>
+          <Button
+            type="button"
+            variant="light"
+            onClick={removeSelected}
+            disabled={!inZoneSelected.length}
+          >
+            ← Remove
+          </Button>
+        </Stack>
+
+        <Stack gap="xs">
+          <Text size="sm" fw={500}>
+            In zone (export order)
+          </Text>
+          <ScrollArea h={240} type="auto" offsetScrollbars style={{ border: '1px solid var(--mantine-color-default-border)', borderRadius: 'var(--mantine-radius-sm)' }}>
+            <ChannelList
+              items={inZoneChannels}
+              checked={new Set(inZoneSelected)}
+              onToggle={toggleInZone}
+              emptyLabel="No channels in zone"
+            />
+          </ScrollArea>
+          <Group gap="xs">
+            <Button
+              type="button"
+              variant="default"
+              size="compact-sm"
+              onClick={() => moveSelected('up')}
+              disabled={!canMoveUp}
+            >
+              Move up
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              size="compact-sm"
+              onClick={() => moveSelected('down')}
+              disabled={!canMoveDown}
+            >
+              Move down
+            </Button>
+          </Group>
+        </Stack>
+      </SimpleGrid>
     </Stack>
   );
 }

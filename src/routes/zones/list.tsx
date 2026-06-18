@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import EntityTable from '../../components/report/EntityTable.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
-import { sortByName, unresolvedZoneMemberCount } from '../../lib/reportLookup.ts';
+import { sortByName } from '../../lib/reportLookup.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 
 export default function ZonesList() {
@@ -32,11 +32,6 @@ export default function ZonesList() {
               key: 'members',
               header: 'Members',
               render: (z) => z.memberChannelIds.length,
-            },
-            {
-              key: 'unresolved',
-              header: 'Unresolved',
-              render: (z) => unresolvedZoneMemberCount(z, channels),
             },
           ]}
         />

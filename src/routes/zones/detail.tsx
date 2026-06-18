@@ -64,10 +64,6 @@ export default function ZoneDetail() {
               fields: [
                 { label: 'Name', value: zone.name },
                 { label: 'Member channels', value: String(members.length) },
-                {
-                  label: 'Source member names',
-                  value: String(zone.sourceMemberNames.length),
-                },
               ],
             },
           ]}
