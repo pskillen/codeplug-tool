@@ -1,13 +1,13 @@
 ---
 name: git-workflow
 description: >-
-  Git workflow for opengd77-map — single monorepo of static browser tools on
+  Git workflow for codeplug-tool — single monorepo of static browser tools on
   GitHub Pages. Plan with GitHub issues, branch by issue when tracked, use
   conventional commits, open PRs with linked tickets. Use when starting features,
   committing, or opening pull requests in this repo.
 ---
 
-# opengd77-map Git Workflow
+# codeplug-tool Git Workflow
 
 ## Overview
 
@@ -25,7 +25,7 @@ For larger initiatives, pair with [progress-tracking](../progress-tracking/SKILL
 
 **Small fix or single-file tweak:** branch and PR without an issue is fine.
 
-**Features and multi-commit work:** create one GitHub issue in `pskillen/opengd77-map` with:
+**Features and multi-commit work:** create one GitHub issue in `pskillen/codeplug-tool` with:
 
 - Problem and intended outcome
 - Which part of the SPA is affected (e.g. a route/component under `src/`)
@@ -118,7 +118,7 @@ When the **Shell** tool runs `git`:
 
 When work is ready:
 
-1. Open one PR in `pskillen/opengd77-map` via `user-github-personal` MCP
+1. Open one PR in `pskillen/codeplug-tool` via `user-github-personal` MCP
 2. Link the issue (`Closes #N`) when applicable
 3. Note which part of the SPA changed and how to smoke-test locally (`npm run dev`, affected route, or the GitHub Pages URL)
 
