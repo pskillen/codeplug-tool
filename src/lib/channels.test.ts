@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Channel } from '../models/codeplug.ts';
+import { channelFieldDefaults, type Channel } from '../models/codeplug.ts';
 import {
   applyFilters,
   buildChannelById,
@@ -13,13 +13,10 @@ import type { Zone } from '../models/codeplug.ts';
 
 function ch(overrides: Partial<Channel> & Pick<Channel, 'id' | 'name'>): Channel {
   return {
-    number: '1',
     callsign: overrides.name.split(/\s+/)[0],
     mode: 'digital',
-    rxFrequency: '',
-    txFrequency: '',
-    contactName: '',
-    rxGroupListName: '',
+    ...channelFieldDefaults(),
+    number: '1',
     location: { lat: 56.5, lon: -4.0 },
     useLocation: true,
     ...overrides,

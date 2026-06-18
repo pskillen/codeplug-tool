@@ -2,7 +2,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ReactNode } from 'react';
 import type { ImportResult } from '../lib/import/types.ts';
-import { emptyCodeplug, resetIdGenerator, setIdGenerator } from '../models/codeplug.ts';
+import { channelFieldDefaults, emptyCodeplug, resetIdGenerator, setIdGenerator } from '../models/codeplug.ts';
 import { CODEPLUG_STORAGE_KEY } from './codeplugStorage.ts';
 import { serializeProjects } from './codeplugStorage.ts';
 import { newProject } from '../models/codeplugProject.ts';
@@ -15,6 +15,7 @@ import {
 } from './codeplugStore.tsx';
 
 function channelsCsvResult(): ImportResult {
+  const base = channelFieldDefaults();
   return {
     channels: [
       {
@@ -22,10 +23,7 @@ function channelsCsvResult(): ImportResult {
         name: 'A',
         callsign: 'A',
         mode: 'digital',
-        rxFrequency: '',
-        txFrequency: '',
-        contactName: '',
-        rxGroupListName: '',
+        ...base,
         location: { lat: 56.5, lon: -4.0 },
         useLocation: true,
         number: '1',
@@ -35,10 +33,7 @@ function channelsCsvResult(): ImportResult {
         name: 'B',
         callsign: 'B',
         mode: 'digital',
-        rxFrequency: '',
-        txFrequency: '',
-        contactName: '',
-        rxGroupListName: '',
+        ...base,
         location: { lat: 57.0, lon: -3.5 },
         useLocation: true,
         number: '2',
@@ -97,10 +92,7 @@ describe('codeplug import merge semantics', () => {
           name: 'A',
           callsign: 'A',
           mode: 'digital',
-          rxFrequency: '',
-          txFrequency: '',
-          contactName: '',
-          rxGroupListName: '',
+          ...channelFieldDefaults(),
           location: { lat: 56.5, lon: -4.0 },
           useLocation: true,
           number: '1',

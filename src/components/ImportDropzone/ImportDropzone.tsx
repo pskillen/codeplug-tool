@@ -29,7 +29,7 @@ export default function ImportDropzone({
   onResult,
   persistenceError,
   onDismissPersistenceError,
-  hint = 'Drop OpenGD77 CSV files or a whole export folder. Channels.csv and Zones.csv are recognised; other files are skipped.',
+  hint = 'Drop OpenGD77 CSV files or a whole export folder. Channels.csv, Zones.csv, Contacts.csv, and TG_Lists.csv are recognised; DTMF.csv and APRS.csv are skipped.',
 }: ImportDropzoneProps) {
   const [dragover, setDragover] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
@@ -65,8 +65,15 @@ export default function ImportDropzone({
   return (
     <Stack gap="sm">
       <Text size="sm" c="dimmed">
-        {hint.split(/(Channels\.csv|Zones\.csv)/).map((part, i) =>
-          part === 'Channels.csv' || part === 'Zones.csv' ? <code key={i}>{part}</code> : part,
+        {hint.split(/(Channels\.csv|Zones\.csv|Contacts\.csv|TG_Lists\.csv)/).map((part, i) =>
+          part === 'Channels.csv' ||
+          part === 'Zones.csv' ||
+          part === 'Contacts.csv' ||
+          part === 'TG_Lists.csv' ? (
+            <code key={i}>{part}</code>
+          ) : (
+            part
+          ),
         )}
       </Text>
 

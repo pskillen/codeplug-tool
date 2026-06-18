@@ -5,6 +5,7 @@ import ActiveProjectBar from './components/ActiveProjectBar/ActiveProjectBar.tsx
 import BuildFooter from './components/BuildFooter.tsx';
 import Home from './routes/Home.tsx';
 import Map from './routes/Map.tsx';
+import Export from './routes/Export.tsx';
 import { useProjects } from './state/codeplugStore.tsx';
 
 function App() {
@@ -54,6 +55,13 @@ function App() {
               active={location.pathname === '/map'}
               onClick={close}
             />
+            <NavLink
+              component={Link}
+              to="/export"
+              label="Export"
+              active={location.pathname === '/export'}
+              onClick={close}
+            />
           </Stack>
         </AppShell.Navbar>
       ) : null}
@@ -62,6 +70,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/map" element={<Map />} />
+          <Route path="/export" element={<Export />} />
         </Routes>
         <BuildFooter />
       </AppShell.Main>

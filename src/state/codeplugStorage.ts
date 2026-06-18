@@ -1,6 +1,13 @@
 import {
   CODEPLUG_SCHEMA_VERSION,
+  channelFieldDefaults,
+  type Channel,
   type Codeplug,
+  type CodeplugMeta,
+  type Contact,
+  type RxGroupList,
+  type TalkGroup,
+  type Zone,
 } from '../models/codeplug.ts';
 import type { CodeplugProject } from '../models/codeplugProject.ts';
 import { newProject } from '../models/codeplugProject.ts';
@@ -20,29 +27,113 @@ export class StorageQuotaError extends Error {
   }
 }
 
+function migrateChannel(raw: Partial<Channel>): Channel {
+  const defaults = channelFieldDefaults();
+  return {
+    id: raw.id ?? '',
+    name: raw.name ?? '',
+    callsign: raw.callsign ?? '',
+    mode: raw.mode ?? 'other',
+    ...defaults,
+    ...raw,
+    vendorExtras: raw.vendorExtras ?? {},
+  };
+}
+
+function migrateRxGroupLists(raw: Record<string, unknown>): RxGroupList[] {
+  if (Array.isArray(raw.rxGroupLists)) {
+    return raw.rxGroupLists as RxGroupList[];
+  }
+  if (Array.isArray(raw.tgLists)) {
+    return (raw.tgLists as Array<Record<string, unknown>>).map((item) => ({
+      id: String(item.id ?? ''),
+      name: String(item.name ?? ''),
+      sourceMemberNames: Array.isArray(item.sourceMemberNames)
+        ? (item.sourceMemberNames as string[])
+        : Array.isArray(item.memberContactNames)
+          ? (item.memberContactNames as string[])
+          : [],
+    }));
+  }
+  return [];
+}
+
+function migrateContact(raw: Partial<Contact>): Contact {
+  return {
+    id: raw.id ?? '',
+    name: raw.name ?? '',
+    number: raw.number ?? '',
+    timeslotOverride: raw.timeslotOverride ?? '',
+  };
+}
+
+function migrateTalkGroup(raw: Partial<TalkGroup>): TalkGroup {
+  return {
+    id: raw.id ?? '',
+    name: raw.name ?? '',
+    number: raw.number ?? '',
+    timeslotOverride: raw.timeslotOverride ?? '',
+  };
+}
+
+/** Normalise a persisted codeplug (v1 or v2) to the current schema. */
+export function migrateCodeplug(value: unknown): Codeplug | null {
+  if (!value || typeof value !== 'object') return null;
+  const raw = value as Record<string, unknown>;
+  const meta = raw.meta as CodeplugMeta | undefined;
+  if (!meta || typeof meta.schemaVersion !== 'number') return null;
+  if (meta.schemaVersion > CODEPLUG_SCHEMA_VERSION) return null;
+
+  const channels = Array.isArray(raw.channels)
+    ? (raw.channels as Partial<Channel>[]).map(migrateChannel)
+    : [];
+  const zones = Array.isArray(raw.zones) ? (raw.zones as Zone[]) : [];
+  const talkGroups = Array.isArray(raw.talkGroups)
+    ? (raw.talkGroups as Partial<TalkGroup>[]).map(migrateTalkGroup)
+    : [];
+  const contacts = Array.isArray(raw.contacts)
+    ? (raw.contacts as Partial<Contact>[]).map(migrateContact)
+    : [];
+
+  return {
+    channels,
+    zones,
+    talkGroups,
+    rxGroupLists: migrateRxGroupLists(raw),
+    contacts,
+    meta: {
+      importedAt: meta.importedAt ?? null,
+      sourceFiles: Array.isArray(meta.sourceFiles) ? meta.sourceFiles : [],
+      schemaVersion: CODEPLUG_SCHEMA_VERSION,
+    },
+  };
+}
+
 export function isValidCodeplug(value: unknown): value is Codeplug {
-  if (!value || typeof value !== 'object') return false;
-  const cp = value as Codeplug;
-  if (cp.meta?.schemaVersion !== CODEPLUG_SCHEMA_VERSION) return false;
+  const cp = migrateCodeplug(value);
+  if (!cp) return false;
   return (
     Array.isArray(cp.channels) &&
     Array.isArray(cp.zones) &&
     Array.isArray(cp.talkGroups) &&
-    Array.isArray(cp.tgLists) &&
-    Array.isArray(cp.contacts)
+    Array.isArray(cp.rxGroupLists) &&
+    Array.isArray(cp.contacts) &&
+    cp.meta.schemaVersion === CODEPLUG_SCHEMA_VERSION
   );
 }
 
 export function isValidProject(value: unknown): value is CodeplugProject {
   if (!value || typeof value !== 'object') return false;
   const p = value as CodeplugProject;
-  return (
-    typeof p.id === 'string' &&
-    typeof p.name === 'string' &&
-    typeof p.createdAt === 'string' &&
-    typeof p.updatedAt === 'string' &&
-    isValidCodeplug(p.codeplug)
-  );
+  if (
+    typeof p.id !== 'string' ||
+    typeof p.name !== 'string' ||
+    typeof p.createdAt !== 'string' ||
+    typeof p.updatedAt !== 'string'
+  ) {
+    return false;
+  }
+  return isValidCodeplug(p.codeplug);
 }
 
 export function isPersistableProjects(state: ProjectsState): boolean {
@@ -68,6 +159,22 @@ function normalizeActiveProjectId(
   return projects[0].id;
 }
 
+function normalizeProject(raw: unknown): CodeplugProject | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const p = raw as CodeplugProject;
+  const codeplug = migrateCodeplug(p.codeplug);
+  if (
+    !codeplug ||
+    typeof p.id !== 'string' ||
+    typeof p.name !== 'string' ||
+    typeof p.createdAt !== 'string' ||
+    typeof p.updatedAt !== 'string'
+  ) {
+    return null;
+  }
+  return { ...p, codeplug };
+}
+
 export function deserializeProjects(json: string): ProjectsState | null {
   let parsed: unknown;
   try {
@@ -82,7 +189,9 @@ export function deserializeProjects(json: string): ProjectsState | null {
   if (envelope.version !== CODEPLUG_STORAGE_VERSION) return null;
   if (!Array.isArray(envelope.projects)) return null;
 
-  const projects = envelope.projects.filter(isValidProject);
+  const projects = envelope.projects
+    .map(normalizeProject)
+    .filter((p): p is CodeplugProject => p != null);
   const activeProjectId =
     typeof envelope.activeProjectId === 'string' || envelope.activeProjectId === null
       ? (envelope.activeProjectId as string | null)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildNameToChannelId, resolveZoneMembers } from './codeplug.ts';
-import type { Channel } from '../models/codeplug.ts';
+import { channelFieldDefaults, type Channel } from '../models/codeplug.ts';
 
 function ch(id: string, name: string): Channel {
   return {
@@ -8,10 +8,7 @@ function ch(id: string, name: string): Channel {
     name,
     callsign: name.split(/\s+/)[0],
     mode: 'digital',
-    rxFrequency: '',
-    txFrequency: '',
-    contactName: '',
-    rxGroupListName: '',
+    ...channelFieldDefaults(),
     location: { lat: 56.5, lon: -4.0 },
     useLocation: true,
     number: '1',
