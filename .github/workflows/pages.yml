@@ -23,23 +23,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Prepare site
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build SPA
         env:
           BUILD_ENV: prod
           BUILD_VERSION: ${{ github.event.release.tag_name }}
-        run: |
-          VERSION="${BUILD_VERSION#v}"
-          sed -i "s|__BUILD_ENV__|${BUILD_ENV}|g" site/build-info.js
-          sed -i "s|__BUILD_VERSION__|${VERSION}|g" site/build-info.js
-          mkdir -p _site
-          cp site/index.html _site/index.html
-          cp site/build-info.js _site/build-info.js
-          cp -r tools _site/tools
+        run: npm run build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: _site
+          path: dist
 
       - name: Deploy to GitHub Pages
         id: deployment

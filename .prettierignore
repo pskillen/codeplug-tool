@@ -1,0 +1,8 @@
+dist/
+node_modules/
+site/
+tools/
+.cursor/
+docs/
+AGENTS.md
+README.md
