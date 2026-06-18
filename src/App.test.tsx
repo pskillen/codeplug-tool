@@ -43,14 +43,16 @@ function renderApp(initialRoute = '/') {
 }
 
 describe('App', () => {
-  it('renders the home heading', () => {
+  it('renders the home heading and import section', () => {
     renderApp('/');
     expect(screen.getByRole('heading', { name: 'MM9PDY Codeplug Tool' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Import codeplug' })).toBeInTheDocument();
   });
 
   it('renders the channel map sidebar on /map', () => {
     renderApp('/map');
     expect(screen.getByRole('heading', { name: 'OpenGD77 channel map' })).toBeInTheDocument();
+    expect(screen.getByText('Active codeplug')).toBeInTheDocument();
     expect(screen.getByText('Channels.csv', { selector: 'code' })).toBeInTheDocument();
     expect(screen.getByTestId('map-container')).toBeInTheDocument();
   });

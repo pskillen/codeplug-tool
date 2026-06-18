@@ -26,6 +26,7 @@ import {
   useMap,
 } from 'react-leaflet';
 import ImportPanel from '../ImportPanel/ImportPanel.tsx';
+import ActiveProjectBar from '../ActiveProjectBar/ActiveProjectBar.tsx';
 import {
   applyFilters,
   buildChannelById,
@@ -369,6 +370,7 @@ export default function ChannelMap() {
   return (
     <div className="channel-map">
       <aside className="channel-map-sidebar">
+        <ActiveProjectBar />
         <Title order={3}>OpenGD77 channel map</Title>
 
         {tileConfig.fallback ? (
