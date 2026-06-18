@@ -1,6 +1,8 @@
-import { Anchor, Group, Stack, Text, Title } from '@mantine/core';
-import { Link, useParams } from 'react-router-dom';
+import { Anchor, Button, Group, Stack, Text, Title } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
+import ConfirmDeleteModal from '../../components/crud/ConfirmDeleteModal.tsx';
 import DetailSections, { DetailLinkList } from '../../components/report/DetailSections.tsx';
 import NotFoundEntity from '../../components/report/NotFoundEntity.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
@@ -26,7 +28,9 @@ function formatLocation(lat: number | undefined, lon: number | undefined): strin
 
 export default function ChannelDetail() {
   const { id } = useParams<{ id: string }>();
-  const { codeplug } = useCodeplug();
+  const navigate = useNavigate();
+  const { codeplug, deleteChannel } = useCodeplug();
+  const [deleteOpen, { open: openDelete, close: closeDelete }] = useDisclosure(false);
   const channel = id ? findEntityById(codeplug.channels, id) : null;
 
   if (!channel) {
@@ -147,13 +151,34 @@ export default function ChannelDetail() {
   ];
 
   const externalLinks = externalChannelLinks(channel.callsign);
+  const memberZones = zonesContainingChannel(channel.id, codeplug.zones);
+  const zoneWarning =
+    memberZones.length > 0
+      ? `This channel is a member of ${memberZones.length} zone(s): ${memberZones.map((z) => z.name).join(', ')}.`
+      : undefined;
+
+  const confirmDelete = () => {
+    deleteChannel(channel.id);
+    closeDelete();
+    navigate('/channels');
+  };
 
   return (
     <ReportPage title={channel.name}>
       <Stack gap="lg">
-        <Anchor component={Link} to="/channels" size="sm">
-          ← Channels
-        </Anchor>
+        <Group justify="space-between">
+          <Anchor component={Link} to="/channels" size="sm">
+            ← Channels
+          </Anchor>
+          <Group gap="sm">
+            <Button component={Link} to={`/channels/${channel.id}/edit`} variant="light" size="sm">
+              Edit
+            </Button>
+            <Button color="red" variant="light" size="sm" onClick={openDelete}>
+              Delete
+            </Button>
+          </Group>
+        </Group>
 
         <DetailSections sections={sections} />
 
@@ -183,6 +208,15 @@ export default function ChannelDetail() {
           />
         </Stack>
       </Stack>
+
+      <ConfirmDeleteModal
+        opened={deleteOpen}
+        onClose={closeDelete}
+        onConfirm={confirmDelete}
+        title="Delete channel"
+        entityName={channel.name}
+        warning={zoneWarning}
+      />
     </ReportPage>
   );
 }

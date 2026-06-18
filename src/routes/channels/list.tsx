@@ -1,4 +1,5 @@
-import { Stack, Text } from '@mantine/core';
+import { Button, Group, Stack, Text } from '@mantine/core';
+import { Link } from 'react-router-dom';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import EntityTable from '../../components/report/EntityTable.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
@@ -22,6 +23,12 @@ export default function ChannelsList() {
   return (
     <ReportPage title="Channels">
       <Stack gap="lg">
+        <Group justify="flex-end">
+          <Button component={Link} to="/channels/new">
+            New channel
+          </Button>
+        </Group>
+
         <EntityTable
           rows={sorted}
           rowKey={(ch) => ch.id}

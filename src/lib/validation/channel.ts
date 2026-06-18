@@ -1,5 +1,4 @@
 import type { Channel, Codeplug } from '../../models/codeplug.ts';
-import { OPENGD77_MAX_ZONE_MEMBERS } from '../codeplugMutations.ts';
 
 export interface ValidationIssue {
   field: string;

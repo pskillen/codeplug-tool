@@ -48,7 +48,7 @@ describe('codeplugMutations', () => {
 
   it('updateChannel rename refreshes zone sourceMemberNames', () => {
     const ch = makeChannel('ch-1', 'Old Name');
-    let cp = {
+    const cp = {
       ...emptyCodeplug(),
       channels: [ch],
       zones: [
@@ -61,10 +61,10 @@ describe('codeplugMutations', () => {
       ],
     };
 
-    cp = updateChannel(cp, 'ch-1', { name: 'New Name' });
-    expect(cp.channels[0].name).toBe('New Name');
-    expect(cp.zones[0].sourceMemberNames).toEqual(['New Name']);
-    expect(cp.zones[0].memberChannelIds).toEqual(['ch-1']);
+    const next = updateChannel(cp, 'ch-1', { name: 'New Name' });
+    expect(next.channels[0].name).toBe('New Name');
+    expect(next.zones[0].sourceMemberNames).toEqual(['New Name']);
+    expect(next.zones[0].memberChannelIds).toEqual(['ch-1']);
   });
 
   it('deleteChannel removes id from zones', () => {
