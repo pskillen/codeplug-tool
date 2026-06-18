@@ -16,7 +16,7 @@
 ## Ticket A — scaffold SPA, tooling, routing, deploy pipeline (#18)
 
 **Status:** Complete (pending merge)
-**PR:** (pending)
+**PR:** https://github.com/pskillen/opengd77-map/pull/23
 
 **Delivered**
 
@@ -55,6 +55,6 @@
 
 ## Next
 
-- Open PR for Ticket A with `Closes #18`
+- Merge PR #23 (Ticket A)
 - After merge, begin Ticket B (#19) on a new branch from `main`
 - **Do not publish a GitHub release until Ticket C is merged**
