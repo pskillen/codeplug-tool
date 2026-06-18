@@ -1,5 +1,6 @@
 import { Group, NumberInput, SegmentedControl, Stack, Text, TextInput, Title } from '@mantine/core';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import MapLocationPicker from '../../components/MapLocationPicker/MapLocationPicker.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
 import { coordsToLocator, isValidLocator, locatorToCoords } from '../../lib/maidenhead.ts';
 
@@ -29,14 +30,25 @@ export default function MaidenheadConverter() {
     return null;
   }, [locator]);
 
+  const mapLat = parseCoord(lat);
+  const mapLon = parseCoord(lon);
+
+  const applyCoords = useCallback(
+    (latN: number, lonN: number, locatorPrecision: LocatorPrecision = precision) => {
+      setLat(latN);
+      setLon(lonN);
+      setLocator(coordsToLocator(latN, lonN, locatorPrecision));
+    },
+    [precision],
+  );
+
   const handleLocatorChange = (value: string) => {
     setLocator(value);
     if (!value.trim()) return;
     if (!isValidLocator(value)) return;
     const coords = locatorToCoords(value);
     if (coords) {
-      setLat(coords.lat);
-      setLon(coords.lon);
+      applyCoords(coords.lat, coords.lon, precision);
       setLocator(value.trim().toUpperCase().replace(/\s/g, ''));
     }
   };
@@ -46,7 +58,7 @@ export default function MaidenheadConverter() {
     const latN = parseCoord(value);
     const lonN = parseCoord(lon);
     if (latN != null && lonN != null) {
-      setLocator(coordsToLocator(latN, lonN, precision));
+      applyCoords(latN, lonN);
     }
   };
 
@@ -55,7 +67,7 @@ export default function MaidenheadConverter() {
     const latN = parseCoord(lat);
     const lonN = parseCoord(value);
     if (latN != null && lonN != null) {
-      setLocator(coordsToLocator(latN, lonN, precision));
+      applyCoords(latN, lonN);
     }
   };
 
@@ -67,6 +79,10 @@ export default function MaidenheadConverter() {
     if (latN != null && lonN != null) {
       setLocator(coordsToLocator(latN, lonN, p));
     }
+  };
+
+  const handleMapPick = (latN: number, lonN: number) => {
+    applyCoords(latN, lonN);
   };
 
   return (
@@ -112,6 +128,14 @@ export default function MaidenheadConverter() {
               max={180}
             />
           </Group>
+        </Stack>
+
+        <Stack gap="sm">
+          <Title order={4}>Map</Title>
+          <Text size="sm" c="dimmed">
+            Click the map or drag the marker to set coordinates.
+          </Text>
+          <MapLocationPicker lat={mapLat} lon={mapLon} onPick={handleMapPick} />
         </Stack>
       </Stack>
     </ReportPage>
