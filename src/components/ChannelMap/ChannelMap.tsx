@@ -25,7 +25,6 @@ import {
   Tooltip,
   useMap,
 } from 'react-leaflet';
-import ImportPanel from '../ImportPanel/ImportPanel.tsx';
 import {
   applyFilters,
   buildChannelById,
@@ -45,8 +44,8 @@ import { useCodeplug } from '../../state/codeplugStore.tsx';
 import { useDocumentLayoutReady } from '../../hooks/useDocumentLayoutReady.ts';
 import './ChannelMap.css';
 
-const STORAGE_KEY_TOKEN = 'opengd77-channel-map.mapboxToken';
-const STORAGE_KEY_TILE = 'opengd77-channel-map.tileProvider';
+const STORAGE_KEY_TOKEN = 'mm9pdy-codeplug-tool.channel-map.mapboxToken';
+const STORAGE_KEY_TILE = 'mm9pdy-codeplug-tool.channel-map.tileProvider';
 
 type TileProvider = 'osm' | 'mapbox' | 'mapbox-sat';
 
@@ -369,15 +368,13 @@ export default function ChannelMap() {
   return (
     <div className="channel-map">
       <aside className="channel-map-sidebar">
-        <Title order={3}>OpenGD77 channel map</Title>
+        <Title order={3}>Channel map</Title>
 
         {tileConfig.fallback ? (
           <Alert color="yellow">
             Mapbox selected but no token set. Using OpenStreetMap instead.
           </Alert>
         ) : null}
-
-        <ImportPanel />
 
         <Fieldset legend="Filters">
           <Stack gap="xs">

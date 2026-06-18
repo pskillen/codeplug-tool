@@ -3,6 +3,8 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import App from './App.tsx';
+import { newProject } from './models/codeplugProject.ts';
+import { CODEPLUG_STORAGE_KEY, serializeProjects } from './state/codeplugStorage.ts';
 import { CodeplugProvider } from './state/codeplugStore.tsx';
 import { theme } from './theme.ts';
 
@@ -43,15 +45,31 @@ function renderApp(initialRoute = '/') {
 }
 
 describe('App', () => {
-  it('renders the home heading', () => {
+  it('renders the home heading and import section', () => {
     renderApp('/');
     expect(screen.getByRole('heading', { name: 'MM9PDY Codeplug Tool' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Import codeplug' })).toBeInTheDocument();
   });
 
-  it('renders the channel map sidebar on /map', () => {
+  it('renders the channel map on /map', () => {
     renderApp('/map');
     expect(screen.getByRole('heading', { name: 'OpenGD77 channel map' })).toBeInTheDocument();
-    expect(screen.getByText('Channels.csv', { selector: 'code' })).toBeInTheDocument();
     expect(screen.getByTestId('map-container')).toBeInTheDocument();
+    expect(screen.queryByText('Active codeplug')).not.toBeInTheDocument();
+    expect(screen.queryByText('Drop CSV files or a folder here')).not.toBeInTheDocument();
+  });
+
+  it('shows app nav with active codeplug when a project is active', () => {
+    const project = newProject('Test repeaters');
+    localStorage.setItem(
+      CODEPLUG_STORAGE_KEY,
+      serializeProjects({ activeProjectId: project.id, projects: [project] }),
+    );
+
+    renderApp('/map');
+
+    expect(screen.getByText('Active codeplug')).toBeInTheDocument();
+    expect(screen.getByText('Test repeaters')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Channel map' })).toBeInTheDocument();
   });
 });

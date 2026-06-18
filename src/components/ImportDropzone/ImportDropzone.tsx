@@ -1,7 +1,7 @@
 import { Alert, Box, Button, Group, Stack, Text } from '@mantine/core';
 import { useCallback, useRef, useState } from 'react';
 import { collectFilesFromDataTransfer, importFiles } from '../../lib/import/index.ts';
-import { useCodeplug } from '../../state/codeplugStore.tsx';
+import type { ImportResult } from '../../lib/import/types.ts';
 import '../ChannelMap/ChannelMap.css';
 
 function formatImportSummary(
@@ -18,8 +18,19 @@ function formatImportSummary(
   return parts.length ? parts.join(' · ') : null;
 }
 
-export default function ImportPanel() {
-  const { codeplug, applyImport, clear } = useCodeplug();
+export interface ImportDropzoneProps {
+  onResult: (result: ImportResult) => void;
+  persistenceError?: string | null;
+  onDismissPersistenceError?: () => void;
+  hint?: string;
+}
+
+export default function ImportDropzone({
+  onResult,
+  persistenceError,
+  onDismissPersistenceError,
+  hint = 'Drop OpenGD77 CSV files or a whole export folder. Channels.csv and Zones.csv are recognised; other files are skipped.',
+}: ImportDropzoneProps) {
   const [dragover, setDragover] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,14 +42,14 @@ export default function ImportPanel() {
       if (!files.length) return;
       try {
         const result = await importFiles(files);
-        applyImport(result);
+        onResult(result);
         setSummary(formatImportSummary(result.recognised, result.skipped, result.errors));
         setError(result.errors.length ? result.errors.map((e) => e.message).join('; ') : null);
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
       }
     },
-    [applyImport],
+    [onResult],
   );
 
   const onDrop = useCallback(
@@ -51,15 +62,19 @@ export default function ImportPanel() {
     [handleFiles],
   );
 
-  const channelCount = codeplug.channels.length;
-  const zoneCount = codeplug.zones.length;
-
   return (
     <Stack gap="sm">
       <Text size="sm" c="dimmed">
-        Drop OpenGD77 CSV files or a whole export folder. <code>Channels.csv</code> and{' '}
-        <code>Zones.csv</code> are recognised; other files are skipped.
+        {hint.split(/(Channels\.csv|Zones\.csv)/).map((part, i) =>
+          part === 'Channels.csv' || part === 'Zones.csv' ? <code key={i}>{part}</code> : part,
+        )}
       </Text>
+
+      {persistenceError ? (
+        <Alert color="yellow" onClose={onDismissPersistenceError} withCloseButton>
+          {persistenceError}
+        </Alert>
+      ) : null}
 
       {error ? (
         <Alert color="red" onClose={() => setError(null)} withCloseButton>
@@ -128,18 +143,6 @@ export default function ImportPanel() {
           e.target.value = '';
         }}
       />
-
-      {channelCount > 0 || zoneCount > 0 ? (
-        <Group justify="space-between">
-          <Text size="sm" c="dimmed">
-            {channelCount} channel{channelCount === 1 ? '' : 's'}
-            {zoneCount ? ` · ${zoneCount} zone${zoneCount === 1 ? '' : 's'}` : ''} loaded
-          </Text>
-          <Button variant="subtle" color="red" size="compact-sm" onClick={() => clear()}>
-            Clear all
-          </Button>
-        </Group>
-      ) : null}
     </Stack>
   );
 }
