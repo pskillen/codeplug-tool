@@ -1,16 +1,16 @@
 ---
-description: Conventions when editing opengd77-map browser tools
+description: Conventions when editing codeplug-tool browser tools
 globs: "**/*.{html,js,css,ts,tsx,md}"
 alwaysApply: false
 ---
 
-# opengd77-map edits
+# codeplug-tool edits
 
 Read [`AGENTS.md`](../../AGENTS.md) first. For git, plans, and docs see [`.cursor/skills/`](../skills/).
 
 ## SPA (`src/`)
 
-- React + TypeScript under `src/`; Vite bundles for GitHub Pages (`base: '/opengd77-map/'`).
+- React + TypeScript under `src/`; Vite bundles for GitHub Pages (`base: '/codeplug-tool/'`).
 - Routing via `react-router` HashRouter.
 - Build info via Vite `define` — see [version-number skill](../skills/version-number/SKILL.md).
 

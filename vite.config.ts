@@ -6,7 +6,7 @@ const buildEnv = process.env.BUILD_ENV || 'local';
 const buildVersion = (process.env.BUILD_VERSION || 'local').replace(/^v/, '');
 
 export default defineConfig({
-  base: '/opengd77-map/',
+  base: '/codeplug-tool/',
   plugins: [react()],
   define: {
     __BUILD_ENV__: JSON.stringify(buildEnv),

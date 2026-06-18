@@ -1,13 +1,13 @@
 ---
 name: progress-tracking
 description: >-
-  Maintains progress and outstanding markdown logs for multi-step opengd77-map
+  Maintains progress and outstanding markdown logs for multi-step codeplug-tool
   plans and features. Use when executing a Cursor plan, a multi-commit feature,
   or when the user asks to update progress/outstanding docs, hand off between
   agents, or before opening a PR for a larger initiative.
 ---
 
-# Progress tracking (opengd77-map)
+# Progress tracking (codeplug-tool)
 
 Persistent **progress** and **outstanding** files preserve execution state when context is lost, agents switch, or work spans multiple PRs. Use for non-trivial scope (multi-commit, new tool, or high coordination risk).
 
@@ -84,7 +84,7 @@ Leave accurate **Status** lines, open PR URLs, branch names, and a **Next:** sec
 ```markdown
 # <Title> — progress
 
-**Tracking:** [opengd77-map#NNN](https://github.com/pskillen/opengd77-map/issues/NNN)
+**Tracking:** [codeplug-tool#NNN](https://github.com/pskillen/codeplug-tool/issues/NNN)
 **Plan:** `.cursor/plans/<plan-file>.plan.md` or GitHub issue
 **Tool:** `tools/<tool>/` (e.g. `tools/channel-map/`)
 

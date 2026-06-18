@@ -1,12 +1,12 @@
 ---
 name: feature-docs
 description: >-
-  How opengd77-map documents tools and features under docs/features/. Use when
+  How codeplug-tool documents tools and features under docs/features/. Use when
   adding or updating feature docs, reverse-engineering behaviour for a ticket, or
   creating progress/outstanding logs for an initiative.
 ---
 
-# opengd77-map feature documentation
+# codeplug-tool feature documentation
 
 Canonical feature docs live under **`docs/features/<topic>/`**. Tools live under **`tools/<topic>/`**. User-facing overview stays in [`README.md`](../../../README.md) and the live site; feature docs target contributors and agents.
 
@@ -79,7 +79,7 @@ Link both from the tracking GitHub issue and the Cursor plan **Progress tracking
 ## Style conventions
 
 - **British English** in prose is fine; code identifiers stay as in repo.
-- Link GitHub issues/PRs with full URLs: `[opengd77-map#1](https://github.com/pskillen/opengd77-map/issues/1)`.
+- Link GitHub issues/PRs with full URLs: `[codeplug-tool#1](https://github.com/pskillen/codeplug-tool/issues/1)`.
 - Use relative links between docs: `[csv-columns.md](csv-columns.md)`.
 - Cite **concrete defaults** (e.g. Leaflet tile source, hull opacity) where behaviour depends on them.
 - When behaviour changes, update the **feature doc** and any affected comments in the HTML tool.

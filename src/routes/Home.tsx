@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <Container size="sm" py="md">
       <Stack gap="md">
-        <Title order={1}>opengd77-map</Title>
+        <Title order={1}>MM9PDY Codeplug Tool</Title>
         <Text c="dimmed">
           Browser tools for visualising OpenGD77 codeplug geography. CSV files stay on your machine.
         </Text>

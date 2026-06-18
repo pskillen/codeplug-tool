@@ -1,7 +1,7 @@
 ---
 name: version-number
 description: >-
-  Display build environment and version in page footers for opengd77-map SPA.
+  Display build environment and version in page footers for codeplug-tool SPA.
   Covers Vite define injection at build time, local fallbacks, and footer UI.
   Use when adding build info, wiring pages.yml, or debugging which release a
   tab is running.
@@ -9,7 +9,7 @@ description: >-
 
 # Build version and environment in footer
 
-opengd77-map displays **build environment** and **build version** in a muted
+codeplug-tool displays **build environment** and **build version** in a muted
 page footer so support and contributors can tell at a glance which build a
 browser tab is running. Values are baked in at **build time** via Vite `define`
 in `vite.config.ts`. Local dev builds fall back to `"local"` without any
