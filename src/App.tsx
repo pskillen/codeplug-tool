@@ -11,6 +11,7 @@ import ChannelDetail from './routes/channels/detail.tsx';
 import ChannelEdit from './routes/channels/edit.tsx';
 import ZonesList from './routes/zones/list.tsx';
 import ZoneDetail from './routes/zones/detail.tsx';
+import ZoneEdit from './routes/zones/edit.tsx';
 import TalkGroupsList from './routes/TalkGroupsList.tsx';
 import TalkGroupDetail from './routes/TalkGroupDetail.tsx';
 import ContactsList from './routes/ContactsList.tsx';
@@ -99,6 +100,8 @@ export default function App() {
           <Route path="/channels/:id/edit" element={<ChannelEdit />} />
           <Route path="/channels/:id" element={<ChannelDetail />} />
           <Route path="/zones" element={<ZonesList />} />
+          <Route path="/zones/new" element={<ZoneEdit />} />
+          <Route path="/zones/:id/edit" element={<ZoneEdit />} />
           <Route path="/zones/:id" element={<ZoneDetail />} />
           <Route path="/talk-groups" element={<TalkGroupsList />} />
           <Route path="/talk-groups/:id" element={<TalkGroupDetail />} />

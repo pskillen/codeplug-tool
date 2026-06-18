@@ -11,7 +11,7 @@ export const OPENGD77_MAX_ZONE_MEMBERS = 80;
 
 export type ChannelInput = Omit<Channel, 'id' | 'callsign'> & { name: string };
 
-export type ZoneInput = Pick<Zone, 'name'>;
+export type ZoneInput = Pick<Zone, 'name'> & { memberChannelIds?: string[] };
 
 function channelById(channels: Channel[], id: string): Channel | undefined {
   return channels.find((ch) => ch.id === id);
@@ -101,11 +101,22 @@ export function deleteChannel(codeplug: Codeplug, channelId: string): Codeplug {
 }
 
 export function addZone(codeplug: Codeplug, input: ZoneInput): Codeplug {
+  const memberChannelIds = input.memberChannelIds ?? [];
+  if (memberChannelIds.length > OPENGD77_MAX_ZONE_MEMBERS) {
+    throw new Error(`Zone cannot have more than ${OPENGD77_MAX_ZONE_MEMBERS} members`);
+  }
+  const channelIds = new Set(codeplug.channels.map((ch) => ch.id));
+  for (const id of memberChannelIds) {
+    if (!channelIds.has(id)) {
+      throw new Error(`Unknown channel id: ${id}`);
+    }
+  }
+
   const zone: Zone = {
     id: newId(),
     name: input.name,
-    memberChannelIds: [],
-    sourceMemberNames: [],
+    memberChannelIds,
+    sourceMemberNames: channelNamesForIds(codeplug.channels, memberChannelIds),
   };
   return { ...codeplug, zones: [...codeplug.zones, zone] };
 }

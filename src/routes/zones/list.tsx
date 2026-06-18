@@ -1,4 +1,5 @@
-import { Stack } from '@mantine/core';
+import { Button, Group, Stack } from '@mantine/core';
+import { Link } from 'react-router-dom';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import EntityTable from '../../components/report/EntityTable.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
@@ -13,6 +14,12 @@ export default function ZonesList() {
   return (
     <ReportPage title="Zones">
       <Stack gap="lg">
+        <Group justify="flex-end">
+          <Button component={Link} to="/zones/new">
+            New zone
+          </Button>
+        </Group>
+
         <EntityTable
           rows={sorted}
           rowKey={(z) => z.id}

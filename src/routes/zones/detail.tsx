@@ -1,6 +1,8 @@
-import { Anchor, Stack, Title } from '@mantine/core';
-import { Link, useParams } from 'react-router-dom';
+import { Anchor, Button, Group, Stack, Title } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
+import ConfirmDeleteModal from '../../components/crud/ConfirmDeleteModal.tsx';
 import EntityTable from '../../components/report/EntityTable.tsx';
 import DetailSections from '../../components/report/DetailSections.tsx';
 import NotFoundEntity from '../../components/report/NotFoundEntity.tsx';
@@ -17,7 +19,9 @@ function modeLabel(mode: Channel['mode']): string {
 
 export default function ZoneDetail() {
   const { id } = useParams<{ id: string }>();
-  const { codeplug } = useCodeplug();
+  const navigate = useNavigate();
+  const { codeplug, deleteZone } = useCodeplug();
+  const [deleteOpen, { open: openDelete, close: closeDelete }] = useDisclosure(false);
   const zone = id ? findEntityById(codeplug.zones, id) : null;
 
   if (!zone) {
@@ -30,12 +34,28 @@ export default function ZoneDetail() {
 
   const members = channelsForZone(zone, codeplug.channels);
 
+  const confirmDelete = () => {
+    deleteZone(zone.id);
+    closeDelete();
+    navigate('/zones');
+  };
+
   return (
     <ReportPage title={zone.name}>
       <Stack gap="lg">
-        <Anchor component={Link} to="/zones" size="sm">
-          ← Zones
-        </Anchor>
+        <Group justify="space-between">
+          <Anchor component={Link} to="/zones" size="sm">
+            ← Zones
+          </Anchor>
+          <Group gap="sm">
+            <Button component={Link} to={`/zones/${zone.id}/edit`} variant="light" size="sm">
+              Edit
+            </Button>
+            <Button color="red" variant="light" size="sm" onClick={openDelete}>
+              Delete
+            </Button>
+          </Group>
+        </Group>
 
         <DetailSections
           sections={[
@@ -79,6 +99,14 @@ export default function ZoneDetail() {
           />
         </Stack>
       </Stack>
+
+      <ConfirmDeleteModal
+        opened={deleteOpen}
+        onClose={closeDelete}
+        onConfirm={confirmDelete}
+        title="Delete zone"
+        entityName={zone.name}
+      />
     </ReportPage>
   );
 }
