@@ -40,6 +40,7 @@ import {
 } from '../../lib/channels.ts';
 import { parseChannelsCsv, parseZonesCsv, type Channel, type Zone } from '../../lib/csv.ts';
 import { convexHullLatLon, zoneColor, type LatLon } from '../../lib/geo.ts';
+import { collectMapPoints, computeMapView } from '../../lib/mapView.ts';
 import './ChannelMap.css';
 
 const STORAGE_KEY_TOKEN = 'opengd77-channel-map.mapboxToken';
@@ -157,30 +158,38 @@ function FitMapBounds({
   const map = useMap();
 
   useEffect(() => {
-    const lats: number[] = [];
-    const lons: number[] = [];
+    const zonePoints = showZoneHulls ? zoneHulls.flatMap((zh) => zh.points) : [];
+    const points = collectMapPoints(groups, zonePoints, showZoneHulls);
+    const action = computeMapView(points, {
+      padding: [48, 48],
+      maxZoom: 11,
+      singlePointZoom: 11,
+    });
 
-    for (const group of groups) {
-      lats.push(group[0].lat!);
-      lons.push(group[0].lon!);
+    if (!action) return;
+
+    if (action.type === 'setView') {
+      map.setView(action.center, action.zoom);
+      return;
     }
-    if (showZoneHulls) {
-      for (const zh of zoneHulls) {
-        for (const p of zh.points) {
-          lats.push(p[0]);
-          lons.push(p[1]);
-        }
-      }
-    }
 
-    if (!lats.length) return;
-
-    const bounds = L.latLngBounds(
-      [Math.min(...lats), Math.min(...lons)],
-      [Math.max(...lats), Math.max(...lons)],
-    );
-    map.fitBounds(bounds, { padding: [48, 48], maxZoom: 11 });
+    map.fitBounds(L.latLngBounds(action.southWest, action.northEast), {
+      padding: action.padding,
+      maxZoom: action.maxZoom,
+    });
   }, [map, groups, zoneHulls, showZoneHulls]);
+
+  return null;
+}
+
+function MapResizeFix() {
+  const map = useMap();
+
+  useEffect(() => {
+    map.invalidateSize();
+    const frame = requestAnimationFrame(() => map.invalidateSize());
+    return () => cancelAnimationFrame(frame);
+  }, [map]);
 
   return null;
 }
@@ -559,13 +568,18 @@ export default function ChannelMap() {
 
       <div className="channel-map-map">
         <MapContainer center={[56.5, -4.0]} zoom={6} style={{ height: '100%', width: '100%' }}>
+          <MapResizeFix />
           <TileLayer
             key={`${tileProvider}-${mapboxToken}`}
             url={tileConfig.config.url}
             attribution={tileConfig.config.attribution}
             maxZoom={tileConfig.config.maxZoom}
-            tileSize={tileConfig.config.tileSize}
-            zoomOffset={tileConfig.config.zoomOffset}
+            {...(tileConfig.config.tileSize != null
+              ? {
+                  tileSize: tileConfig.config.tileSize,
+                  zoomOffset: tileConfig.config.zoomOffset ?? -1,
+                }
+              : {})}
           />
 
           {showZoneHulls

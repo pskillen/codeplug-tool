@@ -18,6 +18,8 @@ vi.mock('react-leaflet', () => ({
   Tooltip: () => null,
   useMap: () => ({
     fitBounds: vi.fn(),
+    setView: vi.fn(),
+    invalidateSize: vi.fn(),
   }),
 }));
 
