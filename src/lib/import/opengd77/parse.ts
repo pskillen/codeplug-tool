@@ -1,5 +1,5 @@
 import { extractCallsign, parseCsv } from '../../csv.ts';
-import { mapChannelMode, newId, type Channel } from '../../../models/codeplug.ts';
+import { channelFieldDefaults, mapChannelMode, newId, type Channel } from '../../../models/codeplug.ts';
 import type { ParsedZone } from '../types.ts';
 
 const COL = {
@@ -46,6 +46,7 @@ export function parseChannels(text: string): Channel[] {
 
     out.push({
       id: newId(),
+      ...channelFieldDefaults(),
       number: get(COL.number),
       name,
       callsign: extractCallsign(name),

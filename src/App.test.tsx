@@ -53,7 +53,7 @@ describe('App', () => {
 
   it('renders the channel map on /map', () => {
     renderApp('/map');
-    expect(screen.getByRole('heading', { name: 'OpenGD77 channel map' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Channel map' })).toBeInTheDocument();
     expect(screen.getByTestId('map-container')).toBeInTheDocument();
     expect(screen.queryByText('Active codeplug')).not.toBeInTheDocument();
     expect(screen.queryByText('Drop CSV files or a folder here')).not.toBeInTheDocument();

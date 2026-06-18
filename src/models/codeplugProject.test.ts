@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   CODEPLUG_SCHEMA_VERSION,
+  channelFieldDefaults,
   emptyCodeplug,
   resetIdGenerator,
   setIdGenerator,
@@ -34,12 +35,7 @@ describe('newProject', () => {
       name: 'Test',
       callsign: 'Test',
       mode: 'digital',
-      rxFrequency: '',
-      txFrequency: '',
-      contactName: '',
-      rxGroupListName: '',
-      location: null,
-      useLocation: false,
+      ...channelFieldDefaults(),
       number: '1',
     });
 

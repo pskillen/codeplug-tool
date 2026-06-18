@@ -5,6 +5,33 @@ export interface GeoPoint {
   lon: number;
 }
 
+/** Default values for optional Channel fields — spread in tests and migration. */
+export function channelFieldDefaults(): Omit<Channel, 'id' | 'name' | 'callsign' | 'mode'> {
+  return {
+    rxFrequency: '',
+    txFrequency: '',
+    contactName: '',
+    rxGroupListName: '',
+    location: null,
+    useLocation: false,
+    number: '',
+    bandwidthKHz: '',
+    colourCode: '',
+    timeslot: '',
+    dmrId: '',
+    rxTone: '',
+    txTone: '',
+    squelch: '',
+    power: '',
+    rxOnly: '',
+    aprsConfigName: '',
+    voxEnabled: false,
+    transmitTimeout: '',
+    scanSkip: false,
+    vendorExtras: {},
+  };
+}
+
 export interface Channel {
   /** Stable internal identifier — not derived from vendor fields. */
   id: string;
@@ -15,10 +42,26 @@ export interface Channel {
   rxFrequency: string;
   txFrequency: string;
   contactName: string;
+  /** OpenGD77 `TG List` — RX group list name (vendor wire). */
   rxGroupListName: string;
   location: GeoPoint | null;
   useLocation: boolean;
   number: string;
+  bandwidthKHz: string;
+  colourCode: string;
+  timeslot: string;
+  dmrId: string;
+  rxTone: string;
+  txTone: string;
+  squelch: string;
+  power: string;
+  rxOnly: string;
+  aprsConfigName: string;
+  voxEnabled: boolean;
+  transmitTimeout: string;
+  scanSkip: boolean;
+  /** OpenGD77-only columns keyed by canonical CSV header name. */
+  vendorExtras: Record<string, string>;
 }
 
 export interface Zone {
@@ -30,25 +73,25 @@ export interface Zone {
   sourceMemberNames: string[];
 }
 
-/** Stub — OpenGD77 adapter does not populate yet. */
 export interface TalkGroup {
   id: string;
   name: string;
   number: string;
+  timeslotOverride: string;
 }
 
-/** Stub — OpenGD77 adapter does not populate yet. */
-export interface TgList {
+/** RX group list — members are vendor wire names from Contacts.csv (groups and/or privates). */
+export interface RxGroupList {
   id: string;
   name: string;
-  memberContactNames: string[];
+  sourceMemberNames: string[];
 }
 
-/** Stub — OpenGD77 adapter does not populate yet. */
 export interface Contact {
   id: string;
   name: string;
   number: string;
+  timeslotOverride: string;
 }
 
 export interface CodeplugMeta {
@@ -61,12 +104,12 @@ export interface Codeplug {
   channels: Channel[];
   zones: Zone[];
   talkGroups: TalkGroup[];
-  tgLists: TgList[];
+  rxGroupLists: RxGroupList[];
   contacts: Contact[];
   meta: CodeplugMeta;
 }
 
-export const CODEPLUG_SCHEMA_VERSION = 1;
+export const CODEPLUG_SCHEMA_VERSION = 2;
 
 let idGenerator: () => string = () => crypto.randomUUID();
 
@@ -90,7 +133,7 @@ export function emptyCodeplug(): Codeplug {
     channels: [],
     zones: [],
     talkGroups: [],
-    tgLists: [],
+    rxGroupLists: [],
     contacts: [],
     meta: {
       schemaVersion: CODEPLUG_SCHEMA_VERSION,

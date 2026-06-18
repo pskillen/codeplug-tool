@@ -100,6 +100,36 @@ describe('codeplugStorage', () => {
     expect(isValidProject({ ...project, name: 1 })).toBe(false);
   });
 
+  it('migrates v1 codeplugs with tgLists to rxGroupLists', () => {
+    const v1 = {
+      channels: [],
+      zones: [],
+      talkGroups: [],
+      tgLists: [{ id: 'tg-1', name: 'Scotland', memberContactNames: ['Scotland TS1'] }],
+      contacts: [],
+      meta: { schemaVersion: 1, importedAt: null, sourceFiles: [] },
+    };
+    const json = JSON.stringify({
+      version: CODEPLUG_STORAGE_VERSION,
+      activeProjectId: null,
+      projects: [
+        {
+          id: 'p1',
+          name: 'Legacy',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+          codeplug: v1,
+        },
+      ],
+    });
+
+    const state = deserializeProjects(json);
+    expect(state?.projects[0].codeplug.meta.schemaVersion).toBe(2);
+    expect(state?.projects[0].codeplug.rxGroupLists).toEqual([
+      { id: 'tg-1', name: 'Scotland', sourceMemberNames: ['Scotland TS1'] },
+    ]);
+  });
+
   it('isPersistableProjects is false for an empty set', () => {
     expect(isPersistableProjects({ activeProjectId: null, projects: [] })).toBe(false);
     expect(isPersistableProjects(makeSampleProjectsState())).toBe(true);
