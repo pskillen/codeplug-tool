@@ -74,20 +74,24 @@ export default function ZoneMemberPicker({
   selectedIds,
   onChange,
 }: ZoneMemberPickerProps) {
-  const [filter, setFilter] = useState('');
+  const [availableFilter, setAvailableFilter] = useState('');
+  const [inZoneFilter, setInZoneFilter] = useState('');
   const [availableSelected, setAvailableSelected] = useState<string[]>([]);
   const [inZoneSelected, setInZoneSelected] = useState<string[]>([]);
 
   const atCap = selectedIds.length >= OPENGD77_MAX_ZONE_MEMBERS;
   const selectedSet = new Set(selectedIds);
-  const filterLower = filter.trim().toLowerCase();
+  const availableFilterLower = availableFilter.trim().toLowerCase();
+  const inZoneFilterLower = inZoneFilter.trim().toLowerCase();
 
   const availableChannels = useMemo(
     () =>
       sortByName(channels).filter(
-        (ch) => !selectedSet.has(ch.id) && (!filterLower || ch.name.toLowerCase().includes(filterLower)),
+        (ch) =>
+          !selectedSet.has(ch.id) &&
+          (!availableFilterLower || ch.name.toLowerCase().includes(availableFilterLower)),
       ),
-    [channels, selectedIds, filterLower],
+    [channels, selectedIds, availableFilterLower],
   );
 
   const inZoneChannels = useMemo(
@@ -95,8 +99,10 @@ export default function ZoneMemberPicker({
       selectedIds
         .map((id) => channels.find((ch) => ch.id === id))
         .filter((ch): ch is Channel => ch != null)
-        .filter((ch) => !filterLower || ch.name.toLowerCase().includes(filterLower)),
-    [channels, selectedIds, filterLower],
+        .filter(
+          (ch) => !inZoneFilterLower || ch.name.toLowerCase().includes(inZoneFilterLower),
+        ),
+    [channels, selectedIds, inZoneFilterLower],
   );
 
   const toggleAvailable = (id: string) => {
@@ -141,15 +147,14 @@ export default function ZoneMemberPicker({
         {selectedIds.length} / {OPENGD77_MAX_ZONE_MEMBERS} members
       </Text>
 
-      <TextInput
-        label="Filter channels"
-        placeholder="Search by name…"
-        value={filter}
-        onChange={(e) => setFilter(e.currentTarget.value)}
-      />
-
       <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
         <Stack gap="xs">
+          <TextInput
+            label="Filter available"
+            placeholder="Search by name…"
+            value={availableFilter}
+            onChange={(e) => setAvailableFilter(e.currentTarget.value)}
+          />
           <Text size="sm" fw={500}>
             Available
           </Text>
@@ -183,6 +188,12 @@ export default function ZoneMemberPicker({
         </Stack>
 
         <Stack gap="xs">
+          <TextInput
+            label="Filter in zone"
+            placeholder="Search by name…"
+            value={inZoneFilter}
+            onChange={(e) => setInZoneFilter(e.currentTarget.value)}
+          />
           <Text size="sm" fw={500}>
             In zone (export order)
           </Text>
