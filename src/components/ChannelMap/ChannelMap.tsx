@@ -368,7 +368,7 @@ export default function ChannelMap() {
   return (
     <div className="channel-map">
       <aside className="channel-map-sidebar">
-        <Title order={3}>OpenGD77 channel map</Title>
+        <Title order={3}>Channel map</Title>
 
         {tileConfig.fallback ? (
           <Alert color="yellow">
