@@ -6,11 +6,11 @@ Multi-select channel membership editor for zone create/edit forms. Preserves mem
 
 ## Props
 
-| Prop | Type | Notes |
-| --- | --- | --- |
-| `channels` | `Channel[]` | Project channels to pick from |
-| `selectedIds` | `string[]` | Ordered member channel ids |
-| `onChange` | `(ids: string[]) => void` | Updated selection |
+| Prop          | Type                      | Notes                         |
+| ------------- | ------------------------- | ----------------------------- |
+| `channels`    | `Channel[]`               | Project channels to pick from |
+| `selectedIds` | `string[]`                | Ordered member channel ids    |
+| `onChange`    | `(ids: string[]) => void` | Updated selection             |
 
 ## Behaviour
 

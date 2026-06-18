@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { bandFromChannel, bandFromFrequencyMhz, formatOffsetMhz, frequencyOffsetMhz } from './bands.ts';
+import {
+  bandFromChannel,
+  bandFromFrequencyMhz,
+  formatOffsetMhz,
+  frequencyOffsetMhz,
+} from './bands.ts';
 
 describe('bands', () => {
   it('classifies 2m and 70cm', () => {

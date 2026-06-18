@@ -16,6 +16,12 @@ export default function BandPill({ band, size = 'sm' }: BandPillProps) {
   );
 }
 
-export function BandPillForChannel({ channel, size }: { channel: Channel; size?: BandPillProps['size'] }) {
+export function BandPillForChannel({
+  channel,
+  size,
+}: {
+  channel: Channel;
+  size?: BandPillProps['size'];
+}) {
   return <BandPill band={bandFromChannel(channel.rxFrequency, channel.txFrequency)} size={size} />;
 }

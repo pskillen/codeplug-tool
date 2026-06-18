@@ -10,11 +10,25 @@ export interface BandDefinition {
 }
 
 export const UK_BANDS: BandDefinition[] = [
-  { id: '136khz', label: '136 kHz', minMhz: 0.1357, maxMhz: 0.1378, color: '#6741d9', mantine: 'violet.7' },
+  {
+    id: '136khz',
+    label: '136 kHz',
+    minMhz: 0.1357,
+    maxMhz: 0.1378,
+    color: '#6741d9',
+    mantine: 'violet.7',
+  },
   { id: '600m', label: '600 m', minMhz: 0.472, maxMhz: 0.479, color: '#1098ad', mantine: 'cyan.7' },
   { id: '160m', label: '160 m', minMhz: 1.81, maxMhz: 2.0, color: '#ae3ec9', mantine: 'grape.6' },
   { id: '80m', label: '80 m', minMhz: 3.5, maxMhz: 3.8, color: '#4263eb', mantine: 'indigo.6' },
-  { id: '60m', label: '60 m', minMhz: 5.2585, maxMhz: 5.4065, color: '#f59f00', mantine: 'yellow.7' },
+  {
+    id: '60m',
+    label: '60 m',
+    minMhz: 5.2585,
+    maxMhz: 5.4065,
+    color: '#f59f00',
+    mantine: 'yellow.7',
+  },
   { id: '40m', label: '40 m', minMhz: 7.0, maxMhz: 7.2, color: '#2f9e44', mantine: 'green.7' },
   { id: '30m', label: '30 m', minMhz: 10.1, maxMhz: 10.15, color: '#12b886', mantine: 'teal.6' },
   { id: '20m', label: '20 m', minMhz: 14.0, maxMhz: 14.35, color: '#0ca678', mantine: 'teal.7' },
@@ -31,7 +45,14 @@ export const UK_BANDS: BandDefinition[] = [
   { id: '9cm', label: '9 cm', minMhz: 3400, maxMhz: 3475, color: '#495057', mantine: 'gray.7' },
   { id: '6cm', label: '6 cm', minMhz: 5650, maxMhz: 5850, color: '#343a40', mantine: 'gray.8' },
   { id: '3cm', label: '3 cm', minMhz: 10000, maxMhz: 10500, color: '#212529', mantine: 'gray.9' },
-  { id: '12cm', label: '1.2 cm', minMhz: 24000, maxMhz: 24250, color: '#495057', mantine: 'gray.7' },
+  {
+    id: '12cm',
+    label: '1.2 cm',
+    minMhz: 24000,
+    maxMhz: 24250,
+    color: '#495057',
+    mantine: 'gray.7',
+  },
   { id: 'mm', label: 'mm+', minMhz: 47000, maxMhz: 300000, color: '#868e96', mantine: 'gray.6' },
 ];
 

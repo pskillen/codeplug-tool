@@ -23,9 +23,7 @@ export function validateChannel(
   if (!input.name.trim()) {
     issues.push({ field: 'name', message: 'Channel name is required', severity: 'error' });
   } else {
-    const duplicate = codeplug.channels.find(
-      (ch) => ch.name === input.name && ch.id !== channelId,
-    );
+    const duplicate = codeplug.channels.find((ch) => ch.name === input.name && ch.id !== channelId);
     if (duplicate) {
       issues.push({
         field: 'name',

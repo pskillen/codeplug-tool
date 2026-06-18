@@ -126,9 +126,7 @@ export function updateZone(
   zoneId: string,
   patch: Partial<ZoneInput>,
 ): Codeplug {
-  const zones = codeplug.zones.map((zone) =>
-    zone.id === zoneId ? { ...zone, ...patch } : zone,
-  );
+  const zones = codeplug.zones.map((zone) => (zone.id === zoneId ? { ...zone, ...patch } : zone));
   return { ...codeplug, zones };
 }
 

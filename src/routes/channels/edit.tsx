@@ -80,9 +80,7 @@ function channelToForm(ch: Channel): ChannelFormValues {
     useLocation: ch.useLocation,
     hideFromMap: ch.hideFromMap,
     locator:
-      ch.location && ch.useLocation
-        ? coordsToLocator(ch.location.lat, ch.location.lon, 6)
-        : '',
+      ch.location && ch.useLocation ? coordsToLocator(ch.location.lat, ch.location.lon, 6) : '',
   };
 }
 
@@ -247,7 +245,13 @@ export default function ChannelEdit() {
     <ReportPage title={isNew ? 'New channel' : `Edit ${existing?.name ?? 'channel'}`}>
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
-          <Button component={Link} to={isNew ? '/channels' : `/channels/${existing?.id}`} variant="subtle" size="compact-sm" style={{ alignSelf: 'flex-start' }}>
+          <Button
+            component={Link}
+            to={isNew ? '/channels' : `/channels/${existing?.id}`}
+            variant="subtle"
+            size="compact-sm"
+            style={{ alignSelf: 'flex-start' }}
+          >
             ← Back
           </Button>
 
@@ -259,7 +263,12 @@ export default function ChannelEdit() {
 
           <Stack gap="sm">
             <Title order={4}>Identity</Title>
-            <TextInput label="Name" required value={values.name} onChange={(e) => set('name', e.currentTarget.value)} />
+            <TextInput
+              label="Name"
+              required
+              value={values.name}
+              onChange={(e) => set('name', e.currentTarget.value)}
+            />
             <Select
               label="Mode"
               data={[
@@ -270,40 +279,88 @@ export default function ChannelEdit() {
               value={values.mode}
               onChange={(v) => set('mode', mapChannelMode(v ?? 'digital'))}
             />
-            <TextInput label="Channel number" value={values.number} onChange={(e) => set('number', e.currentTarget.value)} />
+            <TextInput
+              label="Channel number"
+              value={values.number}
+              onChange={(e) => set('number', e.currentTarget.value)}
+            />
           </Stack>
 
           <Stack gap="sm">
             <Title order={4}>RF</Title>
             <Group grow>
-              <TextInput label="RX MHz" value={values.rxFrequency} onChange={(e) => set('rxFrequency', e.currentTarget.value)} />
-              <TextInput label="TX MHz" value={values.txFrequency} onChange={(e) => set('txFrequency', e.currentTarget.value)} />
+              <TextInput
+                label="RX MHz"
+                value={values.rxFrequency}
+                onChange={(e) => set('rxFrequency', e.currentTarget.value)}
+              />
+              <TextInput
+                label="TX MHz"
+                value={values.txFrequency}
+                onChange={(e) => set('txFrequency', e.currentTarget.value)}
+              />
             </Group>
             {offset !== null ? (
               <Text size="sm" c="dimmed">
                 Offset: {formatOffsetMhz(offset)}
               </Text>
             ) : null}
-            <TextInput label="Bandwidth (kHz)" value={values.bandwidthKHz} onChange={(e) => set('bandwidthKHz', e.currentTarget.value)} />
-            <TextInput label="Power" value={values.power} onChange={(e) => set('power', e.currentTarget.value)} />
+            <TextInput
+              label="Bandwidth (kHz)"
+              value={values.bandwidthKHz}
+              onChange={(e) => set('bandwidthKHz', e.currentTarget.value)}
+            />
+            <TextInput
+              label="Power"
+              value={values.power}
+              onChange={(e) => set('power', e.currentTarget.value)}
+            />
             {isAnalogue ? (
               <Group grow>
-                <TextInput label="RX tone" value={values.rxTone} onChange={(e) => set('rxTone', e.currentTarget.value)} />
-                <TextInput label="TX tone" value={values.txTone} onChange={(e) => set('txTone', e.currentTarget.value)} />
+                <TextInput
+                  label="RX tone"
+                  value={values.rxTone}
+                  onChange={(e) => set('rxTone', e.currentTarget.value)}
+                />
+                <TextInput
+                  label="TX tone"
+                  value={values.txTone}
+                  onChange={(e) => set('txTone', e.currentTarget.value)}
+                />
               </Group>
             ) : null}
-            <TextInput label="Squelch" value={values.squelch} onChange={(e) => set('squelch', e.currentTarget.value)} />
-            <TextInput label="RX only" value={values.rxOnly} onChange={(e) => set('rxOnly', e.currentTarget.value)} />
+            <TextInput
+              label="Squelch"
+              value={values.squelch}
+              onChange={(e) => set('squelch', e.currentTarget.value)}
+            />
+            <TextInput
+              label="RX only"
+              value={values.rxOnly}
+              onChange={(e) => set('rxOnly', e.currentTarget.value)}
+            />
           </Stack>
 
           {isDigital ? (
             <Stack gap="sm">
               <Title order={4}>DMR</Title>
               <Group grow>
-                <TextInput label="Colour code" value={values.colourCode} onChange={(e) => set('colourCode', e.currentTarget.value)} />
-                <TextInput label="Timeslot" value={values.timeslot} onChange={(e) => set('timeslot', e.currentTarget.value)} />
+                <TextInput
+                  label="Colour code"
+                  value={values.colourCode}
+                  onChange={(e) => set('colourCode', e.currentTarget.value)}
+                />
+                <TextInput
+                  label="Timeslot"
+                  value={values.timeslot}
+                  onChange={(e) => set('timeslot', e.currentTarget.value)}
+                />
               </Group>
-              <TextInput label="DMR ID" value={values.dmrId} onChange={(e) => set('dmrId', e.currentTarget.value)} />
+              <TextInput
+                label="DMR ID"
+                value={values.dmrId}
+                onChange={(e) => set('dmrId', e.currentTarget.value)}
+              />
               <Select
                 label="TX contact"
                 data={contactOptions}
@@ -361,8 +418,16 @@ export default function ChannelEdit() {
                 decimalScale={6}
               />
             </Group>
-            <Checkbox label="Use Location" checked={values.useLocation} onChange={(e) => set('useLocation', e.currentTarget.checked)} />
-            <Checkbox label="Hide from map" checked={values.hideFromMap} onChange={(e) => set('hideFromMap', e.currentTarget.checked)} />
+            <Checkbox
+              label="Use Location"
+              checked={values.useLocation}
+              onChange={(e) => set('useLocation', e.currentTarget.checked)}
+            />
+            <Checkbox
+              label="Hide from map"
+              checked={values.hideFromMap}
+              onChange={(e) => set('hideFromMap', e.currentTarget.checked)}
+            />
             <Text size="xs" c="dimmed">
               Click the map to set coordinates.
             </Text>
@@ -377,15 +442,35 @@ export default function ChannelEdit() {
 
           <Stack gap="sm">
             <Title order={4}>Scan / APRS</Title>
-            <TextInput label="APRS config" value={values.aprsConfigName} onChange={(e) => set('aprsConfigName', e.currentTarget.value)} />
-            <TextInput label="Transmit timeout" value={values.transmitTimeout} onChange={(e) => set('transmitTimeout', e.currentTarget.value)} />
-            <Checkbox label="Scan skip" checked={values.scanSkip} onChange={(e) => set('scanSkip', e.currentTarget.checked)} />
-            <Checkbox label="VOX" checked={values.voxEnabled} onChange={(e) => set('voxEnabled', e.currentTarget.checked)} />
+            <TextInput
+              label="APRS config"
+              value={values.aprsConfigName}
+              onChange={(e) => set('aprsConfigName', e.currentTarget.value)}
+            />
+            <TextInput
+              label="Transmit timeout"
+              value={values.transmitTimeout}
+              onChange={(e) => set('transmitTimeout', e.currentTarget.value)}
+            />
+            <Checkbox
+              label="Scan skip"
+              checked={values.scanSkip}
+              onChange={(e) => set('scanSkip', e.currentTarget.checked)}
+            />
+            <Checkbox
+              label="VOX"
+              checked={values.voxEnabled}
+              onChange={(e) => set('voxEnabled', e.currentTarget.checked)}
+            />
           </Stack>
 
           <Group>
             <Button type="submit">Save</Button>
-            <Button variant="default" component={Link} to={isNew ? '/channels' : `/channels/${existing?.id}`}>
+            <Button
+              variant="default"
+              component={Link}
+              to={isNew ? '/channels' : `/channels/${existing?.id}`}
+            >
               Cancel
             </Button>
           </Group>

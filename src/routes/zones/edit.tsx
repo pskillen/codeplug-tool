@@ -34,11 +34,7 @@ export default function ZoneEdit() {
     e.preventDefault();
     setFormError(null);
 
-    const issues = validateZone(
-      { name, memberChannelIds: memberIds },
-      codeplug,
-      existing?.id,
-    );
+    const issues = validateZone({ name, memberChannelIds: memberIds }, codeplug, existing?.id);
     if (hasValidationErrors(issues)) {
       setFormError(issues.find((i) => i.severity === 'error')?.message ?? 'Validation failed');
       return;
@@ -80,7 +76,12 @@ export default function ZoneEdit() {
             </Text>
           ) : null}
 
-          <TextInput label="Zone name" required value={name} onChange={(e) => setName(e.currentTarget.value)} />
+          <TextInput
+            label="Zone name"
+            required
+            value={name}
+            onChange={(e) => setName(e.currentTarget.value)}
+          />
 
           <Stack gap="sm">
             <Title order={4}>Member channels</Title>
@@ -93,7 +94,11 @@ export default function ZoneEdit() {
 
           <Group>
             <Button type="submit">Save</Button>
-            <Button variant="default" component={Link} to={isNew ? '/zones' : `/zones/${existing?.id}`}>
+            <Button
+              variant="default"
+              component={Link}
+              to={isNew ? '/zones' : `/zones/${existing?.id}`}
+            >
               Cancel
             </Button>
           </Group>

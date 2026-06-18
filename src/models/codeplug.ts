@@ -27,10 +27,10 @@ export function channelFieldDefaults(): Omit<Channel, 'id' | 'name' | 'callsign'
     aprsConfigName: '',
     voxEnabled: false,
     transmitTimeout: '',
-  scanSkip: false,
-  hideFromMap: false,
-  vendorExtras: {},
-};
+    scanSkip: false,
+    hideFromMap: false,
+    vendorExtras: {},
+  };
 }
 
 export interface Channel {

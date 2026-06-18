@@ -69,29 +69,40 @@ export default function ChannelsList() {
 
   const { skipped } = applyFilters(channels, { requireUseLocation: true, skipZero: true });
 
-  const bandOptions = [...new Set(channels.map((ch) => bandFromChannel(ch.rxFrequency, ch.txFrequency)?.id).filter(Boolean))].map(
-    (id) => {
-      const band = bandFromChannel(
-        channels.find((c) => bandFromChannel(c.rxFrequency, c.txFrequency)?.id === id)?.rxFrequency ?? '',
-      );
-      return { value: id!, label: band?.label ?? id! };
+  const bandOptions = [
+    ...new Set(
+      channels.map((ch) => bandFromChannel(ch.rxFrequency, ch.txFrequency)?.id).filter(Boolean),
+    ),
+  ].map((id) => {
+    const band = bandFromChannel(
+      channels.find((c) => bandFromChannel(c.rxFrequency, c.txFrequency)?.id === id)?.rxFrequency ??
+        '',
+    );
+    return { value: id!, label: band?.label ?? id! };
+  });
+
+  const optionalColumnDefs = OPTIONAL_COLUMNS.filter((c) => visibleCols.includes(c.key)).map(
+    (col) => {
+      if (col.key === 'contact') {
+        return { key: col.key, header: col.header, render: (ch: Channel) => ch.contactName || '—' };
+      }
+      if (col.key === 'rgl') {
+        return {
+          key: col.key,
+          header: col.header,
+          render: (ch: Channel) => ch.rxGroupListName || '—',
+        };
+      }
+      return {
+        key: col.key,
+        header: col.header,
+        render: (ch: Channel) =>
+          ch.location && ch.useLocation
+            ? coordsToLocator(ch.location.lat, ch.location.lon, 6)
+            : '—',
+      };
     },
   );
-
-  const optionalColumnDefs = OPTIONAL_COLUMNS.filter((c) => visibleCols.includes(c.key)).map((col) => {
-    if (col.key === 'contact') {
-      return { key: col.key, header: col.header, render: (ch: Channel) => ch.contactName || '—' };
-    }
-    if (col.key === 'rgl') {
-      return { key: col.key, header: col.header, render: (ch: Channel) => ch.rxGroupListName || '—' };
-    }
-    return {
-      key: col.key,
-      header: col.header,
-      render: (ch: Channel) =>
-        ch.location && ch.useLocation ? coordsToLocator(ch.location.lat, ch.location.lon, 6) : '—',
-    };
-  });
 
   const saveColumns = (cols: string[]) => {
     setVisibleCols(cols);

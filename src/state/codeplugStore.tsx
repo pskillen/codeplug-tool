@@ -22,11 +22,7 @@ import {
 } from '../lib/codeplugMutations.ts';
 import type { ImportResult } from '../lib/import/types.ts';
 import { emptyCodeplug, newId, type Codeplug, type Zone } from '../models/codeplug.ts';
-import {
-  defaultProjectName,
-  newProject,
-  type CodeplugProject,
-} from '../models/codeplugProject.ts';
+import { defaultProjectName, newProject, type CodeplugProject } from '../models/codeplugProject.ts';
 import {
   clearProjectsStorage,
   loadProjectsFromStorage,
@@ -204,7 +200,9 @@ function projectsReducer(state: ProjectsState, action: ProjectsAction): Projects
       return updateActiveCodeplug(state, (cp) => addZoneMutation(cp, action.input));
 
     case 'UPDATE_ZONE':
-      return updateActiveCodeplug(state, (cp) => updateZoneMutation(cp, action.zoneId, action.patch));
+      return updateActiveCodeplug(state, (cp) =>
+        updateZoneMutation(cp, action.zoneId, action.patch),
+      );
 
     case 'DELETE_ZONE':
       return updateActiveCodeplug(state, (cp) => deleteZoneMutation(cp, action.zoneId));
@@ -282,13 +280,10 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
     setPersistenceError(null);
   }, []);
 
-  const applyImport = useCallback(
-    (result: ImportResult) => {
-      setPersistenceError(null);
-      dispatch({ type: 'APPLY_IMPORT', result });
-    },
-    [],
-  );
+  const applyImport = useCallback((result: ImportResult) => {
+    setPersistenceError(null);
+    dispatch({ type: 'APPLY_IMPORT', result });
+  }, []);
 
   const clear = useCallback(() => {
     setPersistenceError(null);

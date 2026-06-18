@@ -10,7 +10,12 @@ import {
   updateChannel,
   updateZone,
 } from './codeplugMutations.ts';
-import { channelFieldDefaults, emptyCodeplug, resetIdGenerator, setIdGenerator } from '../models/codeplug.ts';
+import {
+  channelFieldDefaults,
+  emptyCodeplug,
+  resetIdGenerator,
+  setIdGenerator,
+} from '../models/codeplug.ts';
 
 function makeChannel(id: string, name: string) {
   return {

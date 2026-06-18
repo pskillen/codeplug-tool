@@ -6,17 +6,17 @@ Displays a coloured pill for a UK amateur band derived from channel RX/TX freque
 
 ## Props — `BandPill`
 
-| Prop | Type | Notes |
-| --- | --- | --- |
+| Prop   | Type                     | Notes                                           |
+| ------ | ------------------------ | ----------------------------------------------- |
 | `band` | `BandDefinition \| null` | From `bandFromChannel` / `bandFromFrequencyMhz` |
-| `size` | `'xs' \| 'sm' \| 'md'` | Mantine Badge size |
+| `size` | `'xs' \| 'sm' \| 'md'`   | Mantine Badge size                              |
 
 ## Props — `BandPillForChannel`
 
-| Prop | Type |
-| --- | --- |
-| `channel` | `Channel` |
-| `size` | optional Badge size |
+| Prop      | Type                |
+| --------- | ------------------- |
+| `channel` | `Channel`           |
+| `size`    | optional Badge size |
 
 ## Related
 

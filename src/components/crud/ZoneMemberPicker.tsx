@@ -63,16 +63,20 @@ export default function ZoneMemberPicker({
         <Stack gap={4}>
           {selectedChannels.map((ch) => (
             <Stack key={ch.id} gap={2}>
-              <Checkbox
-                label={ch.name}
-                checked
-                onChange={() => toggle(ch.id)}
-              />
+              <Checkbox label={ch.name} checked onChange={() => toggle(ch.id)} />
               <Text size="xs" c="dimmed" ml="lg">
-                <button type="button" onClick={() => moveUp(ch.id)} disabled={selectedIds[0] === ch.id}>
+                <button
+                  type="button"
+                  onClick={() => moveUp(ch.id)}
+                  disabled={selectedIds[0] === ch.id}
+                >
                   ↑
                 </button>{' '}
-                <button type="button" onClick={() => moveDown(ch.id)} disabled={selectedIds[selectedIds.length - 1] === ch.id}>
+                <button
+                  type="button"
+                  onClick={() => moveDown(ch.id)}
+                  disabled={selectedIds[selectedIds.length - 1] === ch.id}
+                >
                   ↓
                 </button>
               </Text>
