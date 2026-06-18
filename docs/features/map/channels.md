@@ -6,19 +6,20 @@ See the [map hub](README.md) for overall data flow and load order.
 
 ## Purpose
 
-Documents parsing, filtering, grouping, and rendering of OpenGD77 channel rows. Zone hulls reuse the same filtered channel set via `channelIndex`; see [zones.md](zones.md) for zone-specific behaviour.
+Documents filtering, grouping, and rendering of channels from the central codeplug store. Zone hulls reuse the same filtered channel set via id lookup; see [zones.md](zones.md) for zone-specific behaviour. CSV parsing lives in [import docs](../import/README.md); entity shapes in [data model](../data-model/README.md).
 
 ## Code anchors
 
 | Symbol / region | File | Role |
 | --- | --- | --- |
-| `COL` (header names) | `src/lib/csv.ts` | Header names for channel columns |
-| `parseCsv` | same | RFC-style CSV parser (quoted fields, BOM strip) |
-| `parseChannelsCsv` | same | Build channel objects from rows |
+| `parseChannels` | `src/lib/import/opengd77/parse.ts` | OpenGD77 Channels.csv → `Channel[]` |
+| `parseCsv` | `src/lib/csv.ts` | RFC-style CSV parser (quoted fields, BOM strip) |
 | `applyFilters` | `src/lib/channels.ts` | Plot vs skip by coordinates and `Use Location` |
 | `groupByCoords` | same | Optional merge at identical lat/lon |
+| `buildChannelById` | same | Plotted channels indexed by internal `id` |
+| `ImportPanel` | `src/components/ImportPanel/ImportPanel.tsx` | Multi-file / folder import UI |
+| `useCodeplug` | `src/state/codeplugStore.tsx` | Central codeplug state |
 | Marker rendering | `src/components/ChannelMap/ChannelMap.tsx` | react-leaflet `divIcon` markers + popups |
-| Map refresh | `ChannelMap.tsx` (useMemo) | Rebuild index, markers, then zone hulls |
 
 ## Inputs — `Channels.csv`
 
@@ -48,31 +49,33 @@ Tab characters inside cell values are stripped after trim.
 
 ### Parsed channel object (in memory)
 
+See [data model — Channel](../data-model/README.md#channel). Example:
+
 ```json
 {
+  "id": "550e8400-e29b-41d4-a716-446655440000",
   "number": "42",
   "name": "GB3CS Motherwell",
   "callsign": "GB3CS",
-  "type": "Analogue",
-  "rx": "430.92500",
-  "tx": "438.52500",
-  "contact": "None",
-  "tgList": "None",
-  "lat": 55.78,
-  "lon": -4.10,
+  "mode": "analogue",
+  "rxFrequency": "430.92500",
+  "txFrequency": "438.52500",
+  "contactName": "None",
+  "rxGroupListName": "None",
+  "location": { "lat": 55.78, "lon": -4.10 },
   "useLocation": true
 }
 ```
 
-`callsign` is the first whitespace-separated token of `Channel Name` (`extractCallsign`).
+`callsign` is the first whitespace-separated token of `name` (`extractCallsign`).
 
 ## UI controls
 
-Controls are Mantine inputs bound to React state in `ChannelMap.tsx` (no DOM ids).
+Controls are Mantine inputs bound to React state in `ChannelMap.tsx` (no DOM ids). Import is handled by `ImportPanel` (multi-file / folder).
 
-| Control label | State | Default | Effect |
+| Control | State / hook | Default | Effect |
 | --- | --- | --- | --- |
-| Channels file dropzone | `channels` (via `loadChannelsFile`) | — | Loads and parses `Channels.csv` |
+| Import panel | `useCodeplug()` | — | Loads Channels.csv and/or Zones.csv via import layer |
 | Only `Use Location = Yes` | `requireUseLocation` | on | Skips channels where CPS marked `Use Location` not `Yes` |
 | Skip 0,0 coordinates | `skipZero` | on | Skips channels at exactly `0, 0` |
 | Merge markers at same lat/lon | `dedupeCoords` | on | One marker per site; popup lists all co-located channels |
@@ -86,7 +89,7 @@ Changing any filter updates state; markers and zone hulls recompute reactively v
 
 A channel is **skipped** when:
 
-1. `lat` or `lon` is missing or not a finite number, or
+1. `location` is null or missing finite lat/lon, or
 2. **Skip 0,0** is on and both coordinates are exactly `0`, or
 3. **Only Use Location = Yes** is on and `useLocation` is false.
 
@@ -94,13 +97,13 @@ Skipped channels appear in the **Skipped channels** sidebar list (up to 200 rows
 
 ### Marker appearance
 
-| `Channel Type` | Colour | CSS variable |
+| `mode` | Colour | CSS variable |
 | --- | --- | --- |
-| `Analogue` / `Analog` | Yellow | `--analogue` `#f0c419` |
-| `Digital` | Red | `--digital` `#e03131` |
-| Other / empty | Purple | `--other` `#9c36b5` |
+| `analogue` | Yellow | `--analogue` `#f0c419` |
+| `digital` | Red | `--digital` `#e03131` |
+| `other` | Purple | `--other` `#9c36b5` |
 
-Merged groups use the **dominant** type: digital if at least half the co-located channels are `Digital`.
+Merged groups use the **dominant** mode: digital if at least half the co-located channels are `digital`.
 
 Markers use a `divIcon` with a dot and permanent label below. Merged sites use a slightly larger dot and a `+N` suffix on the label.
 
@@ -124,13 +127,13 @@ Initial map centre: `[56.5, -4.0]`, zoom `6` (before first load).
 | `opengd77-channel-map.mapboxToken` | Mapbox access token (optional) |
 | `opengd77-channel-map.tileProvider` | `osm` / `mapbox` / `mapbox-sat` |
 
-Channel CSV content is **not** persisted — reload the file after a page refresh.
+Channel CSV content persists in the **codeplug store** while navigating routes (`/#/` ↔ `/#/map`) but is **not** written to LocalStorage yet ([#9](https://github.com/pskillen/codeplug-tool/issues/9)).
 
 ## Manual verify
 
 1. Copy `Channels.csv` from an OpenGD77 export into `sample-exports/`.
 2. Run `npm run dev` and open `http://localhost:5173/codeplug-tool/#/map` (or the [live site](https://pskillen.github.io/codeplug-tool/#/map)).
-3. Load `Channels.csv` via dropzone or file picker.
+3. Import `Channels.csv` via the import panel (drop, choose files, or choose folder).
 4. Confirm markers appear for known repeaters; open popups for frequency/contact fields.
 5. Toggle **Skip 0,0** and **Use Location** — skipped list and marker count should update.
 6. Toggle **Merge same lat/lon** — co-located FM/DMR pairs should collapse to one marker when enabled.
@@ -139,11 +142,13 @@ Channel CSV content is **not** persisted — reload the file after a page refres
 ## Known gaps
 
 - No support for semicolon-delimited CPS exports (comma only in `parseCsv`).
-- Channel names must match zone references exactly — no fuzzy or callsign-only fallback.
+- Channel names must match zone references exactly at the import boundary — no fuzzy or callsign-only fallback.
 - No editing or write-back to CSV.
 - Delimiter/tab quirks in OpenGD77 exports beyond simple tab strip are not normalised.
 
 ## Related
 
 - [zones.md](zones.md) — zone hulls and `Zones.csv`
+- [import README](../import/README.md) — CSV import and adapters
+- [data model](../data-model/README.md) — internal entities
 - [map README](README.md) — hub and status table
