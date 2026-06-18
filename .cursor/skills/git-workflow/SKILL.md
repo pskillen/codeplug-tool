@@ -51,11 +51,14 @@ Create branches from **`origin/main`** unless the work explicitly depends on ano
 
 ## 3. Pre-commit Checks
 
-There is no formatter or test suite. Before committing:
+The SPA has lint, format, and test tooling. Before committing, run the checks relevant to your change:
 
-- Open changed HTML in a browser if behaviour changed
+- `npm run lint` and `npm run format:check` — ESLint + Prettier
+- `npm run test` — Vitest (`src/**/*.test.ts(x)`)
+- `npm run build` — type-check and Vite production build when touching build/config
+- `npm run dev` and exercise the affected route (e.g. `/#/map`) if behaviour changed
 - Confirm no secrets (Mapbox tokens, personal CSVs) are staged
-- Match existing patterns in the target tool file
+- Match existing patterns in the target component/module under `src/`
 
 ---
 
@@ -117,7 +120,7 @@ When work is ready:
 
 1. Open one PR in `pskillen/opengd77-map` via `user-github-personal` MCP
 2. Link the issue (`Closes #N`) when applicable
-3. Note which tool(s) changed and how to smoke-test locally (`tools/<name>/` or GitHub Pages URL)
+3. Note which part of the SPA changed and how to smoke-test locally (`npm run dev`, affected route, or the GitHub Pages URL)
 
 **PR description template:**
 
@@ -126,7 +129,8 @@ When work is ready:
 - …
 
 ## Test plan
-- [ ] Open `tools/<name>/` locally with sample Channels.csv / Zones.csv
+- [ ] `npm run lint && npm run test && npm run build`
+- [ ] `npm run dev`, exercise the affected route (e.g. `/#/map` with sample Channels.csv / Zones.csv)
 - [ ] …
 ```
 
@@ -138,7 +142,7 @@ When work is ready:
 |------|--------|
 | Plan | Issue for non-trivial work; link plan + feature docs |
 | Branch | `{num}/{author}/{slug}` or `{type}/{slug}` from `origin/main` |
-| Pre-commit | Browser smoke-test; no secrets in diff |
+| Pre-commit | `npm run lint/test/build`; dev-server smoke-test; no secrets in diff |
 | Commit | Conventional commits; atomic; Shell `working_directory` = repo root |
 | PR | One PR in this repo; link issue; describe manual test steps |
 | Deploy | Merge to `main`, then publish a full GitHub release (tag `v*`) → GitHub Pages |
