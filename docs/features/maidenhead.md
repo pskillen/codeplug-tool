@@ -21,6 +21,7 @@ Operators can convert locators and coordinates ad hoc without editing a channel:
 - Two-way live conversion with selectable precision (4/6/8/10)
 - Map click/drag to set coordinates (`MapLocationPicker`)
 - Address/postcode geocoding (Mapbox when Settings token is set; Photon as fallback or explicit choice)
+- Channel lookup from active codeplug (debounced autocomplete; applies channel coordinates when set)
 
 Channel map rendering is documented in [map/](map/README.md).
 
@@ -33,6 +34,7 @@ Channel map rendering is documented in [map/](map/README.md).
 | `src/routes/channels/edit.tsx` | Channel edit locator field |
 | `src/routes/channels/detail.tsx` | Channel detail locator display |
 | `src/routes/reference/maidenhead.tsx` | Standalone converter page |
+| `src/lib/channelLookup.ts` | Channel search helpers for converter |
 | `src/components/MapLocationPicker/` | Slim map picker for converter |
 
 ## Inputs and outputs

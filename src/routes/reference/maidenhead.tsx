@@ -1,10 +1,29 @@
-import { Button, Group, NumberInput, SegmentedControl, SimpleGrid, Stack, Text, TextInput, Title } from '@mantine/core';
+import {
+  Autocomplete,
+  Button,
+  Group,
+  Loader,
+  NumberInput,
+  SegmentedControl,
+  SimpleGrid,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core';
+import { useDebouncedValue } from '@mantine/hooks';
 import { useCallback, useMemo, useState } from 'react';
 import MapLocationPicker from '../../components/MapLocationPicker/MapLocationPicker.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
 import { useMapSettings } from '../../hooks/useMapSettings.ts';
 import { GeocodeError, geocodeQuery, type GeocodeProvider } from '../../lib/geocode.ts';
+import {
+  channelHasLocation,
+  channelOptionLabel,
+  filterChannelOptions,
+} from '../../lib/channelLookup.ts';
 import { coordsToLocator, isValidLocator, locatorToCoords } from '../../lib/maidenhead.ts';
+import { useCodeplug } from '../../state/codeplugStore.tsx';
 
 type LocatorPrecision = 4 | 6 | 8 | 10;
 
@@ -20,12 +39,15 @@ const GEOCODE_PROVIDER_OPTIONS: { value: GeocodeProvider; label: string }[] = [
   { value: 'photon', label: 'Photon (OSM)' },
 ];
 
+const CHANNEL_SEARCH_DEBOUNCE_MS = 500;
+
 function parseCoord(value: string | number): number | null {
   const n = typeof value === 'number' ? value : parseFloat(value);
   return Number.isFinite(n) ? n : null;
 }
 
 export default function MaidenheadConverter() {
+  const { codeplug } = useCodeplug();
   const { mapboxToken } = useMapSettings();
   const [locator, setLocator] = useState('');
   const [lat, setLat] = useState<string | number>('');
@@ -38,6 +60,22 @@ export default function MaidenheadConverter() {
   const [geocodeLoading, setGeocodeLoading] = useState(false);
   const [geocodeError, setGeocodeError] = useState<string | null>(null);
   const [geocodeLabel, setGeocodeLabel] = useState<string | null>(null);
+  const [channelSearch, setChannelSearch] = useState('');
+  const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
+  const [debouncedChannelSearch] = useDebouncedValue(channelSearch, CHANNEL_SEARCH_DEBOUNCE_MS);
+
+  const channelById = useMemo(
+    () => new Map(codeplug.channels.map((ch) => [ch.id, ch])),
+    [codeplug.channels],
+  );
+  const selectedChannel = selectedChannelId ? channelById.get(selectedChannelId) : undefined;
+  const selectedChannelHasLocation = selectedChannel ? channelHasLocation(selectedChannel) : false;
+  const channelOptionsLoading =
+    channelSearch.trim().length > 0 && channelSearch !== debouncedChannelSearch;
+  const channelOptions = useMemo(() => {
+    if (!debouncedChannelSearch.trim()) return [];
+    return filterChannelOptions(codeplug.channels, debouncedChannelSearch);
+  }, [debouncedChannelSearch, codeplug.channels]);
 
   const hasMapboxToken = mapboxToken.trim().length > 0;
 
@@ -122,6 +160,23 @@ export default function MaidenheadConverter() {
     } finally {
       setGeocodeLoading(false);
     }
+  };
+
+  const handleChannelSearchChange = (value: string) => {
+    setChannelSearch(value);
+    setSelectedChannelId(null);
+  };
+
+  const handleChannelOptionSubmit = (value: string) => {
+    setSelectedChannelId(value);
+    const ch = channelById.get(value);
+    if (ch) setChannelSearch(channelOptionLabel(ch));
+  };
+
+  const handleApplyChannelLocation = () => {
+    if (!selectedChannel?.location || !channelHasLocation(selectedChannel)) return;
+    const { lat: latN, lon: lonN } = selectedChannel.location;
+    applyCoords(latN, lonN);
   };
 
   return (
@@ -211,6 +266,37 @@ export default function MaidenheadConverter() {
                 {geocodeLabel}
               </Text>
             ) : null}
+
+            <Stack gap="sm">
+              <Title order={4}>Channel lookup</Title>
+              <Text size="sm" c="dimmed">
+                Search the active codeplug by channel name or callsign.
+              </Text>
+              <Group align="flex-end" grow>
+                <Autocomplete
+                  label="Channel"
+                  placeholder="Name or callsign"
+                  value={channelSearch}
+                  onChange={handleChannelSearchChange}
+                  onOptionSubmit={handleChannelOptionSubmit}
+                  data={channelOptions}
+                  rightSection={channelOptionsLoading ? <Loader size={18} /> : null}
+                  filter={({ options }) => options}
+                />
+                <Button
+                  onClick={handleApplyChannelLocation}
+                  disabled={!selectedChannel || !selectedChannelHasLocation}
+                  style={{ flexShrink: 0 }}
+                >
+                  Use location
+                </Button>
+              </Group>
+              {selectedChannel && !selectedChannelHasLocation ? (
+                <Text size="sm" c="dimmed">
+                  This channel has no coordinates set.
+                </Text>
+              ) : null}
+            </Stack>
           </Stack>
         </SimpleGrid>
 
