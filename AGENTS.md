@@ -21,7 +21,9 @@ This repo is a **Vite + React + TypeScript SPA** (Mantine UI, react-leaflet maps
 | `index.html` | Vite entry HTML |
 | `src/` | React app — routes, components, lib |
 | `src/components/ChannelMap/` | Channel map UI (react-leaflet) |
-| `src/lib/` | CSV parsing, filters, geometry helpers |
+| `src/models/` | Internal codeplug data models — [data-model](docs/features/data-model/README.md) |
+| `src/lib/import/` | CPS import adapters and registry — [import](docs/features/import/README.md) |
+| `src/state/` | Central codeplug store (persistence-ready) |
 | `package.json`, `vite.config.ts`, `tsconfig.json` | SPA build and tooling |
 | `docs/build/` | Build and deploy documentation |
 | `docs/build/spa/` | SPA migration progress and outstanding logs |
@@ -35,7 +37,7 @@ This repo is a **Vite + React + TypeScript SPA** (Mantine UI, react-leaflet maps
 OpenGD77 is the first-class CPS target. The channel map reads standard OpenGD77 CPS exports:
 
 - **`Channels.csv`** — `Channel Name`, `Channel Type`, `Latitude`, `Longitude`, `Use Location`, frequencies, DMR contact/TG list columns (matched by header name, not column index).
-- **`Zones.csv`** — `Zone Name`, `Channel1`…`Channel80` (member names must match `Channel Name` exactly).
+- **`Zones.csv`** — `Zone Name`, `Channel1`…`Channel80` (member names matched to channels at the import boundary; internal zones use channel ids). See [import docs](docs/features/import/README.md) and [data model](docs/features/data-model/README.md).
 
 Treat vendor CSV as a lossy interchange format at the edges; the goal is to convert it into vendor-agnostic internal models, with native **YAML** as the lossless round-trip format. Do not commit operator codeplug exports unless the user explicitly asks. Use `sample-exports/` (gitignored) for local testing.
 

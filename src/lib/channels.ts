@@ -1,6 +1,7 @@
-import type { Channel, Zone } from './csv.ts';
+import type { Channel, ChannelMode, Zone } from '../models/codeplug.ts';
 import type { LatLon } from './geo.ts';
 import { uniqueLatLon } from './geo.ts';
+import { buildNameToChannelId } from './codeplug.ts';
 
 export const CHANNEL_COLORS = {
   analogue: '#f0c419',
@@ -23,10 +24,9 @@ export interface ZoneMemberMissing {
   reason: string;
 }
 
-export function markerColor(type: string): string {
-  const t = (type || '').toLowerCase();
-  if (t === 'analogue' || t === 'analog') return CHANNEL_COLORS.analogue;
-  if (t === 'digital') return CHANNEL_COLORS.digital;
+export function markerColor(mode: ChannelMode): string {
+  if (mode === 'analogue') return CHANNEL_COLORS.analogue;
+  if (mode === 'digital') return CHANNEL_COLORS.digital;
   return CHANNEL_COLORS.other;
 }
 
@@ -39,9 +39,9 @@ export function markerLabel(group: Channel[], useFull: boolean): string {
   return useFull ? ch.name : ch.callsign;
 }
 
-export function dominantType(group: Channel[]): string {
-  const digital = group.filter((c) => c.type === 'Digital').length;
-  return digital >= group.length / 2 ? 'Digital' : 'Analogue';
+export function dominantMode(group: Channel[]): ChannelMode {
+  const digital = group.filter((c) => c.mode === 'digital').length;
+  return digital >= group.length / 2 ? 'digital' : 'analogue';
 }
 
 export function applyFilters(
@@ -53,8 +53,9 @@ export function applyFilters(
 
   for (const ch of channels) {
     let reason: string | null = null;
-    if (ch.lat == null || ch.lon == null) reason = 'missing coordinates';
-    else if (skipZero && ch.lat === 0 && ch.lon === 0) reason = '0,0 coordinates';
+    if (ch.location == null) reason = 'missing coordinates';
+    else if (skipZero && ch.location.lat === 0 && ch.location.lon === 0)
+      reason = '0,0 coordinates';
     else if (requireUseLocation && !ch.useLocation) reason = 'Use Location = No';
     if (reason) {
       skipped.push({ name: ch.name, reason });
@@ -69,52 +70,63 @@ export function groupByCoords(list: Channel[], merge: boolean): Channel[][] {
   if (!merge) return list.map((ch) => [ch]);
   const map = new Map<string, Channel[]>();
   for (const ch of list) {
-    const key = `${ch.lat!.toFixed(5)},${ch.lon!.toFixed(5)}`;
+    const key = `${ch.location!.lat.toFixed(5)},${ch.location!.lon.toFixed(5)}`;
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(ch);
   }
   return [...map.values()];
 }
 
-export function buildChannelIndex(plotted: Channel[]): Map<string, Channel> {
+export function buildChannelById(plotted: Channel[]): Map<string, Channel> {
   const index = new Map<string, Channel>();
   for (const ch of plotted) {
-    if (!index.has(ch.name)) index.set(ch.name, ch);
+    index.set(ch.id, ch);
   }
   return index;
 }
 
 export function zoneGeolocatedPoints(
   zone: Zone,
-  channelIndex: Map<string, Channel>,
+  plottedById: Map<string, Channel>,
+  allChannels: Channel[],
   { skipZero, requireUseLocation }: FilterOptions,
 ): { points: LatLon[]; missing: ZoneMemberMissing[] } {
   const points: LatLon[] = [];
   const missing: ZoneMemberMissing[] = [];
-  const seenNames = new Set<string>();
+  const seenIds = new Set<string>();
 
-  for (const memberName of zone.members) {
-    if (seenNames.has(memberName)) continue;
-    seenNames.add(memberName);
+  const nameToId = buildNameToChannelId(allChannels);
 
-    const ch = channelIndex.get(memberName);
-    if (!ch) {
+  for (const memberName of zone.sourceMemberNames) {
+    if (!nameToId.has(memberName)) {
       missing.push({ name: memberName, reason: 'not in Channels.csv' });
+    }
+  }
+
+  for (const memberId of zone.memberChannelIds) {
+    if (seenIds.has(memberId)) continue;
+    seenIds.add(memberId);
+
+    const ch = plottedById.get(memberId);
+    if (!ch) {
+      const name =
+        allChannels.find((c) => c.id === memberId)?.name ?? memberId;
+      missing.push({ name, reason: 'filtered out or missing coordinates' });
       continue;
     }
-    if (ch.lat == null || ch.lon == null) {
-      missing.push({ name: memberName, reason: 'no coordinates' });
+    if (ch.location == null) {
+      missing.push({ name: ch.name, reason: 'no coordinates' });
       continue;
     }
-    if (skipZero && ch.lat === 0 && ch.lon === 0) {
-      missing.push({ name: memberName, reason: '0,0 coordinates' });
+    if (skipZero && ch.location.lat === 0 && ch.location.lon === 0) {
+      missing.push({ name: ch.name, reason: '0,0 coordinates' });
       continue;
     }
     if (requireUseLocation && !ch.useLocation) {
-      missing.push({ name: memberName, reason: 'Use Location = No' });
+      missing.push({ name: ch.name, reason: 'Use Location = No' });
       continue;
     }
-    points.push([ch.lat, ch.lon]);
+    points.push([ch.location.lat, ch.location.lon]);
   }
   return { points: uniqueLatLon(points), missing };
 }

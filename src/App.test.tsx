@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import App from './App.tsx';
+import { CodeplugProvider } from './state/codeplugStore.tsx';
 import { theme } from './theme.ts';
 
 vi.mock('react-leaflet', () => ({
@@ -33,7 +34,9 @@ function renderApp(initialRoute = '/') {
   return render(
     <MantineProvider theme={theme} defaultColorScheme="dark">
       <MemoryRouter initialEntries={[initialRoute]}>
-        <App />
+        <CodeplugProvider>
+          <App />
+        </CodeplugProvider>
       </MemoryRouter>
     </MantineProvider>,
   );
@@ -48,7 +51,7 @@ describe('App', () => {
   it('renders the channel map sidebar on /map', () => {
     renderApp('/map');
     expect(screen.getByRole('heading', { name: 'OpenGD77 channel map' })).toBeInTheDocument();
-    expect(screen.getByText('Channels.csv', { selector: 'strong' })).toBeInTheDocument();
+    expect(screen.getByText('Channels.csv', { selector: 'code' })).toBeInTheDocument();
     expect(screen.getByTestId('map-container')).toBeInTheDocument();
   });
 });

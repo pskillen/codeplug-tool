@@ -1,6 +1,5 @@
 import {
   Alert,
-  Box,
   Button,
   Checkbox,
   Collapse,
@@ -14,7 +13,7 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import L from 'leaflet';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Circle,
   MapContainer,
@@ -26,20 +25,23 @@ import {
   Tooltip,
   useMap,
 } from 'react-leaflet';
+import ImportPanel from '../ImportPanel/ImportPanel.tsx';
 import {
   applyFilters,
-  buildChannelIndex,
+  buildChannelById,
   CHANNEL_COLORS,
-  dominantType,
+  dominantMode,
   groupByCoords,
   markerColor,
   markerLabel,
   zoneGeolocatedPoints,
   type FilterOptions,
 } from '../../lib/channels.ts';
-import { parseChannelsCsv, parseZonesCsv, type Channel, type Zone } from '../../lib/csv.ts';
 import { convexHullLatLon, zoneColor, type LatLon } from '../../lib/geo.ts';
 import { collectMapPoints, computeMapView } from '../../lib/mapView.ts';
+import type { Channel } from '../../models/codeplug.ts';
+import type { Zone } from '../../models/codeplug.ts';
+import { useCodeplug } from '../../state/codeplugStore.tsx';
 import { useDocumentLayoutReady } from '../../hooks/useDocumentLayoutReady.ts';
 import './ChannelMap.css';
 
@@ -47,6 +49,12 @@ const STORAGE_KEY_TOKEN = 'opengd77-channel-map.mapboxToken';
 const STORAGE_KEY_TILE = 'opengd77-channel-map.tileProvider';
 
 type TileProvider = 'osm' | 'mapbox' | 'mapbox-sat';
+
+function modeLabel(mode: Channel['mode']): string {
+  if (mode === 'digital') return 'Digital';
+  if (mode === 'analogue') return 'Analogue';
+  return 'Other';
+}
 
 interface ZoneHullData {
   zone: Zone;
@@ -115,22 +123,27 @@ function ChannelPopup({ group }: { group: Channel[] }) {
     <div style={{ minWidth: 180, maxWidth: 280 }}>
       <strong>{title}</strong>
       {group.map((ch) => {
-        const freq = ch.rx && ch.tx ? `${ch.rx} / ${ch.tx} MHz` : '';
+        const freq =
+          ch.rxFrequency && ch.txFrequency
+            ? `${ch.rxFrequency} / ${ch.txFrequency} MHz`
+            : '';
         const dmr =
-          ch.type === 'Digital'
+          ch.mode === 'digital'
             ? [
-                ch.contact && ch.contact !== 'None' ? `TX: ${ch.contact}` : null,
-                ch.tgList && ch.tgList !== 'None' ? `RX list: ${ch.tgList}` : null,
+                ch.contactName && ch.contactName !== 'None' ? `TX: ${ch.contactName}` : null,
+                ch.rxGroupListName && ch.rxGroupListName !== 'None'
+                  ? `RX list: ${ch.rxGroupListName}`
+                  : null,
               ]
                 .filter(Boolean)
                 .join(' · ')
             : '';
         return (
-          <div key={ch.name} style={{ marginBottom: '0.5rem' }}>
+          <div key={ch.id} style={{ marginBottom: '0.5rem' }}>
             <strong>{ch.name}</strong>
             <br />
             <span style={{ opacity: 0.85 }}>
-              {ch.type}
+              {modeLabel(ch.mode)}
               {freq ? ` · ${freq}` : ''}
             </span>
             {dmr ? (
@@ -214,56 +227,12 @@ function MapResizeFix() {
   return null;
 }
 
-function Dropzone({ label, onFile }: { label: React.ReactNode; onFile: (file: File) => void }) {
-  const [dragover, setDragover] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handleFile = (file: File | undefined) => {
-    if (file) onFile(file);
-  };
-
-  return (
-    <Box
-      className={`channel-map-dropzone${dragover ? ' dragover' : ''}`}
-      tabIndex={0}
-      onClick={() => inputRef.current?.click()}
-      onDragEnter={(e) => {
-        e.preventDefault();
-        setDragover(true);
-      }}
-      onDragOver={(e) => {
-        e.preventDefault();
-        setDragover(true);
-      }}
-      onDragLeave={(e) => {
-        e.preventDefault();
-        setDragover(false);
-      }}
-      onDrop={(e) => {
-        e.preventDefault();
-        setDragover(false);
-        handleFile(e.dataTransfer.files[0]);
-      }}
-    >
-      {label}
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".csv,text/csv"
-        hidden
-        onChange={(e) => {
-          handleFile(e.target.files?.[0]);
-          e.target.value = '';
-        }}
-      />
-    </Box>
-  );
-}
-
 export default function ChannelMap() {
   const mapLayoutReady = useDocumentLayoutReady();
-  const [channels, setChannels] = useState<Channel[]>([]);
-  const [zones, setZones] = useState<Zone[]>([]);
+  const { codeplug } = useCodeplug();
+  const channels = codeplug.channels;
+  const zones = codeplug.zones;
+
   const [requireUseLocation, setRequireUseLocation] = useState(true);
   const [skipZero, setSkipZero] = useState(true);
   const [dedupeCoords, setDedupeCoords] = useState(true);
@@ -276,7 +245,6 @@ export default function ChannelMap() {
   const [mapboxToken, setMapboxToken] = useState(
     () => localStorage.getItem(STORAGE_KEY_TOKEN) ?? '',
   );
-  const [error, setError] = useState<string | null>(null);
   const [skippedOpen, { toggle: toggleSkipped }] = useDisclosure(false);
   const [zonesOpen, { toggle: toggleZones }] = useDisclosure(false);
 
@@ -290,15 +258,20 @@ export default function ChannelMap() {
     [channels, filterOpts],
   );
 
-  const channelIndex = useMemo(() => buildChannelIndex(plotted), [plotted]);
+  const plottedById = useMemo(() => buildChannelById(plotted), [plotted]);
 
   const groups = useMemo(() => groupByCoords(plotted, dedupeCoords), [plotted, dedupeCoords]);
 
   const zoneHulls: ZoneHullData[] = useMemo(() => {
-    if (!zones.length || !showZoneHulls || !channelIndex.size) return [];
+    if (!zones.length || !showZoneHulls || !plottedById.size) return [];
 
     return zones.map((zone, index) => {
-      const { points, missing } = zoneGeolocatedPoints(zone, channelIndex, filterOpts);
+      const { points, missing } = zoneGeolocatedPoints(
+        zone,
+        plottedById,
+        channels,
+        filterOpts,
+      );
       const colors = zoneColor(index);
 
       if (points.length === 0) {
@@ -308,7 +281,7 @@ export default function ChannelMap() {
           points,
           missing,
           colors,
-          shapeNote: `no geolocated members (${zone.members.length} in zone)`,
+          shapeNote: `no geolocated members (${zone.sourceMemberNames.length} in zone)`,
           geometry: 'none' as const,
         };
       }
@@ -349,7 +322,7 @@ export default function ChannelMap() {
         hull,
       };
     });
-  }, [zones, showZoneHulls, channelIndex, filterOpts]);
+  }, [zones, showZoneHulls, plottedById, channels, filterOpts]);
 
   const tileConfig = useMemo(() => {
     const needsMapbox = tileProvider === 'mapbox' || tileProvider === 'mapbox-sat';
@@ -359,39 +332,6 @@ export default function ChannelMap() {
     }
     return { config: tileLayerConfig(tileProvider, token), fallback: false };
   }, [tileProvider, mapboxToken]);
-
-  const loadChannelsFile = useCallback((file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        setChannels(parseChannelsCsv(reader.result as string));
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
-      }
-    };
-    reader.readAsText(file);
-  }, []);
-
-  const loadZonesFile = useCallback(
-    (file: File) => {
-      if (!channels.length) {
-        setError('Load Channels.csv first so zone members can be resolved.');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          setZones(parseZonesCsv(reader.result as string));
-          setError(null);
-        } catch (err) {
-          setError(err instanceof Error ? err.message : String(err));
-        }
-      };
-      reader.readAsText(file);
-    },
-    [channels.length],
-  );
 
   const saveToken = () => {
     const t = mapboxToken.trim();
@@ -430,16 +370,6 @@ export default function ChannelMap() {
     <div className="channel-map">
       <aside className="channel-map-sidebar">
         <Title order={3}>OpenGD77 channel map</Title>
-        <Text size="sm" c="dimmed">
-          Load <code>Channels.csv</code>, then optionally <code>Zones.csv</code>, from an OpenGD77
-          CPS export. Zone convex hulls use the same coordinate filters as markers.
-        </Text>
-
-        {error ? (
-          <Alert color="red" onClose={() => setError(null)} withCloseButton>
-            {error}
-          </Alert>
-        ) : null}
 
         {tileConfig.fallback ? (
           <Alert color="yellow">
@@ -447,23 +377,7 @@ export default function ChannelMap() {
           </Alert>
         ) : null}
 
-        <Dropzone
-          label={
-            <>
-              Drop <strong>Channels.csv</strong> here or click to browse
-            </>
-          }
-          onFile={loadChannelsFile}
-        />
-
-        <Dropzone
-          label={
-            <>
-              Drop <strong>Zones.csv</strong> here (after channels)
-            </>
-          }
-          onFile={loadZonesFile}
-        />
+        <ImportPanel />
 
         <Fieldset legend="Filters">
           <Stack gap="xs">
@@ -574,7 +488,7 @@ export default function ChannelMap() {
               <ul className="channel-map-zones">
                 {zoneHulls.map((zh) => (
                   <li
-                    key={zh.zone.name}
+                    key={zh.zone.id}
                     className={zh.missing.length || zh.geometry === 'none' ? 'warn' : 'ok'}
                   >
                     {zh.zone.name} — {zh.shapeNote}
@@ -611,7 +525,7 @@ export default function ChannelMap() {
                     <div>
                       <strong>{zh.zone.name}</strong>
                       <br />
-                      {zh.zone.members.length} zone members · {zh.shapeNote}
+                      {zh.zone.sourceMemberNames.length} zone members · {zh.shapeNote}
                       {zh.missing.length ? (
                         <>
                           <br />
@@ -626,7 +540,7 @@ export default function ChannelMap() {
                   if (zh.geometry === 'circle') {
                     return (
                       <Circle
-                        key={zh.zone.name}
+                        key={zh.zone.id}
                         center={zh.points[0]}
                         radius={2500}
                         pathOptions={{
@@ -647,7 +561,7 @@ export default function ChannelMap() {
                   if (zh.geometry === 'line') {
                     return (
                       <Polyline
-                        key={zh.zone.name}
+                        key={zh.zone.id}
                         positions={zh.points}
                         pathOptions={{ color: zh.colors.stroke, weight: 3, opacity: 0.85 }}
                       >
@@ -661,7 +575,7 @@ export default function ChannelMap() {
 
                   return (
                     <Polygon
-                      key={zh.zone.name}
+                      key={zh.zone.id}
                       positions={zh.hull!}
                       pathOptions={{
                         color: zh.colors.stroke,
@@ -682,13 +596,13 @@ export default function ChannelMap() {
             {groups.map((group) => {
               const ch = group[0];
               const merged = group.length > 1;
-              const color = markerColor(merged ? dominantType(group) : ch.type);
+              const color = markerColor(merged ? dominantMode(group) : ch.mode);
               const label = markerLabel(group, fullChannelName);
-              const position: LatLon = [ch.lat!, ch.lon!];
+              const position: LatLon = [ch.location!.lat, ch.location!.lon];
 
               return (
                 <Marker
-                  key={`${position[0]}-${position[1]}-${ch.name}`}
+                  key={`${ch.id}-${position[0]}-${position[1]}`}
                   position={position}
                   icon={channelDivIcon(color, label, merged)}
                 >
