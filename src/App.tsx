@@ -22,7 +22,7 @@ function App() {
       <AppShell.Header>
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Text fw={600}>opengd77-map</Text>
+          <Text fw={600}>MM9PDY Codeplug Tool</Text>
         </Group>
       </AppShell.Header>
 

@@ -42,7 +42,7 @@ function renderApp(initialRoute = '/') {
 describe('App', () => {
   it('renders the home heading', () => {
     renderApp('/');
-    expect(screen.getByRole('heading', { name: 'opengd77-map' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'MM9PDY Codeplug Tool' })).toBeInTheDocument();
   });
 
   it('renders the channel map sidebar on /map', () => {
