@@ -26,7 +26,6 @@ import {
   Tooltip,
   useMap,
 } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
 import {
   applyFilters,
   buildChannelIndex,
@@ -41,6 +40,7 @@ import {
 import { parseChannelsCsv, parseZonesCsv, type Channel, type Zone } from '../../lib/csv.ts';
 import { convexHullLatLon, zoneColor, type LatLon } from '../../lib/geo.ts';
 import { collectMapPoints, computeMapView } from '../../lib/mapView.ts';
+import { useDocumentLayoutReady } from '../../hooks/useDocumentLayoutReady.ts';
 import './ChannelMap.css';
 
 const STORAGE_KEY_TOKEN = 'opengd77-channel-map.mapboxToken';
@@ -186,9 +186,29 @@ function MapResizeFix() {
   const map = useMap();
 
   useEffect(() => {
-    map.invalidateSize();
-    const frame = requestAnimationFrame(() => map.invalidateSize());
-    return () => cancelAnimationFrame(frame);
+    const container = map.getContainer();
+    const parent = container.parentElement;
+    if (!parent) return;
+
+    const refresh = () => {
+      if (document.readyState !== 'complete') return;
+      map.invalidateSize();
+    };
+
+    const onLoad = () => refresh();
+    if (document.readyState === 'complete') {
+      requestAnimationFrame(refresh);
+    } else {
+      window.addEventListener('load', onLoad, { once: true });
+    }
+
+    const observer = new ResizeObserver(() => refresh());
+    observer.observe(parent);
+
+    return () => {
+      window.removeEventListener('load', onLoad);
+      observer.disconnect();
+    };
   }, [map]);
 
   return null;
@@ -241,6 +261,7 @@ function Dropzone({ label, onFile }: { label: React.ReactNode; onFile: (file: Fi
 }
 
 export default function ChannelMap() {
+  const mapLayoutReady = useDocumentLayoutReady();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [requireUseLocation, setRequireUseLocation] = useState(true);
@@ -567,46 +588,81 @@ export default function ChannelMap() {
       </aside>
 
       <div className="channel-map-map">
-        <MapContainer center={[56.5, -4.0]} zoom={6} style={{ height: '100%', width: '100%' }}>
-          <MapResizeFix />
-          <TileLayer
-            key={`${tileProvider}-${mapboxToken}`}
-            url={tileConfig.config.url}
-            attribution={tileConfig.config.attribution}
-            maxZoom={tileConfig.config.maxZoom}
-            {...(tileConfig.config.tileSize != null
-              ? {
-                  tileSize: tileConfig.config.tileSize,
-                  zoomOffset: tileConfig.config.zoomOffset ?? -1,
-                }
-              : {})}
-          />
+        {mapLayoutReady ? (
+          <MapContainer center={[56.5, -4.0]} zoom={6} style={{ height: '100%', width: '100%' }}>
+            <MapResizeFix />
+            <TileLayer
+              key={`${tileProvider}-${mapboxToken}`}
+              url={tileConfig.config.url}
+              attribution={tileConfig.config.attribution}
+              maxZoom={tileConfig.config.maxZoom}
+              {...(tileConfig.config.tileSize != null
+                ? {
+                    tileSize: tileConfig.config.tileSize,
+                    zoomOffset: tileConfig.config.zoomOffset ?? -1,
+                  }
+                : {})}
+            />
 
-          {showZoneHulls
-            ? zoneHulls.map((zh) => {
-                if (zh.geometry === 'none') return null;
-                const popupContent = (
-                  <div>
-                    <strong>{zh.zone.name}</strong>
-                    <br />
-                    {zh.zone.members.length} zone members · {zh.shapeNote}
-                    {zh.missing.length ? (
-                      <>
-                        <br />
-                        <span style={{ opacity: 0.75 }}>
-                          {zh.missing.length} member(s) without coords
-                        </span>
-                      </>
-                    ) : null}
-                  </div>
-                );
+            {showZoneHulls
+              ? zoneHulls.map((zh) => {
+                  if (zh.geometry === 'none') return null;
+                  const popupContent = (
+                    <div>
+                      <strong>{zh.zone.name}</strong>
+                      <br />
+                      {zh.zone.members.length} zone members · {zh.shapeNote}
+                      {zh.missing.length ? (
+                        <>
+                          <br />
+                          <span style={{ opacity: 0.75 }}>
+                            {zh.missing.length} member(s) without coords
+                          </span>
+                        </>
+                      ) : null}
+                    </div>
+                  );
 
-                if (zh.geometry === 'circle') {
+                  if (zh.geometry === 'circle') {
+                    return (
+                      <Circle
+                        key={zh.zone.name}
+                        center={zh.points[0]}
+                        radius={2500}
+                        pathOptions={{
+                          color: zh.colors.stroke,
+                          fillColor: zh.colors.stroke,
+                          fillOpacity: 0.18,
+                          weight: 2,
+                        }}
+                      >
+                        <Tooltip sticky direction="center" className="zone-tooltip">
+                          {zh.zone.name}
+                        </Tooltip>
+                        <Popup>{popupContent}</Popup>
+                      </Circle>
+                    );
+                  }
+
+                  if (zh.geometry === 'line') {
+                    return (
+                      <Polyline
+                        key={zh.zone.name}
+                        positions={zh.points}
+                        pathOptions={{ color: zh.colors.stroke, weight: 3, opacity: 0.85 }}
+                      >
+                        <Tooltip sticky direction="center" className="zone-tooltip">
+                          {zh.zone.name}
+                        </Tooltip>
+                        <Popup>{popupContent}</Popup>
+                      </Polyline>
+                    );
+                  }
+
                   return (
-                    <Circle
+                    <Polygon
                       key={zh.zone.name}
-                      center={zh.points[0]}
-                      radius={2500}
+                      positions={zh.hull!}
                       pathOptions={{
                         color: zh.colors.stroke,
                         fillColor: zh.colors.stroke,
@@ -618,69 +674,36 @@ export default function ChannelMap() {
                         {zh.zone.name}
                       </Tooltip>
                       <Popup>{popupContent}</Popup>
-                    </Circle>
+                    </Polygon>
                   );
-                }
+                })
+              : null}
 
-                if (zh.geometry === 'line') {
-                  return (
-                    <Polyline
-                      key={zh.zone.name}
-                      positions={zh.points}
-                      pathOptions={{ color: zh.colors.stroke, weight: 3, opacity: 0.85 }}
-                    >
-                      <Tooltip sticky direction="center" className="zone-tooltip">
-                        {zh.zone.name}
-                      </Tooltip>
-                      <Popup>{popupContent}</Popup>
-                    </Polyline>
-                  );
-                }
+            {groups.map((group) => {
+              const ch = group[0];
+              const merged = group.length > 1;
+              const color = markerColor(merged ? dominantType(group) : ch.type);
+              const label = markerLabel(group, fullChannelName);
+              const position: LatLon = [ch.lat!, ch.lon!];
 
-                return (
-                  <Polygon
-                    key={zh.zone.name}
-                    positions={zh.hull!}
-                    pathOptions={{
-                      color: zh.colors.stroke,
-                      fillColor: zh.colors.stroke,
-                      fillOpacity: 0.18,
-                      weight: 2,
-                    }}
-                  >
-                    <Tooltip sticky direction="center" className="zone-tooltip">
-                      {zh.zone.name}
-                    </Tooltip>
-                    <Popup>{popupContent}</Popup>
-                  </Polygon>
-                );
-              })
-            : null}
+              return (
+                <Marker
+                  key={`${position[0]}-${position[1]}-${ch.name}`}
+                  position={position}
+                  icon={channelDivIcon(color, label, merged)}
+                >
+                  <Popup>
+                    <ChannelPopup group={group} />
+                  </Popup>
+                </Marker>
+              );
+            })}
 
-          {groups.map((group) => {
-            const ch = group[0];
-            const merged = group.length > 1;
-            const color = markerColor(merged ? dominantType(group) : ch.type);
-            const label = markerLabel(group, fullChannelName);
-            const position: LatLon = [ch.lat!, ch.lon!];
-
-            return (
-              <Marker
-                key={`${position[0]}-${position[1]}-${ch.name}`}
-                position={position}
-                icon={channelDivIcon(color, label, merged)}
-              >
-                <Popup>
-                  <ChannelPopup group={group} />
-                </Popup>
-              </Marker>
-            );
-          })}
-
-          {groups.length > 0 ? (
-            <FitMapBounds groups={groups} zoneHulls={zoneHulls} showZoneHulls={showZoneHulls} />
-          ) : null}
-        </MapContainer>
+            {groups.length > 0 ? (
+              <FitMapBounds groups={groups} zoneHulls={zoneHulls} showZoneHulls={showZoneHulls} />
+            ) : null}
+          </MapContainer>
+        ) : null}
       </div>
     </div>
   );

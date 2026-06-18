@@ -20,6 +20,12 @@ vi.mock('react-leaflet', () => ({
     fitBounds: vi.fn(),
     setView: vi.fn(),
     invalidateSize: vi.fn(),
+    getContainer: () => {
+      const parent = document.createElement('div');
+      const container = document.createElement('div');
+      parent.appendChild(container);
+      return container;
+    },
   }),
 }));
 
