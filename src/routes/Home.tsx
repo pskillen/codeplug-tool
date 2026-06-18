@@ -37,13 +37,13 @@ export default function Home() {
           <ImportDropzone
             onResult={(result) => {
               importNewProject(result);
-              navigate('/map');
+              navigate('/summary');
             }}
             persistenceError={persistenceError}
             onDismissPersistenceError={clearPersistenceError}
             hint={
               projects.length
-                ? 'Import creates a new codeplug and opens the channel map.'
+                ? 'Import creates a new codeplug and opens the summary.'
                 : 'Drop OpenGD77 CSV files or a whole export folder. Channels.csv, Zones.csv, Contacts.csv, and TG_Lists.csv are recognised; DTMF.csv and APRS.csv are skipped.'
             }
           />

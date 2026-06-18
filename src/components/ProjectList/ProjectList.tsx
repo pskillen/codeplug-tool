@@ -21,7 +21,7 @@ export default function ProjectList() {
 
   const openProject = (id: string) => {
     setActiveProject(id);
-    navigate('/map');
+    navigate('/summary');
   };
 
   const requestDelete = (project: CodeplugProject) => {

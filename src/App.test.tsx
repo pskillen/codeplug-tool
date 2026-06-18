@@ -51,12 +51,18 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: 'Import codeplug' })).toBeInTheDocument();
   });
 
-  it('renders the channel map on /map', () => {
-    renderApp('/map');
-    expect(screen.getByRole('heading', { name: 'Channel map' })).toBeInTheDocument();
-    expect(screen.getByTestId('map-container')).toBeInTheDocument();
-    expect(screen.queryByText('Active codeplug')).not.toBeInTheDocument();
-    expect(screen.queryByText('Drop CSV files or a folder here')).not.toBeInTheDocument();
+  it('renders the summary page on /summary', () => {
+    const project = newProject('Test repeaters');
+    localStorage.setItem(
+      CODEPLUG_STORAGE_KEY,
+      serializeProjects({ activeProjectId: project.id, projects: [project] }),
+    );
+
+    renderApp('/summary');
+
+    expect(screen.getByRole('heading', { name: 'Summary' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Channels', level: 3 })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Zones', level: 3 })).toBeInTheDocument();
   });
 
   it('shows app nav with active codeplug when a project is active', () => {
@@ -66,10 +72,24 @@ describe('App', () => {
       serializeProjects({ activeProjectId: project.id, projects: [project] }),
     );
 
-    renderApp('/map');
+    renderApp('/summary');
 
     expect(screen.getByText('Active codeplug')).toBeInTheDocument();
     expect(screen.getByText('Test repeaters')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Channel map' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Summary' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Channels' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Settings' })).toBeInTheDocument();
+  });
+
+  it('redirects /map to /channels', () => {
+    const project = newProject('Test repeaters');
+    localStorage.setItem(
+      CODEPLUG_STORAGE_KEY,
+      serializeProjects({ activeProjectId: project.id, projects: [project] }),
+    );
+
+    renderApp('/map');
+
+    expect(screen.getByRole('heading', { name: 'Channels' })).toBeInTheDocument();
   });
 });
