@@ -1,18 +1,44 @@
 import { AppShell, Burger, Group, NavLink, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Link, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import ActiveProjectBar from './components/ActiveProjectBar/ActiveProjectBar.tsx';
 import BuildFooter from './components/BuildFooter.tsx';
 import Home from './routes/Home.tsx';
-import Map from './routes/Map.tsx';
 import Export from './routes/Export.tsx';
+import Summary from './routes/Summary.tsx';
+import ChannelsList from './routes/ChannelsList.tsx';
+import ChannelDetail from './routes/ChannelDetail.tsx';
+import ZonesList from './routes/ZonesList.tsx';
+import ZoneDetail from './routes/ZoneDetail.tsx';
+import TalkGroupsList from './routes/TalkGroupsList.tsx';
+import TalkGroupDetail from './routes/TalkGroupDetail.tsx';
+import ContactsList from './routes/ContactsList.tsx';
+import ContactDetail from './routes/ContactDetail.tsx';
+import RxGroupListsList from './routes/RxGroupListsList.tsx';
+import RxGroupListDetail from './routes/RxGroupListDetail.tsx';
+import Settings from './routes/Settings.tsx';
 import { useProjects } from './state/codeplugStore.tsx';
 
-function App() {
+function navActive(pathname: string, path: string): boolean {
+  if (path === '/') return pathname === '/';
+  return pathname === path || pathname.startsWith(`${path}/`);
+}
+
+export default function App() {
   const [opened, { toggle, close }] = useDisclosure();
   const location = useLocation();
   const { activeProjectId } = useProjects();
   const showNav = activeProjectId != null;
+
+  const navItems = [
+    { to: '/summary', label: 'Summary' },
+    { to: '/channels', label: 'Channels' },
+    { to: '/zones', label: 'Zones' },
+    { to: '/talk-groups', label: 'Talk groups' },
+    { to: '/contacts', label: 'Contacts' },
+    { to: '/rx-group-lists', label: 'RX Group Lists' },
+    { to: '/export', label: 'Export' },
+  ];
 
   return (
     <AppShell
@@ -26,7 +52,7 @@ function App() {
             }
           : undefined
       }
-      padding={location.pathname === '/map' ? 0 : 'md'}
+      padding="md"
     >
       <AppShell.Header>
         <Group h="100%" px="md">
@@ -39,27 +65,24 @@ function App() {
 
       {showNav ? (
         <AppShell.Navbar p="md">
-          <Stack gap="md">
+          <Stack gap="md" style={{ height: '100%' }}>
             <ActiveProjectBar />
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                component={Link}
+                to={item.to}
+                label={item.label}
+                active={navActive(location.pathname, item.to)}
+                onClick={close}
+              />
+            ))}
+            <div style={{ flex: 1 }} />
             <NavLink
               component={Link}
-              to="/"
-              label="Home"
-              active={location.pathname === '/'}
-              onClick={close}
-            />
-            <NavLink
-              component={Link}
-              to="/map"
-              label="Channel map"
-              active={location.pathname === '/map'}
-              onClick={close}
-            />
-            <NavLink
-              component={Link}
-              to="/export"
-              label="Export"
-              active={location.pathname === '/export'}
+              to="/settings"
+              label="Settings"
+              active={navActive(location.pathname, '/settings')}
               onClick={close}
             />
           </Stack>
@@ -69,13 +92,23 @@ function App() {
       <AppShell.Main>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/map" element={<Map />} />
+          <Route path="/summary" element={<Summary />} />
+          <Route path="/channels" element={<ChannelsList />} />
+          <Route path="/channels/:id" element={<ChannelDetail />} />
+          <Route path="/zones" element={<ZonesList />} />
+          <Route path="/zones/:id" element={<ZoneDetail />} />
+          <Route path="/talk-groups" element={<TalkGroupsList />} />
+          <Route path="/talk-groups/:id" element={<TalkGroupDetail />} />
+          <Route path="/contacts" element={<ContactsList />} />
+          <Route path="/contacts/:id" element={<ContactDetail />} />
+          <Route path="/rx-group-lists" element={<RxGroupListsList />} />
+          <Route path="/rx-group-lists/:id" element={<RxGroupListDetail />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/export" element={<Export />} />
+          <Route path="/map" element={<Navigate to="/channels" replace />} />
         </Routes>
         <BuildFooter />
       </AppShell.Main>
     </AppShell>
   );
 }
-
-export default App;

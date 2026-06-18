@@ -16,6 +16,7 @@ Agent skills for documentation and execution tracking:
 | Persistence | `src/state/codeplugStorage.ts` | [persistence/](persistence/) | Shipped |
 | Import | `src/lib/import/` | [import/](import/) | Shipped |
 | Export | `src/lib/export/`, `src/routes/Export.tsx` | [export/](export/) | Shipped ([#38](https://github.com/pskillen/codeplug-tool/issues/38)) |
-| Map | `src/components/ChannelMap/` | [map/](map/) | Shipped |
+| Map | `src/components/CodeplugMap/` | [map/](map/) | Shipped |
+| Report | `src/routes/`, `src/components/report/` | [report/](report/) | Shipped ([#6](https://github.com/pskillen/codeplug-tool/issues/6)) |
 
 Add a row when a new feature is created.
