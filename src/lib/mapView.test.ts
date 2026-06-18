@@ -37,7 +37,10 @@ describe('computeMapView', () => {
 
 describe('collectMapPoints', () => {
   it('collects marker and optional zone points', () => {
-    const groups = [[{ lat: 56.5, lon: -4.0 }], [{ lat: 57.0, lon: -3.5 }]];
+    const groups = [
+      [{ location: { lat: 56.5, lon: -4.0 } }],
+      [{ location: { lat: 57.0, lon: -3.5 } }],
+    ];
     expect(collectMapPoints(groups, [[56.5, -4.0]], true)).toHaveLength(3);
     expect(collectMapPoints(groups, [[56.5, -4.0]], false)).toHaveLength(2);
   });

@@ -15,7 +15,7 @@ export type MapViewAction =
     };
 
 export function collectMapPoints(
-  groups: { lat: number | null; lon: number | null }[][],
+  groups: { location: { lat: number; lon: number } | null }[][],
   zonePoints: LatLon[],
   includeZones: boolean,
 ): LatLon[] {
@@ -23,8 +23,9 @@ export function collectMapPoints(
 
   for (const group of groups) {
     const ch = group[0];
-    if (ch.lat != null && ch.lon != null && Number.isFinite(ch.lat) && Number.isFinite(ch.lon)) {
-      points.push([ch.lat, ch.lon]);
+    const loc = ch.location;
+    if (loc != null && Number.isFinite(loc.lat) && Number.isFinite(loc.lon)) {
+      points.push([loc.lat, loc.lon]);
     }
   }
 
