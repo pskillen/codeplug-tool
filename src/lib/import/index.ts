@@ -1,0 +1,100 @@
+import { parseCsv } from '../csv.ts';
+import { importAdapters } from './registry.ts';
+import type { ImportResult } from './types.ts';
+
+function headerRow(text: string): string[] {
+  const rows = parseCsv(text.replace(/^\uFEFF/, ''));
+  return rows[0]?.map((h) => h.trim()) ?? [];
+}
+
+export async function importFiles(files: File[]): Promise<ImportResult> {
+  const result: ImportResult = {
+    recognised: [],
+    skipped: [],
+    errors: [],
+  };
+
+  for (const file of files) {
+    const fileName = file.name;
+    let text: string;
+    try {
+      text = await file.text();
+    } catch (err) {
+      result.errors.push({
+        fileName,
+        message: err instanceof Error ? err.message : String(err),
+      });
+      continue;
+    }
+
+    const headers = headerRow(text);
+    const adapter = importAdapters[0];
+    const kind = adapter.detectKind(fileName, headers);
+
+    if (kind === 'unknown') {
+      result.skipped.push({ fileName, message: 'Unrecognised CSV format' });
+      continue;
+    }
+
+    try {
+      if (kind === 'channels') {
+        result.channels = adapter.parseChannels(text);
+      } else {
+        result.zones = adapter.parseZones(text);
+      }
+      result.recognised.push(fileName);
+    } catch (err) {
+      result.errors.push({
+        fileName,
+        message: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+
+  return result;
+}
+
+interface DroppedEntry {
+  isFile: boolean;
+  isDirectory: boolean;
+  name: string;
+  file: (success: (file: File) => void) => void;
+  createReader?: () => DroppedDirectoryReader;
+}
+
+interface DroppedDirectoryReader {
+  readEntries: (success: (entries: DroppedEntry[]) => void) => void;
+}
+
+async function readEntryFiles(entry: DroppedEntry): Promise<File[]> {
+  if (entry.isFile) {
+    return new Promise((resolve) => {
+      entry.file((file) => resolve([file]));
+    });
+  }
+
+  if (!entry.isDirectory || !entry.createReader) return [];
+
+  const reader = entry.createReader();
+  const entries = await new Promise<DroppedEntry[]>((resolve) => {
+    reader.readEntries(resolve);
+  });
+
+  const nested = await Promise.all(entries.map(readEntryFiles));
+  return nested.flat();
+}
+
+export async function collectFilesFromDataTransfer(dt: DataTransfer): Promise<File[]> {
+  const items = [...dt.items];
+  if (items.length && typeof items[0].webkitGetAsEntry === 'function') {
+    const entries = items
+      .map((item) => item.webkitGetAsEntry?.() as DroppedEntry | null)
+      .filter((entry): entry is DroppedEntry => entry != null);
+
+    const files = (await Promise.all(entries.map(readEntryFiles))).flat();
+    const csvFiles = files.filter((f) => f.name.toLowerCase().endsWith('.csv'));
+    if (csvFiles.length) return csvFiles;
+  }
+
+  return [...dt.files].filter((f) => f.name.toLowerCase().endsWith('.csv'));
+}
