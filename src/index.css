@@ -44,3 +44,9 @@ a {
   padding-left: 1.25rem;
   line-height: 1.8;
 }
+
+.build-footer {
+  margin-top: 2rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
