@@ -43,16 +43,18 @@ Your data lives in your browser's **LocalStorage** for now — nothing is upload
 | LocalStorage persistence | Planned |
 | Multiple projects, switchable | Planned |
 | CRUD for channels / zones / talk groups + TG lists / contacts | Planned |
-| Read-only tabular report (zones, channels, TGs) | Planned |
+| Read-only tabular report (zones, channels, TGs) | **Shipped** |
 | Cloud storage (Dropbox / OneDrive / Google Drive) | Planned |
 
 Planned work is tracked as [GitHub issues](https://github.com/pskillen/codeplug-tool/issues) — browse the open tickets for the current backlog and design notes.
 
-### What ships today: the channel map
+### What ships today
 
-The map is the first feature. Load an OpenGD77 `Channels.csv` export to plot channels with valid coordinates; optionally add `Zones.csv` to draw a coloured hull around each zone's geolocated members. Default tiles are OpenStreetMap (no API key); paste a [Mapbox token](https://account.mapbox.com/access-tokens/) in the sidebar for streets/satellite tiles — the token is stored in browser LocalStorage only.
+**Report views** — import an OpenGD77 CPS export and browse channels, zones, talk groups, contacts, and RX group lists as tables with detail pages. Channels and zones pages include an inset map.
 
-Open the [live channel map](https://pskillen.github.io/codeplug-tool/#/map), or run it locally (below) and go to `/#/map`. Full behaviour notes: [`docs/features/map/`](docs/features/map/README.md).
+**Channel map** — plot channels with valid coordinates; draw coloured hulls around zone members. Default tiles are OpenStreetMap (no API key); configure Mapbox streets/satellite on **Settings** — tokens stay in browser LocalStorage only.
+
+Open the [live app](https://pskillen.github.io/codeplug-tool/), or run locally and go to `/#/summary`. Docs: [`docs/features/report/`](docs/features/report/README.md), [`docs/features/map/`](docs/features/map/README.md).
 
 ## Development
 

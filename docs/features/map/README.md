@@ -2,7 +2,7 @@
 
 OpenGD77 CPS stores latitude and longitude on each channel and lists zone membership in a separate export, but the desktop CPS gives no geographic overview. The map tool loads those CSVs in the browser so you can see where repeaters sit, which channels lack coordinates, and whether zone footprints match the geography you intended when building a codeplug.
 
-Implementation lives in the SPA under `src/components/ChannelMap/` (react-leaflet UI) and `src/lib/` (CSV parsing, filters, geometry). GitHub Pages publishes when a full GitHub release is published (see [build docs](../../build/README.md)). All parsing and rendering run client-side; CSV files never leave the machine.
+Implementation lives in the SPA under `src/components/CodeplugMap/` (react-leaflet inset map) and `src/lib/` (filters, geometry). Map settings (tile provider, Mapbox token) are on `/settings`. The map is embedded on Channels and Zones report pages rather than a standalone full-page view.
 
 ## Implementation status
 
@@ -11,7 +11,7 @@ Implementation lives in the SPA under `src/components/ChannelMap/` (react-leafle
 | Channel markers | Shipped | FM / DMR / other colours, popups, merge co-located sites |
 | Zone convex hulls | Shipped | Polygon, line (2 sites), circle (1 site); overlapping zones supported |
 | Map tiles | Shipped | OpenStreetMap default; optional Mapbox streets / satellite |
-| Filters & sidebar stats | Shipped | Shared coordinate rules for markers and zone hulls |
+| Filters & map controls | Shipped | Full-name labels and zone hulls on inset map; tile settings on `/settings` |
 | Contacts / TG lists map layer | Deferred | Not geographic — out of scope for this tool |
 | GitHub Pages deploy | Shipped | Publish GitHub release → `.github/workflows/pages.yml` |
 
@@ -70,9 +70,9 @@ Load order matters: **`Channels.csv` first**, then optional **`Zones.csv`**. Zon
 
 | Resource | URL |
 | --- | --- |
-| Component (source) | [`src/components/ChannelMap/`](../../../src/components/ChannelMap/) |
-| Lib (source) | [`src/lib/`](../../../src/lib/) |
-| Live (deployed) | [channel map](https://pskillen.github.io/codeplug-tool/#/map) |
+| Component (source) | [`src/components/CodeplugMap/`](../../../src/components/CodeplugMap/) |
+| Settings route | [`src/routes/Settings.tsx`](../../../src/routes/Settings.tsx) |
+| Live (deployed) | [channels report](https://pskillen.github.io/codeplug-tool/#/channels) |
 | Build / deploy | [docs/build/README.md](../../build/README.md) |
 | Local test CSVs | [`sample-exports/`](../../../sample-exports/) (gitignored) |
 | Agent guide | [`AGENTS.md`](../../../AGENTS.md) |
