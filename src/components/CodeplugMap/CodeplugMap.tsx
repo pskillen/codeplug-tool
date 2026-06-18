@@ -309,7 +309,12 @@ export default function CodeplugMap({
 
       <div className="codeplug-map" style={mapStyle}>
         {mapLayoutReady ? (
-          <MapContainer center={[56.5, -4.0]} zoom={6} style={{ height: '100%', width: '100%' }}>
+          <MapContainer
+            center={[56.5, -4.0]}
+            zoom={6}
+            preferCanvas
+            style={{ height: '100%', width: '100%' }}
+          >
             <MapResizeFix />
             {onLocationPick ? <MapClickHandler onPick={onLocationPick} /> : null}
             <TileLayer

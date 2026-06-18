@@ -30,15 +30,16 @@ Gives geographic context when working with Maidenhead locators (channel CRUD dis
 ## Behaviour
 
 - Viewport-scoped: lines and labels recompute on pan/zoom (`moveend` / `zoomend`).
+- **6-character detail** (fine lines and labels) only renders at Leaflet zoom **9+**; below that, mode `6` still shows coarse 4-char grid lines so wide views stay responsive.
 - Rendered below zone hulls and channel markers.
 - Subtle stroke/label styling so markers remain primary.
-- Applies to all `CodeplugMap` embeds; not `MapLocationPicker` (converter pick map).
+- Applies to all `CodeplugMap` embeds and the Maidenhead converter `MapLocationPicker`.
 
 ## Manual verify
 
 1. `/settings` → **4-character grid** → open `/#/channels` with geolocated channels.
 2. Confirm ~2° × 1° lines and 4-char labels (e.g. `IO85` over Glasgow).
-3. Switch to **6-character grid** → finer lines and 6-char labels; coarse lines still visible.
+3. Switch to **6-character grid** → zoom in to level 9+ for fine lines and 6-char labels; coarse lines visible when zoomed out.
 4. Pan/zoom → grid updates; setting persists after reload.
 5. **Off** → no grid overlay.
 

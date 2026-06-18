@@ -1,6 +1,6 @@
 import L from 'leaflet';
 import { useMemo, useState } from 'react';
-import { Marker, Polyline, Tooltip, useMap, useMapEvents } from 'react-leaflet';
+import { Marker, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import {
   computeGridLabels,
   computeGridLines,
@@ -28,9 +28,18 @@ function safeMapBounds(map: L.Map) {
   return { south: 49, west: -11, north: 61, east: 2 };
 }
 
-function labelIcon(): L.DivIcon {
+function escapeHtml(s: string): string {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function labelIcon(text: string): L.DivIcon {
   return L.divIcon({
     className: 'maidenhead-grid-label-wrap',
+    html: `<div class="maidenhead-grid-label">${escapeHtml(text)}</div>`,
     iconSize: [0, 0],
     iconAnchor: [0, 0],
   });
@@ -43,23 +52,25 @@ export interface MaidenheadGridLayerProps {
 export default function MaidenheadGridLayer({ mode }: MaidenheadGridLayerProps) {
   const map = useMap();
   const [bounds, setBounds] = useState(() => safeMapBounds(map));
+  const [zoom, setZoom] = useState(() => map.getZoom?.() ?? 6);
+
+  const syncView = () => {
+    setBounds(safeMapBounds(map));
+    if (typeof map.getZoom === 'function') setZoom(map.getZoom());
+  };
 
   useMapEvents({
-    moveend() {
-      setBounds(safeMapBounds(map));
-    },
-    zoomend() {
-      setBounds(safeMapBounds(map));
-    },
+    moveend: syncView,
+    zoomend: syncView,
   });
 
   const lines = useMemo(
-    () => (mode === 'off' ? [] : computeGridLines(bounds, mode)),
-    [bounds, mode],
+    () => (mode === 'off' ? [] : computeGridLines(bounds, mode, undefined, zoom)),
+    [bounds, mode, zoom],
   );
   const labels = useMemo(
-    () => (mode === 'off' ? [] : computeGridLabels(bounds, mode)),
-    [bounds, mode],
+    () => (mode === 'off' ? [] : computeGridLabels(bounds, mode, undefined, zoom)),
+    [bounds, mode, zoom],
   );
 
   if (mode === 'off') return null;
@@ -78,13 +89,9 @@ export default function MaidenheadGridLayer({ mode }: MaidenheadGridLayerProps) 
         <Marker
           key={`${label.level}-${label.text}-${label.position[0]}-${label.position[1]}`}
           position={label.position}
-          icon={labelIcon()}
+          icon={labelIcon(label.text)}
           interactive={false}
-        >
-          <Tooltip permanent direction="center" className="maidenhead-grid-label">
-            {label.text}
-          </Tooltip>
-        </Marker>
+        />
       ))}
     </>
   );

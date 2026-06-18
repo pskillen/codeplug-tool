@@ -88,8 +88,11 @@
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+  line-height: 1;
   padding: 0;
   pointer-events: none;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
   text-shadow:
     -1px -1px 0 rgba(255, 255, 255, 0.85),
     1px -1px 0 rgba(255, 255, 255, 0.85),
@@ -97,6 +100,13 @@
     1px 1px 0 rgba(255, 255, 255, 0.85);
 }
 
-.maidenhead-grid-label::before {
+.maidenhead-grid-label.leaflet-tooltip {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.maidenhead-grid-label.leaflet-tooltip::before {
   display: none;
 }

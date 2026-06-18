@@ -29,6 +29,15 @@ const ORIGIN_LAT = -90;
 
 const DEFAULT_BUFFER_DEG = 0.5;
 
+/** Fine 6-char lines and labels only render at this Leaflet zoom or above. */
+export const MIN_ZOOM_FOR_6_DETAIL = 9;
+
+function show6CharDetail(mode: MaidenheadGridMode, zoom: number | undefined): boolean {
+  if (mode !== '6') return false;
+  if (zoom == null) return true;
+  return zoom >= MIN_ZOOM_FOR_6_DETAIL;
+}
+
 function padBounds(bounds: MapBounds, bufferDeg: number): MapBounds {
   return {
     south: Math.max(-90, bounds.south - bufferDeg),
@@ -81,6 +90,7 @@ export function computeGridLines(
   bounds: MapBounds,
   mode: MaidenheadGridMode,
   bufferDeg = DEFAULT_BUFFER_DEG,
+  zoom?: number,
 ): GridLine[] {
   if (mode === 'off') return [];
 
@@ -90,7 +100,7 @@ export function computeGridLines(
   if (mode === '4' || mode === '6') {
     addLevelLines(lines, padded, '4', LON_STEP_4, LAT_STEP_4);
   }
-  if (mode === '6') {
+  if (show6CharDetail(mode, zoom)) {
     addLevelLines(lines, padded, '6', LON_STEP_6, LAT_STEP_6);
   }
 
@@ -128,6 +138,7 @@ export function computeGridLabels(
   bounds: MapBounds,
   mode: MaidenheadGridMode,
   bufferDeg = DEFAULT_BUFFER_DEG,
+  zoom?: number,
 ): GridLabel[] {
   if (mode === 'off') return [];
 
@@ -144,7 +155,7 @@ export function computeGridLabels(
     });
   }
 
-  if (mode === '6') {
+  if (show6CharDetail(mode, zoom)) {
     forEachCellCentre(padded, LON_STEP_6, LAT_STEP_6, (lat, lon) => {
       labels.push({
         position: [lat, lon],

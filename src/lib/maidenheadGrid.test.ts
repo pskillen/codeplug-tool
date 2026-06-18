@@ -34,6 +34,18 @@ describe('maidenheadGrid', () => {
     );
   });
 
+  it('defers 6-char lines and labels until zoom threshold', () => {
+    const linesLow = computeGridLines(glasgowBounds, '6', 0, 8);
+    const labelsLow = computeGridLabels(glasgowBounds, '6', 0, 8);
+    expect(linesLow.every((l) => l.level === '4')).toBe(true);
+    expect(labelsLow).toEqual([]);
+
+    const linesHigh = computeGridLines(glasgowBounds, '6', 0, 10);
+    const labelsHigh = computeGridLabels(glasgowBounds, '6', 0, 10);
+    expect(linesHigh.some((l) => l.level === '6')).toBe(true);
+    expect(labelsHigh.length).toBeGreaterThan(0);
+  });
+
   it('labels 4-char cells with IO85-style locators', () => {
     const labels = computeGridLabels(glasgowBounds, '4', 0);
     expect(labels.length).toBeGreaterThan(0);
@@ -45,7 +57,7 @@ describe('maidenheadGrid', () => {
   });
 
   it('labels 6-char fine cells in mode 6', () => {
-    const labels = computeGridLabels(glasgowBounds, '6', 0);
+    const labels = computeGridLabels(glasgowBounds, '6', 0, 10);
     expect(labels.length).toBeGreaterThan(0);
     expect(labels.every((l) => l.text.length === 6)).toBe(true);
     for (const label of labels) {
