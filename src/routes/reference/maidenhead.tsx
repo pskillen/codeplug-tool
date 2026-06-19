@@ -192,47 +192,55 @@ export default function MaidenheadConverter() {
         </Text>
 
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-          <Stack gap="md">
-            <Stack gap="sm">
-              <Title order={4}>Locator</Title>
-              <TextInput
-                label="Maidenhead locator"
-                placeholder="e.g. IO85uk"
-                value={locator}
-                onChange={(e) => handleLocatorChange(e.currentTarget.value)}
-                error={locatorError}
-              />
-            </Stack>
-
-            <Stack gap="sm">
-              <Title order={4}>Coordinates</Title>
-              <UseMyLocationButton onLocation={(latN, lonN) => applyCoords(latN, lonN)} />
-              <SegmentedControl
-                value={String(precision)}
-                onChange={handlePrecisionChange}
-                data={PRECISION_OPTIONS}
-              />
-              <Group grow>
-                <NumberInput
-                  label="Latitude"
-                  value={lat}
-                  onChange={handleLatChange}
-                  decimalScale={6}
-                  min={-90}
-                  max={90}
-                />
-                <NumberInput
-                  label="Longitude"
-                  value={lon}
-                  onChange={handleLonChange}
-                  decimalScale={6}
-                  min={-180}
-                  max={180}
-                />
-              </Group>
-            </Stack>
+          <Stack gap="sm">
+            <Title order={4}>Locator</Title>
+            <TextInput
+              label="Maidenhead locator"
+              placeholder="e.g. IO85uk"
+              value={locator}
+              onChange={(e) => handleLocatorChange(e.currentTarget.value)}
+              error={locatorError}
+            />
+            <SegmentedControl
+              value={String(precision)}
+              onChange={handlePrecisionChange}
+              data={PRECISION_OPTIONS}
+            />
           </Stack>
 
+          <Stack gap="sm">
+            <Title order={4}>Coordinates</Title>
+            <Group grow>
+              <NumberInput
+                label="Latitude"
+                value={lat}
+                onChange={handleLatChange}
+                decimalScale={6}
+                min={-90}
+                max={90}
+              />
+              <NumberInput
+                label="Longitude"
+                value={lon}
+                onChange={handleLonChange}
+                decimalScale={6}
+                min={-180}
+                max={180}
+              />
+            </Group>
+            <UseMyLocationButton onLocation={(latN, lonN) => applyCoords(latN, lonN)} />
+          </Stack>
+        </SimpleGrid>
+
+        <Stack gap="sm">
+          <Title order={4}>Map</Title>
+          <Text size="sm" c="dimmed">
+            Click the map or drag the marker to set coordinates.
+          </Text>
+          <MapLocationPicker lat={mapLat} lon={mapLon} onPick={handleMapPick} />
+        </Stack>
+
+        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
           <Stack gap="sm">
             <Title order={4}>Address lookup</Title>
             <Text size="sm" c="dimmed">
@@ -272,48 +280,40 @@ export default function MaidenheadConverter() {
                 {geocodeLabel}
               </Text>
             ) : null}
+          </Stack>
 
-            <Stack gap="sm">
-              <Title order={4}>Channel lookup</Title>
+          <Stack gap="sm">
+            <Title order={4}>Channel lookup</Title>
+            <Text size="sm" c="dimmed">
+              Search the active codeplug by channel name or callsign.
+            </Text>
+            <Group align="flex-end" grow>
+              <Autocomplete
+                label="Channel"
+                placeholder="Name or callsign"
+                value={channelSearch}
+                onChange={handleChannelSearchChange}
+                onOptionSubmit={handleChannelOptionSubmit}
+                data={channelOptions}
+                rightSection={channelOptionsLoading ? <Loader size={18} /> : null}
+                filter={({ options }) => options}
+                comboboxProps={{ zIndex: 1000 }}
+              />
+              <Button
+                onClick={handleApplyChannelLocation}
+                disabled={!selectedChannel || !selectedChannelHasLocation}
+                style={{ flexShrink: 0 }}
+              >
+                Use location
+              </Button>
+            </Group>
+            {selectedChannel && !selectedChannelHasLocation ? (
               <Text size="sm" c="dimmed">
-                Search the active codeplug by channel name or callsign.
+                This channel has no coordinates set.
               </Text>
-              <Group align="flex-end" grow>
-                <Autocomplete
-                  label="Channel"
-                  placeholder="Name or callsign"
-                  value={channelSearch}
-                  onChange={handleChannelSearchChange}
-                  onOptionSubmit={handleChannelOptionSubmit}
-                  data={channelOptions}
-                  rightSection={channelOptionsLoading ? <Loader size={18} /> : null}
-                  filter={({ options }) => options}
-                  comboboxProps={{ zIndex: 1000 }}
-                />
-                <Button
-                  onClick={handleApplyChannelLocation}
-                  disabled={!selectedChannel || !selectedChannelHasLocation}
-                  style={{ flexShrink: 0 }}
-                >
-                  Use location
-                </Button>
-              </Group>
-              {selectedChannel && !selectedChannelHasLocation ? (
-                <Text size="sm" c="dimmed">
-                  This channel has no coordinates set.
-                </Text>
-              ) : null}
-            </Stack>
+            ) : null}
           </Stack>
         </SimpleGrid>
-
-        <Stack gap="sm">
-          <Title order={4}>Map</Title>
-          <Text size="sm" c="dimmed">
-            Click the map or drag the marker to set coordinates.
-          </Text>
-          <MapLocationPicker lat={mapLat} lon={mapLon} onPick={handleMapPick} />
-        </Stack>
       </Stack>
     </ReportPage>
   );
