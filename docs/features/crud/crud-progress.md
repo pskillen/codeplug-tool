@@ -19,8 +19,8 @@
 
 | Slice | Status | Notes |
 | --- | --- | --- |
-| Docs kickoff | In progress | README, progress, outstanding |
-| Mutations | Pending | TG, contact, RGL + cascade helpers |
+| Docs kickoff | Complete | README, progress, outstanding |
+| Mutations | Complete | TG, contact, RGL + cascade helpers |
 | Validation | Pending | `talkGroup.ts`, `contact.ts`, `rxGroupList.ts` |
 | Store wiring | Pending | `codeplugStore` actions |
 | Talk group CRUD UI | Pending | `TalkGroupEdit`, list/detail |

@@ -78,6 +78,11 @@ export function findRxGroupListByName(name: string, lists: RxGroupList[]): RxGro
   return lists.find((r) => r.name === name) ?? null;
 }
 
+export function rxGroupListsContainingMember(name: string, lists: RxGroupList[]): RxGroupList[] {
+  if (!name) return [];
+  return lists.filter((rgl) => rgl.sourceMemberNames.includes(name));
+}
+
 export function externalChannelLinks(callsign: string): { label: string; url: string }[] {
   const q = encodeURIComponent(callsign);
   return [
