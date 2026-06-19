@@ -183,7 +183,10 @@ describe('App', () => {
 
     renderApp('/channels/new');
 
-    expect(screen.getByRole('link', { name: 'Back to channels' })).toHaveAttribute('href', '/channels');
+    expect(screen.getByRole('link', { name: 'Back to channels' })).toHaveAttribute(
+      'href',
+      '/channels',
+    );
     expect(screen.getByRole('button', { name: 'Identity' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'RF' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'DMR' })).toBeInTheDocument();

@@ -39,7 +39,11 @@ function emitColumnChange() {
 }
 
 export function useChannelListColumns(): [string[], (cols: string[]) => void] {
-  const visibleCols = useSyncExternalStore(subscribeColumnStore, getColumnSnapshot, getColumnSnapshot);
+  const visibleCols = useSyncExternalStore(
+    subscribeColumnStore,
+    getColumnSnapshot,
+    getColumnSnapshot,
+  );
 
   const setVisibleCols = useCallback((cols: string[]) => {
     localStorage.setItem(CHANNEL_LIST_COLUMN_STORAGE_KEY, JSON.stringify(cols));

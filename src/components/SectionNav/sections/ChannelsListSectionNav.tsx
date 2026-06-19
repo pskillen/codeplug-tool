@@ -1,13 +1,4 @@
-import {
-  Button,
-  MultiSelect,
-  Select,
-  Slider,
-  Stack,
-  Switch,
-  Text,
-  TextInput,
-} from '@mantine/core';
+import { Button, MultiSelect, Select, Slider, Stack, Switch, Text, TextInput } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import { useMemo } from 'react';

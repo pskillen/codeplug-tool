@@ -38,8 +38,7 @@ export function useChannelListQuery(): ChannelListQuery {
   const bandFilter = useMemo(() => parseCsvParam(searchParams.get('band')), [searchParams]);
   const modeFilter = useMemo(() => parseCsvParam(searchParams.get('mode')), [searchParams]);
   const duplexRaw = searchParams.get('duplex');
-  const duplexFilter =
-    duplexRaw === 'simplex' || duplexRaw === 'split' ? duplexRaw : null;
+  const duplexFilter = duplexRaw === 'simplex' || duplexRaw === 'split' ? duplexRaw : null;
   const distanceFilterEnabled = searchParams.get('distance') === '1';
   const maxDistanceKm = parseMaxDistanceKm(searchParams.get('maxKm'));
 
@@ -91,7 +90,9 @@ export function useChannelListQuery(): ChannelListQuery {
   const setMaxDistanceKm = useCallback(
     (value: number) => {
       const km = Number.isFinite(value) ? value : defaultMaxDistanceKm();
-      updateParams((p) => setOrDelete(p, 'maxKm', km === defaultMaxDistanceKm() ? null : String(km)));
+      updateParams((p) =>
+        setOrDelete(p, 'maxKm', km === defaultMaxDistanceKm() ? null : String(km)),
+      );
     },
     [updateParams],
   );

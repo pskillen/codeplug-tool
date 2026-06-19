@@ -51,13 +51,7 @@ export function EntityZoneLinks({
   return (
     <Stack gap={4} mt="xs">
       {zones.map((zone) => (
-        <NavLink
-          key={zone.id}
-          component={Link}
-          to={`/zones/${zone.id}`}
-          label={zone.name}
-          py={4}
-        />
+        <NavLink key={zone.id} component={Link} to={`/zones/${zone.id}`} label={zone.name} py={4} />
       ))}
     </Stack>
   );

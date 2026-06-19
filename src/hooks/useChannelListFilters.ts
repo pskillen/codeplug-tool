@@ -1,8 +1,5 @@
 import { useMemo } from 'react';
-import {
-  channelHasGeolocation,
-  filterChannelsByDistance,
-} from '../lib/channels.ts';
+import { channelHasGeolocation, filterChannelsByDistance } from '../lib/channels.ts';
 import { channelMatchesBandFilter } from '../lib/bands.ts';
 import { formatDistanceM, haversineDistanceM } from '../lib/geoDistance.ts';
 import { sortByName } from '../lib/reportLookup.ts';
@@ -58,7 +55,8 @@ export function filterChannelsForList(
     }
     if (!channelMatchesBandFilter(ch.rxFrequency, ch.txFrequency, query.bandFilter)) return false;
     if (query.modeFilter.length && !query.modeFilter.includes(ch.mode)) return false;
-    if (query.duplexFilter === 'simplex' && !isSimplex(ch.rxFrequency, ch.txFrequency)) return false;
+    if (query.duplexFilter === 'simplex' && !isSimplex(ch.rxFrequency, ch.txFrequency))
+      return false;
     if (query.duplexFilter === 'split' && isSimplex(ch.rxFrequency, ch.txFrequency)) return false;
     return true;
   });
@@ -93,10 +91,7 @@ export function useFilteredChannels(
   );
 }
 
-export function distanceLabelForChannel(
-  channel: Channel,
-  position: OperatorPosition,
-): string {
+export function distanceLabelForChannel(channel: Channel, position: OperatorPosition): string {
   if (!channelHasGeolocation(channel)) return '—';
   return formatDistanceM(
     haversineDistanceM(position.lat, position.lon, channel.location!.lat, channel.location!.lon),

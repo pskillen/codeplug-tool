@@ -6,16 +6,16 @@ Primary (section 1) application navigation — project routes, `ActiveProjectBar
 
 ## Props
 
-| Prop | Type | Default | Notes |
-| --- | --- | --- | --- |
-| `onNavClick` | `() => void` | — | Called when a nav link is clicked (closes mobile burger drawer) |
+| Prop         | Type         | Default | Notes                                                           |
+| ------------ | ------------ | ------- | --------------------------------------------------------------- |
+| `onNavClick` | `() => void` | —       | Called when a nav link is clicked (closes mobile burger drawer) |
 
 ## Usage
 
 ```tsx
 import AppNav from '../components/AppNav/AppNav.tsx';
 
-<AppNav onNavClick={close} />
+<AppNav onNavClick={close} />;
 ```
 
 ## Behaviour

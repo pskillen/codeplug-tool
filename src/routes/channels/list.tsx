@@ -10,10 +10,7 @@ import { coordsToLocator } from '../../lib/maidenhead.ts';
 import { CHANNEL_OPTIONAL_COLUMNS } from '../../hooks/channelListQueryUtils.ts';
 import { useChannelListColumns } from '../../hooks/useChannelListColumns.ts';
 import { useChannelListQuery } from '../../hooks/useChannelListQuery.ts';
-import {
-  distanceLabelForChannel,
-  useFilteredChannels,
-} from '../../hooks/useChannelListFilters.ts';
+import { distanceLabelForChannel, useFilteredChannels } from '../../hooks/useChannelListFilters.ts';
 import type { Channel } from '../../models/codeplug.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 import { useOperatorPosition } from '../../state/operatorPosition.tsx';
@@ -29,35 +26,33 @@ export default function ChannelsList() {
   const mapChannels = query.distanceFilterEnabled ? filtered : channels;
   const { skipped } = applyFilters(channels, { requireUseLocation: true, skipZero: true });
 
-  const optionalColumnDefs = CHANNEL_OPTIONAL_COLUMNS.filter((c) => visibleCols.includes(c.key)).map(
-    (col) => {
-      if (col.key === 'contact') {
-        return { key: col.key, header: col.header, render: (ch: Channel) => ch.contactName || '—' };
-      }
-      if (col.key === 'rgl') {
-        return {
-          key: col.key,
-          header: col.header,
-          render: (ch: Channel) => ch.rxGroupListName || '—',
-        };
-      }
-      if (col.key === 'distance') {
-        return {
-          key: col.key,
-          header: col.header,
-          render: (ch: Channel) => (position ? distanceLabelForChannel(ch, position) : '—'),
-        };
-      }
+  const optionalColumnDefs = CHANNEL_OPTIONAL_COLUMNS.filter((c) =>
+    visibleCols.includes(c.key),
+  ).map((col) => {
+    if (col.key === 'contact') {
+      return { key: col.key, header: col.header, render: (ch: Channel) => ch.contactName || '—' };
+    }
+    if (col.key === 'rgl') {
       return {
         key: col.key,
         header: col.header,
-        render: (ch: Channel) =>
-          ch.location && ch.useLocation
-            ? coordsToLocator(ch.location.lat, ch.location.lon, 6)
-            : '—',
+        render: (ch: Channel) => ch.rxGroupListName || '—',
       };
-    },
-  );
+    }
+    if (col.key === 'distance') {
+      return {
+        key: col.key,
+        header: col.header,
+        render: (ch: Channel) => (position ? distanceLabelForChannel(ch, position) : '—'),
+      };
+    }
+    return {
+      key: col.key,
+      header: col.header,
+      render: (ch: Channel) =>
+        ch.location && ch.useLocation ? coordsToLocator(ch.location.lat, ch.location.lon, 6) : '—',
+    };
+  });
 
   return (
     <ReportPage title="Channels">

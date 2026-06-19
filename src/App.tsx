@@ -69,11 +69,7 @@ export default function App() {
           {showSecondary && isDesktopNav ? (
             <>
               <Divider orientation="vertical" />
-              <Box
-                w={SECONDARY_NAV_WIDTH}
-                p="md"
-                style={{ flexShrink: 0, overflow: 'hidden' }}
-              >
+              <Box w={SECONDARY_NAV_WIDTH} p="md" style={{ flexShrink: 0, overflow: 'hidden' }}>
                 <SectionNav variant="sidebar" />
               </Box>
             </>

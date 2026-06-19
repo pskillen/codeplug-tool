@@ -1,8 +1,7 @@
 import { Divider, NavLink, Stack } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
 import {
   CHANNEL_DETAIL_EXTRA_SECTIONS,
   CHANNEL_FORM_SECTIONS,
@@ -13,10 +12,11 @@ import {
 } from '../../../lib/channelPageSections.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../../lib/iconSizes.ts';
 import { findEntityById } from '../../../lib/reportLookup.ts';
+import type { SectionNavProps } from '../../../nav/sectionNavTypes.ts';
 import { useCodeplug } from '../../../state/codeplugStore.tsx';
 import PageSectionNavLinks from './PageSectionNavLinks.tsx';
 
-export default function ChannelPageSectionNav() {
+export default function ChannelPageSectionNav(_props: SectionNavProps) {
   const { pathname } = useLocation();
   const { codeplug } = useCodeplug();
   const channelId = channelIdFromPath(pathname);

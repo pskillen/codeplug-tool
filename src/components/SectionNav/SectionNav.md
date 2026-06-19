@@ -6,8 +6,8 @@ Contextual secondary navigation (section 2) — resolves route-specific controls
 
 ## Props
 
-| Prop | Type | Notes |
-| --- | --- | --- |
+| Prop      | Type                     | Notes                                                                  |
+| --------- | ------------------------ | ---------------------------------------------------------------------- |
 | `variant` | `'sidebar' \| 'toolbar'` | `sidebar` in `AppShell.Navbar`; `toolbar` above main content on mobile |
 
 ## Usage
