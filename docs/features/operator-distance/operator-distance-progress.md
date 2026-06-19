@@ -7,7 +7,9 @@
 
 ## Overall status
 
-**Status:** Complete (pending PR)
+**Status:** Complete (pending merge)
+
+**PR:** https://github.com/pskillen/codeplug-tool/pull/71
 
 ---
 
@@ -33,4 +35,4 @@
 
 ## Next
 
-- Open PR with `Closes #70`
+- Merge PR #71
