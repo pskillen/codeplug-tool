@@ -7,7 +7,7 @@
 
 ## Overall status
 
-**Status:** In progress
+**Status:** Complete (pending PR)
 
 **Branch:** `78/pskillen/testing-strategy-docs`
 
@@ -36,8 +36,39 @@
 
 ---
 
+## Slice 3: Fixtures and unit
+
+**Status:** Complete
+
+**Delivered**
+
+- `docs/build/testing/fixtures.md`
+- `docs/build/testing/unit.md`
+
+---
+
+## Slice 4: System and component
+
+**Status:** Complete
+
+**Delivered**
+
+- `docs/build/testing/system.md`
+- `docs/build/testing/component.md`
+
+---
+
+## Slice 5: E2e and cross-links
+
+**Status:** Complete
+
+**Delivered**
+
+- `docs/build/testing/e2e.md`
+- Cross-links in import/export feature READMEs
+
+---
+
 ## Next
 
-- Slice 3: fixtures.md, unit.md
-- Slices 4–5: system, component, e2e
-- Slice 6: PR
+- Slice 6: open PR `Closes #78`
