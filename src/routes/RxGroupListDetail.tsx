@@ -3,6 +3,8 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconArrowLeft, IconPencil, IconTrash } from '@tabler/icons-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ConfirmDeleteModal from '../components/crud/ConfirmDeleteModal.tsx';
+import { BandPillForChannel } from '../components/crud/BandPill.tsx';
+import ModePill from '../components/crud/ModePill.tsx';
 import EntityTable from '../components/report/EntityTable.tsx';
 import DetailSections from '../components/report/DetailSections.tsx';
 import NotFoundEntity from '../components/report/NotFoundEntity.tsx';
@@ -15,7 +17,6 @@ import {
 import type { Contact, TalkGroup } from '../models/codeplug.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
-import { modeLabel } from '../lib/channelModes.ts';
 
 export default function RxGroupListDetail() {
   const { id } = useParams<{ id: string }>();
@@ -141,8 +142,8 @@ export default function RxGroupListDetail() {
                 getPath: (ch) => `/channels/${ch.id}`,
               }}
               columns={[
-                { key: 'mode', header: 'Mode', render: (ch) => modeLabel(ch.mode) },
-                { key: 'rx', header: 'RX MHz', render: (ch) => ch.rxFrequency || '—' },
+                { key: 'band', header: 'Band', render: (ch) => <BandPillForChannel channel={ch} /> },
+                { key: 'mode', header: 'Mode', render: (ch) => <ModePill mode={ch.mode} /> },
               ]}
             />
           )}

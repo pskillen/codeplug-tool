@@ -3,13 +3,13 @@ import { IconPlus } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import EntityTable from '../components/report/EntityTable.tsx';
 import ReportPage from '../components/report/ReportPage.tsx';
-import { sortByName } from '../lib/reportLookup.ts';
+import { channelsWithRxGroupList, formatReferenceCount, sortByName } from '../lib/reportLookup.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
 
 export default function RxGroupListsList() {
   const { codeplug } = useCodeplug();
-  const { rxGroupLists } = codeplug;
+  const { channels, rxGroupLists } = codeplug;
   const sorted = sortByName(rxGroupLists);
 
   return (
@@ -36,7 +36,13 @@ export default function RxGroupListsList() {
             {
               key: 'members',
               header: 'Members',
-              render: (r) => r.sourceMemberNames.length,
+              render: (r) => formatReferenceCount(r.sourceMemberNames.length),
+            },
+            {
+              key: 'channels',
+              header: 'Channels using',
+              render: (r) =>
+                formatReferenceCount(channelsWithRxGroupList(r.name, channels).length),
             },
           ]}
         />
