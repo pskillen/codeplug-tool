@@ -1,5 +1,6 @@
 import { Button, Container, Stack, Text, Title } from '@mantine/core';
 import { IconDownload, IconPackage } from '@tabler/icons-react';
+import ImportIntoActivePanel from '../components/ImportIntoActivePanel/ImportIntoActivePanel.tsx';
 import { opengd77ExportAdapter, type OpenGd77ExportFileName } from '../lib/export/index.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
@@ -34,6 +35,14 @@ export default function Export() {
         {!hasData ? (
           <Text c="dimmed">Import a codeplug first — there are no channels to export yet.</Text>
         ) : null}
+
+        <Stack gap="sm">
+          <Title order={3}>Import into active codeplug</Title>
+          <Text size="sm" c="dimmed">
+            Add or refresh CSV data in the open codeplug without creating a new project.
+          </Text>
+          <ImportIntoActivePanel />
+        </Stack>
 
         <Stack gap="sm">
           <Title order={3}>OpenGD77 CPS CSV</Title>
