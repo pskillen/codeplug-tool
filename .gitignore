@@ -28,4 +28,5 @@ tmp/
 node_modules/
 dist/
 coverage/
+test-results/
 *.tsbuildinfo

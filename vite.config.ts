@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 
 const buildEnv = process.env.BUILD_ENV || 'local';
 const buildVersion = (process.env.BUILD_VERSION || 'local').replace(/^v/, '');
+const isGitHubActions = process.env.GITHUB_ACTIONS === 'true';
 
 export default defineConfig({
   base: '/codeplug-tool/',
@@ -16,6 +17,12 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     globals: true,
+    reporters: isGitHubActions
+      ? [
+          'default',
+          ['junit', { outputFile: 'test-results/junit.xml', addFileAttribute: true }],
+        ]
+      : ['default'],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],

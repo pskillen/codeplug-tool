@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  checks: write
 
 concurrency:
   group: checks-${{ github.workflow }}-${{ github.ref }}
@@ -38,6 +39,17 @@ jobs:
       - name: Test with coverage
         run: npm run test:coverage
 
+      - name: Test report
+        uses: dorny/test-reporter@v3
+        if: ${{ !cancelled() }}
+        with:
+          name: Vitest
+          path: test-results/junit.xml
+          reporter: java-junit
+          list-suites: all
+          list-tests: all
+          report-title: Test results
+
       # Future (#40): Playwright e2e — uncomment when test:e2e lands
       # - name: Install Playwright browsers
       #   run: npx playwright install --with-deps chromium
@@ -52,6 +64,14 @@ jobs:
         with:
           name: coverage-report
           path: coverage/
+          retention-days: 14
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: test-results
+          path: test-results/
           retention-days: 14
 
       - name: Coverage summary

@@ -68,13 +68,13 @@ Every pull request and push to `main` runs [`.github/workflows/checks.yaml`](../
 | --- | --- | --- | --- |
 | ESLint | `npm run lint` | Yes | |
 | Prettier | `npm run format:check` | Yes | |
-| Unit + component + system | `npm run test:coverage` | Yes | Full Vitest suite; coverage via `@vitest/coverage-v8`; report-only in v1 |
+| Unit + component + system | `npm run test:coverage` | Yes | Full Vitest suite; JUnit → [dorny/test-reporter](https://github.com/dorny/test-reporter) check with every test name; coverage report-only in v1 |
 | E2e | `npm run test:e2e` | When #40 lands | Playwright + browser install (commented placeholder in workflow) |
 | Type-check + build | `npm run build` | Yes | `tsc -b && vite build` |
 
 `npm run test:system` remains a **local focused script** for import/merge work; CI runs the full suite via `test:coverage`.
 
-**Reading coverage:** open the Actions run for your PR → **Summary** tab shows statement/branch/function/line percentages; download the **coverage-report** artifact for `lcov.info` and per-file HTML. No fail-on-threshold in v1.
+**Reading results:** the **Vitest** check run lists every test with pass/fail; the job **Summary** also includes coverage percentages. Download **test-results** or **coverage-report** artifacts for JUnit XML / lcov detail. No fail-on-threshold for coverage in v1.
 
 ## Where to add tests
 
