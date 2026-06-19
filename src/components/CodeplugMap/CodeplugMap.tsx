@@ -15,7 +15,6 @@ import {
 import {
   applyFilters,
   buildChannelById,
-  CHANNEL_COLORS,
   dominantMode,
   groupByCoords,
   markerColor,
@@ -23,6 +22,7 @@ import {
   zoneGeolocatedPoints,
   type FilterOptions,
 } from '../../lib/channels.ts';
+import { isDmrMode, modeLabel } from '../../lib/channelModes.ts';
 import { convexHullLatLon, zoneColor, type LatLon } from '../../lib/geo.ts';
 import { collectMapPoints, computeMapView } from '../../lib/mapView.ts';
 import type { Channel, Zone } from '../../models/codeplug.ts';
@@ -36,12 +36,6 @@ const DEFAULT_FILTER_OPTS: FilterOptions = {
   requireUseLocation: true,
   skipZero: true,
 };
-
-function modeLabel(mode: Channel['mode']): string {
-  if (mode === 'digital') return 'Digital';
-  if (mode === 'analogue') return 'Analogue';
-  return 'Other';
-}
 
 interface ZoneHullData {
   zone: Zone;
@@ -89,7 +83,7 @@ function ChannelPopup({ group }: { group: Channel[] }) {
         const freq =
           ch.rxFrequency && ch.txFrequency ? `${ch.rxFrequency} / ${ch.txFrequency} MHz` : '';
         const dmr =
-          ch.mode === 'digital'
+          isDmrMode(ch.mode)
             ? [
                 ch.contactName && ch.contactName !== 'None' ? `TX: ${ch.contactName}` : null,
                 ch.rxGroupListName && ch.rxGroupListName !== 'None'
@@ -439,5 +433,3 @@ export default function CodeplugMap({
     </div>
   );
 }
-
-export { CHANNEL_COLORS };

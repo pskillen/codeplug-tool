@@ -31,7 +31,4 @@ export const theme = createTheme({
   primaryShade: 6,
   colors: { brand, dark },
   fontFamily: 'system-ui, sans-serif',
-  other: {
-    channelColors: { analogue: '#f0c419', digital: '#e03131', other: '#9c36b5' },
-  },
 });

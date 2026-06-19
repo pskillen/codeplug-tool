@@ -20,12 +20,7 @@ import { formatOffsetMhz, frequencyOffsetMhz } from '../../lib/bands.ts';
 import { formatFrequencyMhz } from '../../lib/formatFrequency.ts';
 import { coordsToLocator } from '../../lib/maidenhead.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
-
-function modeLabel(mode: string): string {
-  if (mode === 'digital') return 'Digital';
-  if (mode === 'analogue') return 'Analogue';
-  return 'Other';
-}
+import { modeLabel } from '../../lib/channelModes.ts';
 
 function formatLocation(lat: number | undefined, lon: number | undefined): string {
   if (lat == null || lon == null) return '—';

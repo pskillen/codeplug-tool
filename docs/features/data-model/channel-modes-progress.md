@@ -12,6 +12,6 @@
 | --- | --- | --- |
 | Reference doc + `channelModes.ts` | Complete | `docs/reference/channel-modes.md`, `src/lib/channelModes.ts` |
 | Data model + schema v3 migration | Complete | `CODEPLUG_SCHEMA_VERSION = 3` |
-| Import / export boundary | In progress | |
-| Shared UI primitives + map colours | Pending | |
-| Channels CRUD | Pending | |
+| Import / export boundary | Complete | |
+| Shared UI primitives + map colours | Complete | `ModePill`, per-mode marker colours |
+| Channels CRUD | In progress | |
