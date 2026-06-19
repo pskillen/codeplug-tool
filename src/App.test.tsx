@@ -68,6 +68,7 @@ function seedActiveProjectWithChannels() {
     CODEPLUG_STORAGE_KEY,
     serializeProjects({ activeProjectId: withChannels.id, projects: [withChannels] }),
   );
+  return withChannels.codeplug.channels[0]!.id;
 }
 
 describe('App', () => {
@@ -175,6 +176,29 @@ describe('App', () => {
     const newLinks = screen.getAllByRole('link', { name: 'New talk group' });
     expect(newLinks.some((link) => link.getAttribute('href') === '/talk-groups/new')).toBe(true);
     expect(within(document.body).queryByRole('button', { name: 'New talk group' })).toBeNull();
+  });
+
+  it('shows section scroll links on channel edit', () => {
+    seedActiveProject();
+
+    renderApp('/channels/new');
+
+    expect(screen.getByRole('link', { name: 'Back to channels' })).toHaveAttribute('href', '/channels');
+    expect(screen.getByRole('button', { name: 'Identity' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'RF' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'DMR' })).toBeInTheDocument();
+    expect(screen.queryByLabelText('Sort')).not.toBeInTheDocument();
+  });
+
+  it('shows section scroll links on channel detail', () => {
+    const channelId = seedActiveProjectWithChannels();
+
+    renderApp(`/channels/${channelId}`);
+
+    expect(screen.getByRole('link', { name: 'Back to channels' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Identity' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Map' })).toBeInTheDocument();
+    expect(screen.queryByLabelText('Sort')).not.toBeInTheDocument();
   });
 
   it('renders the reference index on /reference', () => {
