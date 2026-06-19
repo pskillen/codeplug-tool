@@ -25,6 +25,18 @@
 
 ---
 
+## Slice 1: Foundation
+
+**Status:** Complete
+
+**Delivered**
+
+- `@tabler/icons-react` dependency
+- `src/lib/iconSizes.ts` shared constants
+- Icons section in `docs/reference/display-conventions.md`
+
+---
+
 ## Next
 
-- Slice 1: Install `@tabler/icons-react`, `iconSizes.ts`, display conventions
+- Slice 2: Shell navigation — `App.tsx`, reference index, ActiveProjectBar

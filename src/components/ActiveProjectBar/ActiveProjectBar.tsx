@@ -1,5 +1,7 @@
 import { Button, Group, Stack, Text } from '@mantine/core';
+import { IconSwitchHorizontal } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { useProjects } from '../../state/codeplugStore.tsx';
 
 export default function ActiveProjectBar() {
@@ -19,7 +21,12 @@ export default function ActiveProjectBar() {
             {activeProject.name}
           </Text>
         </Stack>
-        <Button size="compact-sm" variant="default" onClick={() => navigate('/')}>
+        <Button
+          size="compact-sm"
+          variant="default"
+          leftSection={<IconSwitchHorizontal size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+          onClick={() => navigate('/')}
+        >
           Switch
         </Button>
       </Group>

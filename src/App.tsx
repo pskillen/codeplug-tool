@@ -1,8 +1,21 @@
 import { AppShell, Burger, Group, NavLink, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import {
+  IconAddressBook,
+  IconAntenna,
+  IconBook,
+  IconDownload,
+  IconFolders,
+  IconLayoutDashboard,
+  IconListDetails,
+  IconSettings,
+  IconUsersGroup,
+} from '@tabler/icons-react';
+import type { TablerIcon } from '@tabler/icons-react';
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import ActiveProjectBar from './components/ActiveProjectBar/ActiveProjectBar.tsx';
 import BuildFooter from './components/BuildFooter.tsx';
+import { ICON_SIZE_NAV, ICON_STROKE } from './lib/iconSizes.ts';
 import Home from './routes/Home.tsx';
 import Export from './routes/Export.tsx';
 import Summary from './routes/Summary.tsx';
@@ -29,20 +42,24 @@ function navActive(pathname: string, path: string): boolean {
   return pathname === path || pathname.startsWith(`${path}/`);
 }
 
+function navIcon(Icon: TablerIcon) {
+  return <Icon size={ICON_SIZE_NAV} stroke={ICON_STROKE} />;
+}
+
 export default function App() {
   const [opened, { toggle, close }] = useDisclosure();
   const location = useLocation();
   const { activeProjectId } = useProjects();
   const showNav = activeProjectId != null;
 
-  const navItems = [
-    { to: '/summary', label: 'Summary' },
-    { to: '/channels', label: 'Channels' },
-    { to: '/zones', label: 'Zones' },
-    { to: '/talk-groups', label: 'Talk groups' },
-    { to: '/contacts', label: 'Contacts' },
-    { to: '/rx-group-lists', label: 'RX Group Lists' },
-    { to: '/export', label: 'Export' },
+  const navItems: { to: string; label: string; icon: TablerIcon }[] = [
+    { to: '/summary', label: 'Summary', icon: IconLayoutDashboard },
+    { to: '/channels', label: 'Channels', icon: IconAntenna },
+    { to: '/zones', label: 'Zones', icon: IconFolders },
+    { to: '/talk-groups', label: 'Talk groups', icon: IconUsersGroup },
+    { to: '/contacts', label: 'Contacts', icon: IconAddressBook },
+    { to: '/rx-group-lists', label: 'RX Group Lists', icon: IconListDetails },
+    { to: '/export', label: 'Export', icon: IconDownload },
   ];
 
   return (
@@ -78,6 +95,7 @@ export default function App() {
                 component={Link}
                 to={item.to}
                 label={item.label}
+                leftSection={navIcon(item.icon)}
                 active={navActive(location.pathname, item.to)}
                 onClick={close}
               />
@@ -87,6 +105,7 @@ export default function App() {
               component={Link}
               to="/reference"
               label="Reference"
+              leftSection={navIcon(IconBook)}
               active={navActive(location.pathname, '/reference')}
               onClick={close}
             />
@@ -94,6 +113,7 @@ export default function App() {
               component={Link}
               to="/settings"
               label="Settings"
+              leftSection={navIcon(IconSettings)}
               active={navActive(location.pathname, '/settings')}
               onClick={close}
             />
