@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import ImportIntoActivePanel from './ImportIntoActivePanel.tsx';
-import { channelsOnlyBundle } from '../../test/fixtures/opengd77/loadFixture.ts';
+import { channelsOnlyBundle } from '../../test/opengd77/loadFixture.ts';
 import { newProject } from '../../models/codeplugProject.ts';
 import { CODEPLUG_STORAGE_KEY, serializeProjects } from '../../state/codeplugStorage.ts';
 import { CodeplugProvider } from '../../state/codeplugStore.tsx';

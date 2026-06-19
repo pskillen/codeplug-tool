@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { channelFieldDefaults, newId, resetIdGenerator, setIdGenerator } from '../models/codeplug.ts';
+import { channelFieldDefaults, resetIdGenerator, setIdGenerator } from '../models/codeplug.ts';
 import type { Channel } from '../models/codeplug.ts';
 import type { ImportResult } from './import/types.ts';
 import { applyImportToCodeplug, emptyEntityStats, previewImportMerge } from './importMerge.ts';
@@ -30,7 +30,7 @@ describe('importMerge', () => {
   describe('merge mode — channels', () => {
     it('is idempotent when re-importing identical channels', () => {
       const existing = channel({ id: 'ch-1', name: 'A', number: '1' });
-      let cp = applyImportToCodeplug(
+      const cp = applyImportToCodeplug(
         { ...emptyCodeplug(), channels: [existing] },
         channelsResult([channel({ id: 'new-id', name: 'A', number: '1' })]),
         'merge',

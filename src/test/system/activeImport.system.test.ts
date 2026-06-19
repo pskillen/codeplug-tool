@@ -11,7 +11,7 @@ import {
   reducedChannelsBundle,
   unresolvedZoneBundle,
   zonesOnlyBundle,
-} from '../fixtures/opengd77/loadFixture.ts';
+} from '../opengd77/loadFixture.ts';
 import {
   channelIds,
   runActiveImportWorkflow,
