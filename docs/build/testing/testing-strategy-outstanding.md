@@ -8,7 +8,7 @@ Items **skipped**, **incomplete**, or **discovered during #78 execution** — no
 
 ## CI (#79)
 
-- [x] PR workflow shipped — [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml); `test:coverage` runs full Vitest suite (includes system tests)
+- [x] Checks workflow shipped — [`.github/workflows/checks.yaml`](../../.github/workflows/checks.yaml); `test:coverage` runs full Vitest suite (includes system tests)
 - [ ] Wire `test:e2e` into PR workflow when [#40](https://github.com/pskillen/codeplug-tool/issues/40) lands
 
 ## Doc follow-up

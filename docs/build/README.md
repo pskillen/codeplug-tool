@@ -8,7 +8,7 @@ How the MM9PDY Codeplug Tool **Vite + React SPA** reaches **GitHub Pages**. The 
 | --- | --- | --- |
 | SPA source layout | Shipped (Ticket A) | Root `index.html`, `src/`, Vite config |
 | CI workflow (Pages deploy) | Shipped | `.github/workflows/pages.yml` — Node setup + `npm run build` on release |
-| PR CI (lint, test, coverage, build) | Shipped | `.github/workflows/ci.yml` — runs on pull request and push to `main` |
+| PR checks (lint, test, coverage, build) | Shipped | `.github/workflows/checks.yaml` — runs on pull request and push to `main` |
 | Release-triggered deploy | Shipped | Publish full GitHub release → GitHub Actions → Pages |
 | Build version footer | Shipped | Vite `define` injects `BUILD_ENV` / `BUILD_VERSION`; `BuildFooter` component |
 | Legacy static tools | Retired (Ticket C) | SPA-only; `site/` and `tools/` removed |
@@ -43,7 +43,7 @@ How the MM9PDY Codeplug Tool **Vite + React SPA** reaches **GitHub Pages**. The 
 | `src/` | React app source |
 | `vite.config.ts` | Vite config — `base`, `define` for build info |
 | `dist/` | Build output (gitignored; uploaded to Pages) |
-| `.github/workflows/ci.yml` | PR CI — lint, format, test with coverage, build |
+| `.github/workflows/checks.yaml` | PR checks — lint, format, test with coverage, build |
 | `.github/workflows/pages.yml` | Release-triggered deploy workflow |
 | `docs/`, `.cursor/`, `AGENTS.md` | **Not** published — contributor/agent material only |
 
@@ -129,7 +129,7 @@ Use CSV fixtures from gitignored `sample-exports/`.
 - No staging environment — publishing a release updates production Pages.
 - No cache-busting beyond Vite content hashes in `dist/assets/`.
 - Pages workflow does not run on PRs (published-release-only).
-- E2e tests not yet in PR CI — planned [#40](https://github.com/pskillen/codeplug-tool/issues/40); see [testing/README.md](testing/README.md).
+- E2e tests not yet in PR checks — planned [#40](https://github.com/pskillen/codeplug-tool/issues/40); see [testing/README.md](testing/README.md).
 
 ## Cross-links
 

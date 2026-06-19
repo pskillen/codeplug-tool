@@ -62,7 +62,7 @@ Run before commit: `npm run lint`, `npm run format:check`, `npm test`, and `npm 
 
 ## CI on pull requests
 
-Every pull request and push to `main` runs [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
+Every pull request and push to `main` runs [`.github/workflows/checks.yaml`](../../.github/workflows/checks.yaml) (**Checks** workflow):
 
 | Check | Script | CI | Notes |
 | --- | --- | --- | --- |
@@ -107,5 +107,5 @@ Every pull request and push to `main` runs [`.github/workflows/ci.yml`](../../.g
 | Export feature | [docs/features/export/README.md](../../features/export/README.md) |
 | Data model | [docs/features/data-model/README.md](../../features/data-model/README.md) |
 | OpenGD77 wire format | [docs/reference/opengd77/](../../reference/opengd77/README.md) |
-| PR CI | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) — shipped [#79](https://github.com/pskillen/codeplug-tool/issues/79) |
+| PR checks | [`.github/workflows/checks.yaml`](../../.github/workflows/checks.yaml) — shipped [#79](https://github.com/pskillen/codeplug-tool/issues/79) |
 | Playwright e2e (planned) | [#40](https://github.com/pskillen/codeplug-tool/issues/40) |

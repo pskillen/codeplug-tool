@@ -71,7 +71,7 @@ E2e should use the **same fixture bundles** as system tests where possible ([fix
 
 ## CI
 
-When [#40](https://github.com/pskillen/codeplug-tool/issues/40) lands, extend PR workflow [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
+When [#40](https://github.com/pskillen/codeplug-tool/issues/40) lands, extend the **Checks** workflow [`.github/workflows/checks.yaml`](../../.github/workflows/checks.yaml):
 
 - Install Playwright browsers
 - Run `npm run test:e2e` after unit + system pass
