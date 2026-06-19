@@ -21,24 +21,14 @@ import { useOperatorPosition } from '../../state/operatorPosition.tsx';
 import { formatOffsetMhz, frequencyOffsetMhz } from '../../lib/bands.ts';
 import { formatFrequencyMhz } from '../../lib/formatFrequency.ts';
 import { formatDistanceM, haversineDistanceM } from '../../lib/geoDistance.ts';
+import { channelHasGeolocation } from '../../lib/channels.ts';
 import { coordsToLocator } from '../../lib/maidenhead.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { modeLabel } from '../../lib/channelModes.ts';
-import type { Channel } from '../../models/codeplug.ts';
 
 function formatLocation(lat: number | undefined, lon: number | undefined): string {
   if (lat == null || lon == null) return '—';
   return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-}
-
-function channelHasGeolocation(channel: Channel): boolean {
-  const { location, useLocation } = channel;
-  return (
-    useLocation &&
-    location != null &&
-    Number.isFinite(location.lat) &&
-    Number.isFinite(location.lon)
-  );
 }
 
 export default function ChannelDetail() {

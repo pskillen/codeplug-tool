@@ -135,3 +135,13 @@ export function zoneGeolocatedPoints(
   }
   return { points: uniqueLatLon(points), missing };
 }
+
+export function channelHasGeolocation(channel: Channel): boolean {
+  const { location, useLocation } = channel;
+  return (
+    useLocation &&
+    location != null &&
+    Number.isFinite(location.lat) &&
+    Number.isFinite(location.lon)
+  );
+}
