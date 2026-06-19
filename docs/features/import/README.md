@@ -33,6 +33,7 @@ Import was hard-wired to OpenGD77 CSV inside the channel map. This refactor intr
 | [opengd77-progress.md](opengd77-progress.md) | #38 execution log |
 | [opengd77-outstanding.md](opengd77-outstanding.md) | #38 discovered debt |
 | [export/README.md](../export/README.md) | CPS export |
+| [Testing strategy](../../build/testing/README.md) | Format fidelity, layers, CI |
 | [persistence/README.md](../persistence/README.md) | LocalStorage envelope |
 | [codeplug-project/README.md](../codeplug-project/README.md) | Project wrapper + CRUD |
 

@@ -56,9 +56,11 @@ Code: `[src/lib/export/opengd77/](../../../src/lib/export/opengd77/)`, UI `[src/
 | [import/opengd77.md](../import/opengd77.md)                   | Import adapter behaviour                      |
 | [import/opengd77-progress.md](../import/opengd77-progress.md) | Execution log                                 |
 | [data-model/README.md](../data-model/README.md)               | Entity definitions                            |
+| [Testing strategy](../../build/testing/README.md)             | Format fidelity, layers, CI                   |
 
 
 ## Related
 
 - [Import hub](../import/README.md)
+- [Testing strategy](../../build/testing/README.md)
 
