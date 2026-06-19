@@ -1,13 +1,9 @@
-import { AppShell, Box, Burger, Divider, Group, NavLink, Stack, Text } from '@mantine/core';
+import { AppShell, Box, Burger, Divider, Group, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconBook, IconHome, IconSettings } from '@tabler/icons-react';
-import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import ActiveProjectBar from './components/ActiveProjectBar/ActiveProjectBar.tsx';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import AppNav from './components/AppNav/AppNav.tsx';
 import RequireActiveProject from './components/RequireActiveProject/RequireActiveProject.tsx';
 import BuildFooter from './components/BuildFooter.tsx';
-import { ICON_SIZE_NAV, ICON_STROKE } from './lib/iconSizes.ts';
-import { navActive } from './nav/navActive.ts';
-import { projectNavItems } from './nav/primaryNavItems.ts';
 import {
   NAVBAR_WIDTH_WITH_SECONDARY,
   PRIMARY_NAV_WIDTH,
@@ -71,53 +67,7 @@ export default function App() {
       <AppShell.Navbar p={0}>
         <Group wrap="nowrap" align="stretch" gap={0} style={{ height: '100%' }}>
           <Box w={PRIMARY_NAV_WIDTH} p="md" style={{ flexShrink: 0 }}>
-            <Stack gap="md" style={{ height: '100%' }}>
-              {hasActiveProject ? (
-                <>
-                  <ActiveProjectBar />
-                  {projectNavItems.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <NavLink
-                        key={item.to}
-                        component={Link}
-                        to={item.to}
-                        label={item.label}
-                        leftSection={<Icon size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
-                        active={navActive(location.pathname, item.to)}
-                        onClick={close}
-                      />
-                    );
-                  })}
-                </>
-              ) : (
-                <NavLink
-                  component={Link}
-                  to="/"
-                  label="Home"
-                  leftSection={<IconHome size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
-                  active={navActive(location.pathname, '/')}
-                  onClick={close}
-                />
-              )}
-              <div style={{ flex: 1 }} />
-              <NavLink
-                component={Link}
-                to="/reference"
-                label="Reference"
-                leftSection={<IconBook size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
-                active={navActive(location.pathname, '/reference')}
-                onClick={close}
-              />
-              <NavLink
-                component={Link}
-                to="/settings"
-                label="Settings"
-                leftSection={<IconSettings size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
-                active={navActive(location.pathname, '/settings')}
-                onClick={close}
-              />
-            </Stack>
+            <AppNav onNavClick={close} />
           </Box>
           {showSecondary && SectionComponent ? (
             <>
