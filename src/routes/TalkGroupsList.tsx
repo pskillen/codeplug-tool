@@ -1,7 +1,11 @@
+import { Button, Group, Stack } from '@mantine/core';
+import { IconPlus } from '@tabler/icons-react';
+import { Link } from 'react-router-dom';
 import EntityTable from '../components/report/EntityTable.tsx';
 import ReportPage from '../components/report/ReportPage.tsx';
 import { channelsWithTalkGroupName, sortByName } from '../lib/reportLookup.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
 
 export default function TalkGroupsList() {
   const { codeplug } = useCodeplug();
@@ -10,23 +14,35 @@ export default function TalkGroupsList() {
 
   return (
     <ReportPage title="Talk groups">
-      <EntityTable
-        rows={sorted}
-        rowKey={(tg) => tg.id}
-        nameColumn={{
-          getName: (tg) => tg.name,
-          getPath: (tg) => `/talk-groups/${tg.id}`,
-        }}
-        columns={[
-          { key: 'number', header: 'DMR ID', render: (tg) => tg.number || '—' },
-          { key: 'ts', header: 'Timeslot', render: (tg) => tg.timeslotOverride || '—' },
-          {
-            key: 'channels',
-            header: 'Channels using',
-            render: (tg) => channelsWithTalkGroupName(tg.name, channels).length,
-          },
-        ]}
-      />
+      <Stack gap="lg">
+        <Group justify="flex-end">
+          <Button
+            component={Link}
+            to="/talk-groups/new"
+            leftSection={<IconPlus size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+          >
+            New talk group
+          </Button>
+        </Group>
+
+        <EntityTable
+          rows={sorted}
+          rowKey={(tg) => tg.id}
+          nameColumn={{
+            getName: (tg) => tg.name,
+            getPath: (tg) => `/talk-groups/${tg.id}`,
+          }}
+          columns={[
+            { key: 'number', header: 'DMR ID', render: (tg) => tg.number || '—' },
+            { key: 'ts', header: 'Timeslot', render: (tg) => tg.timeslotOverride || '—' },
+            {
+              key: 'channels',
+              header: 'Channels using',
+              render: (tg) => channelsWithTalkGroupName(tg.name, channels).length,
+            },
+          ]}
+        />
+      </Stack>
     </ReportPage>
   );
 }

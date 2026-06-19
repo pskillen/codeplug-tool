@@ -29,6 +29,7 @@ import ZoneDetail from './routes/zones/detail.tsx';
 import ZoneEdit from './routes/zones/edit.tsx';
 import TalkGroupsList from './routes/TalkGroupsList.tsx';
 import TalkGroupDetail from './routes/TalkGroupDetail.tsx';
+import TalkGroupEdit from './routes/TalkGroupEdit.tsx';
 import ContactsList from './routes/ContactsList.tsx';
 import ContactDetail from './routes/ContactDetail.tsx';
 import RxGroupListsList from './routes/RxGroupListsList.tsx';
@@ -146,6 +147,8 @@ export default function App() {
             <Route path="/zones/:id/edit" element={<ZoneEdit />} />
             <Route path="/zones/:id" element={<ZoneDetail />} />
             <Route path="/talk-groups" element={<TalkGroupsList />} />
+            <Route path="/talk-groups/new" element={<TalkGroupEdit />} />
+            <Route path="/talk-groups/:id/edit" element={<TalkGroupEdit />} />
             <Route path="/talk-groups/:id" element={<TalkGroupDetail />} />
             <Route path="/contacts" element={<ContactsList />} />
             <Route path="/contacts/:id" element={<ContactDetail />} />
