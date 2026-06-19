@@ -11,7 +11,7 @@
 | Slice | Status | Notes |
 | --- | --- | --- |
 | Reference doc + `channelModes.ts` | Complete | `docs/reference/channel-modes.md`, `src/lib/channelModes.ts` |
-| Data model + schema v3 migration | In progress | |
-| Import / export boundary | Pending | |
+| Data model + schema v3 migration | Complete | `CODEPLUG_SCHEMA_VERSION = 3` |
+| Import / export boundary | In progress | |
 | Shared UI primitives + map colours | Pending | |
 | Channels CRUD | Pending | |
