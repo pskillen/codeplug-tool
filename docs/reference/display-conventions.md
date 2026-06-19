@@ -17,6 +17,10 @@ Implementation: `formatFrequencyMhz()` in `src/lib/formatFrequency.ts`.
 
 UK amateur band pills use definitions in [bands.md](./bands.md). When RX and TX fall on different bands, show one pill per band (split operation).
 
+## Channel modes
+
+Mode pills and map marker colours use definitions in [channel-modes.md](./channel-modes.md).
+
 ## Icons
 
 The SPA uses [Tabler Icons](https://tabler.io/icons) via `@tabler/icons-react` — the set Mantine documents and examples use.
