@@ -25,7 +25,7 @@
 | Store wiring | Complete | `codeplugStore` actions |
 | Talk group CRUD UI | Complete | `TalkGroupEdit`, list/detail |
 | RX group list CRUD UI | Complete | `RxGroupListEdit`, `RxGroupListMemberPicker` |
-| Contact CRUD UI | Pending | `ContactEdit`, list/detail |
+| Contact CRUD UI | Complete | `ContactEdit`, list/detail |
 | Final docs / export verify | Pending | progress complete, optional roundtrip |
 
 ## Verify

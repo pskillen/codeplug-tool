@@ -12,9 +12,9 @@ Create, edit, and delete codeplug entities against the internal vendor-neutral m
 | Zone CRUD | Complete | `src/routes/zones/` + `ZoneMemberPicker` |
 | Talk group CRUD | In progress | [#13](https://github.com/pskillen/codeplug-tool/issues/13) — `TalkGroupEdit`, list/detail actions |
 | RX group list CRUD | Complete | `RxGroupListEdit`, `RxGroupListMemberPicker` |
-| Contact CRUD | In progress | [#14](https://github.com/pskillen/codeplug-tool/issues/14) — `ContactEdit`, list/detail actions |
-| Store mutations | In progress | `src/lib/codeplugMutations.ts`, `codeplugStore` |
-| Validation | In progress | `src/lib/validation/` |
+| Contact CRUD | Complete | `ContactEdit`, list/detail |
+| Store mutations | Complete | `codeplugMutations.ts`, `codeplugStore` |
+| Validation | Complete | `src/lib/validation/` |
 
 ## Vendor boundaries
 
