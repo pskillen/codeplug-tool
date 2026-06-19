@@ -37,6 +37,30 @@
 
 ---
 
+## Slice 2: Shell navigation
+
+**Status:** Complete
+
+**Delivered**
+
+- `App.tsx` navbar icons
+- Reference index sub-nav icons
+- ActiveProjectBar Switch icon
+
+---
+
+## Slice 3: CRUD and back navigation
+
+**Status:** Complete
+
+**Delivered**
+
+- List New buttons, detail Edit/Delete/Back, edit Save/Cancel/Back
+- ConfirmDeleteModal, ZoneMemberPicker arrow icons
+- ReportPage.md back-link note updated
+
+---
+
 ## Next
 
-- Slice 2: Shell navigation — `App.tsx`, reference index, ActiveProjectBar
+- Slice 4: ImportDropzone, Export, SummaryCard, ProjectList

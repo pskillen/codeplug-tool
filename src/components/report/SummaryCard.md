@@ -11,7 +11,8 @@ Overview card on the Summary page (`/summary`): entity type title, total count, 
 | `title` | `string` | Card heading (e.g. `"Channels"`, `"Talk groups"`) |
 | `count` | `number` | Total entities |
 | `previewNames` | `string[]` | Up to ~5 names; caller slices/sorts before passing |
-| `listPath` | `string` | Hash route for “View all →” |
+| `listPath` | `string` | Hash route for “View all” link |
+| `icon` | `ReactNode` | Optional Tabler icon beside the title (matches navbar entity icons) |
 
 ## Usage
 
@@ -26,6 +27,7 @@ const preview = sortByName(channels).slice(0, 5).map((c) => c.name);
   count={channels.length}
   previewNames={preview}
   listPath="/channels"
+  icon={<IconAntenna size={16} stroke={1.5} />}
 />
 ```
 

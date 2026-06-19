@@ -1,5 +1,7 @@
 import { Button, Container, Stack, Text, Title } from '@mantine/core';
+import { IconDownload, IconPackage } from '@tabler/icons-react';
 import { opengd77ExportAdapter, type OpenGd77ExportFileName } from '../lib/export/index.ts';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
 
 const INDIVIDUAL_FILES: OpenGd77ExportFileName[] = [
@@ -41,6 +43,7 @@ export default function Export() {
                 key={fileName}
                 variant="default"
                 disabled={!hasData}
+                leftSection={<IconDownload size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
                 onClick={() => opengd77ExportAdapter.downloadFile(codeplug, fileName)}
               >
                 Download {fileName}
@@ -48,6 +51,7 @@ export default function Export() {
             ))}
             <Button
               disabled={!hasData}
+              leftSection={<IconPackage size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
               onClick={() => opengd77ExportAdapter.downloadZip(codeplug)}
             >
               Download all (.zip)

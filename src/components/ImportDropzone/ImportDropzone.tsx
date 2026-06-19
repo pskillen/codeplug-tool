@@ -1,7 +1,9 @@
 import { Alert, Box, Button, Group, Stack, Text } from '@mantine/core';
+import { IconFile, IconFolder, IconUpload } from '@tabler/icons-react';
 import { useCallback, useRef, useState } from 'react';
 import { collectFilesFromDataTransfer, importFiles } from '../../lib/import/index.ts';
 import type { ImportResult } from '../../lib/import/types.ts';
+import { ICON_SIZE_ACTION, ICON_STROKE, ICON_SIZE_NAV } from '../../lib/iconSizes.ts';
 import './ImportDropzone.css';
 
 function formatImportSummary(
@@ -113,7 +115,10 @@ export default function ImportDropzone({
         }}
         onDrop={onDrop}
       >
-        Drop CSV files or a folder here, or click to choose files
+        <Stack gap="xs" align="center">
+          <IconUpload size={ICON_SIZE_ACTION} stroke={ICON_STROKE} />
+          <Text size="sm">Drop CSV files or a folder here, or click to choose files</Text>
+        </Stack>
         <input
           ref={filesInputRef}
           type="file"
@@ -129,10 +134,18 @@ export default function ImportDropzone({
       </Box>
 
       <Group grow>
-        <Button variant="default" onClick={() => filesInputRef.current?.click()}>
+        <Button
+          variant="default"
+          leftSection={<IconFile size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+          onClick={() => filesInputRef.current?.click()}
+        >
           Choose files
         </Button>
-        <Button variant="default" onClick={() => folderInputRef.current?.click()}>
+        <Button
+          variant="default"
+          leftSection={<IconFolder size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+          onClick={() => folderInputRef.current?.click()}
+        >
           Choose folder
         </Button>
       </Group>
