@@ -1,6 +1,8 @@
 import { Button, Checkbox, Group, ScrollArea, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
+import { IconArrowLeft, IconArrowRight } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
 import { OPENGD77_MAX_ZONE_MEMBERS } from '../../lib/codeplugMutations.ts';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { sortByName } from '../../lib/reportLookup.ts';
 import type { Channel } from '../../models/codeplug.ts';
 
@@ -174,16 +176,18 @@ export default function ZoneMemberPicker({
             variant="light"
             onClick={addSelected}
             disabled={!availableSelected.length || atCap}
+            rightSection={<IconArrowRight size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
           >
-            Add →
+            Add
           </Button>
           <Button
             type="button"
             variant="light"
             onClick={removeSelected}
             disabled={!inZoneSelected.length}
+            leftSection={<IconArrowLeft size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
           >
-            ← Remove
+            Remove
           </Button>
         </Stack>
 

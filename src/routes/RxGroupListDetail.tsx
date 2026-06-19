@@ -1,4 +1,5 @@
-import { Anchor, Badge, Stack, Title } from '@mantine/core';
+import { Anchor, Badge, Group, Stack, Title } from '@mantine/core';
+import { IconArrowLeft } from '@tabler/icons-react';
 import { Link, useParams } from 'react-router-dom';
 import EntityTable from '../components/report/EntityTable.tsx';
 import DetailSections from '../components/report/DetailSections.tsx';
@@ -12,6 +13,7 @@ import {
 import type { Channel } from '../models/codeplug.ts';
 import type { Contact, TalkGroup } from '../models/codeplug.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
 
 function modeLabel(mode: Channel['mode']): string {
   if (mode === 'digital') return 'Digital';
@@ -39,7 +41,10 @@ export default function RxGroupListDetail() {
     <ReportPage title={rgl.name}>
       <Stack gap="lg">
         <Anchor component={Link} to="/rx-group-lists" size="sm">
-          ← RX Group Lists
+          <Group gap={4} wrap="nowrap">
+            <IconArrowLeft size={ICON_SIZE_NAV} stroke={ICON_STROKE} />
+            RX Group Lists
+          </Group>
         </Anchor>
 
         <DetailSections

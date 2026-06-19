@@ -1,19 +1,32 @@
 import { Anchor, Card, Group, Stack, Text, Title } from '@mantine/core';
+import { IconArrowRight } from '@tabler/icons-react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 
 export interface SummaryCardProps {
   title: string;
   count: number;
   previewNames: string[];
   listPath: string;
+  icon?: ReactNode;
 }
 
-export default function SummaryCard({ title, count, previewNames, listPath }: SummaryCardProps) {
+export default function SummaryCard({
+  title,
+  count,
+  previewNames,
+  listPath,
+  icon,
+}: SummaryCardProps) {
   return (
     <Card withBorder padding="md" radius="md">
       <Stack gap="sm">
         <Group justify="space-between" align="flex-start">
-          <Title order={3}>{title}</Title>
+          <Group gap="xs" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
+            {icon}
+            <Title order={3}>{title}</Title>
+          </Group>
           <Text fw={600} size="xl">
             {count}
           </Text>
@@ -32,7 +45,10 @@ export default function SummaryCard({ title, count, previewNames, listPath }: Su
           </Text>
         )}
         <Anchor component={Link} to={listPath} size="sm">
-          View all →
+          <Group gap={4} wrap="nowrap">
+            View all
+            <IconArrowRight size={ICON_SIZE_NAV} stroke={ICON_STROKE} />
+          </Group>
         </Anchor>
       </Stack>
     </Card>

@@ -1,8 +1,10 @@
 import { Badge, Button, Group, Modal, Stack, Text } from '@mantine/core';
+import { IconFolderOpen, IconTrash } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { CodeplugProject } from '../../models/codeplugProject.ts';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { useProjects } from '../../state/codeplugStore.tsx';
 
 function formatUpdatedAt(iso: string): string {
@@ -70,13 +72,19 @@ export default function ProjectList() {
                 </Text>
               </Stack>
               <Group gap="xs" wrap="nowrap">
-                <Button size="compact-sm" variant="default" onClick={() => openProject(project.id)}>
+                <Button
+                  size="compact-sm"
+                  variant="default"
+                  leftSection={<IconFolderOpen size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+                  onClick={() => openProject(project.id)}
+                >
                   Open
                 </Button>
                 <Button
                   size="compact-sm"
                   variant="subtle"
                   color="red"
+                  leftSection={<IconTrash size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
                   onClick={() => requestDelete(project)}
                 >
                   Delete

@@ -1,4 +1,5 @@
 import { Button, Group, Stack, Text, TextInput, Title } from '@mantine/core';
+import { IconArrowLeft, IconDeviceFloppy } from '@tabler/icons-react';
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ZoneMemberPicker from '../../components/crud/ZoneMemberPicker.tsx';
@@ -7,6 +8,7 @@ import { findEntityById } from '../../lib/reportLookup.ts';
 import { hasValidationErrors } from '../../lib/validation/channel.ts';
 import { validateZone } from '../../lib/validation/zone.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 
 export default function ZoneEdit() {
   const { id } = useParams<{ id: string }>();
@@ -66,8 +68,9 @@ export default function ZoneEdit() {
             variant="subtle"
             size="compact-sm"
             style={{ alignSelf: 'flex-start' }}
+            leftSection={<IconArrowLeft size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
           >
-            ← Back
+            Back
           </Button>
 
           {formError ? (
@@ -93,7 +96,12 @@ export default function ZoneEdit() {
           </Stack>
 
           <Group>
-            <Button type="submit">Save</Button>
+            <Button
+              type="submit"
+              leftSection={<IconDeviceFloppy size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+            >
+              Save
+            </Button>
             <Button
               variant="default"
               component={Link}

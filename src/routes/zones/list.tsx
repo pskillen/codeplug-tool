@@ -1,8 +1,10 @@
 import { Button, Group, Stack } from '@mantine/core';
+import { IconPlus } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import EntityTable from '../../components/report/EntityTable.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { sortByName } from '../../lib/reportLookup.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 
@@ -15,7 +17,11 @@ export default function ZonesList() {
     <ReportPage title="Zones">
       <Stack gap="lg">
         <Group justify="flex-end">
-          <Button component={Link} to="/zones/new">
+          <Button
+            component={Link}
+            to="/zones/new"
+            leftSection={<IconPlus size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+          >
             New zone
           </Button>
         </Group>

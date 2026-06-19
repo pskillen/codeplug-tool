@@ -1,4 +1,6 @@
 import { Button, Group, Modal, Stack, Text } from '@mantine/core';
+import { IconTrash } from '@tabler/icons-react';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 
 export interface ConfirmDeleteModalProps {
   opened: boolean;
@@ -32,7 +34,11 @@ export default function ConfirmDeleteModal({
           <Button variant="default" onClick={onClose}>
             Cancel
           </Button>
-          <Button color="red" onClick={onConfirm}>
+          <Button
+            color="red"
+            onClick={onConfirm}
+            leftSection={<IconTrash size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+          >
             Delete
           </Button>
         </Group>

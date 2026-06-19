@@ -25,7 +25,7 @@ export default function ChannelsList() {
 }
 ```
 
-Detail routes typically add their own back link (`← Channels`) inside `children` rather than via `ReportPage` props.
+Detail routes typically add their own back link (arrow icon + list label, e.g. “Channels”) inside `children` rather than via `ReportPage` props.
 
 ## Behaviour
 

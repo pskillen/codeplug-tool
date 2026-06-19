@@ -1,5 +1,6 @@
 import { Anchor, Button, Group, Stack, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { IconArrowLeft, IconPencil, IconTrash } from '@tabler/icons-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import ConfirmDeleteModal from '../../components/crud/ConfirmDeleteModal.tsx';
@@ -10,6 +11,7 @@ import ReportPage from '../../components/report/ReportPage.tsx';
 import { channelsForZone, findEntityById } from '../../lib/reportLookup.ts';
 import type { Channel } from '../../models/codeplug.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 
 function modeLabel(mode: Channel['mode']): string {
   if (mode === 'digital') return 'Digital';
@@ -45,13 +47,28 @@ export default function ZoneDetail() {
       <Stack gap="lg">
         <Group justify="space-between">
           <Anchor component={Link} to="/zones" size="sm">
-            ← Zones
+            <Group gap={4} wrap="nowrap">
+              <IconArrowLeft size={ICON_SIZE_NAV} stroke={ICON_STROKE} />
+              Zones
+            </Group>
           </Anchor>
           <Group gap="sm">
-            <Button component={Link} to={`/zones/${zone.id}/edit`} variant="light" size="sm">
+            <Button
+              component={Link}
+              to={`/zones/${zone.id}/edit`}
+              variant="light"
+              size="sm"
+              leftSection={<IconPencil size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+            >
               Edit
             </Button>
-            <Button color="red" variant="light" size="sm" onClick={openDelete}>
+            <Button
+              color="red"
+              variant="light"
+              size="sm"
+              onClick={openDelete}
+              leftSection={<IconTrash size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+            >
               Delete
             </Button>
           </Group>
