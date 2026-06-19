@@ -1,6 +1,11 @@
 import ReferenceSectionNav from '../components/SectionNav/sections/ReferenceSectionNav.tsx';
 import ChannelsSectionNav from '../components/SectionNav/sections/ChannelsSectionNav.tsx';
 import SettingsSectionNav from '../components/SectionNav/sections/SettingsSectionNav.tsx';
+import ZonesSectionNav from '../components/SectionNav/sections/ZonesSectionNav.tsx';
+import ImportExportSectionNav from '../components/SectionNav/sections/ImportExportSectionNav.tsx';
+import TalkGroupsSectionNav from '../components/SectionNav/sections/TalkGroupsSectionNav.tsx';
+import ContactsSectionNav from '../components/SectionNav/sections/ContactsSectionNav.tsx';
+import RxGroupListsSectionNav from '../components/SectionNav/sections/RxGroupListsSectionNav.tsx';
 import { NullSectionNav } from './sectionNavStubs.tsx';
 import type { SectionNavEntry } from './sectionNavTypes.ts';
 
@@ -9,11 +14,11 @@ const registry: SectionNavEntry[] = [
   { title: 'Reference', prefix: '/reference', Component: ReferenceSectionNav },
   { title: 'Settings', prefix: '/settings', Component: SettingsSectionNav },
   { title: 'Channels', prefix: '/channels', Component: ChannelsSectionNav },
-  { title: 'Zones', prefix: '/zones', Component: NullSectionNav },
-  { title: 'Talk groups', prefix: '/talk-groups', Component: NullSectionNav },
-  { title: 'Contacts', prefix: '/contacts', Component: NullSectionNav },
-  { title: 'RX Group Lists', prefix: '/rx-group-lists', Component: NullSectionNav },
-  { title: 'Import & export', prefix: '/export', Component: NullSectionNav },
+  { title: 'Zones', prefix: '/zones', Component: ZonesSectionNav },
+  { title: 'Talk groups', prefix: '/talk-groups', Component: TalkGroupsSectionNav },
+  { title: 'Contacts', prefix: '/contacts', Component: ContactsSectionNav },
+  { title: 'RX Group Lists', prefix: '/rx-group-lists', Component: RxGroupListsSectionNav },
+  { title: 'Import & export', prefix: '/export', Component: ImportExportSectionNav },
 ];
 
 export function resolveSectionNav(pathname: string): SectionNavEntry | null {
