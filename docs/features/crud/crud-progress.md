@@ -21,7 +21,7 @@
 | --- | --- | --- |
 | Docs kickoff | Complete | README, progress, outstanding |
 | Mutations | Complete | TG, contact, RGL + cascade helpers |
-| Validation | Pending | `talkGroup.ts`, `contact.ts`, `rxGroupList.ts` |
+| Validation | Complete | `talkGroup.ts`, `contact.ts`, `rxGroupList.ts` |
 | Store wiring | Pending | `codeplugStore` actions |
 | Talk group CRUD UI | Pending | `TalkGroupEdit`, list/detail |
 | RX group list CRUD UI | Pending | `RxGroupListEdit`, `RxGroupListMemberPicker` |
