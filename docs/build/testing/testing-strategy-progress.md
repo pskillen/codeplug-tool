@@ -7,9 +7,11 @@
 
 ## Overall status
 
-**Status:** Complete (pending PR)
+**Status:** Complete (pending merge)
 
 **Branch:** `78/pskillen/testing-strategy-docs`
+
+**PR:** https://github.com/pskillen/codeplug-tool/pull/82
 
 ---
 
@@ -71,4 +73,4 @@
 
 ## Next
 
-- Slice 6: open PR `Closes #78`
+- Merge PR #82
