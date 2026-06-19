@@ -6,6 +6,7 @@ import {
   IconBook,
   IconDownload,
   IconFolders,
+  IconHome,
   IconLayoutDashboard,
   IconListDetails,
   IconSettings,
@@ -51,7 +52,7 @@ export default function App() {
   const [opened, { toggle, close }] = useDisclosure();
   const location = useLocation();
   const { activeProjectId } = useProjects();
-  const showNav = activeProjectId != null;
+  const hasActiveProject = activeProjectId != null;
 
   const navItems: { to: string; label: string; icon: TablerIcon }[] = [
     { to: '/summary', label: 'Summary', icon: IconLayoutDashboard },
@@ -66,61 +67,66 @@ export default function App() {
   return (
     <AppShell
       header={{ height: 56 }}
-      navbar={
-        showNav
-          ? {
-              width: 260,
-              breakpoint: 'sm',
-              collapsed: { mobile: !opened },
-            }
-          : undefined
-      }
+      navbar={{
+        width: 260,
+        breakpoint: 'sm',
+        collapsed: { mobile: !opened },
+      }}
       padding="md"
     >
       <AppShell.Header>
         <Group h="100%" px="md">
-          {showNav ? (
-            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          ) : null}
+          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
           <Text fw={600}>MM9PDY Codeplug Tool</Text>
         </Group>
       </AppShell.Header>
 
-      {showNav ? (
-        <AppShell.Navbar p="md">
-          <Stack gap="md" style={{ height: '100%' }}>
-            <ActiveProjectBar />
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                component={Link}
-                to={item.to}
-                label={item.label}
-                leftSection={navIcon(item.icon)}
-                active={navActive(location.pathname, item.to)}
-                onClick={close}
-              />
-            ))}
-            <div style={{ flex: 1 }} />
+      <AppShell.Navbar p="md">
+        <Stack gap="md" style={{ height: '100%' }}>
+          {hasActiveProject ? (
+            <>
+              <ActiveProjectBar />
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  component={Link}
+                  to={item.to}
+                  label={item.label}
+                  leftSection={navIcon(item.icon)}
+                  active={navActive(location.pathname, item.to)}
+                  onClick={close}
+                />
+              ))}
+            </>
+          ) : (
             <NavLink
               component={Link}
-              to="/reference"
-              label="Reference"
-              leftSection={navIcon(IconBook)}
-              active={navActive(location.pathname, '/reference')}
+              to="/"
+              label="Home"
+              leftSection={navIcon(IconHome)}
+              active={navActive(location.pathname, '/')}
               onClick={close}
             />
-            <NavLink
-              component={Link}
-              to="/settings"
-              label="Settings"
-              leftSection={navIcon(IconSettings)}
-              active={navActive(location.pathname, '/settings')}
-              onClick={close}
-            />
-          </Stack>
-        </AppShell.Navbar>
-      ) : null}
+          )}
+          <div style={{ flex: 1 }} />
+          <NavLink
+            component={Link}
+            to="/reference"
+            label="Reference"
+            leftSection={navIcon(IconBook)}
+            active={navActive(location.pathname, '/reference')}
+            onClick={close}
+          />
+          <NavLink
+            component={Link}
+            to="/settings"
+            label="Settings"
+            leftSection={navIcon(IconSettings)}
+            active={navActive(location.pathname, '/settings')}
+            onClick={close}
+          />
+        </Stack>
+      </AppShell.Navbar>
 
       <AppShell.Main>
         <Routes>
