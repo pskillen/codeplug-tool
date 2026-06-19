@@ -1,4 +1,5 @@
-import { Anchor, Stack, Title } from '@mantine/core';
+import { Anchor, Group, Stack, Title } from '@mantine/core';
+import { IconArrowLeft } from '@tabler/icons-react';
 import { Link, useParams } from 'react-router-dom';
 import EntityTable from '../components/report/EntityTable.tsx';
 import DetailSections from '../components/report/DetailSections.tsx';
@@ -7,6 +8,7 @@ import ReportPage from '../components/report/ReportPage.tsx';
 import { channelsWithContactName, findEntityById } from '../lib/reportLookup.ts';
 import type { Channel } from '../models/codeplug.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
 
 function modeLabel(mode: Channel['mode']): string {
   if (mode === 'digital') return 'Digital';
@@ -33,7 +35,10 @@ export default function ContactDetail() {
     <ReportPage title={contact.name}>
       <Stack gap="lg">
         <Anchor component={Link} to="/contacts" size="sm">
-          ← Contacts
+          <Group gap={4} wrap="nowrap">
+            <IconArrowLeft size={ICON_SIZE_NAV} stroke={ICON_STROKE} />
+            Contacts
+          </Group>
         </Anchor>
 
         <DetailSections

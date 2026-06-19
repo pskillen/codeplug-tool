@@ -1,4 +1,5 @@
 import { Badge, Button, Group, MultiSelect, Stack, Text, TextInput } from '@mantine/core';
+import { IconPlus } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
@@ -8,6 +9,7 @@ import ReportPage from '../../components/report/ReportPage.tsx';
 import { applyFilters, CHANNEL_COLORS } from '../../lib/channels.ts';
 import { channelMatchesBandFilter, bandsFromFrequencies, UK_BANDS } from '../../lib/bands.ts';
 import { formatFrequencyMhz } from '../../lib/formatFrequency.ts';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { isSimplex } from '../../lib/validation/channel.ts';
 import { coordsToLocator } from '../../lib/maidenhead.ts';
 import { sortByName } from '../../lib/reportLookup.ts';
@@ -159,7 +161,11 @@ export default function ChannelsList() {
               style={{ minWidth: 160 }}
             />
           </Group>
-          <Button component={Link} to="/channels/new">
+          <Button
+            component={Link}
+            to="/channels/new"
+            leftSection={<IconPlus size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+          >
             New channel
           </Button>
         </Group>

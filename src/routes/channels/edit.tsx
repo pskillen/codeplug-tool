@@ -9,6 +9,7 @@ import {
   TextInput,
   Title,
 } from '@mantine/core';
+import { IconArrowLeft, IconDeviceFloppy } from '@tabler/icons-react';
 import { useState, useMemo, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ReportPage from '../../components/report/ReportPage.tsx';
@@ -18,6 +19,7 @@ import { formatOffsetMhz, frequencyOffsetMhz } from '../../lib/bands.ts';
 import { BandPillsForFrequencies } from '../../components/crud/BandPill.tsx';
 import ChannelModeSegmentedControl from '../../components/crud/ChannelModeSegmentedControl.tsx';
 import { coordsToLocator, isValidLocator, locatorToCoords } from '../../lib/maidenhead.ts';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { hasValidationErrors, validateChannel } from '../../lib/validation/channel.ts';
 import {
   channelFieldDefaults,
@@ -286,8 +288,9 @@ export default function ChannelEdit() {
             variant="subtle"
             size="compact-sm"
             style={{ alignSelf: 'flex-start' }}
+            leftSection={<IconArrowLeft size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
           >
-            ← Back
+            Back
           </Button>
 
           {formError ? (
@@ -504,7 +507,12 @@ export default function ChannelEdit() {
           </Stack>
 
           <Group>
-            <Button type="submit">Save</Button>
+            <Button
+              type="submit"
+              leftSection={<IconDeviceFloppy size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+            >
+              Save
+            </Button>
             <Button
               variant="default"
               component={Link}

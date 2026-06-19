@@ -1,5 +1,6 @@
 import { Anchor, Button, Group, Stack, Text, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { IconArrowLeft, IconPencil, IconTrash } from '@tabler/icons-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import ConfirmDeleteModal from '../../components/crud/ConfirmDeleteModal.tsx';
@@ -18,6 +19,7 @@ import { useCodeplug } from '../../state/codeplugStore.tsx';
 import { formatOffsetMhz, frequencyOffsetMhz } from '../../lib/bands.ts';
 import { formatFrequencyMhz } from '../../lib/formatFrequency.ts';
 import { coordsToLocator } from '../../lib/maidenhead.ts';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 
 function modeLabel(mode: string): string {
   if (mode === 'digital') return 'Digital';
@@ -185,13 +187,28 @@ export default function ChannelDetail() {
       <Stack gap="lg">
         <Group justify="space-between">
           <Anchor component={Link} to="/channels" size="sm">
-            ← Channels
+            <Group gap={4} wrap="nowrap">
+              <IconArrowLeft size={ICON_SIZE_NAV} stroke={ICON_STROKE} />
+              Channels
+            </Group>
           </Anchor>
           <Group gap="sm">
-            <Button component={Link} to={`/channels/${channel.id}/edit`} variant="light" size="sm">
+            <Button
+              component={Link}
+              to={`/channels/${channel.id}/edit`}
+              variant="light"
+              size="sm"
+              leftSection={<IconPencil size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+            >
               Edit
             </Button>
-            <Button color="red" variant="light" size="sm" onClick={openDelete}>
+            <Button
+              color="red"
+              variant="light"
+              size="sm"
+              onClick={openDelete}
+              leftSection={<IconTrash size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+            >
               Delete
             </Button>
           </Group>
