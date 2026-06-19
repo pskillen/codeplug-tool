@@ -13,6 +13,7 @@ import { useState, useMemo, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ReportPage from '../../components/report/ReportPage.tsx';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
+import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
 import { formatOffsetMhz, frequencyOffsetMhz } from '../../lib/bands.ts';
 import { BandPillsForFrequencies } from '../../components/crud/BandPill.tsx';
 import ChannelModeSegmentedControl from '../../components/crud/ChannelModeSegmentedControl.tsx';
@@ -458,12 +459,15 @@ export default function ChannelEdit() {
               onChange={(e) => set('hideFromMap', e.currentTarget.checked)}
             />
             <Group justify="space-between" align="flex-end">
-              <Text size="xs" c="dimmed">
-                Click the map to set coordinates.
-              </Text>
-              <Button type="button" variant="subtle" size="compact-sm" onClick={clearPosition}>
-                Clear position
-              </Button>
+              <UseMyLocationButton onLocation={applyCoords} />
+              <Group gap="xs" align="flex-end">
+                <Text size="xs" c="dimmed">
+                  Click the map to set coordinates.
+                </Text>
+                <Button type="button" variant="subtle" size="compact-sm" onClick={clearPosition}>
+                  Clear position
+                </Button>
+              </Group>
             </Group>
             <CodeplugMap
               channels={mapPreviewChannels}
