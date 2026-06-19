@@ -1,4 +1,4 @@
-import { Badge, Button, Group, MultiSelect, Stack, Text, TextInput } from '@mantine/core';
+import { Button, Group, MultiSelect, Stack, Text, TextInput } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
@@ -6,8 +6,10 @@ import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import { BandPillForChannel } from '../../components/crud/BandPill.tsx';
 import EntityTable from '../../components/report/EntityTable.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
-import { applyFilters, CHANNEL_COLORS } from '../../lib/channels.ts';
+import { applyFilters } from '../../lib/channels.ts';
 import { channelMatchesBandFilter, bandsFromFrequencies, UK_BANDS } from '../../lib/bands.ts';
+import { modeFilterOptions } from '../../lib/channelModes.ts';
+import ModePill from '../../components/crud/ModePill.tsx';
 import { formatFrequencyMhz } from '../../lib/formatFrequency.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { isSimplex } from '../../lib/validation/channel.ts';
@@ -23,21 +25,6 @@ const OPTIONAL_COLUMNS = [
   { key: 'rgl', header: 'RX group list' },
   { key: 'loc', header: 'Locator' },
 ] as const;
-
-function modeLabel(mode: Channel['mode']): string {
-  if (mode === 'digital') return 'Digital';
-  if (mode === 'analogue') return 'Analogue';
-  return 'Other';
-}
-
-function ModePill({ mode }: { mode: Channel['mode'] }) {
-  const color = CHANNEL_COLORS[mode === 'other' ? 'other' : mode];
-  return (
-    <Badge size="sm" style={{ backgroundColor: color, color: '#1a1b1e' }}>
-      {modeLabel(mode)}
-    </Badge>
-  );
-}
 
 function loadVisibleColumns(): string[] {
   try {
@@ -131,11 +118,7 @@ export default function ChannelsList() {
             />
             <MultiSelect
               label="Mode"
-              data={[
-                { value: 'digital', label: 'Digital' },
-                { value: 'analogue', label: 'Analogue' },
-                { value: 'other', label: 'Other' },
-              ]}
+              data={modeFilterOptions()}
               value={modeFilter}
               onChange={setModeFilter}
               clearable

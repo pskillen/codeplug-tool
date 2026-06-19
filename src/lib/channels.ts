@@ -2,12 +2,7 @@ import type { Channel, ChannelMode, Zone } from '../models/codeplug.ts';
 import type { LatLon } from './geo.ts';
 import { uniqueLatLon } from './geo.ts';
 import { buildNameToChannelId } from './codeplug.ts';
-
-export const CHANNEL_COLORS = {
-  analogue: '#f0c419',
-  digital: '#e03131',
-  other: '#9c36b5',
-} as const;
+import { modeColor } from './channelModes.ts';
 
 export interface FilterOptions {
   requireUseLocation: boolean;
@@ -25,9 +20,7 @@ export interface ZoneMemberMissing {
 }
 
 export function markerColor(mode: ChannelMode): string {
-  if (mode === 'analogue') return CHANNEL_COLORS.analogue;
-  if (mode === 'digital') return CHANNEL_COLORS.digital;
-  return CHANNEL_COLORS.other;
+  return modeColor(mode);
 }
 
 export function markerLabel(group: Channel[], useFull: boolean): string {
@@ -40,8 +33,19 @@ export function markerLabel(group: Channel[], useFull: boolean): string {
 }
 
 export function dominantMode(group: Channel[]): ChannelMode {
-  const digital = group.filter((c) => c.mode === 'digital').length;
-  return digital >= group.length / 2 ? 'digital' : 'analogue';
+  const counts = new Map<ChannelMode, number>();
+  for (const ch of group) {
+    counts.set(ch.mode, (counts.get(ch.mode) ?? 0) + 1);
+  }
+  let best = group[0].mode;
+  let bestCount = 0;
+  for (const [mode, count] of counts) {
+    if (count > bestCount) {
+      bestCount = count;
+      best = mode;
+    }
+  }
+  return best;
 }
 
 export function applyFilters(

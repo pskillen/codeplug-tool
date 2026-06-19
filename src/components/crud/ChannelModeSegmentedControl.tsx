@@ -1,33 +1,24 @@
-import { SegmentedControl, Stack, Text } from '@mantine/core';
-import { mapChannelMode, type ChannelMode } from '../../models/codeplug.ts';
-import classes from './ChannelModeSegmentedControl.module.css';
+import { Select, Stack, Text } from '@mantine/core';
+import { CHANNEL_MODES, type ChannelMode } from '../../lib/channelModes.ts';
 
-const MODE_DATA = [
-  { label: 'Digital', value: 'digital' },
-  { label: 'Analogue', value: 'analogue' },
-  { label: 'Other', value: 'other' },
-] as const;
-
-export interface ChannelModeSegmentedControlProps {
+export interface ChannelModeSelectProps {
   value: ChannelMode;
   onChange: (mode: ChannelMode) => void;
 }
 
-export default function ChannelModeSegmentedControl({
-  value,
-  onChange,
-}: ChannelModeSegmentedControlProps) {
+export default function ChannelModeSelect({ value, onChange }: ChannelModeSelectProps) {
   return (
     <Stack gap={4}>
       <Text size="sm" fw={500}>
         Mode
       </Text>
-      <SegmentedControl
-        classNames={classes}
-        data={[...MODE_DATA]}
+      <Select
+        data={CHANNEL_MODES.map((m) => ({ value: m.id, label: m.label }))}
         value={value}
-        onChange={(v) => onChange(mapChannelMode(v))}
-        fullWidth
+        onChange={(v) => {
+          if (v) onChange(v as ChannelMode);
+        }}
+        searchable
       />
     </Stack>
   );

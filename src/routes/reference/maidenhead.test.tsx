@@ -117,7 +117,7 @@ describe('MaidenheadConverter', () => {
         id: 'ch-1',
         name: 'GB3HI',
         callsign: 'GB3HI',
-        mode: 'digital',
+        mode: 'dmr',
         location: { lat: 55.86, lon: -4.25 },
         useLocation: true,
       },

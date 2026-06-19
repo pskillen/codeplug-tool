@@ -22,7 +22,7 @@ erDiagram
 
 At the **vendor boundary**, `Channel.contactName` and `Channel.rxGroupListName` reference Contacts.csv / TG_Lists.csv **by name** (not internal id). `RxGroupList.sourceMemberNames` lists member names from Contacts.csv (group talk groups and/or private contacts).
 
-**Source:** [`src/models/codeplug.ts`](../../../src/models/codeplug.ts) · schema version **2**
+**Source:** [`src/models/codeplug.ts`](../../../src/models/codeplug.ts) · schema version **3**
 
 ## Design principles
 
@@ -32,7 +32,7 @@ At the **vendor boundary**, `Channel.contactName` and `Channel.rxGroupListName` 
 | **Vendor names are display fields** | `Channel.name`, `Zone.name`, etc. are preserved for UI and export round-trip but are **not** internal foreign keys (except name-based wire fields below). |
 | **Name matching at import only** | Zone members resolve channel **names** → ids via `resolveZoneMembers`. RX group list members stay as `sourceMemberNames` for export. |
 | **JSON-serialisable** | Plain data objects for persistence and export. |
-| **Schema versioned** | `CODEPLUG_SCHEMA_VERSION = 2`; v1 codeplugs migrate on load. |
+| **Schema versioned** | `CODEPLUG_SCHEMA_VERSION = 3`; v1/v2 codeplugs migrate on load. |
 
 ## Entities
 
@@ -54,7 +54,7 @@ At the **vendor boundary**, `Channel.contactName` and `Channel.rxGroupListName` 
 | `id` | `string` | Internal |
 | `name` | `string` | OpenGD77 `Channel Name` |
 | `callsign` | `string` | Derived — first word of `name` |
-| `mode` | `'analogue' \| 'digital' \| 'other'` | From `Channel Type` |
+| `mode` | `ChannelMode` | Specific mode — see [channel-modes reference](../../reference/channel-modes.md) (`fm`, `dmr`, `ysf`, …) |
 | `rxFrequency`, `txFrequency` | `string` | |
 | `contactName` | `string` | Vendor `Contact` name |
 | `rxGroupListName` | `string` | Vendor `TG List` — RX group list name |
@@ -108,7 +108,7 @@ Named RX group list from `TG_Lists.csv`. Members are **vendor names** (may be ta
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `schemaVersion` | `number` | Must match `CODEPLUG_SCHEMA_VERSION` (2) after migration |
+| `schemaVersion` | `number` | Must match `CODEPLUG_SCHEMA_VERSION` (3) after migration |
 | `importedAt` | `string \| null` | |
 | `sourceFiles` | `string[]` | |
 

@@ -38,11 +38,11 @@ Columns are matched by **header name**, not column index.
 | Column | Used for |
 | --- | --- |
 | `Channel Number` | Stored; not shown on map |
-| `Channel Type` | Marker colour (`Analogue` / `Digital` / other) |
+| `Channel Type` | Marker colour — mapped to specific mode; see [channel-modes](../../reference/channel-modes.md) |
 | `Rx Frequency` | Popup |
 | `Tx Frequency` | Popup |
-| `Contact` | Popup (digital; hidden when `None`) |
-| `TG List` | Popup (digital; hidden when `None`) |
+| `Contact` | Popup (DMR; hidden when `None`) |
+| `TG List` | Popup (DMR; hidden when `None`) |
 | `Use Location` | Filter — `Yes` (case-insensitive) enables plotting when filter is on |
 
 Tab characters inside cell values are stripped after trim.
@@ -57,7 +57,7 @@ See [data model — Channel](../data-model/README.md#channel). Example:
   "number": "42",
   "name": "GB3CS Motherwell",
   "callsign": "GB3CS",
-  "mode": "analogue",
+  "mode": "fm",
   "rxFrequency": "430.92500",
   "txFrequency": "438.52500",
   "contactName": "None",
@@ -97,13 +97,9 @@ Skipped channels appear in the **Skipped channels** sidebar list (up to 200 rows
 
 ### Marker appearance
 
-| `mode` | Colour | CSS variable |
-| --- | --- | --- |
-| `analogue` | Yellow | `--analogue` `#f0c419` |
-| `digital` | Red | `--digital` `#e03131` |
-| `other` | Purple | `--other` `#9c36b5` |
+Per-mode marker colours are defined in [channel-modes](../../reference/channel-modes.md) (`src/lib/channelModes.ts`). Examples: `fm` `#f0c419`, `dmr` `#e03131`, `dstar` `#7950f2`.
 
-Merged groups use the **dominant** mode: digital if at least half the co-located channels are `digital`.
+Merged groups use the **dominant** mode: the most frequent specific mode in the co-located group (tie → first channel).
 
 Markers use a `divIcon` with a dot and permanent label below. Merged sites use a slightly larger dot and a `+N` suffix on the label.
 
@@ -112,7 +108,7 @@ Markers use a `divIcon` with a dot and permanent label below. Merged sites use a
 Click a marker for:
 
 - Title: callsign, or `callsign (+N)` when merged
-- Per channel: full name, type, RX/TX MHz, and for digital rows contact / TG list when not `None`
+- Per channel: full name, mode label, RX/TX MHz, and for DMR rows contact / TG list when not `None`
 
 ### Map bounds
 

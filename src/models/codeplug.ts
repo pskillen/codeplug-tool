@@ -1,4 +1,6 @@
-export type ChannelMode = 'analogue' | 'digital' | 'other';
+import type { ChannelMode } from '../lib/channelModes.ts';
+
+export type { ChannelMode };
 
 export interface GeoPoint {
   lat: number;
@@ -112,7 +114,7 @@ export interface Codeplug {
   meta: CodeplugMeta;
 }
 
-export const CODEPLUG_SCHEMA_VERSION = 2;
+export const CODEPLUG_SCHEMA_VERSION = 3;
 
 let idGenerator: () => string = () => crypto.randomUUID();
 
@@ -146,9 +148,3 @@ export function emptyCodeplug(): Codeplug {
   };
 }
 
-export function mapChannelMode(type: string): ChannelMode {
-  const t = (type || '').toLowerCase();
-  if (t === 'digital') return 'digital';
-  if (t === 'analogue' || t === 'analog') return 'analogue';
-  return 'other';
-}

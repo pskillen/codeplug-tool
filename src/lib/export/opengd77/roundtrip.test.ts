@@ -82,7 +82,7 @@ Scotland,Scotland TS1,Local 9,,`;
         name: l.name,
         sourceMemberNames: l.sourceMemberNames,
       })),
-      meta: { schemaVersion: 2, importedAt: null, sourceFiles: [] },
+      meta: { schemaVersion: 3, importedAt: null, sourceFiles: [] },
     });
 
     const second = await importFromExport(exported);
@@ -102,7 +102,7 @@ Scotland,Scotland TS1,Local 9,,`;
         name: l.name,
         sourceMemberNames: l.sourceMemberNames,
       })),
-      meta: { schemaVersion: 2, importedAt: null, sourceFiles: [] },
+      meta: { schemaVersion: 3, importedAt: null, sourceFiles: [] },
     })).toEqual(
       stripIds({
         channels: first.channels!,
@@ -121,7 +121,7 @@ Scotland,Scotland TS1,Local 9,,`;
           name: l.name,
           sourceMemberNames: l.sourceMemberNames,
         })),
-        meta: { schemaVersion: 2, importedAt: null, sourceFiles: [] },
+        meta: { schemaVersion: 3, importedAt: null, sourceFiles: [] },
       }),
     );
   });

@@ -22,7 +22,7 @@ function makeChannel(id: string, name: string) {
     id,
     name,
     callsign: name.split(' ')[0],
-    mode: 'digital' as const,
+    mode: 'dmr' as const,
     ...channelFieldDefaults(),
     number: '1',
   };
@@ -42,7 +42,7 @@ describe('codeplugMutations', () => {
     const cp = emptyCodeplug();
     const next = addChannel(cp, {
       name: 'GB3DA DMR',
-      mode: 'digital',
+      mode: 'dmr',
       ...channelFieldDefaults(),
       number: '',
     });

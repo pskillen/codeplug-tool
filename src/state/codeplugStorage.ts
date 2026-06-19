@@ -9,6 +9,7 @@ import {
   type TalkGroup,
   type Zone,
 } from '../models/codeplug.ts';
+import { normalizeChannelMode } from '../lib/channelModes.ts';
 import type { CodeplugProject } from '../models/codeplugProject.ts';
 import { newProject } from '../models/codeplugProject.ts';
 
@@ -33,9 +34,9 @@ function migrateChannel(raw: Partial<Channel>): Channel {
     id: raw.id ?? '',
     name: raw.name ?? '',
     callsign: raw.callsign ?? '',
-    mode: raw.mode ?? 'other',
     ...defaults,
     ...raw,
+    mode: normalizeChannelMode(String(raw.mode ?? 'other')),
     hideFromMap: raw.hideFromMap ?? false,
     vendorExtras: raw.vendorExtras ?? {},
   };
@@ -77,7 +78,7 @@ function migrateTalkGroup(raw: Partial<TalkGroup>): TalkGroup {
   };
 }
 
-/** Normalise a persisted codeplug (v1 or v2) to the current schema. */
+/** Normalise a persisted codeplug (v1, v2, or v3) to the current schema. */
 export function migrateCodeplug(value: unknown): Codeplug | null {
   if (!value || typeof value !== 'object') return null;
   const raw = value as Record<string, unknown>;

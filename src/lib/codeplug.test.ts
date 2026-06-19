@@ -7,7 +7,7 @@ function ch(id: string, name: string): Channel {
     id,
     name,
     callsign: name.split(/\s+/)[0],
-    mode: 'digital',
+    mode: 'dmr',
     ...channelFieldDefaults(),
     location: { lat: 56.5, lon: -4.0 },
     useLocation: true,

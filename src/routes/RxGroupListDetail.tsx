@@ -10,16 +10,10 @@ import {
   findEntityById,
   resolveRxGroupListMembers,
 } from '../lib/reportLookup.ts';
-import type { Channel } from '../models/codeplug.ts';
 import type { Contact, TalkGroup } from '../models/codeplug.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
-
-function modeLabel(mode: Channel['mode']): string {
-  if (mode === 'digital') return 'Digital';
-  if (mode === 'analogue') return 'Analogue';
-  return 'Other';
-}
+import { modeLabel } from '../lib/channelModes.ts';
 
 export default function RxGroupListDetail() {
   const { id } = useParams<{ id: string }>();

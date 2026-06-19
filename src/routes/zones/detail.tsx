@@ -9,16 +9,10 @@ import DetailSections from '../../components/report/DetailSections.tsx';
 import NotFoundEntity from '../../components/report/NotFoundEntity.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
 import { channelsForZone, findEntityById } from '../../lib/reportLookup.ts';
-import type { Channel } from '../../models/codeplug.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 
-function modeLabel(mode: Channel['mode']): string {
-  if (mode === 'digital') return 'Digital';
-  if (mode === 'analogue') return 'Analogue';
-  return 'Other';
-}
-
+import { modeLabel } from '../../lib/channelModes.ts';
 export default function ZoneDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();

@@ -14,7 +14,7 @@ import type { Zone } from '../models/codeplug.ts';
 function ch(overrides: Partial<Channel> & Pick<Channel, 'id' | 'name'>): Channel {
   return {
     callsign: overrides.name.split(/\s+/)[0],
-    mode: 'digital',
+    mode: 'dmr',
     ...channelFieldDefaults(),
     number: '1',
     location: { lat: 56.5, lon: -4.0 },
@@ -24,9 +24,10 @@ function ch(overrides: Partial<Channel> & Pick<Channel, 'id' | 'name'>): Channel
 }
 
 describe('markerColor', () => {
-  it('maps analogue and digital modes', () => {
-    expect(markerColor('analogue')).toBe('#f0c419');
-    expect(markerColor('digital')).toBe('#e03131');
+  it('returns per-mode colours from channelModes', () => {
+    expect(markerColor('fm')).toBe('#f0c419');
+    expect(markerColor('dmr')).toBe('#e03131');
+    expect(markerColor('dstar')).toBe('#7950f2');
     expect(markerColor('other')).toBe('#9c36b5');
   });
 });
@@ -71,21 +72,21 @@ describe('groupByCoords', () => {
 });
 
 describe('dominantMode', () => {
-  it('returns digital when majority are digital', () => {
+  it('returns the most frequent mode in a group', () => {
     const group = [
-      ch({ id: '1', name: 'A', mode: 'digital' }),
-      ch({ id: '2', name: 'B', mode: 'analogue' }),
+      ch({ id: '1', name: 'A', mode: 'dmr' }),
+      ch({ id: '2', name: 'B', mode: 'fm' }),
     ];
-    expect(dominantMode(group)).toBe('digital');
+    expect(dominantMode(group)).toBe('dmr');
   });
 
-  it('returns analogue when digital is minority', () => {
+  it('returns fm when it is the majority', () => {
     const group = [
-      ch({ id: '1', name: 'A', mode: 'digital' }),
-      ch({ id: '2', name: 'B', mode: 'analogue' }),
-      ch({ id: '3', name: 'C', mode: 'analogue' }),
+      ch({ id: '1', name: 'A', mode: 'dmr' }),
+      ch({ id: '2', name: 'B', mode: 'fm' }),
+      ch({ id: '3', name: 'C', mode: 'fm' }),
     ];
-    expect(dominantMode(group)).toBe('analogue');
+    expect(dominantMode(group)).toBe('fm');
   });
 });
 
