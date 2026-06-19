@@ -7,43 +7,30 @@
 
 ## Overall status
 
-**Status:** In progress
+**Status:** Complete (pending PR)
 
 ---
 
-## Slice 0: Skill + docs scaffold
+## Delivered
 
-**Status:** Complete
+| Slice | Commit | Notes |
+| --- | --- | --- |
+| Skill + docs scaffold | `docs(skills)`, `docs(operator-distance)` | Plan-mode reminder; feature folder |
+| Distance utilities | `feat(geo)` | `geoDistance.ts` |
+| Session position | `feat(state)` | `operatorPosition.tsx`, `main.tsx` |
+| Map marker | `feat(map)` | `CodeplugMap` `operatorPosition` prop |
+| Channel detail | `feat(channels)` | Distance field, Use/Clear |
+| Channel list | `feat(channels)` | Sort, distance column, map |
+| Zone detail | `feat(zones)` | Map marker |
+| Documentation | `docs(operator-distance)` | Hub, cross-links, sidecars |
 
-**Delivered**
+## Verify
 
-- Plan-mode reminder in `.cursor/skills/make-a-plan/SKILL.md`
-- Feature doc folder `docs/features/operator-distance/`
-
----
-
-## Slice 1: Distance utilities
-
-**Status:** Complete
-
-**Delivered**
-
-- `src/lib/geoDistance.ts` — `haversineDistanceM`, `formatDistanceM`
-- `src/lib/geoDistance.test.ts`
-
----
-
-## Slice 2: Session operator position
-
-**Status:** Complete
-
-**Delivered**
-
-- `src/state/operatorPosition.tsx` — `OperatorPositionProvider`, `useOperatorPosition`
-- Wired in `src/main.tsx`
+- `npm run lint && npm run test && npm run build`
+- `npm run dev` → manual verify checklist in [README.md](README.md)
 
 ---
 
 ## Next
 
-- CodeplugMap operator marker
+- Open PR with `Closes #70`
