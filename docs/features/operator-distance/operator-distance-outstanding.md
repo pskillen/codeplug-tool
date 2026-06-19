@@ -11,5 +11,4 @@ Items skipped, incomplete, or discovered during execution — not the plan's fut
 - [ ] Summary page map ([#61](https://github.com/pskillen/codeplug-tool/issues/61)) — same `operatorPosition` prop pattern
 - [ ] Continuous GPS / `watchPosition`
 - [ ] Bearing / compass to repeater
-- [ ] Radius filter
 - [ ] Persisting operator position across sessions

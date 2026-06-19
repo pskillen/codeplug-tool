@@ -13,6 +13,7 @@ Session-scoped operator position for **field use**: distance from me on channel 
 | CodeplugMap operator marker | Shipped | `operatorPosition` prop — blue “You” marker, included in bounds |
 | Channel detail distance | Shipped | Location section + Use/Clear my location |
 | Channel list sort + column | Shipped | Name / Distance from me; hideable distance column (default on) |
+| Channel list distance filter | Shipped | Within distance switch + km slider; hides ungeolocated |
 | Zone detail map marker | Shipped | Reuses session position |
 
 ## Documentation map
@@ -58,6 +59,7 @@ Session-scoped operator position for **field use**: distance from me on channel 
 - **Privacy:** browser Geolocation API locally; never uploaded; session-only unless user saves a channel on edit
 - **Permission denied:** inline error on button; rest of page usable
 - **Distance sort:** geolocated channels ascending; unlocated at bottom (sub-sorted by name). Without session position, sort falls back to name with helper text
+- **Distance filter:** **Within distance** switch on channel list — hides channels without coordinates (`Use Location` off or missing coords). Slider (5–200 km, marked) limits radius when session position is set; map shows filtered channels only
 - **Maps:** operator marker distinct from channel markers; bounds include operator + channels when both present
 
 ## Manual verify
@@ -65,10 +67,11 @@ Session-scoped operator position for **field use**: distance from me on channel 
 1. Channel detail → **Use my location** → distance appears; map shows channel + You markers
 2. Deny permission → inline error; no distance
 3. Channel list → sort by distance → nearest repeater first; unlocated channels last
-4. Distance column shows values when position set, `—` when not
-5. Zone detail map → operator marker with zone hull
-6. Reload page → position cleared; distance hidden until requested again
-7. **Clear my location** → distance/marker removed across views
+4. **Within distance** filter → ungeolocated hidden; slider limits radius when location set
+5. Distance column shows values when position set, `—` when not
+6. Zone detail map → operator marker with zone hull
+7. Reload page → position cleared; distance hidden until requested again
+8. **Clear my location** → distance/marker removed across views
 
 ## Related
 

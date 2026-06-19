@@ -1,4 +1,4 @@
-import { Button, Group, MultiSelect, Select, Stack, Text, TextInput } from '@mantine/core';
+import { Button, Group, MultiSelect, Select, Slider, Stack, Switch, Text, TextInput } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
@@ -7,7 +7,7 @@ import { BandPillForChannel } from '../../components/crud/BandPill.tsx';
 import EntityTable from '../../components/report/EntityTable.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
-import { applyFilters, channelHasGeolocation } from '../../lib/channels.ts';
+import { applyFilters, channelHasGeolocation, DISTANCE_FILTER_MARKS_KM, filterChannelsByDistance } from '../../lib/channels.ts';
 import { channelMatchesBandFilter, bandsFromFrequencies, UK_BANDS } from '../../lib/bands.ts';
 import { modeFilterOptions } from '../../lib/channelModes.ts';
 import ModePill from '../../components/crud/ModePill.tsx';
@@ -109,6 +109,8 @@ export default function ChannelsList() {
   const [modeFilter, setModeFilter] = useState<string[]>([]);
   const [duplexFilter, setDuplexFilter] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>('name');
+  const [distanceFilterEnabled, setDistanceFilterEnabled] = useState(false);
+  const [maxDistanceKm, setMaxDistanceKm] = useState<number>(DISTANCE_FILTER_MARKS_KM[2]);
   const [visibleCols, setVisibleCols] = useState<string[]>(loadVisibleColumns);
 
   const nameFiltered = useMemo(() => {
@@ -122,10 +124,22 @@ export default function ChannelsList() {
     });
   }, [channels, nameFilter, bandFilter, modeFilter, duplexFilter]);
 
-  const filtered = useMemo(
-    () => sortChannels(nameFiltered, sortMode, position),
-    [nameFiltered, sortMode, position],
+  const distanceFiltered = useMemo(
+    () =>
+      filterChannelsByDistance(nameFiltered, {
+        enabled: distanceFilterEnabled,
+        operatorPosition: position,
+        maxDistanceKm,
+      }),
+    [nameFiltered, distanceFilterEnabled, position, maxDistanceKm],
   );
+
+  const filtered = useMemo(
+    () => sortChannels(distanceFiltered, sortMode, position),
+    [distanceFiltered, sortMode, position],
+  );
+
+  const mapChannels = distanceFilterEnabled ? filtered : channels;
 
   const { skipped } = applyFilters(channels, { requireUseLocation: true, skipZero: true });
 
@@ -175,6 +189,12 @@ export default function ChannelsList() {
   };
 
   const distanceSortPending = sortMode === 'distance' && !position;
+  const distanceFilterPending = distanceFilterEnabled && !position;
+
+  const distanceFilterMarks = DISTANCE_FILTER_MARKS_KM.map((km) => ({
+    value: km,
+    label: `${km}`,
+  }));
 
   return (
     <ReportPage title="Channels">
@@ -271,12 +291,54 @@ export default function ChannelsList() {
               Clear my location
             </Button>
           </Group>
-        ) : sortMode === 'name' ? (
+        ) : sortMode === 'name' && !distanceFilterEnabled ? (
           <UseMyLocationButton
             onLocation={(lat, lon, accuracyMeters) =>
               setPosition({ lat, lon, accuracyMeters: accuracyMeters ?? null })
             }
           />
+        ) : null}
+
+        <Switch
+          label="Within distance"
+          description="Hide channels without coordinates; limit by radius when your location is set"
+          checked={distanceFilterEnabled}
+          onChange={(e) => setDistanceFilterEnabled(e.currentTarget.checked)}
+        />
+
+        {distanceFilterEnabled ? (
+          <Stack gap="xs" maw={480}>
+            <Text size="sm" fw={500}>
+              Within {maxDistanceKm} km
+              {position
+                ? ` — showing ${filtered.length} channel${filtered.length === 1 ? '' : 's'}`
+                : ' — set your location to apply radius'}
+            </Text>
+            <Slider
+              value={maxDistanceKm}
+              onChange={setMaxDistanceKm}
+              min={DISTANCE_FILTER_MARKS_KM[0]}
+              max={DISTANCE_FILTER_MARKS_KM[DISTANCE_FILTER_MARKS_KM.length - 1]}
+              marks={distanceFilterMarks}
+              restrictToMarks
+              label={(value) => `${value} km`}
+              mb="lg"
+            />
+          </Stack>
+        ) : null}
+
+        {distanceFilterPending ? (
+          <Stack gap="xs">
+            <Text size="sm" c="dimmed">
+              Distance filter hides channels without coordinates. Set your location to also limit by
+              radius.
+            </Text>
+            <UseMyLocationButton
+              onLocation={(lat, lon, accuracyMeters) =>
+                setPosition({ lat, lon, accuracyMeters: accuracyMeters ?? null })
+              }
+            />
+          </Stack>
         ) : null}
 
         <EntityTable
@@ -303,7 +365,7 @@ export default function ChannelsList() {
         ) : null}
 
         <CodeplugMap
-          channels={channels}
+          channels={mapChannels}
           zones={zones}
           allChannels={channels}
           operatorPosition={position}
