@@ -34,6 +34,7 @@ import ContactsList from './routes/ContactsList.tsx';
 import ContactDetail from './routes/ContactDetail.tsx';
 import RxGroupListsList from './routes/RxGroupListsList.tsx';
 import RxGroupListDetail from './routes/RxGroupListDetail.tsx';
+import RxGroupListEdit from './routes/RxGroupListEdit.tsx';
 import Settings from './routes/Settings.tsx';
 import ReferenceIndex from './routes/reference/index.tsx';
 import BandPlan from './routes/reference/band-plan.tsx';
@@ -153,6 +154,8 @@ export default function App() {
             <Route path="/contacts" element={<ContactsList />} />
             <Route path="/contacts/:id" element={<ContactDetail />} />
             <Route path="/rx-group-lists" element={<RxGroupListsList />} />
+            <Route path="/rx-group-lists/new" element={<RxGroupListEdit />} />
+            <Route path="/rx-group-lists/:id/edit" element={<RxGroupListEdit />} />
             <Route path="/rx-group-lists/:id" element={<RxGroupListDetail />} />
             <Route path="/export" element={<ImportExport />} />
             <Route path="/map" element={<Navigate to="/channels" replace />} />
