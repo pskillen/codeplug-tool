@@ -40,8 +40,7 @@ function escapeHtml(s: string): string {
 function labelIcon(text: string): L.DivIcon {
   return L.divIcon({
     className: 'maidenhead-grid-label-wrap',
-    html: `<div class="maidenhead-grid-label">${escapeHtml(text)}</div>`,
-    iconSize: [0, 0],
+    html: `<span class="maidenhead-grid-label">${escapeHtml(text)}</span>`,
     iconAnchor: [0, 0],
   });
 }
