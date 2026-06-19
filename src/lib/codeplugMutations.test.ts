@@ -24,9 +24,10 @@ import {
   emptyCodeplug,
   resetIdGenerator,
   setIdGenerator,
+  type Channel,
 } from '../models/codeplug.ts';
 
-function makeChannel(id: string, name: string, extras: Partial<ReturnType<typeof makeChannel>> = {}) {
+function makeChannel(id: string, name: string, extras: Partial<Channel> = {}): Channel {
   return {
     id,
     name,
