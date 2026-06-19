@@ -18,10 +18,7 @@ export default defineConfig({
     setupFiles: './src/test/setup.ts',
     globals: true,
     reporters: isGitHubActions
-      ? [
-          'default',
-          ['junit', { outputFile: 'test-results/junit.xml', addFileAttribute: true }],
-        ]
+      ? ['default', ['junit', { outputFile: 'test-results/junit.xml', addFileAttribute: true }]]
       : ['default'],
     coverage: {
       provider: 'v8',
