@@ -13,7 +13,7 @@ Session-scoped operator position for field use: distance from me on channel deta
 | CodeplugMap operator marker | Complete | `operatorPosition` prop |
 | Channel detail distance | Planned | Location section + map |
 | Channel list sort + column | Complete | Name / Distance from me |
-| Zone detail map marker | Planned | Reuse session position |
+| Zone detail map marker | Complete | Reuse session position |
 
 ## Documentation map
 
