@@ -30,8 +30,10 @@ function mockGeolocationSuccess(lat: number, lon: number, accuracy = 12) {
             altitudeAccuracy: null,
             heading: null,
             speed: null,
+            toJSON: () => ({}),
           },
           timestamp: Date.now(),
+          toJSON: () => ({}),
         });
       }),
     },

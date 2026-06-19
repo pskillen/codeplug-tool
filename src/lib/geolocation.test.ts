@@ -68,8 +68,8 @@ describe('requestCurrentPosition', () => {
   });
 
   it('returns lat, lon, and accuracy on success', async () => {
-    const getCurrentPosition = vi.fn((_success: PositionCallback) => {
-      _success({
+    const getCurrentPosition = vi.fn((success: PositionCallback) => {
+      success({
         coords: {
           latitude: 55.953252,
           longitude: -3.188267,
@@ -78,8 +78,10 @@ describe('requestCurrentPosition', () => {
           altitudeAccuracy: null,
           heading: null,
           speed: null,
+          toJSON: () => ({}),
         },
         timestamp: Date.now(),
+        toJSON: () => ({}),
       });
     });
 
