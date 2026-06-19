@@ -12,6 +12,7 @@ How the MM9PDY Codeplug Tool **Vite + React SPA** reaches **GitHub Pages**. The 
 | Build version footer | Shipped | Vite `define` injects `BUILD_ENV` / `BUILD_VERSION`; `BuildFooter` component |
 | Legacy static tools | Retired (Ticket C) | SPA-only; `site/` and `tools/` removed |
 | Merge-to-main auto deploy | Not used | Releases are explicit via published GitHub releases only |
+| PR CI (lint, test, coverage) | Planned | [#79](https://github.com/pskillen/codeplug-tool/issues/79) — separate from Pages workflow |
 
 ## Documentation map
 
@@ -20,6 +21,7 @@ How the MM9PDY Codeplug Tool **Vite + React SPA** reaches **GitHub Pages**. The 
 | [README.md](../../README.md) | User-facing overview and live site link |
 | [AGENTS.md](../../AGENTS.md) | Agent layout table and working principles |
 | [docs/build/spa/](spa/) | SPA migration progress and outstanding logs |
+| [docs/build/testing/](testing/) | Testing strategy — format fidelity, layers, CI expectations |
 | [docs/features/map/](../features/map/README.md) | Channel map behaviour and verify steps |
 
 ## Concepts
@@ -125,7 +127,8 @@ Use CSV fixtures from gitignored `sample-exports/`.
 
 - No staging environment — publishing a release updates production Pages.
 - No cache-busting beyond Vite content hashes in `dist/assets/`.
-- Workflow does not run on PRs or tag pushes (published-release-only).
+- Pages workflow does not run on PRs (published-release-only).
+- **PR CI** (lint, test, coverage, build on pull request) — planned [#79](https://github.com/pskillen/codeplug-tool/issues/79); see [testing/README.md](testing/README.md).
 
 ## Cross-links
 

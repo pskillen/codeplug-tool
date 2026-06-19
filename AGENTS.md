@@ -26,6 +26,7 @@ This repo is a **Vite + React + TypeScript SPA** (Mantine UI, react-leaflet maps
 | `src/state/` | Central codeplug store (persistence-ready) |
 | `package.json`, `vite.config.ts`, `tsconfig.json` | SPA build and tooling |
 | `docs/build/` | Build and deploy documentation |
+| `docs/build/testing/` | Testing strategy — [README](docs/build/testing/README.md) |
 | `docs/build/spa/` | SPA migration progress and outstanding logs |
 | `docs/features/map/` | Channel map contributor docs — [README](docs/features/map/README.md) |
 | `docs/features/` | Feature doc index and progress logs |
