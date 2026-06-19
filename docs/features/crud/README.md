@@ -18,7 +18,7 @@ Create, edit, and delete codeplug entities against the internal vendor-neutral m
 
 ## Vendor boundaries
 
-Internal models, mutations, validation, and CRUD UI are **vendor-neutral** — no radio profile constants or member-count caps. Cardinality limits and vendor column mapping apply at the **import/export boundary** only. See [data-model](../data-model/README.md) and [make-a-plan skill](../../../.cursor/skills/make-a-plan/SKILL.md).
+Internal models, mutations, validation, and CRUD UI are **vendor-neutral** — no radio profile constants or member-count caps. Cardinality limits and vendor column mapping apply at the **import/export boundary** only. See [AGENTS.md — Vendor boundaries](../../../AGENTS.md#vendor-boundaries) and [data-model](../data-model/README.md).
 
 TG/RGL/contact CRUD follows the same rule: unlimited RGL members in the internal model; export may truncate per radio profile.
 

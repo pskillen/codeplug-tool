@@ -37,6 +37,7 @@ Wire-format column detail: [OpenGD77 reference](../../reference/opengd77/README.
 | **JSON-serialisable** | Plain data objects for persistence and export. |
 | **Schema versioned** | `CODEPLUG_SCHEMA_VERSION = 3`; v1/v2 codeplugs migrate on load. |
 | **CRUD is vendor-neutral** | Create/edit/delete in the SPA does not enforce radio cardinality (e.g. RX group list member count). Limits apply at import/export per [radio profiles](../../reference/opengd77/radios/README.md). |
+| **Vendor-specific fields are additive** | e.g. `vendorExtras`, opaque wire strings — store when useful; importer/exporter decides drop, warn, truncate, or round-trip. Do not reject or cap in CRUD because export might not round-trip. |
 
 ## Entities
 
