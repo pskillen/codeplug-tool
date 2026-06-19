@@ -33,6 +33,17 @@
 
 ---
 
+## Slice 2: Session operator position
+
+**Status:** Complete
+
+**Delivered**
+
+- `src/state/operatorPosition.tsx` — `OperatorPositionProvider`, `useOperatorPosition`
+- Wired in `src/main.tsx`
+
+---
+
 ## Next
 
-- Session operator position context
+- CodeplugMap operator marker
