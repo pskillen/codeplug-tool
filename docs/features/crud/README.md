@@ -10,7 +10,7 @@ Create, edit, and delete codeplug entities against the internal vendor-neutral m
 | --- | --- | --- |
 | Channel CRUD | Complete | `src/routes/channels/` |
 | Zone CRUD | Complete | `src/routes/zones/` + `ZoneMemberPicker` |
-| Talk group CRUD | In progress | [#13](https://github.com/pskillen/codeplug-tool/issues/13) — `TalkGroupEdit`, list/detail actions |
+| Talk group CRUD | Complete | `TalkGroupEdit`, list/detail |
 | RX group list CRUD | Complete | `RxGroupListEdit`, `RxGroupListMemberPicker` |
 | Contact CRUD | Complete | `ContactEdit`, list/detail |
 | Store mutations | Complete | `codeplugMutations.ts`, `codeplugStore` |
