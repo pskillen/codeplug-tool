@@ -8,7 +8,7 @@ function channel(id: string, name: string) {
     id,
     name,
     callsign: name,
-    mode: 'digital' as const,
+    mode: 'dmr' as const,
     ...channelFieldDefaults(),
     number: '1',
   };
@@ -17,13 +17,13 @@ function channel(id: string, name: string) {
 describe('validateChannel', () => {
   it('requires unique name', () => {
     const cp = { ...emptyCodeplug(), channels: [channel('c1', 'Dup')] };
-    const issues = validateChannel({ name: 'Dup', ...channelFieldDefaults(), mode: 'digital' }, cp);
+    const issues = validateChannel({ name: 'Dup', ...channelFieldDefaults(), mode: 'dmr' }, cp);
     expect(hasValidationErrors(issues)).toBe(true);
   });
 
   it('warns on missing contact', () => {
     const issues = validateChannel(
-      { ...channelFieldDefaults(), name: 'X', contactName: 'Missing', mode: 'digital' },
+      { ...channelFieldDefaults(), name: 'X', contactName: 'Missing', mode: 'dmr' },
       emptyCodeplug(),
     );
     expect(issues.some((i) => i.severity === 'warning' && i.field === 'contactName')).toBe(true);

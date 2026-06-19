@@ -16,7 +16,7 @@ const channel = (id: string, name: string, extras: Partial<Channel> = {}): Chann
     id,
     name,
     callsign: name.split(' ')[0],
-    mode: 'digital',
+    mode: 'dmr',
     contactName: '',
     rxGroupListName: '',
     location: null,

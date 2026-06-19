@@ -14,4 +14,4 @@
 | Data model + schema v3 migration | Complete | `CODEPLUG_SCHEMA_VERSION = 3` |
 | Import / export boundary | Complete | |
 | Shared UI primitives + map colours | Complete | `ModePill`, per-mode marker colours |
-| Channels CRUD | In progress | |
+| Channels CRUD | Complete | Mode Select, filters, conditional form fields |

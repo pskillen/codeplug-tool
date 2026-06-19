@@ -6,7 +6,7 @@ function makeChannel(overrides: Partial<Channel> & Pick<Channel, 'id' | 'name'>)
   return {
     ...channelFieldDefaults(),
     callsign: '',
-    mode: 'digital',
+    mode: 'dmr',
     ...overrides,
   };
 }

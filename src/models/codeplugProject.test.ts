@@ -34,7 +34,7 @@ describe('newProject', () => {
       id: 'ch-1',
       name: 'Test',
       callsign: 'Test',
-      mode: 'digital',
+      mode: 'dmr',
       ...channelFieldDefaults(),
       number: '1',
     });

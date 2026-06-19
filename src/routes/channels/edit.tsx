@@ -17,7 +17,8 @@ import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
 import { formatOffsetMhz, frequencyOffsetMhz } from '../../lib/bands.ts';
 import { BandPillsForFrequencies } from '../../components/crud/BandPill.tsx';
-import ChannelModeSegmentedControl from '../../components/crud/ChannelModeSegmentedControl.tsx';
+import ChannelModeSelect from '../../components/crud/ChannelModeSegmentedControl.tsx';
+import { isAnalogMode, isDmrMode } from '../../lib/channelModes.ts';
 import { coordsToLocator, isValidLocator, locatorToCoords } from '../../lib/maidenhead.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { hasValidationErrors, validateChannel } from '../../lib/validation/channel.ts';
@@ -92,7 +93,7 @@ function emptyForm(): ChannelFormValues {
   const defaults = channelFieldDefaults();
   return {
     name: '',
-    mode: 'digital',
+    mode: 'dmr',
     number: '',
     rxFrequency: '',
     txFrequency: '',
@@ -275,8 +276,8 @@ export default function ChannelEdit() {
     }
   };
 
-  const isDigital = values.mode === 'digital';
-  const isAnalogue = values.mode === 'analogue';
+  const showAnalogFields = isAnalogMode(values.mode);
+  const showDmrFields = isDmrMode(values.mode);
 
   return (
     <ReportPage title={isNew ? 'New channel' : `Edit ${existing?.name ?? 'channel'}`}>
@@ -307,7 +308,7 @@ export default function ChannelEdit() {
               value={values.name}
               onChange={(e) => set('name', e.currentTarget.value)}
             />
-            <ChannelModeSegmentedControl value={values.mode} onChange={(mode) => set('mode', mode)} />
+            <ChannelModeSelect value={values.mode} onChange={(mode) => set('mode', mode)} />
             <TextInput
               label="Channel number"
               value={values.number}
@@ -348,7 +349,7 @@ export default function ChannelEdit() {
               value={values.power}
               onChange={(e) => set('power', e.currentTarget.value)}
             />
-            {isAnalogue ? (
+            {showAnalogFields ? (
               <Group grow>
                 <TextInput
                   label="RX tone"
@@ -374,7 +375,7 @@ export default function ChannelEdit() {
             />
           </Stack>
 
-          {isDigital ? (
+          {showDmrFields ? (
             <Stack gap="sm">
               <Title order={4}>DMR</Title>
               <Group grow>

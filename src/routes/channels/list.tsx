@@ -8,6 +8,7 @@ import EntityTable from '../../components/report/EntityTable.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
 import { applyFilters } from '../../lib/channels.ts';
 import { channelMatchesBandFilter, bandsFromFrequencies, UK_BANDS } from '../../lib/bands.ts';
+import { modeFilterOptions } from '../../lib/channelModes.ts';
 import ModePill from '../../components/crud/ModePill.tsx';
 import { formatFrequencyMhz } from '../../lib/formatFrequency.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
@@ -117,11 +118,7 @@ export default function ChannelsList() {
             />
             <MultiSelect
               label="Mode"
-              data={[
-                { value: 'digital', label: 'Digital' },
-                { value: 'analogue', label: 'Analogue' },
-                { value: 'other', label: 'Other' },
-              ]}
+              data={modeFilterOptions()}
               value={modeFilter}
               onChange={setModeFilter}
               clearable
