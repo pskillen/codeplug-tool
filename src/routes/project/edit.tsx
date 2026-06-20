@@ -2,16 +2,16 @@ import { Button, Group, Stack, Text, TextInput, Textarea } from '@mantine/core';
 import { IconArrowLeft, IconDeviceFloppy } from '@tabler/icons-react';
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import TargetRadiosEditor from '../components/TargetRadiosEditor/TargetRadiosEditor.tsx';
-import ReportPage from '../components/report/ReportPage.tsx';
-import { hasValidationErrors } from '../lib/validation/channel.ts';
+import TargetRadiosEditor from '../../components/TargetRadiosEditor/TargetRadiosEditor.tsx';
+import ReportPage from '../../components/report/ReportPage.tsx';
+import { hasValidationErrors } from '../../lib/validation/channel.ts';
 import {
   sanitizeProjectMetadataPatch,
   validateProjectMetadata,
-} from '../lib/validation/project.ts';
-import type { CodeplugProject } from '../models/codeplugProject.ts';
-import { useProjects } from '../state/codeplugStore.tsx';
-import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
+} from '../../lib/validation/project.ts';
+import type { CodeplugProject } from '../../models/codeplugProject.ts';
+import { useProjects } from '../../state/codeplugStore.tsx';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 
 type FormValues = Pick<
   CodeplugProject,
