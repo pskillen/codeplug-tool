@@ -2,7 +2,7 @@
 
 Items **skipped**, **incomplete**, or **discovered during execution** — not future plan phases.
 
-**Tracking:** [codeplug-tool#84](https://github.com/pskillen/codeplug-tool/issues/84) (doc collate); debt from [#38](https://github.com/pskillen/codeplug-tool/issues/38), [#58](https://github.com/pskillen/codeplug-tool/issues/58), [#43](https://github.com/pskillen/codeplug-tool/issues/43)
+**Tracking:** [codeplug-tool#84](https://github.com/pskillen/codeplug-tool/issues/84) (doc collate); debt from [#38](https://github.com/pskillen/codeplug-tool/issues/38), [#58](https://github.com/pskillen/codeplug-tool/issues/58), [#72](https://github.com/pskillen/codeplug-tool/issues/72)
 
 ---
 
@@ -13,7 +13,7 @@ Items **skipped**, **incomplete**, or **discovered during execution** — not fu
 
 ## Export
 
-- [ ] **Radio profile picker** — apply per-radio limits at export time ([#43](https://github.com/pskillen/codeplug-tool/issues/43)). Today's exporter uses the [Baofeng 1701 profile](../../reference/opengd77/radios/baofeng-1701.md) without a profile picker UI.
+- [ ] **Radio profile picker** — apply per-radio limits at export time ([#72](https://github.com/pskillen/codeplug-tool/issues/72)). Today's exporter uses the [Baofeng 1701 profile](../../reference/opengd77/radios/baofeng-1701.md) without a profile picker UI.
 
 ## Fixtures
 

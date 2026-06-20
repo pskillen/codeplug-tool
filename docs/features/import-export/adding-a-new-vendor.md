@@ -11,7 +11,7 @@ Checklist for contributors adding a CPS import/export format to codeplug-tool. T
 | Situation | What to build |
 | --- | --- |
 | **New vendor format** (e.g. DM32 CPS CSV, qDMR YAML) | New import adapter, export adapter, reference docs, fixture bundle, UI format entry |
-| **New radio on existing format** (e.g. another OpenGD77 radio) | Reference [radio profile](../../reference/opengd77/radios/README.md) only — export limits at profile picker ([#43](https://github.com/pskillen/codeplug-tool/issues/43)); adapter stays format-level |
+| **New radio on existing format** (e.g. another OpenGD77 radio) | Reference [radio profile](../../reference/opengd77/radios/README.md) only — export limits at profile picker ([#72](https://github.com/pskillen/codeplug-tool/issues/72)); adapter stays format-level |
 
 Do **not** bake radio profile caps into internal models, mutations, validation, or CRUD UI. See [AGENTS.md Vendor boundaries](../../../AGENTS.md#vendor-boundaries).
 

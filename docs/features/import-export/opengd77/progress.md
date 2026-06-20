@@ -29,4 +29,4 @@
 
 ## Next
 
-- See [outstanding.md](../outstanding.md) for open debt (APRS/DTMF modelling, radio profile picker, optional real fixtures).
+- See [outstanding.md](../outstanding.md) for open debt (APRS/DTMF modelling, radio profile picker [#72](https://github.com/pskillen/codeplug-tool/issues/72), optional real fixtures).

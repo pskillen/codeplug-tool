@@ -4,7 +4,7 @@ Adapter behaviour for the first CPS import/export target. **Column semantics and
 
 Entity shapes: [data model](../../data-model/README.md).
 
-OpenGD77 CPS CSV is **one interchange format shared by many radios**. Import/export adapters are format-level; radio-specific limits (member column counts, feature availability) are profile-level at export time ([#43](https://github.com/pskillen/codeplug-tool/issues/43)). Today's exporter uses the [Baofeng 1701 profile](../../../reference/opengd77/radios/baofeng-1701.md) without a profile picker UI.
+OpenGD77 CPS CSV is **one interchange format shared by many radios**. Import/export adapters are format-level; radio-specific limits (member column counts, feature availability) are profile-level at export time ([#72](https://github.com/pskillen/codeplug-tool/issues/72)). Today's exporter uses the [Baofeng 1701 profile](../../../reference/opengd77/radios/baofeng-1701.md) without a profile picker UI.
 
 ## Adapter
 

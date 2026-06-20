@@ -8,7 +8,7 @@ How CPS export files enter the app, become internal [codeplug models](../data-mo
 
 Import was originally hard-wired to OpenGD77 CSV inside the channel map. The app now has a format registry, OpenGD77 as the first adapter pair, and a central store that resolves vendor names to internal ids. Export serialises the internal models back to a format the vendor CPS accepts.
 
-The internal model is **radio-agnostic**. Vendor specifics — column mapping, cardinality caps, skipped files — apply at the **import/export boundary** only. Radio-specific limits for OpenGD77 are documented in [radio profiles](../../reference/opengd77/radios/README.md) and are intended to be applied when the operator picks a target radio at export time ([#43](https://github.com/pskillen/codeplug-tool/issues/43)).
+The internal model is **radio-agnostic**. Vendor specifics — column mapping, cardinality caps, skipped files — apply at the **import/export boundary** only. Radio-specific limits for OpenGD77 are documented in [radio profiles](../../reference/opengd77/radios/README.md) and are intended to be applied when the operator picks a target radio at export time ([#72](https://github.com/pskillen/codeplug-tool/issues/72)).
 
 ## Implementation status
 
@@ -26,7 +26,7 @@ The internal model is **radio-agnostic**. Vendor specifics — column mapping, c
 | Export page (`/export`) | Shipped | Nav link when a project is active |
 | LocalStorage persistence | Shipped | [#9](https://github.com/pskillen/codeplug-tool/issues/9) — [persistence/](../persistence/) |
 | Multi-project import | Shipped | Home creates project; Import & export merges into active — [codeplug-project/](../codeplug-project/) |
-| Radio profile picker | Planned | Apply per-radio limits at export — [#43](https://github.com/pskillen/codeplug-tool/issues/43) |
+| Radio profile picker | Planned | Apply per-radio limits at export — [#72](https://github.com/pskillen/codeplug-tool/issues/72) |
 | qDMR YAML | Deferred | [#37](https://github.com/pskillen/codeplug-tool/issues/37) — UI placeholder |
 | Native YAML | Deferred | [#10](https://github.com/pskillen/codeplug-tool/issues/10) — UI placeholder |
 | Baofeng DM32 CPS | Future | [#67](https://github.com/pskillen/codeplug-tool/issues/67) — [dm32 stub](dm32/README.md) |
