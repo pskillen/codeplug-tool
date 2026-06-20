@@ -181,4 +181,36 @@ describe('codeplugStorage', () => {
     clearProjectsStorage();
     expect(localStorage.getItem(CODEPLUG_STORAGE_KEY)).toBeNull();
   });
+
+  it('normalizes legacy projects without metadata fields', () => {
+    const legacy = {
+      id: 'p-legacy',
+      name: 'Legacy project',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+      codeplug: emptyCodeplug(),
+    };
+    const json = JSON.stringify({
+      version: CODEPLUG_STORAGE_VERSION,
+      activeProjectId: 'p-legacy',
+      projects: [legacy],
+    });
+
+    const state = deserializeProjects(json);
+    expect(state?.projects[0]).toMatchObject({
+      description: '',
+      notes: '',
+      author: '',
+      targetRadios: [],
+    });
+  });
+
+  it('normalizes targetRadios by trimming and dropping empties', () => {
+    const project = newProject('With radios');
+    project.targetRadios = ['  Baofeng 1701  ', '', 'DM-32UV', 42 as unknown as string];
+    const json = serializeProjects({ activeProjectId: project.id, projects: [project] });
+
+    const state = deserializeProjects(json);
+    expect(state?.projects[0].targetRadios).toEqual(['Baofeng 1701', 'DM-32UV']);
+  });
 });
