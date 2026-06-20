@@ -26,6 +26,10 @@ describe('newProject', () => {
     expect(project.updatedAt).toBe(project.createdAt);
     expect(project.codeplug).toEqual(emptyCodeplug());
     expect(project.codeplug.meta.schemaVersion).toBe(CODEPLUG_SCHEMA_VERSION);
+    expect(project.description).toBe('');
+    expect(project.notes).toBe('');
+    expect(project.author).toBe('');
+    expect(project.targetRadios).toEqual([]);
   });
 
   it('accepts a pre-built codeplug', () => {

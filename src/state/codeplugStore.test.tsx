@@ -1,5 +1,5 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import type { ImportResult } from '../lib/import/types.ts';
 import {
@@ -177,6 +177,37 @@ describe('projectsReducer', () => {
     );
     expect(state.projects).toHaveLength(1);
     expect(state.activeProjectId).toBe('b');
+  });
+
+  it('updates project metadata and bumps updatedAt', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-01T00:00:00.000Z'));
+    const project = newProject('Original');
+    vi.setSystemTime(new Date('2026-06-02T00:00:00.000Z'));
+
+    const state = projectsReducer(
+      { activeProjectId: project.id, projects: [project] },
+      {
+        type: 'UPDATE_PROJECT',
+        id: project.id,
+        patch: {
+          name: 'Renamed',
+          description: 'Home DMR',
+          author: 'MM9PDY',
+          notes: 'Notes here',
+          targetRadios: ['Baofeng 1701'],
+        },
+      },
+    );
+
+    const updated = state.projects[0];
+    expect(updated.name).toBe('Renamed');
+    expect(updated.description).toBe('Home DMR');
+    expect(updated.author).toBe('MM9PDY');
+    expect(updated.notes).toBe('Notes here');
+    expect(updated.targetRadios).toEqual(['Baofeng 1701']);
+    expect(updated.updatedAt).toBe('2026-06-02T00:00:00.000Z');
+    vi.useRealTimers();
   });
 });
 

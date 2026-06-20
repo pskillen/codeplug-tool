@@ -10,6 +10,8 @@ export interface SummaryCardProps {
   previewNames: string[];
   listPath: string;
   icon?: ReactNode;
+  /** Smaller title/count and fewer preview lines (Summary dashboard). */
+  compact?: boolean;
 }
 
 export default function SummaryCard({
@@ -18,22 +20,27 @@ export default function SummaryCard({
   previewNames,
   listPath,
   icon,
+  compact = false,
 }: SummaryCardProps) {
+  const displayNames = compact ? previewNames.slice(0, 3) : previewNames;
+  const titleOrder = compact ? 4 : 3;
+  const countSize = compact ? 'lg' : 'xl';
+
   return (
-    <Card withBorder padding="md" radius="md">
-      <Stack gap="sm">
+    <Card withBorder padding={compact ? 'sm' : 'md'} radius="md">
+      <Stack gap={compact ? 'xs' : 'sm'}>
         <Group justify="space-between" align="flex-start">
           <Group gap="xs" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
             {icon}
-            <Title order={3}>{title}</Title>
+            <Title order={titleOrder}>{title}</Title>
           </Group>
-          <Text fw={600} size="xl">
+          <Text fw={600} size={countSize}>
             {count}
           </Text>
         </Group>
-        {previewNames.length > 0 ? (
+        {displayNames.length > 0 ? (
           <Stack gap={2}>
-            {previewNames.map((name) => (
+            {displayNames.map((name) => (
               <Text key={name} size="sm" c="dimmed" truncate>
                 {name}
               </Text>

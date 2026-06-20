@@ -161,6 +161,18 @@ function normalizeActiveProjectId(
   return projects[0].id;
 }
 
+function normalizeStringField(value: unknown, fallback = ''): string {
+  return typeof value === 'string' ? value : fallback;
+}
+
+function normalizeTargetRadios(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is string => typeof item === 'string')
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+}
+
 function normalizeProject(raw: unknown): CodeplugProject | null {
   if (!raw || typeof raw !== 'object') return null;
   const p = raw as CodeplugProject;
@@ -174,7 +186,14 @@ function normalizeProject(raw: unknown): CodeplugProject | null {
   ) {
     return null;
   }
-  return { ...p, codeplug };
+  return {
+    ...p,
+    description: normalizeStringField(p.description),
+    notes: normalizeStringField(p.notes),
+    author: normalizeStringField(p.author),
+    targetRadios: normalizeTargetRadios(p.targetRadios),
+    codeplug,
+  };
 }
 
 export function deserializeProjects(json: string): ProjectsState | null {

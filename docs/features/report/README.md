@@ -8,10 +8,10 @@ Browse an imported OpenGD77 codeplug as tables and detail pages. Editing is trac
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| Summary overview | Shipped | Entity counts and preview names |
+| Summary overview | Shipped | Project dashboard — metadata, map, compact entity cards ([#61](https://github.com/pskillen/codeplug-tool/issues/61)) |
 | List pages | Shipped | Channels, zones, talk groups, contacts, RX group lists |
 | Detail pages | Shipped | Per-entity read-only views with cross-links |
-| Inset map | Shipped | Reuses `CodeplugMap` on channels/zones list and detail |
+| Inset map | Shipped | Reuses `CodeplugMap` on Summary, channels/zones list and detail |
 | Map settings | Shipped | Tile provider + Mapbox token on `/settings` |
 | External channel links | Shipped | RepeaterBook, RadioReference, QRZ on channel detail |
 
@@ -19,7 +19,8 @@ Browse an imported OpenGD77 codeplug as tables and detail pages. Editing is trac
 
 | Path | Page |
 | --- | --- |
-| `/summary` | Overview cards (default after import/open) |
+| `/summary` | Project dashboard (metadata, map, entity cards) |
+| `/summary/edit` | Edit project metadata |
 | `/channels` | Channel table + map |
 | `/channels/:id` | Channel detail |
 | `/zones` | Zone table + map |
@@ -39,7 +40,9 @@ Nav appears when a codeplug project is active. Use **Switch** on the active proj
 
 | Path | Role |
 | --- | --- |
-| `src/routes/Summary.tsx` | Summary cards |
+| `src/routes/Summary.tsx` | Summary dashboard wrapper |
+| `src/components/SummaryDashboard/` | Dashboard layout + map embed |
+| `src/routes/project/edit.tsx` | Project metadata edit form |
 | `src/routes/*List.tsx` | Entity list pages |
 | `src/routes/*Detail.tsx` | Entity detail pages |
 | `src/routes/Settings.tsx` | Map settings |

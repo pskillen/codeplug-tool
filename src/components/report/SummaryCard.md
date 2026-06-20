@@ -13,6 +13,7 @@ Overview card on the Summary page (`/summary`): entity type title, total count, 
 | `previewNames` | `string[]`  | Up to ~5 names; caller slices/sorts before passing                  |
 | `listPath`     | `string`    | Hash route for “View all” link                                      |
 | `icon`         | `ReactNode` | Optional Tabler icon beside the title (matches navbar entity icons) |
+| `compact`      | `boolean`   | Smaller card with up to 3 preview names (Summary dashboard)         |
 
 ## Usage
 
@@ -37,8 +38,8 @@ const preview = sortByName(channels)
 
 - Shows “None” when `previewNames` is empty.
 - Preview names truncate with ellipsis on overflow.
-- Laid out in a `SimpleGrid` on `Summary.tsx` (two columns on `sm+`).
+- Laid out in a responsive `SimpleGrid` on [`SummaryDashboard`](../SummaryDashboard/SummaryDashboard.tsx) (compact mode).
 
 ## Related
 
-- [`src/routes/Summary.tsx`](../../routes/Summary.tsx)
+- [`src/components/SummaryDashboard/SummaryDashboard.tsx`](../SummaryDashboard/SummaryDashboard.tsx)

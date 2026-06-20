@@ -39,6 +39,7 @@ import {
 import type { ImportResult } from '../lib/import/types.ts';
 import { emptyCodeplug, type Codeplug } from '../models/codeplug.ts';
 import { defaultProjectName, newProject, type CodeplugProject } from '../models/codeplugProject.ts';
+import type { ProjectMetadataPatch } from '../lib/validation/project.ts';
 import {
   clearProjectsStorage,
   loadProjectsFromStorage,
@@ -69,7 +70,8 @@ type ProjectsAction =
   | { type: 'ADD_RX_GROUP_LIST'; input: RxGroupListInput }
   | { type: 'UPDATE_RX_GROUP_LIST'; rglId: string; patch: Partial<RxGroupListInput> }
   | { type: 'DELETE_RX_GROUP_LIST'; rglId: string }
-  | { type: 'SET_RX_GROUP_LIST_MEMBERS'; rglId: string; sourceMemberNames: string[] };
+  | { type: 'SET_RX_GROUP_LIST_MEMBERS'; rglId: string; sourceMemberNames: string[] }
+  | { type: 'UPDATE_PROJECT'; id: string; patch: ProjectMetadataPatch };
 
 function applyImportToCodeplug(
   codeplug: Codeplug,
@@ -232,6 +234,17 @@ function projectsReducer(state: ProjectsState, action: ProjectsAction): Projects
         setRxGroupListMembersMutation(cp, action.rglId, action.sourceMemberNames),
       );
 
+    case 'UPDATE_PROJECT': {
+      const { id, patch } = action;
+      return {
+        ...state,
+        projects: state.projects.map((project) => {
+          if (project.id !== id) return project;
+          return touchProject({ ...project, ...patch });
+        }),
+      };
+    }
+
     default:
       return state;
   }
@@ -279,6 +292,7 @@ interface ProjectsContextValue {
   applyImportToActive: (result: ImportResult, mode?: ImportApplyMode) => void;
   setActiveProject: (id: string) => void;
   deleteProject: (id: string) => void;
+  updateProject: (id: string, patch: ProjectMetadataPatch) => void;
   persistenceError: string | null;
   clearPersistenceError: () => void;
 }
@@ -344,6 +358,11 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
   const deleteProject = useCallback((id: string) => {
     setPersistenceError(null);
     dispatch({ type: 'DELETE_PROJECT', id });
+  }, []);
+
+  const updateProject = useCallback((id: string, patch: ProjectMetadataPatch) => {
+    setPersistenceError(null);
+    dispatch({ type: 'UPDATE_PROJECT', id, patch });
   }, []);
 
   const addChannel = useCallback((input: ChannelInput) => {
@@ -494,6 +513,7 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
       applyImportToActive,
       setActiveProject,
       deleteProject,
+      updateProject,
       persistenceError,
       clearPersistenceError,
     }),
@@ -504,6 +524,7 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
       applyImportToActive,
       setActiveProject,
       deleteProject,
+      updateProject,
       persistenceError,
       clearPersistenceError,
     ],

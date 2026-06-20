@@ -2,7 +2,7 @@
 
 OpenGD77 CPS stores latitude and longitude on each channel and lists zone membership in a separate export, but the desktop CPS gives no geographic overview. The map tool loads those CSVs in the browser so you can see where repeaters sit, which channels lack coordinates, and whether zone footprints match the geography you intended when building a codeplug.
 
-Implementation lives in the SPA under `src/components/CodeplugMap/` (react-leaflet inset map) and `src/lib/` (filters, geometry). Map settings (tile provider, Mapbox token, Maidenhead grid) are on `/settings`. The map is embedded on Channels and Zones report pages rather than a standalone full-page view.
+Implementation lives in the SPA under `src/components/CodeplugMap/` (react-leaflet inset map) and `src/lib/` (filters, geometry). Map settings (tile provider, Mapbox token, Maidenhead grid) are on `/settings`. The map is embedded on the Summary dashboard and Channels/Zones report pages rather than a standalone full-page view.
 
 ## Implementation status
 

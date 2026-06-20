@@ -123,9 +123,21 @@ describe('App', () => {
 
     renderApp('/summary');
 
-    expect(screen.getByRole('heading', { name: 'Summary' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Channels', level: 3 })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Zones', level: 3 })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Test repeaters' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Channels', level: 4 })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Zones', level: 4 })).toBeInTheDocument();
+    expect(screen.getByText('No geolocated channels')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Edit project' })).toBeInTheDocument();
+  });
+
+  it('renders the project edit page on /summary/edit', () => {
+    seedActiveProject();
+
+    renderApp('/summary/edit');
+
+    expect(screen.getByRole('heading', { name: 'Edit project' })).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Test repeaters')).toBeInTheDocument();
+    expect(screen.getByText('Target radios')).toBeInTheDocument();
   });
 
   it('shows app nav with active codeplug when a project is active', () => {
@@ -134,7 +146,7 @@ describe('App', () => {
     renderApp('/summary');
 
     expect(screen.getByText('Active codeplug')).toBeInTheDocument();
-    expect(screen.getByText('Test repeaters')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Test repeaters' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Summary' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Channels' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Settings' })).toBeInTheDocument();
