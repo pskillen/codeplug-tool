@@ -1,13 +1,4 @@
-import {
-  Alert,
-  Anchor,
-  Button,
-  Group,
-  List,
-  SimpleGrid,
-  Stack,
-  Text,
-} from '@mantine/core';
+import { Alert, Anchor, Button, Group, List, SimpleGrid, Stack, Text } from '@mantine/core';
 import {
   IconAddressBook,
   IconAntenna,
@@ -131,9 +122,7 @@ export default function SummaryDashboard({ project, codeplug }: SummaryDashboard
           ) : (
             <Alert variant="light" title="No geolocated channels">
               <Stack gap="xs">
-                <Text size="sm">
-                  Add locations on channel records to see them on the map.
-                </Text>
+                <Text size="sm">Add locations on channel records to see them on the map.</Text>
                 <Anchor component={Link} to="/channels" size="sm">
                   Go to channels
                 </Anchor>

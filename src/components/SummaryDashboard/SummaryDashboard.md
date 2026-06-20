@@ -6,10 +6,10 @@ Project dashboard for `/summary`: project metadata header, embedded channel map,
 
 ## Props
 
-| Prop | Type | Notes |
-| --- | --- | --- |
-| `project` | `CodeplugProject` | Active project wrapper (name, metadata fields) |
-| `codeplug` | `Codeplug` | Active codeplug content for counts and map |
+| Prop       | Type              | Notes                                          |
+| ---------- | ----------------- | ---------------------------------------------- |
+| `project`  | `CodeplugProject` | Active project wrapper (name, metadata fields) |
+| `codeplug` | `Codeplug`        | Active codeplug content for counts and map     |
 
 ## Usage
 

@@ -6,12 +6,12 @@ Controlled bullet-list editor for indicative target-radio labels on a codeplug p
 
 ## Props
 
-| Prop | Type | Default | Notes |
-| --- | --- | --- | --- |
-| `value` | `string[]` | — | Current list of radio labels |
-| `onChange` | `(items: string[]) => void` | — | Called when list changes (local form state until parent saves) |
-| `label` | `string` | `'Target radios'` | Field label |
-| `description` | `string` | notes-only helper text | Shown under label |
+| Prop          | Type                        | Default                | Notes                                                          |
+| ------------- | --------------------------- | ---------------------- | -------------------------------------------------------------- |
+| `value`       | `string[]`                  | —                      | Current list of radio labels                                   |
+| `onChange`    | `(items: string[]) => void` | —                      | Called when list changes (local form state until parent saves) |
+| `label`       | `string`                    | `'Target radios'`      | Field label                                                    |
+| `description` | `string`                    | notes-only helper text | Shown under label                                              |
 
 ## Usage
 
@@ -21,7 +21,7 @@ import TargetRadiosEditor from '../components/TargetRadiosEditor/TargetRadiosEdi
 <TargetRadiosEditor
   value={values.targetRadios}
   onChange={(targetRadios) => setValues((prev) => ({ ...prev, targetRadios }))}
-/>
+/>;
 ```
 
 ## Behaviour
