@@ -64,6 +64,11 @@ export default function ProjectList() {
                     </Badge>
                   ) : null}
                 </Group>
+                {project.description ? (
+                  <Text size="sm" c="dimmed" truncate>
+                    {project.description}
+                  </Text>
+                ) : null}
                 <Text size="sm" c="dimmed">
                   {channelCount} channel{channelCount === 1 ? '' : 's'}
                   {zoneCount ? ` · ${zoneCount} zone${zoneCount === 1 ? '' : 's'}` : ''}
