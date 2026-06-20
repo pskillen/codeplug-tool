@@ -11,7 +11,7 @@ Agent skills for documentation and execution tracking:
 
 | Topic | Source | Docs | Status |
 | --- | --- | --- | --- |
-| Data model | `src/models/codeplug.ts` | [data-model/](data-model/) | Shipped |
+| Data model | `src/models/codeplug.ts` | [data-model/](data-model/) | Shipped; vendor-neutral refactor in progress ([#52](https://github.com/pskillen/codeplug-tool/issues/52), [#53](https://github.com/pskillen/codeplug-tool/issues/53), [#54](https://github.com/pskillen/codeplug-tool/issues/54), [#91](https://github.com/pskillen/codeplug-tool/issues/91)) — [progress](data-model/pristine-model-refactor-progress.md) |
 | Codeplug projects | `src/models/codeplugProject.ts`, `src/state/codeplugStore.tsx` | [codeplug-project/](codeplug-project/) | Shipped (nascent) |
 | Persistence | `src/state/codeplugStorage.ts` | [persistence/](persistence/) | Shipped |
 | Import / export | `src/lib/import/`, `src/lib/export/`, `src/routes/ImportExport.tsx` | [import-export/](import-export/) | Shipped ([#38](https://github.com/pskillen/codeplug-tool/issues/38), [#58](https://github.com/pskillen/codeplug-tool/issues/58)) |
