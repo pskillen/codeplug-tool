@@ -128,6 +128,7 @@ flowchart LR
 
 ## Related
 
+- [Vendor-agnostic review](vendor-agnostic-review.md) — audit and required changes (#91 / #52 / #53)
 - [OpenGD77 wire reference](../../reference/opengd77/README.md)
 - [OpenGD77 radio profiles](../../reference/opengd77/radios/README.md)
 - [Import / export](../import-export/README.md)
