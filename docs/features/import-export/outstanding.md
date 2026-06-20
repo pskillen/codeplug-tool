@@ -21,4 +21,4 @@ Items **skipped**, **incomplete**, or **discovered during execution** — not fu
 
 ## Documentation
 
-- [ ] **Review OpenGD77 / 1701 import-export implementation** against the new `import-export/` docs for completeness and accuracy — raise a ticket if gaps are found.
+- [ ] **Review OpenGD77 / 1701 import-export implementation** against the new `import-export/` docs for completeness and accuracy ([#91](https://github.com/pskillen/codeplug-tool/issues/91)) — file follow-up tickets for any code gaps found.
