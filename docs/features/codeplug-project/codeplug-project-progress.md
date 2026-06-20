@@ -6,6 +6,7 @@
 ## In flight (#60 + #61)
 
 - [x] Slice 1: `CodeplugProject` metadata fields (`description`, `notes`, `author`, `targetRadios`) + storage normalization
+- [x] Slice 2: `updateProject` store action + project validation
 
 ## Shipped (prior)
 
