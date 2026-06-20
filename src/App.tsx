@@ -14,6 +14,7 @@ import { shouldShowSecondaryNav } from './nav/sectionNavRegistry.ts';
 import Home from './routes/Home.tsx';
 import ImportExport from './routes/ImportExport.tsx';
 import Summary from './routes/Summary.tsx';
+import ProjectEdit from './routes/project/edit.tsx';
 import ChannelsList from './routes/channels/list.tsx';
 import ChannelDetail from './routes/channels/detail.tsx';
 import ChannelEdit from './routes/channels/edit.tsx';
@@ -91,6 +92,7 @@ export default function App() {
           <Route path="/reference/maidenhead" element={<MaidenheadConverter />} />
           <Route element={<RequireActiveProject />}>
             <Route path="/summary" element={<Summary />} />
+            <Route path="/summary/edit" element={<ProjectEdit />} />
             <Route path="/channels" element={<ChannelsList />} />
             <Route path="/channels/new" element={<ChannelEdit />} />
             <Route path="/channels/:id/edit" element={<ChannelEdit />} />
