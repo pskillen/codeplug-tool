@@ -15,6 +15,10 @@ export interface ImportedProvenance {
   importedAt: string;
   /** Ordered wire names for list members (zone→channel names; RGL→contact/tg names). */
   memberWireNames?: string[];
+  /** Original Contact column wire name (channels only). */
+  contactWireName?: string;
+  /** Original TG List column wire name (channels only). */
+  rxGroupListWireName?: string;
 }
 
 export interface EntityMeta {
@@ -30,6 +34,8 @@ export interface StampImportedInput {
   sourceFile: string | null;
   importedAt: string;
   memberWireNames?: string[];
+  contactWireName?: string;
+  rxGroupListWireName?: string;
 }
 
 export function getMemberWireNames(entity: WithEntityMeta): string[] {
@@ -69,6 +75,10 @@ export function stampImported<T extends WithEntityMeta>(entity: T, input: StampI
         sourceFile: input.sourceFile,
         importedAt: input.importedAt,
         ...(input.memberWireNames !== undefined ? { memberWireNames: input.memberWireNames } : {}),
+        ...(input.contactWireName !== undefined ? { contactWireName: input.contactWireName } : {}),
+        ...(input.rxGroupListWireName !== undefined
+          ? { rxGroupListWireName: input.rxGroupListWireName }
+          : {}),
       },
     },
   };
