@@ -9,6 +9,7 @@ import {
   type TalkGroup,
   type Zone,
 } from '../models/codeplug.ts';
+import type { EntityMeta } from '../lib/entityProvenance.ts';
 import { normalizeChannelMode } from '../lib/channelModes.ts';
 import { normalizeToneValue } from '../lib/channelFields/index.ts';
 import { coerceLegacyStringField } from '../lib/import/opengd77/channelWire.ts';
@@ -49,12 +50,14 @@ function migrateChannel(raw: Record<string, unknown>): Channel {
   const defaults = channelFieldDefaults();
   const rest = { ...raw };
   delete rest.number;
+  delete rest.vendorExtras;
 
-  const partial = rest as Partial<Channel>;
+  const partial = rest as Partial<Channel> & { vendorExtras?: Record<string, string> };
   const migrated: Partial<Channel> = { ...defaults, ...partial };
   migrated.mode = normalizeChannelMode(String(partial.mode ?? 'other'));
   migrated.hideFromMap = partial.hideFromMap ?? false;
-  migrated.vendorExtras = partial.vendorExtras ?? {};
+  migrated.opengd77Extras =
+    partial.opengd77Extras ?? partial.vendorExtras ?? defaults.opengd77Extras;
 
   for (const field of TYPED_CHANNEL_FIELDS) {
     const current = partial[field];
@@ -79,24 +82,85 @@ function migrateChannel(raw: Record<string, unknown>): Channel {
     ...migrated,
     mode: migrated.mode!,
     hideFromMap: migrated.hideFromMap ?? false,
-    vendorExtras: migrated.vendorExtras ?? {},
+    opengd77Extras: migrated.opengd77Extras ?? {},
+    meta: partial.meta as EntityMeta | undefined,
   };
 }
 
-function migrateRxGroupLists(raw: Record<string, unknown>): RxGroupList[] {
+function migrateZone(raw: Record<string, unknown>, projectImportedAt: string | null): Zone {
+  const legacyNames = Array.isArray(raw.sourceMemberNames)
+    ? (raw.sourceMemberNames as string[])
+    : [];
+  const memberChannelIds = Array.isArray(raw.memberChannelIds)
+    ? (raw.memberChannelIds as string[])
+    : [];
+  const existingMeta = raw.meta as EntityMeta | undefined;
+
+  const zone: Zone = {
+    id: String(raw.id ?? ''),
+    name: String(raw.name ?? ''),
+    memberChannelIds,
+    meta: existingMeta,
+  };
+
+  if (legacyNames.length > 0 && !existingMeta?.imported?.memberWireNames?.length) {
+    zone.meta = {
+      imported: {
+        formatId: 'opengd77',
+        sourceFile: null,
+        importedAt: projectImportedAt ?? new Date(0).toISOString(),
+        memberWireNames: legacyNames,
+      },
+    };
+  }
+
+  return zone;
+}
+
+function migrateRxGroupList(
+  raw: Record<string, unknown>,
+  projectImportedAt: string | null,
+): RxGroupList {
+  const legacyNames = Array.isArray(raw.sourceMemberNames)
+    ? (raw.sourceMemberNames as string[])
+    : Array.isArray(raw.memberContactNames)
+      ? (raw.memberContactNames as string[])
+      : [];
+  const existingMeta = raw.meta as EntityMeta | undefined;
+
+  const rgl: RxGroupList = {
+    id: String(raw.id ?? ''),
+    name: String(raw.name ?? ''),
+    meta: existingMeta,
+  };
+
+  if (legacyNames.length > 0 && !existingMeta?.imported?.memberWireNames?.length) {
+    rgl.meta = {
+      imported: {
+        formatId: 'opengd77',
+        sourceFile: null,
+        importedAt: projectImportedAt ?? new Date(0).toISOString(),
+        memberWireNames: legacyNames,
+      },
+    };
+  }
+
+  return rgl;
+}
+
+function migrateRxGroupLists(
+  raw: Record<string, unknown>,
+  projectImportedAt: string | null,
+): RxGroupList[] {
   if (Array.isArray(raw.rxGroupLists)) {
-    return raw.rxGroupLists as RxGroupList[];
+    return (raw.rxGroupLists as Record<string, unknown>[]).map((item) =>
+      migrateRxGroupList(item, projectImportedAt),
+    );
   }
   if (Array.isArray(raw.tgLists)) {
-    return (raw.tgLists as Array<Record<string, unknown>>).map((item) => ({
-      id: String(item.id ?? ''),
-      name: String(item.name ?? ''),
-      sourceMemberNames: Array.isArray(item.sourceMemberNames)
-        ? (item.sourceMemberNames as string[])
-        : Array.isArray(item.memberContactNames)
-          ? (item.memberContactNames as string[])
-          : [],
-    }));
+    return (raw.tgLists as Record<string, unknown>[]).map((item) =>
+      migrateRxGroupList(item, projectImportedAt),
+    );
   }
   return [];
 }
@@ -107,6 +171,7 @@ function migrateContact(raw: Partial<Contact>): Contact {
     name: raw.name ?? '',
     number: raw.number ?? '',
     timeslotOverride: raw.timeslotOverride ?? '',
+    meta: raw.meta,
   };
 }
 
@@ -116,10 +181,11 @@ function migrateTalkGroup(raw: Partial<TalkGroup>): TalkGroup {
     name: raw.name ?? '',
     number: raw.number ?? '',
     timeslotOverride: raw.timeslotOverride ?? '',
+    meta: raw.meta,
   };
 }
 
-/** Normalise a persisted codeplug (v1–v5) to the current schema. */
+/** Normalise a persisted codeplug (v1–v6) to the current schema. */
 export function migrateCodeplug(value: unknown): Codeplug | null {
   if (!value || typeof value !== 'object') return null;
   const raw = value as Record<string, unknown>;
@@ -127,10 +193,14 @@ export function migrateCodeplug(value: unknown): Codeplug | null {
   if (!meta || typeof meta.schemaVersion !== 'number') return null;
   if (meta.schemaVersion > CODEPLUG_SCHEMA_VERSION) return null;
 
+  const projectImportedAt = meta.importedAt ?? null;
+
   const channels = Array.isArray(raw.channels)
     ? (raw.channels as Record<string, unknown>[]).map(migrateChannel)
     : [];
-  const zones = Array.isArray(raw.zones) ? (raw.zones as Zone[]) : [];
+  const zones = Array.isArray(raw.zones)
+    ? (raw.zones as Record<string, unknown>[]).map((z) => migrateZone(z, projectImportedAt))
+    : [];
   const talkGroups = Array.isArray(raw.talkGroups)
     ? (raw.talkGroups as Partial<TalkGroup>[]).map(migrateTalkGroup)
     : [];
@@ -142,7 +212,7 @@ export function migrateCodeplug(value: unknown): Codeplug | null {
     channels,
     zones,
     talkGroups,
-    rxGroupLists: migrateRxGroupLists(raw),
+    rxGroupLists: migrateRxGroupLists(raw, projectImportedAt),
     contacts,
     meta: {
       importedAt: meta.importedAt ?? null,
