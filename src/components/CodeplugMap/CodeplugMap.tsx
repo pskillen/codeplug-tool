@@ -23,11 +23,12 @@ import {
   type FilterOptions,
 } from '../../lib/channels.ts';
 import { getMemberWireNames } from '../../lib/entityProvenance.ts';
+import { entityRefDisplayName } from '../../lib/entityRefs.ts';
 import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { isDmrMode, modeLabel } from '../../lib/channelModes.ts';
 import { convexHullLatLon, zoneColor, type LatLon } from '../../lib/geo.ts';
 import { collectMapPoints, computeMapView } from '../../lib/mapView.ts';
-import type { Channel, Zone } from '../../models/codeplug.ts';
+import type { Channel, Contact, TalkGroup, Zone } from '../../models/codeplug.ts';
 import { useDocumentLayoutReady } from '../../hooks/useDocumentLayoutReady.ts';
 import { useMapSettings } from '../../hooks/useMapSettings.ts';
 import MapControls from './MapControls.tsx';
@@ -85,7 +86,15 @@ function operatorDivIcon(): L.DivIcon {
   });
 }
 
-function ChannelPopup({ group }: { group: Channel[] }) {
+function ChannelPopup({
+  group,
+  talkGroups,
+  contacts,
+}: {
+  group: Channel[];
+  talkGroups: TalkGroup[];
+  contacts: Contact[];
+}) {
   const title =
     group.length === 1 ? group[0].callsign : `${group[0].callsign} (+${group.length - 1})`;
 
@@ -99,7 +108,10 @@ function ChannelPopup({ group }: { group: Channel[] }) {
             : '';
         const dmr = isDmrMode(ch.mode)
           ? [
-              ch.contactName && ch.contactName !== 'None' ? `TX: ${ch.contactName}` : null,
+              (() => {
+                const label = entityRefDisplayName(ch.contactRef, talkGroups, contacts);
+                return label ? `TX: ${label}` : null;
+              })(),
               ch.rxGroupListName && ch.rxGroupListName !== 'None'
                 ? `RX list: ${ch.rxGroupListName}`
                 : null,
@@ -217,6 +229,8 @@ export interface CodeplugMapProps {
   channels: Channel[];
   zones?: Zone[];
   allChannels?: Channel[];
+  talkGroups?: TalkGroup[];
+  contacts?: Contact[];
   height?: number | string;
   showControls?: boolean;
   defaultFullChannelName?: boolean;
@@ -231,6 +245,8 @@ export default function CodeplugMap({
   channels,
   zones = [],
   allChannels,
+  talkGroups = [],
+  contacts = [],
   height = 400,
   showControls = true,
   defaultFullChannelName = false,
@@ -441,7 +457,7 @@ export default function CodeplugMap({
                   icon={channelDivIcon(color, label, merged, highlighted)}
                 >
                   <Popup>
-                    <ChannelPopup group={group} />
+                    <ChannelPopup group={group} talkGroups={talkGroups} contacts={contacts} />
                   </Popup>
                 </Marker>
               );

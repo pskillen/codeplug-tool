@@ -10,6 +10,7 @@ import {
   type Zone,
 } from '../models/codeplug.ts';
 import { getMemberWireNames, setMemberWireNames } from './entityProvenance.ts';
+import type { EntityRefKind } from './entityRefs.ts';
 
 export const OPENGD77_MAX_ZONE_MEMBERS = 80;
 
@@ -196,21 +197,25 @@ function propagateContactWireRename(
   oldName: string,
   newName: string,
 ): Codeplug {
-  const channels = codeplug.channels.map((ch) =>
-    ch.contactName === oldName ? { ...ch, contactName: newName } : ch,
-  );
   const rxGroupLists = codeplug.rxGroupLists.map((rgl) =>
     mapMemberWireNames(rgl, (names) => names.map((n) => (n === oldName ? newName : n))),
   );
-  return { ...codeplug, channels, rxGroupLists };
+  return { ...codeplug, rxGroupLists };
 }
 
-function clearContactWireReferences(codeplug: Codeplug, name: string): Codeplug {
+function clearContactEntityReferences(
+  codeplug: Codeplug,
+  kind: EntityRefKind,
+  entityId: string,
+  wireName: string,
+): Codeplug {
   const channels = codeplug.channels.map((ch) =>
-    ch.contactName === name ? { ...ch, contactName: '' } : ch,
+    ch.contactRef?.kind === kind && ch.contactRef.id === entityId
+      ? { ...ch, contactRef: null }
+      : ch,
   );
   const rxGroupLists = codeplug.rxGroupLists.map((rgl) =>
-    mapMemberWireNames(rgl, (names) => names.filter((n) => n !== name)),
+    mapMemberWireNames(rgl, (names) => names.filter((n) => n !== wireName)),
   );
   return { ...codeplug, channels, rxGroupLists };
 }
@@ -272,7 +277,7 @@ export function deleteTalkGroup(codeplug: Codeplug, talkGroupId: string): Codepl
     ...codeplug,
     talkGroups: codeplug.talkGroups.filter((tg) => tg.id !== talkGroupId),
   };
-  return clearContactWireReferences(next, talkGroup.name);
+  return clearContactEntityReferences(next, 'talkGroup', talkGroupId, talkGroup.name);
 }
 
 export function addContact(codeplug: Codeplug, input: ContactInput): Codeplug {
@@ -314,7 +319,7 @@ export function deleteContact(codeplug: Codeplug, contactId: string): Codeplug {
     ...codeplug,
     contacts: codeplug.contacts.filter((c) => c.id !== contactId),
   };
-  return clearContactWireReferences(next, contact.name);
+  return clearContactEntityReferences(next, 'contact', contactId, contact.name);
 }
 
 export function addRxGroupList(codeplug: Codeplug, input: RxGroupListInput): Codeplug {

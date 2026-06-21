@@ -11,11 +11,11 @@ import ReportPage from '../../components/report/ReportPage.tsx';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
 import {
   externalChannelLinks,
-  findContactByName,
   findEntityById,
   findRxGroupListByName,
   zonesContainingChannel,
 } from '../../lib/reportLookup.ts';
+import { entityRefDisplayName } from '../../lib/entityRefs.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 import { useOperatorPosition } from '../../state/operatorPosition.tsx';
 import { percentLabel } from '../../lib/channelFields/index.ts';
@@ -55,8 +55,19 @@ export default function ChannelDetail() {
     path: `/zones/${z.id}`,
   }));
 
-  const txContact = findContactByName(channel.contactName, codeplug.contacts);
-  const txTalkGroup = codeplug.talkGroups.find((tg) => tg.name === channel.contactName);
+  const contactLabel = entityRefDisplayName(
+    channel.contactRef,
+    codeplug.talkGroups,
+    codeplug.contacts,
+  );
+  const txContact =
+    channel.contactRef?.kind === 'contact'
+      ? findEntityById(codeplug.contacts, channel.contactRef.id)
+      : null;
+  const txTalkGroup =
+    channel.contactRef?.kind === 'talkGroup'
+      ? findEntityById(codeplug.talkGroups, channel.contactRef.id)
+      : null;
   const rxList = findRxGroupListByName(channel.rxGroupListName, codeplug.rxGroupLists);
 
   const vendorExtraFields = Object.entries(channel.opengd77Extras).map(([label, value]) => ({
@@ -159,22 +170,21 @@ export default function ChannelDetail() {
         { label: 'DMR ID', value: channel.dmrId != null ? String(channel.dmrId) : '' },
         {
           label: 'TX contact',
-          value:
-            channel.contactName && channel.contactName !== 'None' ? (
-              txContact ? (
-                <Anchor component={Link} to={`/contacts/${txContact.id}`}>
-                  {channel.contactName}
-                </Anchor>
-              ) : txTalkGroup ? (
-                <Anchor component={Link} to={`/talk-groups/${txTalkGroup.id}`}>
-                  {channel.contactName}
-                </Anchor>
-              ) : (
-                channel.contactName
-              )
+          value: contactLabel ? (
+            txContact ? (
+              <Anchor component={Link} to={`/contacts/${txContact.id}`}>
+                {contactLabel}
+              </Anchor>
+            ) : txTalkGroup ? (
+              <Anchor component={Link} to={`/talk-groups/${txTalkGroup.id}`}>
+                {contactLabel}
+              </Anchor>
             ) : (
-              '—'
-            ),
+              contactLabel
+            )
+          ) : (
+            '—'
+          ),
         },
         {
           label: 'RX group list',
@@ -311,6 +321,8 @@ export default function ChannelDetail() {
             channels={[channel]}
             zones={codeplug.zones}
             allChannels={codeplug.channels}
+            talkGroups={codeplug.talkGroups}
+            contacts={codeplug.contacts}
             highlightChannelId={channel.id}
             compactMode
             defaultShowZones={false}

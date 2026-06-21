@@ -10,7 +10,7 @@ import ReportPage from '../components/report/ReportPage.tsx';
 import { getMemberWireNames } from '../lib/entityProvenance.ts';
 import { formatFrequencyHz } from '../lib/formatFrequency.ts';
 import {
-  channelsWithContactName,
+  channelsReferencingContactId,
   findEntityById,
   formatReferenceCount,
   rxGroupListsContainingMember,
@@ -34,7 +34,7 @@ export default function ContactDetail() {
     );
   }
 
-  const usingChannels = channelsWithContactName(contact.name, codeplug.channels);
+  const usingChannels = channelsReferencingContactId(contact.id, codeplug.channels);
   const usingLists = rxGroupListsContainingMember(contact.name, codeplug.rxGroupLists);
 
   const deleteWarningParts: string[] = [];

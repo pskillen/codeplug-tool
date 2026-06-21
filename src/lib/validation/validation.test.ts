@@ -17,12 +17,17 @@ describe('validateChannel', () => {
     expect(hasValidationErrors(issues)).toBe(true);
   });
 
-  it('warns on missing contact', () => {
+  it('warns on missing contactRef target', () => {
     const issues = validateChannel(
-      { ...channelFieldDefaults(), name: 'X', contactName: 'Missing', mode: 'dmr' },
+      {
+        ...channelFieldDefaults(),
+        name: 'X',
+        contactRef: { kind: 'talkGroup', id: 'missing' },
+        mode: 'dmr',
+      },
       emptyCodeplug(),
     );
-    expect(issues.some((i) => i.severity === 'warning' && i.field === 'contactName')).toBe(true);
+    expect(issues.some((i) => i.severity === 'warning' && i.field === 'contactRef')).toBe(true);
   });
 
   it('detects simplex', () => {

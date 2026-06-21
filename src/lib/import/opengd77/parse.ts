@@ -27,14 +27,25 @@ import {
 
 const OPENGD77_FORMAT = 'opengd77';
 
-function importStamp(sourceFile: string, memberWireNames?: string[]) {
+function importStamp(
+  sourceFile: string,
+  defaultExtra?: { memberWireNames?: string[]; contactWireName?: string; rxGroupListWireName?: string },
+) {
   const importedAt = new Date().toISOString();
-  return <T extends WithEntityMeta>(entity: T): T =>
+  return <T extends WithEntityMeta>(
+    entity: T,
+    perEntityExtra?: {
+      memberWireNames?: string[];
+      contactWireName?: string;
+      rxGroupListWireName?: string;
+    },
+  ): T =>
     stampImported(entity, {
       formatId: OPENGD77_FORMAT,
       sourceFile,
       importedAt,
-      memberWireNames,
+      ...defaultExtra,
+      ...perEntityExtra,
     });
 }
 
@@ -87,7 +98,7 @@ export function parseChannels(text: string): Channel[] {
         bandwidthKHz: parseOpenGd77BandwidthWire(get(CHANNEL_COL.bandwidth)),
         colourCode: parseOpenGd77ColourCodeWire(get(CHANNEL_COL.colourCode)),
         timeslot: parseOpenGd77TimeslotWire(get(CHANNEL_COL.timeslot)),
-        contactName: get(CHANNEL_COL.contact),
+        contactRef: null,
         rxGroupListName: get(CHANNEL_COL.tgList),
         dmrId: parseOpenGd77DmrIdWire(get(CHANNEL_COL.dmrId)),
         rxTone: parseOpenGd77ToneWire(get(CHANNEL_COL.rxTone)),
@@ -102,6 +113,9 @@ export function parseChannels(text: string): Channel[] {
         location: hasLat && hasLon ? { lat, lon } : null,
         useLocation: parseYesNo(get(CHANNEL_COL.useLocation)),
         opengd77Extras,
+      }, {
+        contactWireName: get(CHANNEL_COL.contact),
+        rxGroupListWireName: get(CHANNEL_COL.tgList),
       }),
     );
   }

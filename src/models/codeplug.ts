@@ -1,9 +1,11 @@
 import type { ChannelMode } from '../lib/channelModes.ts';
 import type { ChannelTimeslot, ChannelTone } from '../lib/channelFields/index.ts';
 import type { EntityMeta } from '../lib/entityProvenance.ts';
+import type { EntityRef } from '../lib/entityRefs.ts';
 
 export type { ChannelMode };
 export type { EntityMeta, ImportedProvenance } from '../lib/entityProvenance.ts';
+export type { EntityRef, EntityRefKind } from '../lib/entityRefs.ts';
 
 export interface GeoPoint {
   lat: number;
@@ -15,7 +17,7 @@ export function channelFieldDefaults(): Omit<Channel, 'id' | 'name' | 'callsign'
   return {
     rxFrequency: null,
     txFrequency: null,
-    contactName: '',
+    contactRef: null,
     rxGroupListName: '',
     location: null,
     useLocation: false,
@@ -47,7 +49,7 @@ export interface Channel {
   /** Integer Hz — null when unset. */
   rxFrequency: number | null;
   txFrequency: number | null;
-  contactName: string;
+  contactRef: EntityRef | null;
   /** Transitional name FK → RX group list. */
   rxGroupListName: string;
   location: GeoPoint | null;
@@ -123,7 +125,7 @@ export interface Codeplug {
   meta: CodeplugMeta;
 }
 
-export const CODEPLUG_SCHEMA_VERSION = 6;
+export const CODEPLUG_SCHEMA_VERSION = 7;
 
 let idGenerator: () => string = () => crypto.randomUUID();
 

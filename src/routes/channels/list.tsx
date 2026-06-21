@@ -12,6 +12,7 @@ import { useChannelListColumns } from '../../hooks/useChannelListColumns.ts';
 import { useChannelListQuery } from '../../hooks/useChannelListQuery.ts';
 import { distanceLabelForChannel, useFilteredChannels } from '../../hooks/useChannelListFilters.ts';
 import type { Channel } from '../../models/codeplug.ts';
+import { entityRefDisplayName } from '../../lib/entityRefs.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 import { useOperatorPosition } from '../../state/operatorPosition.tsx';
 
@@ -30,7 +31,12 @@ export default function ChannelsList() {
     visibleCols.includes(c.key),
   ).map((col) => {
     if (col.key === 'contact') {
-      return { key: col.key, header: col.header, render: (ch: Channel) => ch.contactName || '—' };
+      return {
+        key: col.key,
+        header: col.header,
+        render: (ch: Channel) =>
+          entityRefDisplayName(ch.contactRef, codeplug.talkGroups, codeplug.contacts) || '—',
+      };
     }
     if (col.key === 'rgl') {
       return {
@@ -94,6 +100,8 @@ export default function ChannelsList() {
           channels={mapChannels}
           zones={zones}
           allChannels={channels}
+          talkGroups={codeplug.talkGroups}
+          contacts={codeplug.contacts}
           operatorPosition={position}
         />
       </Stack>

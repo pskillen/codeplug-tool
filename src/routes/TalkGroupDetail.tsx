@@ -10,7 +10,7 @@ import ReportPage from '../components/report/ReportPage.tsx';
 import { getMemberWireNames } from '../lib/entityProvenance.ts';
 import { formatFrequencyHz } from '../lib/formatFrequency.ts';
 import {
-  channelsWithTalkGroupName,
+  channelsReferencingTalkGroupId,
   findEntityById,
   formatReferenceCount,
   rxGroupListsContainingMember,
@@ -34,7 +34,7 @@ export default function TalkGroupDetail() {
     );
   }
 
-  const usingChannels = channelsWithTalkGroupName(talkGroup.name, codeplug.channels);
+  const usingChannels = channelsReferencingTalkGroupId(talkGroup.id, codeplug.channels);
   const usingLists = rxGroupListsContainingMember(talkGroup.name, codeplug.rxGroupLists);
 
   const deleteWarningParts: string[] = [];

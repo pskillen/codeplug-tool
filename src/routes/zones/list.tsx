@@ -34,7 +34,13 @@ export default function ZonesList() {
           ]}
         />
 
-        <CodeplugMap channels={channels} zones={zones} allChannels={channels} />
+        <CodeplugMap
+          channels={channels}
+          zones={zones}
+          allChannels={channels}
+          talkGroups={codeplug.talkGroups}
+          contacts={codeplug.contacts}
+        />
       </Stack>
     </ReportPage>
   );

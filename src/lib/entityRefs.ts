@@ -1,4 +1,4 @@
-import type { Codeplug, Contact, RxGroupList, TalkGroup } from '../models/codeplug.ts';
+import type { Channel, Codeplug, Contact, RxGroupList, TalkGroup } from '../models/codeplug.ts';
 import type { EntityMeta } from './entityProvenance.ts';
 
 export type EntityRefKind = 'talkGroup' | 'contact';
@@ -118,6 +118,20 @@ export function memberRefsToWireNames(
     if (name) names.push(name);
   }
   return names;
+}
+
+export function resolveChannelContactRefs(
+  channels: Channel[],
+  talkGroups: TalkGroup[],
+  contacts: Contact[],
+): Channel[] {
+  return channels.map((ch) => {
+    const wireName = ch.meta?.imported?.contactWireName;
+    if (wireName === undefined) return ch;
+    const contactRef = resolveContactRefByWireName(wireName, talkGroups, contacts);
+    if (entityRefsEqual(ch.contactRef, contactRef)) return ch;
+    return { ...ch, contactRef };
+  });
 }
 
 export interface ChannelContactExportSource {

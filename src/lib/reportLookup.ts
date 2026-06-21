@@ -1,6 +1,7 @@
 import type { Channel, Contact, RxGroupList, TalkGroup, Zone } from '../models/codeplug.ts';
 import { buildNameToChannelId } from './codeplug.ts';
 import { getMemberWireNames } from './entityProvenance.ts';
+import { entityRefsEqual, resolveContactRefByWireName } from './entityRefs.ts';
 
 export function findEntityById<T extends { id: string }>(entities: T[], id: string): T | null {
   return entities.find((e) => e.id === id) ?? null;
@@ -10,9 +11,30 @@ export function zonesContainingChannel(channelId: string, zones: Zone[]): Zone[]
   return zones.filter((z) => z.memberChannelIds.includes(channelId));
 }
 
-export function channelsWithContactName(name: string, channels: Channel[]): Channel[] {
+export function channelsReferencingContactId(contactId: string, channels: Channel[]): Channel[] {
+  if (!contactId) return [];
+  return channels.filter(
+    (ch) => ch.contactRef?.kind === 'contact' && ch.contactRef.id === contactId,
+  );
+}
+
+export function channelsReferencingTalkGroupId(talkGroupId: string, channels: Channel[]): Channel[] {
+  if (!talkGroupId) return [];
+  return channels.filter(
+    (ch) => ch.contactRef?.kind === 'talkGroup' && ch.contactRef.id === talkGroupId,
+  );
+}
+
+export function channelsWithContactName(
+  name: string,
+  channels: Channel[],
+  talkGroups: TalkGroup[],
+  contacts: Contact[],
+): Channel[] {
   if (!name || name === 'None') return [];
-  return channels.filter((ch) => ch.contactName === name);
+  const ref = resolveContactRefByWireName(name, talkGroups, contacts);
+  if (!ref) return [];
+  return channels.filter((ch) => entityRefsEqual(ch.contactRef, ref));
 }
 
 export function channelsWithRxGroupList(name: string, channels: Channel[]): Channel[] {
@@ -20,8 +42,14 @@ export function channelsWithRxGroupList(name: string, channels: Channel[]): Chan
   return channels.filter((ch) => ch.rxGroupListName === name);
 }
 
-export function channelsWithTalkGroupName(name: string, channels: Channel[]): Channel[] {
-  return channelsWithContactName(name, channels);
+export function channelsWithTalkGroupName(
+  name: string,
+  channels: Channel[],
+  talkGroups: TalkGroup[],
+): Channel[] {
+  const tg = talkGroups.find((t) => t.name === name);
+  if (!tg) return [];
+  return channelsReferencingTalkGroupId(tg.id, channels);
 }
 
 export function channelsForZone(zone: Zone, channels: Channel[]): Channel[] {

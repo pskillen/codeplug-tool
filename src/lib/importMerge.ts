@@ -12,6 +12,7 @@ import {
 } from './importEntityCompare.ts';
 import type { ImportResult, ParsedRxGroupList, ParsedZone } from './import/types.ts';
 import { getMemberWireNames, setMemberWireNames, stampImported } from './entityProvenance.ts';
+import { resolveChannelContactRefs } from './entityRefs.ts';
 import {
   newId,
   type Channel,
@@ -340,6 +341,7 @@ function applyImportInternal(
 
   const nameToId = buildNameToChannelId(channels);
   const { zones, unresolved } = resolveZones(mergedZones, nameToId);
+  const resolvedChannels = resolveChannelContactRefs(channels, talkGroups, contacts);
 
   const reportBase = {
     mode,
@@ -354,7 +356,7 @@ function applyImportInternal(
   return {
     codeplug: {
       ...codeplug,
-      channels,
+      channels: resolvedChannels,
       zones,
       contacts,
       talkGroups,

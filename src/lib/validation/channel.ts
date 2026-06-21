@@ -39,14 +39,16 @@ export function validateChannel(
     issues.push({ field: 'txFrequency', message: 'Invalid TX frequency', severity: 'error' });
   }
 
-  const contact = input.contactName?.trim();
-  if (contact && contact !== 'None') {
-    const hasContact = codeplug.contacts.some((c) => c.name === contact);
-    const hasTalkGroup = codeplug.talkGroups.some((tg) => tg.name === contact);
-    if (!hasContact && !hasTalkGroup) {
+  const ref = input.contactRef;
+  if (ref) {
+    const exists =
+      ref.kind === 'talkGroup'
+        ? codeplug.talkGroups.some((tg) => tg.id === ref.id)
+        : codeplug.contacts.some((c) => c.id === ref.id);
+    if (!exists) {
       issues.push({
-        field: 'contactName',
-        message: `Contact "${contact}" not found in project`,
+        field: 'contactRef',
+        message: 'Selected TX contact not found in project',
         severity: 'warning',
       });
     }

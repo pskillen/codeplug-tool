@@ -39,12 +39,17 @@ describe('reportLookup', () => {
   });
 
   it('channelsWithContactName matches case-sensitively', () => {
-    const channels = [
-      channel('c1', 'GB3SG', { contactName: 'Scotland' }),
-      channel('c2', 'GB3BF', { contactName: 'scotland' }),
+    const talkGroups = [
+      buildTalkGroup({ id: 'tg1', name: 'Scotland', number: '950' }),
+      buildTalkGroup({ id: 'tg2', name: 'scotland', number: '951' }),
     ];
-    expect(channelsWithContactName('Scotland', channels)).toHaveLength(1);
-    expect(channelsWithTalkGroupName('Scotland', channels)).toHaveLength(1);
+    const contacts: ReturnType<typeof buildContact>[] = [];
+    const channels = [
+      channel('c1', 'GB3SG', { contactRef: { kind: 'talkGroup', id: 'tg1' } }),
+      channel('c2', 'GB3BF', { contactRef: { kind: 'talkGroup', id: 'tg2' } }),
+    ];
+    expect(channelsWithContactName('Scotland', channels, talkGroups, contacts)).toHaveLength(1);
+    expect(channelsWithTalkGroupName('Scotland', channels, talkGroups)).toHaveLength(1);
   });
 
   it('channelsWithRxGroupList matches RX group list name', () => {

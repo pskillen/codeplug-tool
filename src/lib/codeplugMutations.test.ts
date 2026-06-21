@@ -170,56 +170,72 @@ describe('codeplugMutations', () => {
       expect(cp.talkGroups[0].name).toBe('Scotland');
     });
 
-    it('updateTalkGroup rename propagates to channels and RGL members', () => {
+    it('updateTalkGroup rename propagates RGL member wire names; channel refs stay id-based', () => {
       const cp = {
         ...emptyCodeplug(),
         talkGroups: [{ id: 'tg-1', name: 'Old TG', number: '9', timeslotOverride: '' }],
-        channels: [makeChannel('ch-1', 'GB3DA', { contactName: 'Old TG' })],
+        channels: [
+          makeChannel('ch-1', 'GB3DA', {
+            contactRef: { kind: 'talkGroup', id: 'tg-1' },
+          }),
+        ],
         rxGroupLists: [
           buildImportedRxGroupList({ id: 'rgl-1', name: 'List' }, ['Old TG', 'Other']),
         ],
       };
       const next = updateTalkGroup(cp, 'tg-1', { name: 'New TG' });
       expect(next.talkGroups[0].name).toBe('New TG');
-      expect(next.channels[0].contactName).toBe('New TG');
+      expect(next.channels[0].contactRef).toEqual({ kind: 'talkGroup', id: 'tg-1' });
       expect(getMemberWireNames(next.rxGroupLists[0])).toEqual(['New TG', 'Other']);
     });
 
-    it('deleteTalkGroup clears channel refs and removes from RGL members', () => {
+    it('deleteTalkGroup clears channel contactRef and removes from RGL members', () => {
       const cp = {
         ...emptyCodeplug(),
         talkGroups: [{ id: 'tg-1', name: 'Scotland', number: '950', timeslotOverride: '' }],
-        channels: [makeChannel('ch-1', 'GB3DA', { contactName: 'Scotland' })],
+        channels: [
+          makeChannel('ch-1', 'GB3DA', {
+            contactRef: { kind: 'talkGroup', id: 'tg-1' },
+          }),
+        ],
         rxGroupLists: [buildImportedRxGroupList({ id: 'rgl-1', name: 'List' }, ['Scotland'])],
       };
       const next = deleteTalkGroup(cp, 'tg-1');
       expect(next.talkGroups).toHaveLength(0);
-      expect(next.channels[0].contactName).toBe('');
+      expect(next.channels[0].contactRef).toBeNull();
       expect(getMemberWireNames(next.rxGroupLists[0])).toEqual([]);
     });
   });
 
   describe('contacts', () => {
-    it('updateContact rename propagates like talk group', () => {
+    it('updateContact rename propagates RGL wire names; channel refs stay id-based', () => {
       const cp = {
         ...emptyCodeplug(),
         contacts: [{ id: 'ct-1', name: 'Old', number: '123', timeslotOverride: '' }],
-        channels: [makeChannel('ch-1', 'GB3DA', { contactName: 'Old' })],
+        channels: [
+          makeChannel('ch-1', 'GB3DA', {
+            contactRef: { kind: 'contact', id: 'ct-1' },
+          }),
+        ],
       };
       const next = updateContact(cp, 'ct-1', { name: 'New' });
-      expect(next.channels[0].contactName).toBe('New');
+      expect(next.channels[0].contactRef).toEqual({ kind: 'contact', id: 'ct-1' });
     });
 
-    it('deleteContact clears references', () => {
+    it('deleteContact clears contactRef by id', () => {
       const cp = {
         ...emptyCodeplug(),
         contacts: [{ id: 'ct-1', name: 'MM9PDY', number: '123', timeslotOverride: '' }],
-        channels: [makeChannel('ch-1', 'GB3DA', { contactName: 'MM9PDY' })],
+        channels: [
+          makeChannel('ch-1', 'GB3DA', {
+            contactRef: { kind: 'contact', id: 'ct-1' },
+          }),
+        ],
         rxGroupLists: [buildImportedRxGroupList({ id: 'rgl-1', name: 'List' }, ['MM9PDY'])],
       };
       const next = deleteContact(cp, 'ct-1');
       expect(next.contacts).toHaveLength(0);
-      expect(next.channels[0].contactName).toBe('');
+      expect(next.channels[0].contactRef).toBeNull();
       expect(getMemberWireNames(next.rxGroupLists[0])).toEqual([]);
     });
   });

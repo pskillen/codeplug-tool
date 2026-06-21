@@ -36,6 +36,7 @@ import { channelSectionAnchorId } from '../../lib/channelPageSections.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { hasValidationErrors, validateChannel } from '../../lib/validation/channel.ts';
 import { channelFieldDefaults, type Channel, type ChannelMode } from '../../models/codeplug.ts';
+import { entityRefKey, parseEntityRefKey } from '../../lib/entityRefs.ts';
 import { findEntityById } from '../../lib/reportLookup.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 
@@ -47,7 +48,7 @@ type ChannelFormValues = {
   bandwidthKHz: string;
   colourCode: string;
   timeslot: string;
-  contactName: string;
+  contactRefKey: string;
   rxGroupListName: string;
   dmrId: string;
   rxTone: ChannelTone;
@@ -91,7 +92,7 @@ function channelToForm(ch: Channel): ChannelFormValues {
     bandwidthKHz: ch.bandwidthKHz != null ? String(ch.bandwidthKHz) : '',
     colourCode: ch.colourCode != null ? String(ch.colourCode) : '',
     timeslot: ch.timeslot != null ? String(ch.timeslot) : '',
-    contactName: ch.contactName,
+    contactRefKey: ch.contactRef ? entityRefKey(ch.contactRef) : '',
     rxGroupListName: ch.rxGroupListName,
     dmrId: ch.dmrId != null ? String(ch.dmrId) : '',
     rxTone: ch.rxTone,
@@ -122,7 +123,7 @@ function emptyForm(): ChannelFormValues {
     bandwidthKHz: '',
     colourCode: '',
     timeslot: '',
-    contactName: defaults.contactName,
+    contactRefKey: '',
     rxGroupListName: defaults.rxGroupListName,
     dmrId: '',
     rxTone: defaults.rxTone,
@@ -165,7 +166,7 @@ function formToChannelInput(values: ChannelFormValues): Omit<Channel, 'id' | 'ca
         ? colourCode
         : null,
     timeslot,
-    contactName: values.contactName,
+    contactRef: parseEntityRefKey(values.contactRefKey),
     rxGroupListName: values.rxGroupListName,
     dmrId: dmrId != null && Number.isFinite(dmrId) && dmrId > 0 ? dmrId : null,
     rxTone: values.rxTone,
@@ -264,8 +265,14 @@ export default function ChannelEdit() {
 
   const contactOptions = [
     { value: '', label: 'None' },
-    ...codeplug.contacts.map((c) => ({ value: c.name, label: c.name })),
-    ...codeplug.talkGroups.map((tg) => ({ value: tg.name, label: `${tg.name} (group)` })),
+    ...codeplug.contacts.map((c) => ({
+      value: entityRefKey({ kind: 'contact', id: c.id }),
+      label: c.name,
+    })),
+    ...codeplug.talkGroups.map((tg) => ({
+      value: entityRefKey({ kind: 'talkGroup', id: tg.id }),
+      label: `${tg.name} (group)`,
+    })),
   ];
 
   const rglOptions = [
@@ -462,8 +469,8 @@ export default function ChannelEdit() {
               <Select
                 label="TX contact"
                 data={contactOptions}
-                value={values.contactName || ''}
-                onChange={(v) => set('contactName', v ?? '')}
+                value={values.contactRefKey || ''}
+                onChange={(v) => set('contactRefKey', v ?? '')}
                 searchable
                 clearable
               />
@@ -539,6 +546,8 @@ export default function ChannelEdit() {
             </Group>
             <CodeplugMap
               channels={mapPreviewChannels}
+              talkGroups={codeplug.talkGroups}
+              contacts={codeplug.contacts}
               height={240}
               compactMode
               showControls={false}

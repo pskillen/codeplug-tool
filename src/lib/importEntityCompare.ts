@@ -1,5 +1,6 @@
 import type { Channel, Contact, RxGroupList, TalkGroup } from '../models/codeplug.ts';
 import { getMemberWireNames } from './entityProvenance.ts';
+import { entityRefsEqual } from './entityRefs.ts';
 
 function locationsEqual(a: Channel['location'], b: Channel['location']): boolean {
   if (a === null && b === null) return true;
@@ -18,6 +19,15 @@ function opengd77ExtrasEqual(a: Record<string, string>, b: Record<string, string
   return true;
 }
 
+function channelContactImportEqual(a: Channel, b: Channel): boolean {
+  const wireA = a.meta?.imported?.contactWireName;
+  const wireB = b.meta?.imported?.contactWireName;
+  if (wireA !== undefined || wireB !== undefined) {
+    return (wireA ?? '') === (wireB ?? '');
+  }
+  return entityRefsEqual(a.contactRef, b.contactRef);
+}
+
 /** Compare import-mapped channel fields (excludes internal id and hideFromMap). */
 export function channelsImportEqual(a: Channel, b: Channel): boolean {
   return (
@@ -26,7 +36,7 @@ export function channelsImportEqual(a: Channel, b: Channel): boolean {
     a.mode === b.mode &&
     a.rxFrequency === b.rxFrequency &&
     a.txFrequency === b.txFrequency &&
-    a.contactName === b.contactName &&
+    channelContactImportEqual(a, b) &&
     a.rxGroupListName === b.rxGroupListName &&
     locationsEqual(a.location, b.location) &&
     a.useLocation === b.useLocation &&

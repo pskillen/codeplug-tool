@@ -3,7 +3,7 @@ import EntityTable from '../components/report/EntityTable.tsx';
 import ReportPage from '../components/report/ReportPage.tsx';
 import { filterRowsByName, useListNameQuery } from '../hooks/useListNameQuery.ts';
 import {
-  channelsWithTalkGroupName,
+  channelsReferencingTalkGroupId,
   formatReferenceCount,
   rxGroupListsContainingMember,
   sortByName,
@@ -34,7 +34,7 @@ export default function TalkGroupsList() {
             key: 'channels',
             header: 'Channels using',
             render: (tg) =>
-              formatReferenceCount(channelsWithTalkGroupName(tg.name, channels).length),
+              formatReferenceCount(channelsReferencingTalkGroupId(tg.id, channels).length),
           },
           {
             key: 'rgl',

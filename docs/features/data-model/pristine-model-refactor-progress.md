@@ -10,7 +10,7 @@
 
 ## Overall status
 
-**Status:** In progress (Phase 3 on branch `93/paddy/import-provenance-meta`)
+**Status:** In progress (Phase 4 on branch `93/paddy/fk-by-uuid`)
 
 The model refactor is delivered as a **phased epic**. Each phase is a self-contained subplan, executed by a **separate agent session**, on its own branch + PR, merged to `main` **sequentially** before the next phase branches.
 
@@ -31,9 +31,9 @@ The model refactor is delivered as a **phased epic**. Each phase is a self-conta
 
 The next agent relies on these values. Keep them accurate.
 
-- **Current `CODEPLUG_SCHEMA_VERSION`:** 6 (Phase 3)
-- **Last merged phase:** Phase 2 (#52, PR #98)
-- **`main` is at:** after Phase 2 merge — Phase 3 in progress on `93/paddy/import-provenance-meta`
+- **Current `CODEPLUG_SCHEMA_VERSION`:** 6 → 7 in progress (Phase 4)
+- **Last merged phase:** Phase 3 (provenance meta + opengd77Extras rename)
+- **`main` is at:** after Phase 3 merge — Phase 4 in progress on `93/paddy/fk-by-uuid`
 - **Epic ticket:** [#93](https://github.com/pskillen/codeplug-tool/issues/93). No per-phase child tickets — FK-by-UUID and provenance/rename are folded under #93.
 - **New tickets created in Phase 0:**
   - OpenGD77 export issues (tracking): [#95](https://github.com/pskillen/codeplug-tool/issues/95)
@@ -120,7 +120,7 @@ The next agent relies on these values. Keep them accurate.
 
 ## Phase 3 — Import provenance to per-entity `meta` + `opengd77Extras` rename (new ticket)
 
-**Status:** Complete (pending PR)
+**Status:** Complete (merged)
 **Branch:** `93/paddy/import-provenance-meta`
 
 **Delivered**
@@ -141,8 +141,8 @@ The next agent relies on these values. Keep them accurate.
 
 ## Phase 4 — FKs by UUID, discriminated refs (new ticket)
 
-**Status:** Not started
-**Branch:** `{ticket}/paddy/fk-by-uuid`
+**Status:** In progress
+**Branch:** `93/paddy/fk-by-uuid`
 **Prerequisite:** Phase 3 provenance `meta` shape merged.
 
 **Doc debt to clear in this phase** (from [doc audit](vendor-boundary-doc-audit.md) #1, #2, #5): once FKs are id-keyed, rewrite the name-FK descriptions in [`crud/README.md`](../crud/README.md) (L38–41) and [`RxGroupListMemberPicker.md`](../../../src/components/crud/RxGroupListMemberPicker.md) (props move from `selectedNames` to id refs), and generalise "Vendor CSV serialises names" (crud README L41) to "the export adapter serialises per target format".
@@ -166,5 +166,4 @@ From the [doc audit](vendor-boundary-doc-audit.md) #6–#8 — pure doc/anchor f
 
 ## Next
 
-- Open PR for Phase 3 (provenance meta + opengd77Extras rename); merge after review.
-- After merge, generate the Phase 4 subplan (FK-by-UUID) in a fresh session.
+- Execute Phase 4 slices (EntityRef helpers → contactRef → rxGroupListId → memberRefs → cross-cutting → docs/PR).
