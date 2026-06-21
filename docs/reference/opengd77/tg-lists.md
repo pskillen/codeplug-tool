@@ -18,7 +18,7 @@ Empty trailing member cells are allowed.
 | Vendor header | Internal field | Required (import) | Import rule | Export rule | Round-trip | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | `TG List Name` | `RxGroupList.name` | **Yes** | Trim; skip row if empty | As stored | String pass-through | FK from `Channels.TG List` |
-| `Contact1`…`ContactN` | `RxGroupList.sourceMemberNames[]` | No | Collect non-empty cells in column order; any `Contact\d+` header | Pad into `Contact1`…`ContactN` up to profile cap | Lossless names | Members are **vendor names** from Contacts.csv |
+| `Contact1`…`ContactN` | `RxGroupList.meta.imported.memberWireNames[]` | No | Collect non-empty cells in column order; any `Contact\d+` header | Pad into `Contact1`…`ContactN` up to profile cap | Lossless names | Members are **vendor names** from Contacts.csv |
 
 ## Promiscuous RX semantics
 

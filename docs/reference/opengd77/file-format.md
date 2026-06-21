@@ -31,8 +31,8 @@ At the vendor boundary:
 
 - `Channel.name`, `Channel.contactName`, `Channel.rxGroupListName` are **wire/display names**, not internal relationship keys.
 - Internal models use stable UUIDs (`Channel.id`, `Zone.memberChannelIds`, …).
-- `Zone.sourceMemberNames` and `RxGroupList.sourceMemberNames` preserve imported vendor names for export and unresolved-member reporting.
-- `Channel.vendorExtras` holds OpenGD77-only columns not mapped to first-class model fields (see [channels.md](channels.md)).
+- `Zone.meta.imported.memberWireNames` and `RxGroupList.meta.imported.memberWireNames` preserve imported vendor names for export and unresolved-member reporting.
+- `Channel.opengd77Extras` holds OpenGD77-only columns not mapped to first-class model fields (see [channels.md](channels.md)).
 
 ## Boolean and enum conversion
 

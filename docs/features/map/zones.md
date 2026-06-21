@@ -28,7 +28,7 @@ The map consumes these [`Zone`](../data-model/README.md#zone) fields:
 | --- | --- |
 | `name` | Tooltip, popup title, sidebar list |
 | `memberChannelIds` | Resolved channel ids — the authoritative membership the map plots |
-| `sourceMemberNames` | Original wire member names — used to report members that resolve to no channel |
+| `meta.imported.memberWireNames` | Original wire member names — used to report members that resolve to no channel |
 
 Membership is resolved to ids **at import** (`resolveZoneMembers`), case-sensitive on channel `name`. The map resolves those ids against the **plotted** channel set (`buildChannelById`), so members hidden by filters are reported as skipped rather than plotted.
 
@@ -39,7 +39,14 @@ Membership is resolved to ids **at import** (`resolveZoneMembers`), case-sensiti
   "id": "8b1f…",
   "name": "Glasgow",
   "memberChannelIds": ["id-hotspot", "id-gb7gl", "id-gb3gl"],
-  "sourceMemberNames": ["Hotspot", "GB7GL Glasgow", "GB3GL Glasgow"]
+  "meta": {
+    "imported": {
+      "formatId": "opengd77",
+      "sourceFile": "Zones.csv",
+      "importedAt": "2026-01-01T00:00:00.000Z",
+      "memberWireNames": ["Hotspot", "GB7GL Glasgow", "GB3GL Glasgow"]
+    }
+  }
 }
 ```
 
@@ -61,7 +68,7 @@ For each member, `zoneGeolocatedPoints` produces a point or a skip reason:
 
 | Condition | Result |
 | --- | --- |
-| `sourceMemberNames` entry resolves to no channel | Reported missing — reason `not in Channels.csv` |
+| `meta.imported.memberWireNames` entry resolves to no channel | Reported missing — reason `unresolved member` |
 | Member id not in the plotted set | Skipped — `filtered out or missing coordinates` |
 | Channel has no `location` | Skipped — `no coordinates` |
 | `0, 0` with **Skip 0,0** on | Skipped — `0,0 coordinates` |
@@ -99,7 +106,7 @@ The sidebar **Zones** panel appears when zones are present. Each zone lists:
 - **ok** — hull drawn; shows vertex/site counts and optional skipped member count
 - **warn** — no geolocated members, or some members skipped (still draws a hull if ≥1 site)
 
-Popups include zone name, member count (`sourceMemberNames.length`), shape note, and count of members without coords.
+Popups include zone name, member count (`meta.imported.memberWireNames` length), shape note, and count of members without coords.
 
 ### Multi-zone channels
 

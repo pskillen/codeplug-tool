@@ -29,19 +29,19 @@ All other columns are optional at import — missing headers yield empty values.
 | `Contact` | `Channel.contactName` | No | Trim | As stored | String pass-through | TX talk group name; FK → Contacts.csv |
 | `TG List` | `Channel.rxGroupListName` | No | Trim | As stored | String pass-through | Promiscuous RX list; FK → TG_Lists.csv |
 | `DMR ID` | `Channel.dmrId` | No | Parse integer | As integer string | Lossless | Hotspot/repeater ID override |
-| `TS1_TA_Tx` | `Channel.vendorExtras['TS1_TA_Tx']` | No | Trim → vendorExtras | From vendorExtras | vendorExtras | Talkaround TS1 |
-| `TS2_TA_Tx ID` | `Channel.vendorExtras['TS2_TA_Tx ID']` | No | Trim → vendorExtras | From vendorExtras | vendorExtras | Talkaround TS2 |
+| `TS1_TA_Tx` | `Channel.opengd77Extras['TS1_TA_Tx']` | No | Trim → opengd77Extras | From opengd77Extras | opengd77Extras | Talkaround TS1 |
+| `TS2_TA_Tx ID` | `Channel.opengd77Extras['TS2_TA_Tx ID']` | No | Trim → opengd77Extras | From opengd77Extras | opengd77Extras | Talkaround TS2 |
 | `RX Tone` | `Channel.rxTone` | No | Wire → tone enum (`None` → `none`) | Enum → wire (`none` → `None`) | Lossless | CTCSS/DCS; see tones below |
 | `TX Tone` | `Channel.txTone` | No | Wire → tone enum | Enum → wire | Lossless | |
 | `Squelch` | `Channel.squelch` | No | Wire → percent | Percent → wire | Lossless | See [power-squelch.md](power-squelch.md) |
 | `Power` | `Channel.power` | No | Wire → percent | Percent → wire | Lossless | See [power-squelch.md](power-squelch.md) |
 | `Rx Only` | `Channel.rxOnly` | No | `Yes`/`No` → boolean | `wireYesNo` | Lossless boolean | |
-| `Zone Skip` | `Channel.vendorExtras['Zone Skip']` | No | Trim → vendorExtras | From vendorExtras | vendorExtras | Not mapped to `scanSkip` |
+| `Zone Skip` | `Channel.opengd77Extras['Zone Skip']` | No | Trim → opengd77Extras | From opengd77Extras | opengd77Extras | Not mapped to `scanSkip` |
 | `All Skip` | `Channel.scanSkip` | No | `Yes` → `true` | `wireYesNo(scanSkip)` | Lossless boolean | Global scan skip |
 | `TOT` | `Channel.transmitTimeout` | No | Parse seconds | As integer string | Lossless | `0` = off; CPS step 15 (0–495) |
 | `VOX` | `Channel.voxEnabled` | No | `Off` or empty → `false`; else `true` | `Off` / `On` | Lossless boolean | |
-| `No Beep` | `Channel.vendorExtras['No Beep']` | No | Trim → vendorExtras | From vendorExtras | vendorExtras | |
-| `No Eco` | `Channel.vendorExtras['No Eco']` | No | Trim → vendorExtras | From vendorExtras | vendorExtras | |
+| `No Beep` | `Channel.opengd77Extras['No Beep']` | No | Trim → opengd77Extras | From opengd77Extras | opengd77Extras | |
+| `No Eco` | `Channel.opengd77Extras['No Eco']` | No | Trim → opengd77Extras | From opengd77Extras | opengd77Extras | |
 | `APRS` | `Channel.aprsConfigName` | No | Trim | As stored | String pass-through | FK → APRS.csv |
 | `Latitude` | `Channel.location.lat` | **Column required** | Parse float | String from location | Lossless when valid | Pair with longitude |
 | `Longitude` | `Channel.location.lon` | **Column required** | Parse float | String from location | Lossless when valid | |

@@ -20,11 +20,11 @@ erDiagram
   Zone }o--o{ Channel : "memberChannelIds"
 ```
 
-Some relationships are still **name-based** — a **transitional** foreign key, not the target design. `Channel.contactName` and `Channel.rxGroupListName` reference a talk group/contact and an RX group list by name; `RxGroupList.sourceMemberNames` lists member names (talk groups and/or contacts). The internal target is a stable **UUID id** FK; name resolution is carried only until the FK-by-id conversion (epic [#93](https://github.com/pskillen/codeplug-tool/issues/93) Phase 4). Treat name FKs as legacy wire baggage, not a pattern to extend.
+Some relationships are still **name-based** — a **transitional** foreign key, not the target design. `Channel.contactName` and `Channel.rxGroupListName` reference a talk group/contact and an RX group list by name. Zone and RX group list **member wire names** live in per-entity import provenance (`meta.imported.memberWireNames`), not as top-level fields. The internal target is a stable **UUID id** FK (epic [#93](https://github.com/pskillen/codeplug-tool/issues/93) Phase 4). Treat name FKs as legacy wire baggage, not a pattern to extend.
 
 Wire-format mapping lives in the [import/export hub](../import-export/README.md) and per-format references under `docs/reference/<format>/` — not here. Radio-specific limits (zone member caps, feature availability) are format/profile concerns that apply at export time, not in the internal model.
 
-**Source:** [`src/models/codeplug.ts`](../../../src/models/codeplug.ts) · schema version **5**
+**Source:** [`src/models/codeplug.ts`](../../../src/models/codeplug.ts) · schema version **6**
 
 ## Design principles
 
@@ -33,11 +33,11 @@ Wire-format mapping lives in the [import/export hub](../import-export/README.md)
 | **Radio-agnostic models** | Channels, zones, contacts, etc. have no radio hardware fields. Target radio constraints are applied at export (see [radio profiles](../../reference/opengd77/radios/README.md)). |
 | **Stable internal ids** | Every entity has `id: string` (`crypto.randomUUID()` via `newId()`). Zone→channel uses resolved ids; FK-by-id is the target for all relationships. |
 | **Names are display fields, not FKs** | `Channel.name`, `Zone.name`, etc. are preserved for UI and round-trip but are **not** the intended foreign-key mechanism. The remaining name-based FKs (above) are transitional and convert to ids in epic [#93](https://github.com/pskillen/codeplug-tool/issues/93) Phase 4. |
-| **Name matching at import only** | Zone members resolve channel **names** → ids via `resolveZoneMembers`. Remaining `*Name` / `sourceMemberNames` fields hold imported names until id-resolution; do not introduce new name-keyed relationships. |
+| **Name matching at import only** | Zone members resolve channel **names** → ids via `resolveZoneMembers` using `meta.imported.memberWireNames`. Do not introduce new name-keyed relationships on entity roots. |
 | **JSON-serialisable** | Plain data objects for persistence and export. |
-| **Schema versioned** | `CODEPLUG_SCHEMA_VERSION = 5`; v1–v4 codeplugs migrate on load. |
+| **Schema versioned** | `CODEPLUG_SCHEMA_VERSION = 6`; v1–v5 codeplugs migrate on load. |
 | **CRUD is vendor-neutral** | Create/edit/delete in the SPA does not enforce radio cardinality (e.g. RX group list member count). Limits apply at import/export per [radio profiles](../../reference/opengd77/radios/README.md). |
-| **Vendor-specific fields are additive** | e.g. `vendorExtras`, opaque wire strings — store when useful; importer/exporter decides drop, warn, truncate, or round-trip. Do not reject or cap in CRUD because export might not round-trip. |
+| **Vendor-specific fields are additive** | e.g. `opengd77Extras`, import provenance in `meta.imported` — store when useful; importer/exporter decides drop, warn, truncate, or round-trip. Do not reject or cap in CRUD because export might not round-trip. |
 
 ## Entities
 
@@ -80,7 +80,8 @@ Typed scalar fields use vendor-neutral semantics in the model; CPS wire strings 
 | `transmitTimeout` | `number \| null` | Seconds; `0` = off; `null` when unset |
 | `scanSkip` | `boolean` | Exclude from scan |
 | `hideFromMap` | `boolean` | Internal only — exclude from map plots |
-| `vendorExtras` | `Record<string, string>` | Opaque vendor wire fields preserved for round-trip |
+| `opengd77Extras` | `Record<string, string>` | OpenGD77-only opaque wire columns preserved for round-trip |
+| `meta` | `EntityMeta` | Optional per-entity metadata (see below) |
 
 Channel numbering (a CPS slot index) is **not** stored — it is assigned at export per target format.
 
@@ -91,23 +92,25 @@ Channel numbering (a CPS slot index) is **not** stored — it is assigned at exp
 | `id` | `string` | Internal |
 | `name` | `string` | |
 | `memberChannelIds` | `string[]` | Resolved channel ids — authoritative membership |
-| `sourceMemberNames` | `string[]` | Original imported member names (channel names) for re-resolution, unresolved reporting, and export round-trip |
+| `meta` | `EntityMeta` | Optional; `meta.imported.memberWireNames` holds imported zone member channel names |
 
 ### `TalkGroup`
 
 DMR group call.
 
-| Field | Type |
-| --- | --- |
-| `id`, `name`, `number`, `timeslotOverride` | (`number` is the DMR ID) |
+| Field | Type | Notes |
+| --- | --- | --- |
+| `id`, `name`, `number`, `timeslotOverride` | | (`number` is the DMR ID) |
+| `meta` | `EntityMeta` | Optional import provenance |
 
 ### `Contact`
 
 DMR private call.
 
-| Field | Type |
-| --- | --- |
-| `id`, `name`, `number`, `timeslotOverride` | (`number` is the DMR ID) |
+| Field | Type | Notes |
+| --- | --- | --- |
+| `id`, `name`, `number`, `timeslotOverride` | | (`number` is the DMR ID) |
+| `meta` | `EntityMeta` | Optional import provenance |
 
 ### `RxGroupList`
 
@@ -116,21 +119,34 @@ Named RX (receive) group list driving promiscuous receive. Members are currently
 | Field | Type |
 | --- | --- |
 | `id`, `name` | |
-| `sourceMemberNames` | `string[]` — original imported member names |
+| `meta` | `EntityMeta` | `meta.imported.memberWireNames` — imported member names (talk groups and/or contacts) |
 
 ### `CodeplugMeta`
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `schemaVersion` | `number` | Must match `CODEPLUG_SCHEMA_VERSION` (5) after migration |
+| `schemaVersion` | `number` | Must match `CODEPLUG_SCHEMA_VERSION` (6) after migration |
 | `importedAt` | `string \| null` | |
 | `sourceFiles` | `string[]` | |
+
+### `EntityMeta` / `ImportedProvenance`
+
+Per-entity import provenance — accessors in [`src/lib/entityProvenance.ts`](../../../src/lib/entityProvenance.ts).
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `meta.imported.formatId` | `string` | Source format (e.g. `'opengd77'`) |
+| `meta.imported.sourceFile` | `string \| null` | Source CSV filename when known |
+| `meta.imported.importedAt` | `string` | ISO-8601 timestamp |
+| `meta.imported.memberWireNames` | `string[]` | Ordered wire names for zone/RGL list members |
+
+Project-level `CodeplugMeta.importedAt` / `sourceFiles` remain for dashboard and merge bookkeeping.
 
 ## Relationship resolution
 
 ```mermaid
 flowchart LR
-  Names["sourceMemberNames (channel names)"] --> Resolve["resolveZoneMembers"]
+  Prov["meta.imported.memberWireNames"] --> Resolve["resolveZoneMembers"]
   Channels["Channel.name to id map"] --> Resolve
   Resolve --> Zone["Zone.memberChannelIds"]
 ```
