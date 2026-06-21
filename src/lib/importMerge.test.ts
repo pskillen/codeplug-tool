@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { resetIdGenerator, setIdGenerator } from '../models/codeplug.ts';
 import type { Channel } from '../models/codeplug.ts';
-import { buildChannel } from '../test/builders/index.ts';
+import { buildChannel, buildImportedZone } from '../test/builders/index.ts';
 import type { ImportResult } from './import/types.ts';
 import { applyImportToCodeplug, emptyEntityStats, previewImportMerge } from './importMerge.ts';
 
@@ -182,7 +182,7 @@ describe('importMerge', () => {
 
       const populated = {
         ...cp,
-        zones: [{ id: 'z-old', name: 'Old', sourceMemberNames: ['A'], memberChannelIds: ['ch-1'] }],
+        zones: [buildImportedZone({ id: 'z-old', name: 'Old', memberChannelIds: ['ch-1'] }, ['A'])],
         contacts: [{ id: 'c1', name: 'Local', number: '9', timeslotOverride: '' }],
       };
 

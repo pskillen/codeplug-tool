@@ -1,4 +1,5 @@
 import type { Channel, Contact, RxGroupList, TalkGroup } from '../models/codeplug.ts';
+import { getMemberWireNames } from './entityProvenance.ts';
 
 function locationsEqual(a: Channel['location'], b: Channel['location']): boolean {
   if (a === null && b === null) return true;
@@ -6,7 +7,7 @@ function locationsEqual(a: Channel['location'], b: Channel['location']): boolean
   return a.lat === b.lat && a.lon === b.lon;
 }
 
-function vendorExtrasEqual(a: Record<string, string>, b: Record<string, string>): boolean {
+function opengd77ExtrasEqual(a: Record<string, string>, b: Record<string, string>): boolean {
   const keysA = Object.keys(a).sort();
   const keysB = Object.keys(b).sort();
   if (keysA.length !== keysB.length) return false;
@@ -42,7 +43,7 @@ export function channelsImportEqual(a: Channel, b: Channel): boolean {
     a.voxEnabled === b.voxEnabled &&
     a.transmitTimeout === b.transmitTimeout &&
     a.scanSkip === b.scanSkip &&
-    vendorExtrasEqual(a.vendorExtras, b.vendorExtras)
+    opengd77ExtrasEqual(a.opengd77Extras, b.opengd77Extras)
   );
 }
 
@@ -71,7 +72,7 @@ export function talkGroupsImportEqual(a: TalkGroup, b: TalkGroup): boolean {
 }
 
 export function rxGroupListsImportEqual(a: RxGroupList, b: RxGroupList): boolean {
-  return a.name === b.name && memberNamesEqual(a.sourceMemberNames, b.sourceMemberNames);
+  return a.name === b.name && memberNamesEqual(getMemberWireNames(a), getMemberWireNames(b));
 }
 
 export function mergeContactOntoExisting(existing: Contact, incoming: Contact): Contact {
