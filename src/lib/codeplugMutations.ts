@@ -9,6 +9,7 @@ import {
   type TalkGroup,
   type Zone,
 } from '../models/codeplug.ts';
+import { getMemberWireNames, setMemberWireNames } from './entityProvenance.ts';
 
 export const OPENGD77_MAX_ZONE_MEMBERS = 80;
 
@@ -20,7 +21,7 @@ export type TalkGroupInput = Omit<TalkGroup, 'id'>;
 
 export type ContactInput = Omit<Contact, 'id'>;
 
-export type RxGroupListInput = Pick<RxGroupList, 'name'> & { sourceMemberNames?: string[] };
+export type RxGroupListInput = Pick<RxGroupList, 'name'> & { memberWireNames?: string[] };
 
 function channelById(channels: Channel[], id: string): Channel | undefined {
   return channels.find((ch) => ch.id === id);
@@ -41,11 +42,10 @@ export function zoneWithMemberIds(
   memberChannelIds: string[],
   channels: Channel[],
 ): Zone {
-  return {
-    ...zone,
-    memberChannelIds,
-    sourceMemberNames: channelNamesForIds(channels, memberChannelIds),
-  };
+  return setMemberWireNames(
+    { ...zone, memberChannelIds },
+    channelNamesForIds(channels, memberChannelIds),
+  );
 }
 
 /** Refresh export wire names for all zones from current channel ids. */
@@ -121,12 +121,15 @@ export function addZone(codeplug: Codeplug, input: ZoneInput): Codeplug {
     }
   }
 
-  const zone: Zone = {
-    id: newId(),
-    name: input.name,
+  const zone: Zone = zoneWithMemberIds(
+    {
+      id: newId(),
+      name: input.name,
+      memberChannelIds,
+    },
     memberChannelIds,
-    sourceMemberNames: channelNamesForIds(codeplug.channels, memberChannelIds),
-  };
+    codeplug.channels,
+  );
   return { ...codeplug, zones: [...codeplug.zones, zone] };
 }
 
@@ -181,6 +184,13 @@ function dedupeMemberNames(names: string[]): string[] {
   return out;
 }
 
+function mapMemberWireNames<T extends { meta?: import('./entityProvenance.ts').EntityMeta }>(
+  entity: T,
+  fn: (names: string[]) => string[],
+): T {
+  return setMemberWireNames(entity, fn(getMemberWireNames(entity)));
+}
+
 function propagateContactWireRename(
   codeplug: Codeplug,
   oldName: string,
@@ -189,10 +199,9 @@ function propagateContactWireRename(
   const channels = codeplug.channels.map((ch) =>
     ch.contactName === oldName ? { ...ch, contactName: newName } : ch,
   );
-  const rxGroupLists = codeplug.rxGroupLists.map((rgl) => ({
-    ...rgl,
-    sourceMemberNames: rgl.sourceMemberNames.map((n) => (n === oldName ? newName : n)),
-  }));
+  const rxGroupLists = codeplug.rxGroupLists.map((rgl) =>
+    mapMemberWireNames(rgl, (names) => names.map((n) => (n === oldName ? newName : n))),
+  );
   return { ...codeplug, channels, rxGroupLists };
 }
 
@@ -200,10 +209,9 @@ function clearContactWireReferences(codeplug: Codeplug, name: string): Codeplug 
   const channels = codeplug.channels.map((ch) =>
     ch.contactName === name ? { ...ch, contactName: '' } : ch,
   );
-  const rxGroupLists = codeplug.rxGroupLists.map((rgl) => ({
-    ...rgl,
-    sourceMemberNames: rgl.sourceMemberNames.filter((n) => n !== name),
-  }));
+  const rxGroupLists = codeplug.rxGroupLists.map((rgl) =>
+    mapMemberWireNames(rgl, (names) => names.filter((n) => n !== name)),
+  );
   return { ...codeplug, channels, rxGroupLists };
 }
 
@@ -310,11 +318,12 @@ export function deleteContact(codeplug: Codeplug, contactId: string): Codeplug {
 }
 
 export function addRxGroupList(codeplug: Codeplug, input: RxGroupListInput): Codeplug {
-  const rgl: RxGroupList = {
+  const memberWireNames = dedupeMemberNames(input.memberWireNames ?? []);
+  const base: RxGroupList = {
     id: newId(),
     name: input.name.trim(),
-    sourceMemberNames: dedupeMemberNames(input.sourceMemberNames ?? []),
   };
+  const rgl = setMemberWireNames(base, memberWireNames);
   return { ...codeplug, rxGroupLists: [...codeplug.rxGroupLists, rgl] };
 }
 
@@ -328,11 +337,11 @@ export function updateRxGroupList(
 
   const existing = codeplug.rxGroupLists[index];
   const name = patch.name !== undefined ? patch.name.trim() : existing.name;
-  const sourceMemberNames =
-    patch.sourceMemberNames !== undefined
-      ? dedupeMemberNames(patch.sourceMemberNames)
-      : existing.sourceMemberNames;
-  const updated: RxGroupList = { ...existing, name, sourceMemberNames };
+  const memberWireNames =
+    patch.memberWireNames !== undefined
+      ? dedupeMemberNames(patch.memberWireNames)
+      : getMemberWireNames(existing);
+  const updated: RxGroupList = setMemberWireNames({ ...existing, name }, memberWireNames);
 
   const rxGroupLists = [...codeplug.rxGroupLists];
   rxGroupLists[index] = updated;
@@ -358,11 +367,11 @@ export function deleteRxGroupList(codeplug: Codeplug, rglId: string): Codeplug {
 export function setRxGroupListMembers(
   codeplug: Codeplug,
   rglId: string,
-  sourceMemberNames: string[],
+  memberWireNames: string[],
 ): Codeplug {
   const rxGroupLists = codeplug.rxGroupLists.map((rgl) => {
     if (rgl.id !== rglId) return rgl;
-    return { ...rgl, sourceMemberNames: dedupeMemberNames(sourceMemberNames) };
+    return setMemberWireNames(rgl, dedupeMemberNames(memberWireNames));
   });
   return { ...codeplug, rxGroupLists };
 }

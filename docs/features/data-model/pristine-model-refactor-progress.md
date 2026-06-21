@@ -10,7 +10,7 @@
 
 ## Overall status
 
-**Status:** In progress (Phase 2 complete, pending PR)
+**Status:** In progress (Phase 3 on branch `93/paddy/import-provenance-meta`)
 
 The model refactor is delivered as a **phased epic**. Each phase is a self-contained subplan, executed by a **separate agent session**, on its own branch + PR, merged to `main` **sequentially** before the next phase branches.
 
@@ -31,15 +31,15 @@ The model refactor is delivered as a **phased epic**. Each phase is a self-conta
 
 The next agent relies on these values. Keep them accurate.
 
-- **Current `CODEPLUG_SCHEMA_VERSION`:** 5 (Phase 2 on branch `52/paddy/typed-channel-fields`)
-- **Last merged phase:** Phase 1 (#53, PR #96)
-- **`main` is at:** `1978745` (after Phase 1 merge) — Phase 2 pending merge
+- **Current `CODEPLUG_SCHEMA_VERSION`:** 6 (Phase 3)
+- **Last merged phase:** Phase 2 (#52, PR #98)
+- **`main` is at:** after Phase 2 merge — Phase 3 in progress on `93/paddy/import-provenance-meta`
 - **Epic ticket:** [#93](https://github.com/pskillen/codeplug-tool/issues/93). No per-phase child tickets — FK-by-UUID and provenance/rename are folded under #93.
 - **New tickets created in Phase 0:**
   - OpenGD77 export issues (tracking): [#95](https://github.com/pskillen/codeplug-tool/issues/95)
 - **Shared test builders:** `src/test/builders/` (Phase 2)
-- **Provenance `meta` shape:** not designed yet (Phase 3) — Phase 4 (FK-by-UUID) depends on it
-- **`vendorExtras` renamed to `opengd77Extras`?** No (Phase 3)
+- **Provenance `meta` shape:** `EntityMeta.imported: { formatId, sourceFile, importedAt, memberWireNames? }` — accessors in `src/lib/entityProvenance.ts`
+- **`vendorExtras` renamed to `opengd77Extras`?** Yes (Phase 3)
 
 ### Locked design decisions (do not relitigate)
 
@@ -99,8 +99,9 @@ The next agent relies on these values. Keep them accurate.
 
 ## Phase 2 — Typed channel fields + shared test builders (#52)
 
-**Status:** Complete (pending PR)
+**Status:** Complete (merged)
 **Branch:** `52/paddy/typed-channel-fields`
+**PR:** [#98](https://github.com/pskillen/codeplug-tool/pull/98) (Closes #52)
 
 **Delivered**
 
@@ -119,10 +120,22 @@ The next agent relies on these values. Keep them accurate.
 
 ## Phase 3 — Import provenance to per-entity `meta` + `opengd77Extras` rename (new ticket)
 
-**Status:** Not started
-**Branch:** `{ticket}/paddy/import-provenance-meta`
+**Status:** Complete (pending PR)
+**Branch:** `93/paddy/import-provenance-meta`
 
-**Doc debt to clear in this phase** (from [doc audit](vendor-boundary-doc-audit.md) #4): when provenance reshapes member resolution/reporting, replace the literal `not in Channels.csv` reason string in [`src/lib/channels.ts`](../../../src/lib/channels.ts) with a format-neutral message; update `channels.test.ts` and the echo in [`map/zones.md`](../map/zones.md).
+**Delivered**
+
+- Per-entity `EntityMeta.imported` provenance; zone/RGL member wire names in `meta.imported.memberWireNames`.
+- `vendorExtras` → `opengd77Extras`; schema v6 migration (v5→v6 fixture).
+- Accessors in `src/lib/entityProvenance.ts`; import stamps provenance on OpenGD77 parse.
+- Neutral unresolved member reason string in map layer (`unresolved member`).
+
+**Doc debt cleared:** vendor-boundary doc audit #4 (map zones + channels.ts reason string).
+
+**Verify**
+
+- `npm run lint && npm run test && npm run build` green.
+- v5→v6 migration fixture passes; OpenGD77 round-trip test green.
 
 ---
 
@@ -153,5 +166,5 @@ From the [doc audit](vendor-boundary-doc-audit.md) #6–#8 — pure doc/anchor f
 
 ## Next
 
-- Open PR for Phase 2 (#52 typed channel fields); merge after review.
-- After merge, generate the Phase 3 subplan (import provenance `meta` + `opengd77Extras` rename) in a fresh session.
+- Open PR for Phase 3 (provenance meta + opengd77Extras rename); merge after review.
+- After merge, generate the Phase 4 subplan (FK-by-UUID) in a fresh session.

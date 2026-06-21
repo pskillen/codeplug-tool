@@ -84,7 +84,7 @@ Only entity types **present** in the import batch are touched.
 | Contact / talk group | `Contact Name` |
 | RX group list | `TG List Name` |
 
-After apply, all zones' `memberChannelIds` are re-resolved from `sourceMemberNames`. Unresolved member names appear in the confirm modal and import report.
+After apply, all zones' `memberChannelIds` are re-resolved from `meta.imported.memberWireNames`. Unresolved member names appear in the confirm modal and import report.
 
 ## OpenGD77 export
 

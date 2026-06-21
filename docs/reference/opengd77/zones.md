@@ -20,7 +20,7 @@ Empty member cells are unused slots. Trailing empty columns may be omitted on ex
 | Vendor header | Internal field | Required (import) | Import rule | Export rule | Round-trip | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Zone Name` | `Zone.name` | **Yes** | Trim; skip row if empty | As stored | String pass-through | |
-| `Channel1`…`ChannelN` | `Zone.sourceMemberNames[]` | No | Collect non-empty cells in column order; any `Channel\d+` header | Pad into `Channel1`…`ChannelN` up to profile cap | Lossless names | Also resolved to `memberChannelIds` at import |
+| `Channel1`…`ChannelN` | `Zone.meta.imported.memberWireNames[]` | No | Collect non-empty cells in column order; any `Channel\d+` header | Pad into `Channel1`…`ChannelN` up to profile cap | Lossless names | Also resolved to `memberChannelIds` at import |
 
 ## Import resolution
 

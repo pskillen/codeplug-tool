@@ -12,6 +12,7 @@ import {
   formatOpenGd77ToneWire,
   formatOpenGd77TransmitTimeoutWire,
 } from './channelWire.ts';
+import { rxGroupListExportMemberNames, zoneExportMemberNames } from '../../entityProvenance.ts';
 
 /** OpenGD77 CSV serialisers — wire format in docs/reference/opengd77/;
  *  1701 profile limits in docs/reference/opengd77/radios/baofeng-1701.md. */
@@ -67,7 +68,7 @@ export function serialiseChannels(codeplug: Codeplug): string {
     };
 
     for (const header of VENDOR_EXTRA_HEADERS) {
-      values[header] = ch.vendorExtras[header] ?? '';
+      values[header] = ch.opengd77Extras[header] ?? '';
     }
 
     return padRow(CHANNEL_HEADERS, values);
@@ -80,7 +81,7 @@ export function serialiseZones(codeplug: Codeplug): string {
   const memberHeaders = zoneMemberHeaders();
   const rows = codeplug.zones.map((zone) => {
     const values: Record<string, string> = { 'Zone Name': zone.name };
-    zone.sourceMemberNames.forEach((name, i) => {
+    zoneExportMemberNames(zone, codeplug.channels).forEach((name, i) => {
       if (i < memberHeaders.length) values[memberHeaders[i]] = name;
     });
     return padRow(ZONE_HEADERS, values);
@@ -120,7 +121,7 @@ export function serialiseRxGroupLists(codeplug: Codeplug): string {
   const memberHeaders = rxGroupListMemberHeaders();
   const rows = codeplug.rxGroupLists.map((list) => {
     const values: Record<string, string> = { [RX_GROUP_LIST_COL.name]: list.name };
-    list.sourceMemberNames.forEach((name, i) => {
+    rxGroupListExportMemberNames(list).forEach((name, i) => {
       if (i < memberHeaders.length) values[memberHeaders[i]] = name;
     });
     return padRow(RX_GROUP_LIST_HEADERS, values);
