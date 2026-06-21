@@ -347,6 +347,51 @@ describe('codeplugStorage', () => {
     expect(cp.channels[1].meta?.imported?.contactWireName).toBe('Dangling');
   });
 
+  it('migrates v6 RGL provenance memberWireNames to memberRefs', () => {
+    const v6 = {
+      channels: [],
+      zones: [],
+      talkGroups: [{ id: 'tg-1', name: 'Scotland', number: '950', timeslotOverride: '' }],
+      contacts: [{ id: 'ct-1', name: 'MM9PDY', number: '123', timeslotOverride: '' }],
+      rxGroupLists: [
+        {
+          id: 'rgl-1',
+          name: 'Scotland',
+          meta: {
+            imported: {
+              formatId: 'opengd77',
+              sourceFile: 'TG_Lists.csv',
+              importedAt: '2026-01-01T00:00:00.000Z',
+              memberWireNames: ['Scotland', 'MM9PDY', 'Missing'],
+            },
+          },
+        },
+      ],
+      meta: { schemaVersion: 6, importedAt: null, sourceFiles: [] },
+    };
+    const json = JSON.stringify({
+      version: CODEPLUG_STORAGE_VERSION,
+      activeProjectId: null,
+      projects: [
+        {
+          id: 'p1',
+          name: 'Legacy',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+          codeplug: v6,
+        },
+      ],
+    });
+
+    const state = deserializeProjects(json);
+    const rgl = state!.projects[0].codeplug.rxGroupLists[0];
+    expect(rgl.memberRefs).toEqual([
+      { kind: 'talkGroup', id: 'tg-1' },
+      { kind: 'contact', id: 'ct-1' },
+    ]);
+    expect(getMemberWireNames(rgl)).toEqual(['Scotland', 'MM9PDY', 'Missing']);
+  });
+
   it('isPersistableProjects is false for an empty set', () => {
     expect(isPersistableProjects({ activeProjectId: null, projects: [] })).toBe(false);
     expect(isPersistableProjects(makeSampleProjectsState())).toBe(true);

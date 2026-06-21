@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest';
 import type { Channel } from '../models/codeplug.ts';
 import {
   channelsForZone,
-  channelsWithContactName,
+  channelsReferencingTalkGroupId,
+  channelsWithContactRef,
   channelsWithRxGroupListId,
-  channelsWithTalkGroupName,
   findEntityById,
   formatReferenceCount,
   resolveRxGroupListMembers,
-  rxGroupListsContainingMember,
+  rxGroupListsContainingMemberRef,
   sortByName,
   zonesContainingChannel,
 } from './reportLookup.ts';
@@ -16,6 +16,7 @@ import {
   buildChannel,
   buildContact,
   buildImportedRxGroupList,
+  buildRxGroupList,
   buildTalkGroup,
   buildZone,
 } from '../test/builders/index.ts';
@@ -38,18 +39,19 @@ describe('reportLookup', () => {
     expect(zonesContainingChannel('c1', zones).map((z) => z.name)).toEqual(['A']);
   });
 
-  it('channelsWithContactName matches case-sensitively', () => {
+  it('channelsWithContactRef matches by id', () => {
     const talkGroups = [
       buildTalkGroup({ id: 'tg1', name: 'Scotland', number: '950' }),
       buildTalkGroup({ id: 'tg2', name: 'scotland', number: '951' }),
     ];
-    const contacts: ReturnType<typeof buildContact>[] = [];
     const channels = [
       channel('c1', 'GB3SG', { contactRef: { kind: 'talkGroup', id: 'tg1' } }),
       channel('c2', 'GB3BF', { contactRef: { kind: 'talkGroup', id: 'tg2' } }),
     ];
-    expect(channelsWithContactName('Scotland', channels, talkGroups, contacts)).toHaveLength(1);
-    expect(channelsWithTalkGroupName('Scotland', channels, talkGroups)).toHaveLength(1);
+    expect(
+      channelsWithContactRef({ kind: 'talkGroup', id: 'tg1' }, channels),
+    ).toHaveLength(1);
+    expect(channelsReferencingTalkGroupId('tg1', channels)).toHaveLength(1);
   });
 
   it('channelsWithRxGroupListId matches RX group list id', () => {
@@ -68,7 +70,23 @@ describe('reportLookup', () => {
     expect(channelsForZone(zone, channels).map((c) => c.id)).toEqual(['c2', 'c1']);
   });
 
-  it('resolveRxGroupListMembers splits talk groups, contacts, unresolved', () => {
+  it('resolveRxGroupListMembers walks memberRefs by id', () => {
+    const rgl = buildRxGroupList({
+      id: 'r1',
+      name: 'Scotland',
+      memberRefs: [
+        { kind: 'talkGroup', id: 'tg1' },
+        { kind: 'contact', id: 'ct1' },
+        { kind: 'talkGroup', id: 'missing' },
+      ],
+    });
+    const talkGroups = [buildTalkGroup({ id: 'tg1', name: 'Scotland', number: '950' })];
+    const contacts = [buildContact({ id: 'ct1', name: 'MM9PDY', number: '123' })];
+    const resolved = resolveRxGroupListMembers(rgl, talkGroups, contacts);
+    expect(resolved.map((m) => m.kind)).toEqual(['talkGroup', 'contact', 'unresolved']);
+  });
+
+  it('resolveRxGroupListMembers falls back to provenance wire names', () => {
     const rgl = buildImportedRxGroupList({ id: 'r1', name: 'Scotland' }, [
       'Scotland',
       'MM9PDY',
@@ -85,14 +103,30 @@ describe('reportLookup', () => {
     expect(sortByName(items).map((i) => i.name)).toEqual(['Alpha', 'Zulu']);
   });
 
-  it('rxGroupListsContainingMember finds lists with member name', () => {
+  it('rxGroupListsContainingMemberRef finds lists with member ref', () => {
     const lists = [
-      buildImportedRxGroupList({ id: 'r1', name: 'A' }, ['Scotland']),
-      buildImportedRxGroupList({ id: 'r2', name: 'B' }, ['Local']),
-      buildImportedRxGroupList({ id: 'r3', name: 'C' }, ['Scotland', 'Local']),
+      buildRxGroupList({
+        id: 'r1',
+        name: 'A',
+        memberRefs: [{ kind: 'talkGroup', id: 'tg1' }],
+      }),
+      buildRxGroupList({
+        id: 'r2',
+        name: 'B',
+        memberRefs: [{ kind: 'contact', id: 'ct1' }],
+      }),
+      buildRxGroupList({
+        id: 'r3',
+        name: 'C',
+        memberRefs: [
+          { kind: 'talkGroup', id: 'tg1' },
+          { kind: 'contact', id: 'ct1' },
+        ],
+      }),
     ];
-    expect(rxGroupListsContainingMember('Scotland', lists).map((r) => r.name)).toEqual(['A', 'C']);
-    expect(rxGroupListsContainingMember('', lists)).toEqual([]);
+    expect(
+      rxGroupListsContainingMemberRef({ kind: 'talkGroup', id: 'tg1' }, lists).map((r) => r.name),
+    ).toEqual(['A', 'C']);
   });
 
   it('formatReferenceCount renders empty for zero', () => {

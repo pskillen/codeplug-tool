@@ -26,6 +26,12 @@ export function channelsReferencingTalkGroupId(talkGroupId: string, channels: Ch
   );
 }
 
+export function channelsWithContactRef(ref: EntityRef | null, channels: Channel[]): Channel[] {
+  if (!ref) return [];
+  return channels.filter((ch) => entityRefsEqual(ch.contactRef, ref));
+}
+
+/** @deprecated use channelsWithContactRef or channelsReferencing*Id */
 export function channelsWithContactName(
   name: string,
   channels: Channel[],
