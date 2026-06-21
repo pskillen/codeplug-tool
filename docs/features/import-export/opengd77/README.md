@@ -37,7 +37,7 @@ Typical filenames: `Channels.csv`, `Zones.csv`, `Contacts.csv`, `TG_Lists.csv`. 
 
 | File kind | Parser | Model output |
 | --- | --- | --- |
-| `channels` | `parseChannels` | `Channel[]` |
+| `channels` | `parseChannels` | `Channel[]` (wire `Channel Number` column ignored) |
 | `zones` | `parseZones` | `ParsedZone[]` → resolved to `Zone[]` with `memberChannelIds` |
 | `contacts` | `parseContacts` | `TalkGroup[]` + `Contact[]` |
 | `rxGroupLists` | `parseRxGroupLists` | `ParsedRxGroupList[]` → `RxGroupList[]` |
