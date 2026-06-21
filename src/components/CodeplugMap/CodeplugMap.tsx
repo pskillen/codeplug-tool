@@ -22,6 +22,7 @@ import {
   zoneGeolocatedPoints,
   type FilterOptions,
 } from '../../lib/channels.ts';
+import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { isDmrMode, modeLabel } from '../../lib/channelModes.ts';
 import { convexHullLatLon, zoneColor, type LatLon } from '../../lib/geo.ts';
 import { collectMapPoints, computeMapView } from '../../lib/mapView.ts';
@@ -92,7 +93,9 @@ function ChannelPopup({ group }: { group: Channel[] }) {
       <strong>{title}</strong>
       {group.map((ch) => {
         const freq =
-          ch.rxFrequency && ch.txFrequency ? `${ch.rxFrequency} / ${ch.txFrequency} MHz` : '';
+          ch.rxFrequency && ch.txFrequency
+            ? `${formatFrequencyHz(ch.rxFrequency).replace(' MHz', '')} / ${formatFrequencyHz(ch.txFrequency).replace(' MHz', '')} MHz`
+            : '';
         const dmr = isDmrMode(ch.mode)
           ? [
               ch.contactName && ch.contactName !== 'None' ? `TX: ${ch.contactName}` : null,
