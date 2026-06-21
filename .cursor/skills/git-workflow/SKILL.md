@@ -110,7 +110,19 @@ When the **Shell** tool runs `git`:
 
 4. **PRs and issues:** use `user-github-personal` MCP — not `gh`.
 
-5. **Commits:** only when the user asks, unless a Cursor plan explicitly requires atomic commits during execution.
+5. **Commits:**
+
+   **Plan execution** (active `.cursor/plans/` file, user said "execute/continue the plan",
+   or multi-slice work with commit checkpoints):
+   - Commit at every **commit checkpoint** before starting the next slice.
+   - Run `git status -sb` — working tree must be clean before the next slice.
+   - Commit little and often; committing is not cheap to skip but cheap to do.
+   - Docs are slices too — own checkpoint, own commit; not deferred to PR time.
+   - **Forbidden:** batching many file edits then multiple `git commit` commands in one shell block.
+   - After any conversation summary: `git log -5` and `git status -sb` — do not assume prior commits.
+
+   **Ad-hoc conversation** (single question, review, unplanned tweak):
+   - Do not commit unless the user asks.
 
 ---
 
