@@ -244,7 +244,7 @@ describe('codeplugMutations', () => {
     it('updateRxGroupList rename keeps channel id refs unchanged', () => {
       let cp = addRxGroupList(emptyCodeplug(), {
         name: 'Scotland',
-        memberWireNames: ['TG1'],
+        memberRefs: [],
       });
       const rglId = cp.rxGroupLists[0].id;
       cp = {
@@ -268,15 +268,24 @@ describe('codeplugMutations', () => {
     });
 
     it('setRxGroupListMembers accepts large lists and dedupes', () => {
-      const members = Array.from({ length: 40 }, (_, i) => `TG${i}`);
-      members.push('TG0');
+      const talkGroups = Array.from({ length: 40 }, (_, i) => ({
+        id: `tg-${i}`,
+        name: `TG${i}`,
+        number: String(i),
+        timeslotOverride: '',
+      }));
+      const memberRefs = [
+        ...talkGroups.map((tg) => ({ kind: 'talkGroup' as const, id: tg.id })),
+        { kind: 'talkGroup' as const, id: 'tg-0' },
+      ];
       const cp = {
         ...emptyCodeplug(),
+        talkGroups,
         rxGroupLists: [buildRxGroupList({ id: 'rgl-1', name: 'Big' })],
       };
-      const next = setRxGroupListMembers(cp, 'rgl-1', members);
-      expect(getMemberWireNames(next.rxGroupLists[0])).toHaveLength(40);
-      expect(getMemberWireNames(next.rxGroupLists[0])[0]).toBe('TG0');
+      const next = setRxGroupListMembers(cp, 'rgl-1', memberRefs);
+      expect(next.rxGroupLists[0].memberRefs).toHaveLength(40);
+      expect(next.rxGroupLists[0].memberRefs[0].id).toBe('tg-0');
     });
   });
 });

@@ -5,7 +5,7 @@ import { filterRowsByName, useListNameQuery } from '../hooks/useListNameQuery.ts
 import {
   channelsReferencingContactId,
   formatReferenceCount,
-  rxGroupListsContainingMember,
+  rxGroupListsContainingMemberRef,
   sortByName,
 } from '../lib/reportLookup.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
@@ -39,7 +39,9 @@ export default function ContactsList() {
             key: 'rgl',
             header: 'RX groups using',
             render: (c) =>
-              formatReferenceCount(rxGroupListsContainingMember(c.name, rxGroupLists).length),
+              formatReferenceCount(
+                rxGroupListsContainingMemberRef({ kind: 'contact', id: c.id }, rxGroupLists).length,
+              ),
           },
         ]}
       />

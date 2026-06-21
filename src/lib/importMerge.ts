@@ -12,7 +12,11 @@ import {
 } from './importEntityCompare.ts';
 import type { ImportResult, ParsedRxGroupList, ParsedZone } from './import/types.ts';
 import { getMemberWireNames, setMemberWireNames, stampImported } from './entityProvenance.ts';
-import { resolveChannelContactRefs, resolveChannelRxGroupListIds } from './entityRefs.ts';
+import {
+  resolveChannelContactRefs,
+  resolveChannelRxGroupListIds,
+  resolveRxGroupListMemberRefs,
+} from './entityRefs.ts';
 import {
   newId,
   type Channel,
@@ -180,6 +184,7 @@ function parsedRxToRxGroupList(parsed: ParsedRxGroupList, importedAt: string): R
   const base: RxGroupList = {
     id: newId(),
     name: parsed.name,
+    memberRefs: [],
   };
   return stampImported(setMemberWireNames(base, parsed.memberWireNames), {
     formatId: 'opengd77',
@@ -331,6 +336,11 @@ function applyImportInternal(
     mode,
     importedAt,
   );
+  const resolvedRxGroupLists = resolveRxGroupListMemberRefs(
+    rxGroupLists,
+    talkGroups,
+    contacts,
+  );
 
   const { zones: mergedZones, stats: zoneStats } = mergeZones(
     codeplug.zones,
@@ -342,7 +352,7 @@ function applyImportInternal(
   const nameToId = buildNameToChannelId(channels);
   const { zones, unresolved } = resolveZones(mergedZones, nameToId);
   const resolvedChannels = resolveChannelContactRefs(
-    resolveChannelRxGroupListIds(channels, rxGroupLists),
+    resolveChannelRxGroupListIds(channels, resolvedRxGroupLists),
     talkGroups,
     contacts,
   );
@@ -364,7 +374,7 @@ function applyImportInternal(
       zones,
       contacts,
       talkGroups,
-      rxGroupLists,
+      rxGroupLists: resolvedRxGroupLists,
       meta: updateMeta(codeplug, result),
     },
     report: {

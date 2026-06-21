@@ -120,6 +120,24 @@ export function memberRefsToWireNames(
   return names;
 }
 
+export function resolveRxGroupListMemberRefs(
+  rxGroupLists: RxGroupList[],
+  talkGroups: TalkGroup[],
+  contacts: Contact[],
+): RxGroupList[] {
+  return rxGroupLists.map((rgl) => {
+    const wireNames = rgl.meta?.imported?.memberWireNames;
+    if (wireNames === undefined) return rgl;
+    const { memberRefs } = resolveMemberRefsByWireNames(wireNames, talkGroups, contacts);
+    if (
+      rgl.memberRefs.length === memberRefs.length &&
+      rgl.memberRefs.every((ref, i) => entityRefsEqual(ref, memberRefs[i]))
+    ) {
+      return rgl;
+    }
+    return { ...rgl, memberRefs };
+  });
+}
 export function resolveChannelRxGroupListIds(
   channels: Channel[],
   rxGroupLists: RxGroupList[],

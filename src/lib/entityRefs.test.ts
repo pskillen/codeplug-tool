@@ -86,7 +86,7 @@ describe('entityRefs', () => {
   });
 
   it('resolveRxGroupListIdByName resolves list id', () => {
-    const lists = [{ id: 'rgl-1', name: 'Scotland' }];
+    const lists = [{ id: 'rgl-1', name: 'Scotland', memberRefs: [] }];
     expect(resolveRxGroupListIdByName('Scotland', lists)).toBe('rgl-1');
     expect(resolveRxGroupListIdByName('None', lists)).toBeNull();
   });
@@ -109,7 +109,7 @@ describe('entityRefs', () => {
 
   it('rxGroupListWireNameForExport prefers provenance', () => {
     const codeplug = buildCodeplug({
-      rxGroupLists: [{ id: 'rgl-1', name: 'Scotland' }],
+      rxGroupLists: [{ id: 'rgl-1', name: 'Scotland', memberRefs: [] }],
     });
     expect(
       rxGroupListWireNameForExport(

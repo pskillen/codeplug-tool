@@ -1,4 +1,5 @@
-import type { Channel, RxGroupList, Zone } from '../models/codeplug.ts';
+import type { Channel, Contact, RxGroupList, TalkGroup, Zone } from '../models/codeplug.ts';
+import { memberRefsToWireNames } from './entityRefs.ts';
 
 function channelNamesForIds(channels: Channel[], ids: string[]): string[] {
   const names: string[] = [];
@@ -93,7 +94,15 @@ export function zoneExportMemberNames(zone: Zone, channels: Channel[]): string[]
   return channelNamesForIds(channels, zone.memberChannelIds);
 }
 
-/** Names for RX group list export — provenance wire names if present, else empty. */
-export function rxGroupListExportMemberNames(rgl: RxGroupList): string[] {
-  return getMemberWireNames(rgl);
+/** Names for RX group list export — provenance wire names if present, else derive from memberRefs. */
+export function rxGroupListExportMemberNames(
+  rgl: RxGroupList,
+  talkGroups: TalkGroup[],
+  contacts: Contact[],
+): string[] {
+  const wireNames = getMemberWireNames(rgl);
+  if (wireNames.length > 0) {
+    return wireNames;
+  }
+  return memberRefsToWireNames(rgl.memberRefs, talkGroups, contacts);
 }

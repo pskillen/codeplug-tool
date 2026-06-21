@@ -5,7 +5,7 @@ import { filterRowsByName, useListNameQuery } from '../hooks/useListNameQuery.ts
 import {
   channelsReferencingTalkGroupId,
   formatReferenceCount,
-  rxGroupListsContainingMember,
+  rxGroupListsContainingMemberRef,
   sortByName,
 } from '../lib/reportLookup.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
@@ -40,7 +40,12 @@ export default function TalkGroupsList() {
             key: 'rgl',
             header: 'RX groups using',
             render: (tg) =>
-              formatReferenceCount(rxGroupListsContainingMember(tg.name, rxGroupLists).length),
+              formatReferenceCount(
+                rxGroupListsContainingMemberRef(
+                  { kind: 'talkGroup', id: tg.id },
+                  rxGroupLists,
+                ).length,
+              ),
           },
         ]}
       />

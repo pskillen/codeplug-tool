@@ -94,10 +94,11 @@ export interface TalkGroup {
   meta?: EntityMeta;
 }
 
-/** RX group list — members are vendor wire names from Contacts.csv (groups and/or privates). */
+/** RX group list — members resolved by internal EntityRef ids. */
 export interface RxGroupList {
   id: string;
   name: string;
+  memberRefs: EntityRef[];
   meta?: EntityMeta;
 }
 

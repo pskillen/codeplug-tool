@@ -14,6 +14,7 @@ import {
   normaliseWireName,
   resolveChannelContactRefs,
   resolveChannelRxGroupListIds,
+  resolveRxGroupListMemberRefs,
 } from '../lib/entityRefs.ts';
 import { normalizeChannelMode } from '../lib/channelModes.ts';
 import { normalizeToneValue } from '../lib/channelFields/index.ts';
@@ -180,6 +181,7 @@ function migrateRxGroupList(
   const rgl: RxGroupList = {
     id: String(raw.id ?? ''),
     name: String(raw.name ?? ''),
+    memberRefs: Array.isArray(raw.memberRefs) ? (raw.memberRefs as RxGroupList['memberRefs']) : [],
     meta: existingMeta,
   };
 
@@ -259,7 +261,11 @@ export function migrateCodeplug(value: unknown): Codeplug | null {
     ? (raw.contacts as Partial<Contact>[]).map(migrateContact)
     : [];
 
-  const rxGroupLists = migrateRxGroupLists(raw, projectImportedAt);
+  const rxGroupLists = resolveRxGroupListMemberRefs(
+    migrateRxGroupLists(raw, projectImportedAt),
+    talkGroups,
+    contacts,
+  );
 
   return {
     channels: resolveChannelContactRefs(

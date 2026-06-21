@@ -13,7 +13,7 @@ import {
   channelsReferencingTalkGroupId,
   findEntityById,
   formatReferenceCount,
-  rxGroupListsContainingMember,
+  rxGroupListsContainingMemberRef,
 } from '../lib/reportLookup.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
@@ -35,7 +35,10 @@ export default function TalkGroupDetail() {
   }
 
   const usingChannels = channelsReferencingTalkGroupId(talkGroup.id, codeplug.channels);
-  const usingLists = rxGroupListsContainingMember(talkGroup.name, codeplug.rxGroupLists);
+  const usingLists = rxGroupListsContainingMemberRef(
+    { kind: 'talkGroup', id: talkGroup.id },
+    codeplug.rxGroupLists,
+  );
 
   const deleteWarningParts: string[] = [];
   if (usingChannels.length > 0) {

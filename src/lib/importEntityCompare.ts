@@ -90,8 +90,18 @@ export function talkGroupsImportEqual(a: TalkGroup, b: TalkGroup): boolean {
   return a.name === b.name && a.number === b.number && a.timeslotOverride === b.timeslotOverride;
 }
 
+function rxGroupListMembersImportEqual(a: RxGroupList, b: RxGroupList): boolean {
+  const wireA = getMemberWireNames(a);
+  const wireB = getMemberWireNames(b);
+  if (wireA.length > 0 || wireB.length > 0) {
+    return memberNamesEqual(wireA, wireB);
+  }
+  if (a.memberRefs.length !== b.memberRefs.length) return false;
+  return a.memberRefs.every((ref, i) => entityRefsEqual(ref, b.memberRefs[i]));
+}
+
 export function rxGroupListsImportEqual(a: RxGroupList, b: RxGroupList): boolean {
-  return a.name === b.name && memberNamesEqual(getMemberWireNames(a), getMemberWireNames(b));
+  return a.name === b.name && rxGroupListMembersImportEqual(a, b);
 }
 
 export function mergeContactOntoExisting(existing: Contact, incoming: Contact): Contact {

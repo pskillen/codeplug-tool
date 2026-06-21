@@ -122,7 +122,7 @@ export function serialiseRxGroupLists(codeplug: Codeplug): string {
   const memberHeaders = rxGroupListMemberHeaders();
   const rows = codeplug.rxGroupLists.map((list) => {
     const values: Record<string, string> = { [RX_GROUP_LIST_COL.name]: list.name };
-    rxGroupListExportMemberNames(list).forEach((name, i) => {
+    rxGroupListExportMemberNames(list, codeplug.talkGroups, codeplug.contacts).forEach((name, i) => {
       if (i < memberHeaders.length) values[memberHeaders[i]] = name;
     });
     return padRow(RX_GROUP_LIST_HEADERS, values);

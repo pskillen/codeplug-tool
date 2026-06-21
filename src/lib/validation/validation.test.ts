@@ -69,9 +69,9 @@ describe('validateContact', () => {
 });
 
 describe('validateRxGroupList', () => {
-  it('warns on unresolved member names', () => {
+  it('warns on unresolved member refs', () => {
     const issues = validateRxGroupList(
-      { name: 'List', memberWireNames: ['Missing'] },
+      { name: 'List', memberRefs: [{ kind: 'talkGroup', id: 'missing' }] },
       emptyCodeplug(),
     );
     expect(issues.some((i) => i.severity === 'warning')).toBe(true);
@@ -89,7 +89,8 @@ describe('validateRxGroupList', () => {
         timeslotOverride: '',
       })),
     };
-    const issues = validateRxGroupList({ name: 'Big', memberWireNames: members }, cp);
+    const memberRefs = members.map((_, i) => ({ kind: 'talkGroup' as const, id: `tg-${i}` }));
+    const issues = validateRxGroupList({ name: 'Big', memberRefs }, cp);
     expect(hasValidationErrors(issues)).toBe(false);
   });
 });

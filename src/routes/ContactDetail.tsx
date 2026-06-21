@@ -13,7 +13,7 @@ import {
   channelsReferencingContactId,
   findEntityById,
   formatReferenceCount,
-  rxGroupListsContainingMember,
+  rxGroupListsContainingMemberRef,
 } from '../lib/reportLookup.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
@@ -35,7 +35,10 @@ export default function ContactDetail() {
   }
 
   const usingChannels = channelsReferencingContactId(contact.id, codeplug.channels);
-  const usingLists = rxGroupListsContainingMember(contact.name, codeplug.rxGroupLists);
+  const usingLists = rxGroupListsContainingMemberRef(
+    { kind: 'contact', id: contact.id },
+    codeplug.rxGroupLists,
+  );
 
   const deleteWarningParts: string[] = [];
   if (usingChannels.length > 0) {
