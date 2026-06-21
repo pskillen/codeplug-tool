@@ -1,6 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
+import { getMemberWireNames } from '../lib/entityProvenance.ts';
 import type { ImportResult } from '../lib/import/types.ts';
 import {
   channelFieldDefaults,
@@ -74,7 +75,7 @@ describe('codeplug import merge semantics', () => {
     });
     expect(state.zones).toHaveLength(1);
     expect(state.zones[0].memberChannelIds).toEqual(['ch-1', 'ch-2']);
-    expect(state.zones[0].sourceMemberNames).toEqual(['A', 'B']);
+    expect(getMemberWireNames(state.zones[0])).toEqual(['A', 'B']);
   });
 
   it('preserves channel ids on channels-only re-import when names match', () => {

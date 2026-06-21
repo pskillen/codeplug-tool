@@ -70,7 +70,7 @@ type ProjectsAction =
   | { type: 'ADD_RX_GROUP_LIST'; input: RxGroupListInput }
   | { type: 'UPDATE_RX_GROUP_LIST'; rglId: string; patch: Partial<RxGroupListInput> }
   | { type: 'DELETE_RX_GROUP_LIST'; rglId: string }
-  | { type: 'SET_RX_GROUP_LIST_MEMBERS'; rglId: string; sourceMemberNames: string[] }
+  | { type: 'SET_RX_GROUP_LIST_MEMBERS'; rglId: string; memberWireNames: string[] }
   | { type: 'UPDATE_PROJECT'; id: string; patch: ProjectMetadataPatch };
 
 function applyImportToCodeplug(
@@ -231,7 +231,7 @@ function projectsReducer(state: ProjectsState, action: ProjectsAction): Projects
 
     case 'SET_RX_GROUP_LIST_MEMBERS':
       return updateActiveCodeplug(state, (cp) =>
-        setRxGroupListMembersMutation(cp, action.rglId, action.sourceMemberNames),
+        setRxGroupListMembersMutation(cp, action.rglId, action.memberWireNames),
       );
 
     case 'UPDATE_PROJECT': {
@@ -279,7 +279,7 @@ interface CodeplugContextValue {
   addRxGroupList: (input: RxGroupListInput) => void;
   updateRxGroupList: (rglId: string, patch: Partial<RxGroupListInput>) => void;
   deleteRxGroupList: (rglId: string) => void;
-  setRxGroupListMembers: (rglId: string, sourceMemberNames: string[]) => void;
+  setRxGroupListMembers: (rglId: string, memberWireNames: string[]) => void;
   persistenceError: string | null;
   clearPersistenceError: () => void;
 }
@@ -445,9 +445,9 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'DELETE_RX_GROUP_LIST', rglId });
   }, []);
 
-  const setRxGroupListMembers = useCallback((rglId: string, sourceMemberNames: string[]) => {
+  const setRxGroupListMembers = useCallback((rglId: string, memberWireNames: string[]) => {
     setPersistenceError(null);
-    dispatch({ type: 'SET_RX_GROUP_LIST_MEMBERS', rglId, sourceMemberNames });
+    dispatch({ type: 'SET_RX_GROUP_LIST_MEMBERS', rglId, memberWireNames });
   }, []);
 
   const current = activeProject(projectsState);

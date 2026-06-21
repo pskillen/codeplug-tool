@@ -25,7 +25,14 @@ import {
   resetIdGenerator,
   setIdGenerator,
 } from '../models/codeplug.ts';
-import { buildChannel } from '../test/builders/index.ts';
+import { getMemberWireNames } from './entityProvenance.ts';
+import {
+  buildChannel,
+  buildImportedRxGroupList,
+  buildImportedZone,
+  buildRxGroupList,
+  buildZone,
+} from '../test/builders/index.ts';
 import type { Channel } from '../models/codeplug.ts';
 
 function makeChannel(id: string, name: string, extras: Partial<Channel> = {}) {
@@ -54,24 +61,26 @@ describe('codeplugMutations', () => {
     expect(next.channels[0].callsign).toBe('GB3DA');
   });
 
-  it('updateChannel rename refreshes zone sourceMemberNames', () => {
+  it('updateChannel rename refreshes zone member wire names', () => {
     const ch = makeChannel('ch-1', 'Old Name');
     const cp = {
       ...emptyCodeplug(),
       channels: [ch],
       zones: [
-        {
-          id: 'z-1',
-          name: 'Zone A',
-          memberChannelIds: ['ch-1'],
-          sourceMemberNames: ['Old Name'],
-        },
+        buildImportedZone(
+          {
+            id: 'z-1',
+            name: 'Zone A',
+            memberChannelIds: ['ch-1'],
+          },
+          ['Old Name'],
+        ),
       ],
     };
 
     const next = updateChannel(cp, 'ch-1', { name: 'New Name' });
     expect(next.channels[0].name).toBe('New Name');
-    expect(next.zones[0].sourceMemberNames).toEqual(['New Name']);
+    expect(getMemberWireNames(next.zones[0])).toEqual(['New Name']);
     expect(next.zones[0].memberChannelIds).toEqual(['ch-1']);
   });
 
@@ -80,26 +89,28 @@ describe('codeplugMutations', () => {
       ...emptyCodeplug(),
       channels: [makeChannel('ch-1', 'A'), makeChannel('ch-2', 'B')],
       zones: [
-        {
-          id: 'z-1',
-          name: 'Z',
-          memberChannelIds: ['ch-1', 'ch-2'],
-          sourceMemberNames: ['A', 'B'],
-        },
+        buildImportedZone(
+          {
+            id: 'z-1',
+            name: 'Z',
+            memberChannelIds: ['ch-1', 'ch-2'],
+          },
+          ['A', 'B'],
+        ),
       ],
     };
 
     const next = deleteChannel(cp, 'ch-1');
     expect(next.channels).toHaveLength(1);
     expect(next.zones[0].memberChannelIds).toEqual(['ch-2']);
-    expect(next.zones[0].sourceMemberNames).toEqual(['B']);
+    expect(getMemberWireNames(next.zones[0])).toEqual(['B']);
   });
 
   it('setZoneMembers enforces 80 cap', () => {
     const cp = {
       ...emptyCodeplug(),
       channels: [makeChannel('ch-1', 'A')],
-      zones: [{ id: 'z-1', name: 'Z', memberChannelIds: [], sourceMemberNames: [] }],
+      zones: [buildZone({ id: 'z-1', name: 'Z' })],
     };
 
     const ids = Array.from({ length: OPENGD77_MAX_ZONE_MEMBERS + 1 }, (_, i) => `ch-${i}`);
@@ -110,7 +121,7 @@ describe('codeplugMutations', () => {
     const cp = {
       ...emptyCodeplug(),
       channels: [makeChannel('ch-1', 'A')],
-      zones: [{ id: 'z-1', name: 'Z', memberChannelIds: [], sourceMemberNames: [] }],
+      zones: [buildZone({ id: 'z-1', name: 'Z' })],
     };
 
     expect(() => setZoneMembers(cp, 'z-1', ['missing'])).toThrow(/Unknown channel/);
@@ -120,12 +131,12 @@ describe('codeplugMutations', () => {
     const cp = {
       ...emptyCodeplug(),
       channels: [makeChannel('ch-1', 'A'), makeChannel('ch-2', 'B')],
-      zones: [{ id: 'z-1', name: 'Z', memberChannelIds: [], sourceMemberNames: [] }],
+      zones: [buildZone({ id: 'z-1', name: 'Z' })],
     };
 
     const next = setZoneMembers(cp, 'z-1', ['ch-2', 'ch-1']);
     expect(next.zones[0].memberChannelIds).toEqual(['ch-2', 'ch-1']);
-    expect(next.zones[0].sourceMemberNames).toEqual(['B', 'A']);
+    expect(getMemberWireNames(next.zones[0])).toEqual(['B', 'A']);
   });
 
   it('addZone and updateZone and deleteZone', () => {
@@ -164,12 +175,14 @@ describe('codeplugMutations', () => {
         ...emptyCodeplug(),
         talkGroups: [{ id: 'tg-1', name: 'Old TG', number: '9', timeslotOverride: '' }],
         channels: [makeChannel('ch-1', 'GB3DA', { contactName: 'Old TG' })],
-        rxGroupLists: [{ id: 'rgl-1', name: 'List', sourceMemberNames: ['Old TG', 'Other'] }],
+        rxGroupLists: [
+          buildImportedRxGroupList({ id: 'rgl-1', name: 'List' }, ['Old TG', 'Other']),
+        ],
       };
       const next = updateTalkGroup(cp, 'tg-1', { name: 'New TG' });
       expect(next.talkGroups[0].name).toBe('New TG');
       expect(next.channels[0].contactName).toBe('New TG');
-      expect(next.rxGroupLists[0].sourceMemberNames).toEqual(['New TG', 'Other']);
+      expect(getMemberWireNames(next.rxGroupLists[0])).toEqual(['New TG', 'Other']);
     });
 
     it('deleteTalkGroup clears channel refs and removes from RGL members', () => {
@@ -177,12 +190,12 @@ describe('codeplugMutations', () => {
         ...emptyCodeplug(),
         talkGroups: [{ id: 'tg-1', name: 'Scotland', number: '950', timeslotOverride: '' }],
         channels: [makeChannel('ch-1', 'GB3DA', { contactName: 'Scotland' })],
-        rxGroupLists: [{ id: 'rgl-1', name: 'List', sourceMemberNames: ['Scotland'] }],
+        rxGroupLists: [buildImportedRxGroupList({ id: 'rgl-1', name: 'List' }, ['Scotland'])],
       };
       const next = deleteTalkGroup(cp, 'tg-1');
       expect(next.talkGroups).toHaveLength(0);
       expect(next.channels[0].contactName).toBe('');
-      expect(next.rxGroupLists[0].sourceMemberNames).toEqual([]);
+      expect(getMemberWireNames(next.rxGroupLists[0])).toEqual([]);
     });
   });
 
@@ -202,12 +215,12 @@ describe('codeplugMutations', () => {
         ...emptyCodeplug(),
         contacts: [{ id: 'ct-1', name: 'MM9PDY', number: '123', timeslotOverride: '' }],
         channels: [makeChannel('ch-1', 'GB3DA', { contactName: 'MM9PDY' })],
-        rxGroupLists: [{ id: 'rgl-1', name: 'List', sourceMemberNames: ['MM9PDY'] }],
+        rxGroupLists: [buildImportedRxGroupList({ id: 'rgl-1', name: 'List' }, ['MM9PDY'])],
       };
       const next = deleteContact(cp, 'ct-1');
       expect(next.contacts).toHaveLength(0);
       expect(next.channels[0].contactName).toBe('');
-      expect(next.rxGroupLists[0].sourceMemberNames).toEqual([]);
+      expect(getMemberWireNames(next.rxGroupLists[0])).toEqual([]);
     });
   });
 
@@ -215,7 +228,7 @@ describe('codeplugMutations', () => {
     it('addRxGroupList and updateRxGroupList rename propagates to channels', () => {
       let cp = addRxGroupList(emptyCodeplug(), {
         name: 'Scotland',
-        sourceMemberNames: ['TG1'],
+        memberWireNames: ['TG1'],
       });
       const rglId = cp.rxGroupLists[0].id;
       cp = {
@@ -230,7 +243,7 @@ describe('codeplugMutations', () => {
     it('deleteRxGroupList clears channel rxGroupListName', () => {
       const cp = {
         ...emptyCodeplug(),
-        rxGroupLists: [{ id: 'rgl-1', name: 'Scotland', sourceMemberNames: [] }],
+        rxGroupLists: [buildRxGroupList({ id: 'rgl-1', name: 'Scotland' })],
         channels: [makeChannel('ch-1', 'GB3DA', { rxGroupListName: 'Scotland' })],
       };
       const next = deleteRxGroupList(cp, 'rgl-1');
@@ -243,11 +256,11 @@ describe('codeplugMutations', () => {
       members.push('TG0');
       const cp = {
         ...emptyCodeplug(),
-        rxGroupLists: [{ id: 'rgl-1', name: 'Big', sourceMemberNames: [] }],
+        rxGroupLists: [buildRxGroupList({ id: 'rgl-1', name: 'Big' })],
       };
       const next = setRxGroupListMembers(cp, 'rgl-1', members);
-      expect(next.rxGroupLists[0].sourceMemberNames).toHaveLength(40);
-      expect(next.rxGroupLists[0].sourceMemberNames[0]).toBe('TG0');
+      expect(getMemberWireNames(next.rxGroupLists[0])).toHaveLength(40);
+      expect(getMemberWireNames(next.rxGroupLists[0])[0]).toBe('TG0');
     });
   });
 });
