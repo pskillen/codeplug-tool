@@ -23,9 +23,10 @@ describe('validateChannel', () => {
   });
 
   it('detects simplex', () => {
-    expect(isSimplex('145.775', '145.775')).toBe(true);
-    expect(isSimplex('145.775', '145.7750')).toBe(true);
-    expect(isSimplex('145.775', '145.175')).toBe(false);
+    const freq = 145_775_000;
+    expect(isSimplex(freq, freq)).toBe(true);
+    expect(isSimplex(freq, freq)).toBe(true);
+    expect(isSimplex(freq, 145_175_000)).toBe(false);
   });
 });
 

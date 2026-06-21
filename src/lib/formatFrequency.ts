@@ -1,6 +1,16 @@
 /**
  * Format MHz for display — see docs/reference/display-conventions.md
  */
+import { frequencyHzToMhz } from './channelFields/frequencies.ts';
+
+export function formatFrequencyHz(hz: number | null): string {
+  if (hz == null || hz <= 0) return '';
+  const mhz = frequencyHzToMhz(hz);
+  if (mhz == null) return '';
+  return `${formatMhzNumber(mhz)} MHz`;
+}
+
+/** @deprecated Use formatFrequencyHz for internal Hz values. Kept for wire-string display during migration. */
 export function formatFrequencyMhz(value: string): string {
   const trimmed = value.trim();
   if (!trimmed) return '';
