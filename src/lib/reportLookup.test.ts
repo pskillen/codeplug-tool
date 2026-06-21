@@ -12,35 +12,10 @@ import {
   sortByName,
   zonesContainingChannel,
 } from './reportLookup.ts';
+import { buildChannel } from '../test/builders/index.ts';
 
 const channel = (id: string, name: string, extras: Partial<Channel> = {}): Channel =>
-  ({
-    id,
-    name,
-    callsign: name.split(' ')[0],
-    mode: 'dmr',
-    contactName: '',
-    rxGroupListName: '',
-    location: null,
-    useLocation: false,
-    rxFrequency: '',
-    txFrequency: '',
-    bandwidthKHz: '',
-    colourCode: '',
-    timeslot: '',
-    dmrId: '',
-    rxTone: '',
-    txTone: '',
-    squelch: '',
-    power: '',
-    rxOnly: '',
-    aprsConfigName: '',
-    voxEnabled: false,
-    transmitTimeout: '',
-    scanSkip: false,
-    vendorExtras: {},
-    ...extras,
-  }) as Channel;
+  buildChannel({ id, name, ...extras });
 
 describe('reportLookup', () => {
   it('findEntityById returns entity or null', () => {

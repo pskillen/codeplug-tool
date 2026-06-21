@@ -40,20 +40,20 @@ describe('importMerge', () => {
     });
 
     it('applies delta when one field changes', () => {
-      const existing = buildChannel({ id: 'ch-1', name: 'A', rxFrequency: '430' });
+      const existing = buildChannel({ id: 'ch-1', name: 'A', rxFrequency: 430_000_000 });
       const cp = { ...emptyCodeplug(), channels: [existing, buildChannel({ id: 'ch-2', name: 'B' })] };
 
       const { codeplug, report } = applyImportToCodeplug(
         cp,
         channelsResult([
-          buildChannel({ id: 'x', name: 'A', rxFrequency: '431' }),
+          buildChannel({ id: 'x', name: 'A', rxFrequency: 431_000_000 }),
           buildChannel({ id: 'y', name: 'B' }),
         ]),
         'merge',
       );
 
       expect(report.channels).toEqual({ added: 0, updated: 1, unchanged: 1, removed: 0 });
-      expect(codeplug.channels.find((c) => c.name === 'A')?.rxFrequency).toBe('431');
+      expect(codeplug.channels.find((c) => c.name === 'A')?.rxFrequency).toBe(431_000_000);
       expect(codeplug.channels.find((c) => c.name === 'A')?.id).toBe('ch-1');
     });
 
@@ -73,12 +73,12 @@ describe('importMerge', () => {
     });
 
     it('preserves hideFromMap on merge update', () => {
-      const existing = buildChannel({ id: 'ch-1', name: 'A', hideFromMap: true, rxFrequency: '430' });
+      const existing = buildChannel({ id: 'ch-1', name: 'A', hideFromMap: true, rxFrequency: 430_000_000 });
       const cp = { ...emptyCodeplug(), channels: [existing] };
 
       const { codeplug } = applyImportToCodeplug(
         cp,
-        channelsResult([buildChannel({ id: 'x', name: 'A', rxFrequency: '431' })]),
+        channelsResult([buildChannel({ id: 'x', name: 'A', rxFrequency: 431_000_000 })]),
         'merge',
       );
 
@@ -91,14 +91,14 @@ describe('importMerge', () => {
       const { codeplug, report } = applyImportToCodeplug(
         cp,
         channelsResult([
-          buildChannel({ id: 'a', name: 'Dup', rxFrequency: '100' }),
-          buildChannel({ id: 'b', name: 'Dup', rxFrequency: '200' }),
+          buildChannel({ id: 'a', name: 'Dup', rxFrequency: 100_000_000 }),
+          buildChannel({ id: 'b', name: 'Dup', rxFrequency: 200_000_000 }),
         ]),
         'merge',
       );
 
       expect(report.channels.added).toBe(1);
-      expect(codeplug.channels[0].rxFrequency).toBe('200');
+      expect(codeplug.channels[0].rxFrequency).toBe(200_000_000);
     });
   });
 
