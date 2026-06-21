@@ -34,7 +34,7 @@ User-facing quick start remains in the [repository README](../../../README.md).
 
 | Term | Meaning in this tool |
 | --- | --- |
-| **`Channel.name`** | Display name; zone members resolve to channels by this string **case-sensitively** at import |
+| **`Channel.name`** | Display name; zone members currently resolve to channels by this string **case-sensitively** at import (transitional — id FKs are the target, epic [#93](https://github.com/pskillen/codeplug-tool/issues/93) Phase 4) |
 | **`useLocation`** | Channel model boolean; when the filter is on, `false` channels are excluded from markers and zone hulls |
 | **`hideFromMap`** | Internal channel flag; always excludes the channel from markers and hulls |
 | **Plotted vs skipped** | A channel may exist in the codeplug but be hidden by filters or missing/invalid coordinates |

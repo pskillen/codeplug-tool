@@ -68,7 +68,7 @@ For each member, `zoneGeolocatedPoints` produces a point or a skip reason:
 | `useLocation === false` with the filter on | Skipped — `Use Location = No` |
 | Otherwise | Point `[lat, lon]` added |
 
-Distinct sites are deduplicated with `toFixed(5)` on lat and lon. (The `not in Channels.csv` label is the literal reason string surfaced today; it refers to a member name with no matching channel in the codeplug.)
+Distinct sites are deduplicated with `toFixed(5)` on lat and lon. (`not in Channels.csv` is the literal reason string emitted by `src/lib/channels.ts` today; it means a member name with no matching channel in the codeplug. The CSV-era wording is legacy vendor leak slated for a generic, format-neutral message — see the [vendor-boundary doc audit](../data-model/vendor-boundary-doc-audit.md).)
 
 ### Hull geometry
 
@@ -115,7 +115,7 @@ Zone membership persists as part of the codeplug (see [persistence/](../persiste
 
 ## Manual verify
 
-1. Open a project with channels and zones (import an OpenGD77 export, or use an existing project).
+1. Open a project with channels and zones (import a codeplug — OpenGD77 CSV is the importer shipped today — or use an existing project).
 2. Confirm one coloured hull per zone with ≥3 geolocated members.
 3. Pick a zone that shares repeaters with another — hulls should overlap.
 4. Open **Zones** in the sidebar — check site counts and skipped counts match expectations.

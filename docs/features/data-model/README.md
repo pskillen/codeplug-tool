@@ -20,9 +20,9 @@ erDiagram
   Zone }o--o{ Channel : "memberChannelIds"
 ```
 
-Some relationships are still **name-based** (a vendor-boundary foreign key, not an internal id): `Channel.contactName` and `Channel.rxGroupListName` reference a talk group/contact and an RX group list by name; `RxGroupList.sourceMemberNames` lists member names (talk groups and/or contacts). These names resolve to entities at the import boundary.
+Some relationships are still **name-based** — a **transitional** foreign key, not the target design. `Channel.contactName` and `Channel.rxGroupListName` reference a talk group/contact and an RX group list by name; `RxGroupList.sourceMemberNames` lists member names (talk groups and/or contacts). The internal target is a stable **UUID id** FK; name resolution is carried only until the FK-by-id conversion (epic [#93](https://github.com/pskillen/codeplug-tool/issues/93) Phase 4). Treat name FKs as legacy wire baggage, not a pattern to extend.
 
-Wire-format column detail (which CSV column maps to which field) lives in the [OpenGD77 reference](../../reference/opengd77/README.md) and [import/export](../import-export/README.md) — not here. Radio-specific limits (zone member caps, feature availability) live in [radio profiles](../../reference/opengd77/radios/README.md) and apply at export time, not in the internal model.
+Wire-format column detail (which format column maps to which field) lives in the relevant **format reference** (e.g. [OpenGD77](../../reference/opengd77/README.md)) and [import/export](../import-export/README.md) — not here. Radio-specific limits (zone member caps, feature availability) are format/profile concerns that apply at export time, not in the internal model.
 
 **Source:** [`src/models/codeplug.ts`](../../../src/models/codeplug.ts) · schema version **4**
 
@@ -31,9 +31,9 @@ Wire-format column detail (which CSV column maps to which field) lives in the [O
 | Principle | Detail |
 | --- | --- |
 | **Radio-agnostic models** | Channels, zones, contacts, etc. have no radio hardware fields. Target radio constraints are applied at export (see [radio profiles](../../reference/opengd77/radios/README.md)). |
-| **Stable internal ids** | Every entity has `id: string` (`crypto.randomUUID()` via `newId()`). Zone→channel uses resolved ids. |
-| **Vendor names are display fields** | `Channel.name`, `Zone.name`, etc. are preserved for UI and export round-trip but are **not** internal foreign keys (except name-based wire fields below). |
-| **Name matching at import only** | Zone members resolve channel **names** → ids via `resolveZoneMembers`. RX group list members stay as `sourceMemberNames` for export. |
+| **Stable internal ids** | Every entity has `id: string` (`crypto.randomUUID()` via `newId()`). Zone→channel uses resolved ids; FK-by-id is the target for all relationships. |
+| **Names are display fields, not FKs** | `Channel.name`, `Zone.name`, etc. are preserved for UI and round-trip but are **not** the intended foreign-key mechanism. The remaining name-based FKs (above) are transitional and convert to ids in epic [#93](https://github.com/pskillen/codeplug-tool/issues/93) Phase 4. |
+| **Name matching at import only** | Zone members resolve channel **names** → ids via `resolveZoneMembers`. Remaining `*Name` / `sourceMemberNames` fields hold imported names until id-resolution; do not introduce new name-keyed relationships. |
 | **JSON-serialisable** | Plain data objects for persistence and export. |
 | **Schema versioned** | `CODEPLUG_SCHEMA_VERSION = 4`; v1–v3 codeplugs migrate on load. |
 | **CRUD is vendor-neutral** | Create/edit/delete in the SPA does not enforce radio cardinality (e.g. RX group list member count). Limits apply at import/export per [radio profiles](../../reference/opengd77/radios/README.md). |
@@ -57,12 +57,12 @@ Wire-format column detail (which CSV column maps to which field) lives in the [O
 | Field | Type | Notes |
 | --- | --- | --- |
 | `id` | `string` | Internal |
-| `name` | `string` | Display name; case-sensitive FK target for zone members |
+| `name` | `string` | Display name; currently also the resolution key for zone members (transitional — see name-FK note) |
 | `callsign` | `string` | Derived — first word of `name` |
 | `mode` | `ChannelMode` | Specific mode — see [channel-modes reference](../../reference/channel-modes.md) (`fm`, `dmr`, `ysf`, …) |
 | `rxFrequency`, `txFrequency` | `string` | |
-| `contactName` | `string` | TX talk group/contact, by name (vendor-boundary FK) |
-| `rxGroupListName` | `string` | RX group list, by name (vendor-boundary FK) |
+| `contactName` | `string` | TX talk group/contact, by name (transitional name FK → id, Phase 4) |
+| `rxGroupListName` | `string` | RX group list, by name (transitional name FK → id, Phase 4) |
 | `location` | `GeoPoint \| null` | |
 | `useLocation` | `boolean` | |
 | `bandwidthKHz`, `colourCode`, `timeslot`, `dmrId` | `string` | DMR/FM extras |
@@ -74,7 +74,7 @@ Wire-format column detail (which CSV column maps to which field) lives in the [O
 | `hideFromMap` | `boolean` | Internal only — exclude from map plots |
 | `vendorExtras` | `Record<string, string>` | Opaque vendor wire fields preserved for round-trip |
 
-Channel numbering (a vendor CPS slot index) is **not** stored — it is assigned at export per target format. Wire-column mappings for every field above live in the [OpenGD77 reference](../../reference/opengd77/README.md).
+Channel numbering (a CPS slot index) is **not** stored — it is assigned at export per target format. Wire-column mappings for every field above live in the relevant format reference (e.g. [OpenGD77](../../reference/opengd77/README.md)).
 
 ### `Zone`
 
@@ -103,7 +103,7 @@ DMR private call.
 
 ### `RxGroupList`
 
-Named RX (receive) group list driving promiscuous receive. Members are referenced **by name** (talk groups and/or private contacts). Many-to-many at the vendor boundary: one list has many members; one name can appear on many lists.
+Named RX (receive) group list driving promiscuous receive. Members are currently referenced **by name** (talk groups and/or private contacts) — transitional, converting to id FKs in epic [#93](https://github.com/pskillen/codeplug-tool/issues/93) Phase 4. Many-to-many: one list has many members; one member can appear on many lists.
 
 | Field | Type |
 | --- | --- |

@@ -69,7 +69,7 @@ Unknown or future envelope `version` → boot with an empty project set (no cras
 ## Size limits
 
 - Typical browser limit: **~5 MB per origin** (varies by browser and other keys on the same origin).
-- A medium OpenGD77 export (hundreds of channels, dozens of zones) is usually well under 1 MB as JSON.
+- A medium codeplug (hundreds of channels, dozens of zones) is usually well under 1 MB as JSON.
 - Multiple projects share the same quota. Very large codeplugs or many projects may need [#32](https://github.com/pskillen/codeplug-tool/issues/32) (IndexedDB / OPFS).
 
 ## Privacy
@@ -90,4 +90,4 @@ Unknown or future envelope `version` → boot with an empty project set (no cras
 
 - [Codeplug projects](../codeplug-project/) — wrapper model and CRUD
 - [Data model](../data-model/) — `Codeplug` contents
-- [Import / export](../import-export/) — CSV → codeplug at the store boundary
+- [Import / export](../import-export/) — imported format → codeplug at the store boundary

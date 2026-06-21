@@ -117,7 +117,7 @@ The codeplug itself persists via the **projects store** in LocalStorage ([#9](ht
 
 ## Manual verify
 
-1. Create or open a project with geolocated channels (import an OpenGD77 export on the home page, or use an existing project).
+1. Create or open a project with geolocated channels (import a codeplug on the home page — OpenGD77 CSV is the importer shipped today — or use an existing project).
 2. Run `npm run dev` and open `http://localhost:5173/codeplug-tool/#/channels` (or the [live site](https://pskillen.github.io/codeplug-tool/#/channels)).
 3. Confirm markers appear for known repeaters; open popups for frequency/contact fields.
 4. Edit a channel's location or toggle **Hide from map** — the marker should appear/disappear on save.
@@ -134,5 +134,5 @@ The codeplug itself persists via the **projects store** in LocalStorage ([#9](ht
 
 - [zones.md](zones.md) — zone hulls from the `Zone` model
 - [data model — Channel](../data-model/README.md#channel) — internal entity
-- [import/export README](../import-export/README.md) — where CSV becomes the model
+- [import/export README](../import-export/README.md) — where an imported format becomes the model
 - [map README](README.md) — hub and status table
