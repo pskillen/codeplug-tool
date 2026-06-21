@@ -11,7 +11,7 @@ Items **skipped**, **incomplete**, or **discovered during execution** — not th
 
 - [x] Silent zone-member truncation on OpenGD77 export (no warning) — moved to [#95](https://github.com/pskillen/codeplug-tool/issues/95). (review doc finding A)
 - [x] `OPENGD77_MAX_ZONE_MEMBERS` enforced in mutations/validation/UI — move the cap to export only; tracked in [#95](https://github.com/pskillen/codeplug-tool/issues/95). (review doc §6)
-- [x] `rxOnly` stored as `Yes`/`No` string — scheduled for Phase 2 boolean conversion. (review doc finding B)
+- [x] `rxOnly` stored as `Yes`/`No` string — converted to boolean in Phase 2 (#52). (review doc finding B)
 - [x] Persistence README says `CODEPLUG_SCHEMA_VERSION = 1` (actual 3) — fixed in Phase 0 PR #94. (review doc finding C)
 
 ## Discovered during execution
