@@ -1,5 +1,7 @@
 /** UK amateur band definitions — mirror docs/reference/bands.md (ranges, colours, notes) */
 
+import { frequencyHzToMhz } from './channelFields/frequencies.ts';
+
 export interface BandDefinition {
   id: string;
   label: string;
@@ -133,19 +135,25 @@ export function bandFromFrequencyMhz(mhz: number): BandDefinition | null {
   return null;
 }
 
-export function bandFromChannel(rxFrequency: string, txFrequency?: string): BandDefinition | null {
-  const bands = bandsFromFrequencies(rxFrequency, txFrequency ?? '');
+export function bandFromChannel(
+  rxFrequency: number | null,
+  txFrequency?: number | null,
+): BandDefinition | null {
+  const bands = bandsFromFrequencies(rxFrequency, txFrequency ?? null);
   return bands[0] ?? null;
 }
 
 /** Distinct bands for RX and TX (RX first). Empty when neither frequency classifies. */
-export function bandsFromFrequencies(rxFrequency: string, txFrequency: string): BandDefinition[] {
+export function bandsFromFrequencies(
+  rxFrequency: number | null,
+  txFrequency: number | null,
+): BandDefinition[] {
   const bands: BandDefinition[] = [];
   const seen = new Set<string>();
 
-  for (const raw of [rxFrequency, txFrequency]) {
-    const mhz = parseFloat(raw);
-    if (!Number.isFinite(mhz) || mhz <= 0) continue;
+  for (const hz of [rxFrequency, txFrequency]) {
+    const mhz = frequencyHzToMhz(hz);
+    if (mhz == null) continue;
     const band = bandFromFrequencyMhz(mhz);
     if (band && !seen.has(band.id)) {
       seen.add(band.id);
@@ -157,18 +165,21 @@ export function bandsFromFrequencies(rxFrequency: string, txFrequency: string): 
 }
 
 export function channelMatchesBandFilter(
-  rxFrequency: string,
-  txFrequency: string,
+  rxFrequency: number | null,
+  txFrequency: number | null,
   bandIds: string[],
 ): boolean {
   if (!bandIds.length) return true;
   return bandsFromFrequencies(rxFrequency, txFrequency).some((b) => bandIds.includes(b.id));
 }
 
-export function frequencyOffsetMhz(rxFrequency: string, txFrequency: string): number | null {
-  const rx = parseFloat(rxFrequency);
-  const tx = parseFloat(txFrequency);
-  if (!Number.isFinite(rx) || !Number.isFinite(tx)) return null;
+export function frequencyOffsetMhz(
+  rxFrequency: number | null,
+  txFrequency: number | null,
+): number | null {
+  const rx = frequencyHzToMhz(rxFrequency);
+  const tx = frequencyHzToMhz(txFrequency);
+  if (rx == null || tx == null) return null;
   return tx - rx;
 }
 

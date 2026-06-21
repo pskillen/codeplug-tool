@@ -62,6 +62,7 @@ See [file-format.md](file-format.md) for header-name parsing, case-sensitive for
 | --- | --- |
 | [file-format.md](file-format.md) | Cross-cutting wire rules |
 | [channels.md](channels.md) | `Channels.csv` columns |
+| [power-squelch.md](power-squelch.md) | Power and squelch wire mapping |
 | [zones.md](zones.md) | `Zones.csv` columns |
 | [contacts.md](contacts.md) | `Contacts.csv` columns |
 | [tg-lists.md](tg-lists.md) | `TG_Lists.csv` columns |

@@ -21,8 +21,8 @@ export function BandPillsForFrequencies({
   txFrequency,
   size,
 }: {
-  rxFrequency: string;
-  txFrequency: string;
+  rxFrequency: number | null;
+  txFrequency: number | null;
   size?: BandPillProps['size'];
 }) {
   const bands = bandsFromFrequencies(rxFrequency, txFrequency);

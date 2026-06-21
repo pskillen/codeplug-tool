@@ -10,7 +10,7 @@
 
 ## Overall status
 
-**Status:** In progress (Phase 1 complete, pending PR)
+**Status:** In progress (Phase 2 complete, pending PR)
 
 The model refactor is delivered as a **phased epic**. Each phase is a self-contained subplan, executed by a **separate agent session**, on its own branch + PR, merged to `main` **sequentially** before the next phase branches.
 
@@ -31,13 +31,13 @@ The model refactor is delivered as a **phased epic**. Each phase is a self-conta
 
 The next agent relies on these values. Keep them accurate.
 
-- **Current `CODEPLUG_SCHEMA_VERSION`:** 4 (Phase 1 landed on branch `53/paddy/drop-channel-number`)
-- **Last merged phase:** Phase 0 (#91, PR #94)
-- **`main` is at:** `c9b01a0` (after Phase 0 merge) — Phase 1 pending merge
+- **Current `CODEPLUG_SCHEMA_VERSION`:** 5 (Phase 2 on branch `52/paddy/typed-channel-fields`)
+- **Last merged phase:** Phase 1 (#53, PR #96)
+- **`main` is at:** `1978745` (after Phase 1 merge) — Phase 2 pending merge
 - **Epic ticket:** [#93](https://github.com/pskillen/codeplug-tool/issues/93). No per-phase child tickets — FK-by-UUID and provenance/rename are folded under #93.
 - **New tickets created in Phase 0:**
   - OpenGD77 export issues (tracking): [#95](https://github.com/pskillen/codeplug-tool/issues/95)
-- **Shared test builders:** not created yet (planned Phase 2 at `src/test/builders`)
+- **Shared test builders:** `src/test/builders/` (Phase 2)
 - **Provenance `meta` shape:** not designed yet (Phase 3) — Phase 4 (FK-by-UUID) depends on it
 - **`vendorExtras` renamed to `opengd77Extras`?** No (Phase 3)
 
@@ -76,7 +76,7 @@ The next agent relies on these values. Keep them accurate.
 
 ## Phase 1 — Drop `Channel.number` (#53)
 
-**Status:** Complete (pending merge)
+**Status:** Complete (merged)
 **Branch:** `53/paddy/drop-channel-number`
 **PR:** [#96](https://github.com/pskillen/codeplug-tool/pull/96) (Closes #53)
 
@@ -99,10 +99,21 @@ The next agent relies on these values. Keep them accurate.
 
 ## Phase 2 — Typed channel fields + shared test builders (#52)
 
-**Status:** Not started
+**Status:** Complete (pending PR)
 **Branch:** `52/paddy/typed-channel-fields`
 
-**Doc debt to clear in this phase** (from [doc audit](vendor-boundary-doc-audit.md) #3): when adding `docs/reference/` entries for power/squelch/tones, split the OpenGD77 `import`/`export` columns out of the generic [`docs/reference/channel-modes.md`](../../reference/channel-modes.md) mode table (and its OpenGD77 footnote) into the OpenGD77 reference, leaving `channel-modes.md` format-neutral.
+**Delivered**
+
+- Schema v5 typed `Channel` fields (Hz frequencies, percent power/squelch, tone enum, DMR scalars, `rxOnly` boolean).
+- Neutral helpers in `src/lib/channelFields/`; OpenGD77 wire mapping in `src/lib/import|export/opengd77/channelWire.ts`.
+- v4→v5 migration on load; shared test builders at `src/test/builders/`.
+- Channel CRUD and map UI updated for typed controls.
+- Doc audit #3: OpenGD77 import/export columns removed from generic `channel-modes.md`; wire rules in `docs/reference/opengd77/`.
+
+**Verify**
+
+- `npm run lint && npm run test && npm run build` green.
+- v4→v5 migration fixture passes; OpenGD77 round-trip test green.
 
 ---
 
@@ -142,5 +153,5 @@ From the [doc audit](vendor-boundary-doc-audit.md) #6–#8 — pure doc/anchor f
 
 ## Next
 
-- Merge PR #96 (Phase 1, closes #53).
-- After merge, generate the Phase 2 subplan (#52 typed channel fields) in a fresh session; clear doc-audit #3 within it.
+- Open PR for Phase 2 (#52 typed channel fields); merge after review.
+- After merge, generate the Phase 3 subplan (import provenance `meta` + `opengd77Extras` rename) in a fresh session.

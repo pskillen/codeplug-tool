@@ -9,6 +9,8 @@ import {
   UK_BANDS,
 } from './bands.ts';
 
+const mhzToHz = (mhz: number) => Math.round(mhz * 1_000_000);
+
 describe('bands', () => {
   it('classifies 2m and 70cm', () => {
     expect(bandFromFrequencyMhz(145.775)?.id).toBe('2m');
@@ -16,23 +18,24 @@ describe('bands', () => {
   });
 
   it('uses RX then TX', () => {
-    expect(bandFromChannel('', '145.775')?.id).toBe('2m');
+    expect(bandFromChannel(null, mhzToHz(145.775))?.id).toBe('2m');
   });
 
   it('formats offset', () => {
-    expect(frequencyOffsetMhz('145.775', '145.775')).toBe(0);
+    const freq = mhzToHz(145.775);
+    expect(frequencyOffsetMhz(freq, freq)).toBe(0);
     expect(formatOffsetMhz(-0.6)).toBe('-0.6 MHz');
   });
 
   it('returns distinct RX and TX bands', () => {
-    const bands = bandsFromFrequencies('145.775', '433.612');
+    const bands = bandsFromFrequencies(mhzToHz(145.775), mhzToHz(433.612));
     expect(bands.map((b) => b.id)).toEqual(['2m', '70cm']);
   });
 
   it('matches band filter on either RX or TX', () => {
-    expect(channelMatchesBandFilter('145.775', '433.612', ['70cm'])).toBe(true);
-    expect(channelMatchesBandFilter('145.775', '433.612', ['2m'])).toBe(true);
-    expect(channelMatchesBandFilter('145.775', '433.612', ['6m'])).toBe(false);
+    expect(channelMatchesBandFilter(mhzToHz(145.775), mhzToHz(433.612), ['70cm'])).toBe(true);
+    expect(channelMatchesBandFilter(mhzToHz(145.775), mhzToHz(433.612), ['2m'])).toBe(true);
+    expect(channelMatchesBandFilter(mhzToHz(145.775), mhzToHz(433.612), ['6m'])).toBe(false);
   });
 
   it('exposes notes for reference display', () => {

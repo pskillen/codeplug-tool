@@ -7,6 +7,7 @@ import EntityTable from '../components/report/EntityTable.tsx';
 import DetailSections from '../components/report/DetailSections.tsx';
 import NotFoundEntity from '../components/report/NotFoundEntity.tsx';
 import ReportPage from '../components/report/ReportPage.tsx';
+import { formatFrequencyHz } from '../lib/formatFrequency.ts';
 import {
   channelsWithContactName,
   findEntityById,
@@ -114,7 +115,12 @@ export default function ContactDetail() {
               }}
               columns={[
                 { key: 'mode', header: 'Mode', render: (ch) => modeLabel(ch.mode) },
-                { key: 'rx', header: 'RX MHz', render: (ch) => ch.rxFrequency || '—' },
+                {
+                  key: 'rx',
+                  header: 'RX MHz',
+                  render: (ch) =>
+                    ch.rxFrequency ? formatFrequencyHz(ch.rxFrequency).replace(' MHz', '') : '—',
+                },
               ]}
             />
           )}

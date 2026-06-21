@@ -5,7 +5,7 @@ import EntityTable from '../../components/report/EntityTable.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
 import { applyFilters } from '../../lib/channels.ts';
 import ModePill from '../../components/crud/ModePill.tsx';
-import { formatFrequencyMhz } from '../../lib/formatFrequency.ts';
+import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { coordsToLocator } from '../../lib/maidenhead.ts';
 import { CHANNEL_OPTIONAL_COLUMNS } from '../../hooks/channelListQueryUtils.ts';
 import { useChannelListColumns } from '../../hooks/useChannelListColumns.ts';
@@ -71,13 +71,13 @@ export default function ChannelsList() {
               key: 'rx',
               header: 'RX MHz',
               render: (ch) =>
-                ch.rxFrequency ? formatFrequencyMhz(ch.rxFrequency).replace(' MHz', '') : '—',
+                ch.rxFrequency ? formatFrequencyHz(ch.rxFrequency).replace(' MHz', '') : '—',
             },
             {
               key: 'tx',
               header: 'TX MHz',
               render: (ch) =>
-                ch.txFrequency ? formatFrequencyMhz(ch.txFrequency).replace(' MHz', '') : '—',
+                ch.txFrequency ? formatFrequencyHz(ch.txFrequency).replace(' MHz', '') : '—',
             },
             ...optionalColumnDefs,
           ]}

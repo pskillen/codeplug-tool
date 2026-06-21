@@ -14,6 +14,7 @@ import { useCodeplug } from '../../state/codeplugStore.tsx';
 import { useOperatorPosition } from '../../state/operatorPosition.tsx';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 
+import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { modeLabel } from '../../lib/channelModes.ts';
 export default function ZoneDetail() {
   const { id } = useParams<{ id: string }>();
@@ -94,7 +95,12 @@ export default function ZoneDetail() {
             }}
             columns={[
               { key: 'mode', header: 'Mode', render: (ch) => modeLabel(ch.mode) },
-              { key: 'rx', header: 'RX MHz', render: (ch) => ch.rxFrequency || '—' },
+              {
+                key: 'rx',
+                header: 'RX MHz',
+                render: (ch) =>
+                  ch.rxFrequency ? formatFrequencyHz(ch.rxFrequency).replace(' MHz', '') : '—',
+              },
             ]}
           />
         </Stack>

@@ -15,6 +15,18 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import ReportPage from '../../components/report/ReportPage.tsx';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
+import {
+  BANDWIDTH_KHZ_OPTIONS,
+  frequencyHzToMhz,
+  parseFrequencyHzFromMhzInput,
+  percentLabel,
+  POWER_PERCENT_OPTIONS,
+  SQUELCH_PERCENT_OPTIONS,
+  toneSelectOptions,
+  type ChannelTimeslot,
+  type ChannelTone,
+} from '../../lib/channelFields/index.ts';
+import { formatMhzNumber } from '../../lib/formatFrequency.ts';
 import { formatOffsetMhz, frequencyOffsetMhz } from '../../lib/bands.ts';
 import { BandPillsForFrequencies } from '../../components/crud/BandPill.tsx';
 import ChannelModeSelect from '../../components/crud/ChannelModeSegmentedControl.tsx';
@@ -30,19 +42,19 @@ import { useCodeplug } from '../../state/codeplugStore.tsx';
 type ChannelFormValues = {
   name: string;
   mode: ChannelMode;
-  rxFrequency: string;
-  txFrequency: string;
+  rxFrequencyMhz: string;
+  txFrequencyMhz: string;
   bandwidthKHz: string;
   colourCode: string;
   timeslot: string;
   contactName: string;
   rxGroupListName: string;
   dmrId: string;
-  rxTone: string;
-  txTone: string;
+  rxTone: ChannelTone;
+  txTone: ChannelTone;
   squelch: string;
   power: string;
-  rxOnly: string;
+  rxOnly: boolean;
   aprsConfigName: string;
   voxEnabled: boolean;
   transmitTimeout: string;
@@ -54,26 +66,42 @@ type ChannelFormValues = {
   locator: string;
 };
 
+function hzToMhzInput(hz: number | null): string {
+  if (hz == null || hz <= 0) return '';
+  const mhz = frequencyHzToMhz(hz);
+  return mhz != null ? formatMhzNumber(mhz) : '';
+}
+
+function percentToSelectValue(value: number | null): string {
+  return value == null ? 'default' : String(value);
+}
+
+function selectValueToPercent(value: string): number | null {
+  if (!value || value === 'default') return null;
+  const n = parseInt(value, 10);
+  return Number.isFinite(n) ? n : null;
+}
+
 function channelToForm(ch: Channel): ChannelFormValues {
   return {
     name: ch.name,
     mode: ch.mode,
-    rxFrequency: ch.rxFrequency,
-    txFrequency: ch.txFrequency,
-    bandwidthKHz: ch.bandwidthKHz,
-    colourCode: ch.colourCode,
-    timeslot: ch.timeslot,
+    rxFrequencyMhz: hzToMhzInput(ch.rxFrequency),
+    txFrequencyMhz: hzToMhzInput(ch.txFrequency),
+    bandwidthKHz: ch.bandwidthKHz != null ? String(ch.bandwidthKHz) : '',
+    colourCode: ch.colourCode != null ? String(ch.colourCode) : '',
+    timeslot: ch.timeslot != null ? String(ch.timeslot) : '',
     contactName: ch.contactName,
     rxGroupListName: ch.rxGroupListName,
-    dmrId: ch.dmrId,
+    dmrId: ch.dmrId != null ? String(ch.dmrId) : '',
     rxTone: ch.rxTone,
     txTone: ch.txTone,
-    squelch: ch.squelch,
-    power: ch.power,
+    squelch: percentToSelectValue(ch.squelch),
+    power: percentToSelectValue(ch.power),
     rxOnly: ch.rxOnly,
     aprsConfigName: ch.aprsConfigName,
     voxEnabled: ch.voxEnabled,
-    transmitTimeout: ch.transmitTimeout,
+    transmitTimeout: ch.transmitTimeout != null ? String(ch.transmitTimeout) : '',
     scanSkip: ch.scanSkip,
     lat: ch.location?.lat != null ? String(ch.location.lat) : '',
     lon: ch.location?.lon != null ? String(ch.location.lon) : '',
@@ -89,22 +117,22 @@ function emptyForm(): ChannelFormValues {
   return {
     name: '',
     mode: 'dmr',
-    rxFrequency: '',
-    txFrequency: '',
-    bandwidthKHz: defaults.bandwidthKHz,
-    colourCode: defaults.colourCode,
-    timeslot: defaults.timeslot,
+    rxFrequencyMhz: '',
+    txFrequencyMhz: '',
+    bandwidthKHz: '',
+    colourCode: '',
+    timeslot: '',
     contactName: defaults.contactName,
     rxGroupListName: defaults.rxGroupListName,
-    dmrId: defaults.dmrId,
+    dmrId: '',
     rxTone: defaults.rxTone,
     txTone: defaults.txTone,
-    squelch: defaults.squelch,
-    power: defaults.power,
+    squelch: 'default',
+    power: 'default',
     rxOnly: defaults.rxOnly,
     aprsConfigName: defaults.aprsConfigName,
     voxEnabled: defaults.voxEnabled,
-    transmitTimeout: defaults.transmitTimeout,
+    transmitTimeout: '',
     scanSkip: defaults.scanSkip,
     lat: '',
     lon: '',
@@ -118,27 +146,36 @@ function formToChannelInput(values: ChannelFormValues): Omit<Channel, 'id' | 'ca
   const lat = parseFloat(values.lat);
   const lon = parseFloat(values.lon);
   const hasCoords = Number.isFinite(lat) && Number.isFinite(lon);
+  const tot = values.transmitTimeout.trim() ? parseInt(values.transmitTimeout, 10) : null;
+  const colourCode = values.colourCode.trim() ? parseInt(values.colourCode, 10) : null;
+  const timeslotRaw = values.timeslot.trim();
+  const timeslot: ChannelTimeslot | null = timeslotRaw === '1' ? 1 : timeslotRaw === '2' ? 2 : null;
+  const dmrId = values.dmrId.trim() ? parseInt(values.dmrId, 10) : null;
+  const bandwidth = values.bandwidthKHz.trim() ? parseFloat(values.bandwidthKHz) : null;
 
   return {
     ...channelFieldDefaults(),
     name: values.name.trim(),
     mode: values.mode,
-    rxFrequency: values.rxFrequency.trim(),
-    txFrequency: values.txFrequency.trim(),
-    bandwidthKHz: values.bandwidthKHz,
-    colourCode: values.colourCode,
-    timeslot: values.timeslot,
+    rxFrequency: parseFrequencyHzFromMhzInput(values.rxFrequencyMhz),
+    txFrequency: parseFrequencyHzFromMhzInput(values.txFrequencyMhz),
+    bandwidthKHz: bandwidth != null && Number.isFinite(bandwidth) ? bandwidth : null,
+    colourCode:
+      colourCode != null && Number.isFinite(colourCode) && colourCode >= 0 && colourCode <= 15
+        ? colourCode
+        : null,
+    timeslot,
     contactName: values.contactName,
     rxGroupListName: values.rxGroupListName,
-    dmrId: values.dmrId,
+    dmrId: dmrId != null && Number.isFinite(dmrId) && dmrId > 0 ? dmrId : null,
     rxTone: values.rxTone,
     txTone: values.txTone,
-    squelch: values.squelch,
-    power: values.power,
+    squelch: selectValueToPercent(values.squelch),
+    power: selectValueToPercent(values.power),
     rxOnly: values.rxOnly,
     aprsConfigName: values.aprsConfigName,
     voxEnabled: values.voxEnabled,
-    transmitTimeout: values.transmitTimeout,
+    transmitTimeout: tot != null && Number.isFinite(tot) && tot >= 0 ? tot : null,
     scanSkip: values.scanSkip,
     location: hasCoords ? { lat, lon } : null,
     useLocation: values.useLocation,
@@ -146,6 +183,27 @@ function formToChannelInput(values: ChannelFormValues): Omit<Channel, 'id' | 'ca
     vendorExtras: {},
   };
 }
+
+const powerSelectData = POWER_PERCENT_OPTIONS.map((p) => ({
+  value: percentToSelectValue(p),
+  label: percentLabel(p),
+}));
+
+const squelchSelectData = SQUELCH_PERCENT_OPTIONS.map((p) => ({
+  value: percentToSelectValue(p),
+  label: p === 0 ? 'Open (0%)' : percentLabel(p),
+}));
+
+const bandwidthSelectData = [
+  { value: '', label: '—' },
+  ...BANDWIDTH_KHZ_OPTIONS.map((bw) => ({ value: String(bw), label: `${bw} kHz` })),
+];
+
+const timeslotSelectData = [
+  { value: '', label: '—' },
+  { value: '1', label: '1' },
+  { value: '2', label: '2' },
+];
 
 export default function ChannelEdit() {
   const { id } = useParams<{ id: string }>();
@@ -171,8 +229,8 @@ export default function ChannelEdit() {
         name: values.name.trim() || 'New channel',
         callsign: existing?.callsign ?? '',
         mode: values.mode,
-        rxFrequency: values.rxFrequency,
-        txFrequency: values.txFrequency,
+        rxFrequency: parseFrequencyHzFromMhzInput(values.rxFrequencyMhz),
+        txFrequency: parseFrequencyHzFromMhzInput(values.txFrequencyMhz),
         location: { lat, lon },
         useLocation: true,
         hideFromMap: false,
@@ -184,8 +242,8 @@ export default function ChannelEdit() {
     values.lon,
     values.name,
     values.mode,
-    values.rxFrequency,
-    values.txFrequency,
+    values.rxFrequencyMhz,
+    values.txFrequencyMhz,
     existing,
   ]);
 
@@ -215,10 +273,9 @@ export default function ChannelEdit() {
     ...codeplug.rxGroupLists.map((r) => ({ value: r.name, label: r.name })),
   ];
 
-  const offset =
-    values.rxFrequency && values.txFrequency
-      ? frequencyOffsetMhz(values.rxFrequency, values.txFrequency)
-      : null;
+  const rxHz = parseFrequencyHzFromMhzInput(values.rxFrequencyMhz);
+  const txHz = parseFrequencyHzFromMhzInput(values.txFrequencyMhz);
+  const offset = rxHz != null && txHz != null ? frequencyOffsetMhz(rxHz, txHz) : null;
 
   const applyLocator = (loc: string) => {
     set('locator', loc);
@@ -316,13 +373,13 @@ export default function ChannelEdit() {
             <Group grow>
               <TextInput
                 label="RX MHz"
-                value={values.rxFrequency}
-                onChange={(e) => set('rxFrequency', e.currentTarget.value)}
+                value={values.rxFrequencyMhz}
+                onChange={(e) => set('rxFrequencyMhz', e.currentTarget.value)}
               />
               <TextInput
                 label="TX MHz"
-                value={values.txFrequency}
-                onChange={(e) => set('txFrequency', e.currentTarget.value)}
+                value={values.txFrequencyMhz}
+                onChange={(e) => set('txFrequencyMhz', e.currentTarget.value)}
               />
             </Group>
             {offset !== null ? (
@@ -330,43 +387,48 @@ export default function ChannelEdit() {
                 Offset: {formatOffsetMhz(offset)}
               </Text>
             ) : null}
-            <BandPillsForFrequencies
-              rxFrequency={values.rxFrequency}
-              txFrequency={values.txFrequency}
-            />
-            <TextInput
+            <BandPillsForFrequencies rxFrequency={rxHz} txFrequency={txHz} />
+            <Select
               label="Bandwidth (kHz)"
+              data={bandwidthSelectData}
               value={values.bandwidthKHz}
-              onChange={(e) => set('bandwidthKHz', e.currentTarget.value)}
+              onChange={(v) => set('bandwidthKHz', v ?? '')}
+              clearable
             />
-            <TextInput
+            <Select
               label="Power"
+              data={powerSelectData}
               value={values.power}
-              onChange={(e) => set('power', e.currentTarget.value)}
+              onChange={(v) => set('power', v ?? 'default')}
             />
             {showAnalogFields ? (
               <Group grow>
-                <TextInput
+                <Select
                   label="RX tone"
+                  data={toneSelectOptions()}
                   value={values.rxTone}
-                  onChange={(e) => set('rxTone', e.currentTarget.value)}
+                  onChange={(v) => set('rxTone', (v ?? 'none') as ChannelTone)}
+                  searchable
                 />
-                <TextInput
+                <Select
                   label="TX tone"
+                  data={toneSelectOptions()}
                   value={values.txTone}
-                  onChange={(e) => set('txTone', e.currentTarget.value)}
+                  onChange={(v) => set('txTone', (v ?? 'none') as ChannelTone)}
+                  searchable
                 />
               </Group>
             ) : null}
-            <TextInput
+            <Select
               label="Squelch"
+              data={squelchSelectData}
               value={values.squelch}
-              onChange={(e) => set('squelch', e.currentTarget.value)}
+              onChange={(v) => set('squelch', v ?? 'default')}
             />
-            <TextInput
+            <Checkbox
               label="RX only"
-              value={values.rxOnly}
-              onChange={(e) => set('rxOnly', e.currentTarget.value)}
+              checked={values.rxOnly}
+              onChange={(e) => set('rxOnly', e.currentTarget.checked)}
             />
           </Stack>
 
@@ -374,21 +436,28 @@ export default function ChannelEdit() {
             <Stack gap="sm" id={channelSectionAnchorId('DMR')}>
               <Title order={4}>DMR</Title>
               <Group grow>
-                <TextInput
+                <NumberInput
                   label="Colour code"
-                  value={values.colourCode}
-                  onChange={(e) => set('colourCode', e.currentTarget.value)}
+                  value={values.colourCode === '' ? undefined : parseInt(values.colourCode, 10)}
+                  onChange={(v) => set('colourCode', v != null ? String(v) : '')}
+                  min={0}
+                  max={15}
+                  allowDecimal={false}
                 />
-                <TextInput
+                <Select
                   label="Timeslot"
+                  data={timeslotSelectData}
                   value={values.timeslot}
-                  onChange={(e) => set('timeslot', e.currentTarget.value)}
+                  onChange={(v) => set('timeslot', v ?? '')}
+                  clearable
                 />
               </Group>
-              <TextInput
+              <NumberInput
                 label="DMR ID"
-                value={values.dmrId}
-                onChange={(e) => set('dmrId', e.currentTarget.value)}
+                value={values.dmrId === '' ? undefined : parseInt(values.dmrId, 10)}
+                onChange={(v) => set('dmrId', v != null ? String(v) : '')}
+                min={1}
+                allowDecimal={false}
               />
               <Select
                 label="TX contact"
@@ -485,10 +554,16 @@ export default function ChannelEdit() {
               value={values.aprsConfigName}
               onChange={(e) => set('aprsConfigName', e.currentTarget.value)}
             />
-            <TextInput
-              label="Transmit timeout"
-              value={values.transmitTimeout}
-              onChange={(e) => set('transmitTimeout', e.currentTarget.value)}
+            <NumberInput
+              label="Transmit timeout (seconds)"
+              value={
+                values.transmitTimeout === '' ? undefined : parseInt(values.transmitTimeout, 10)
+              }
+              onChange={(v) => set('transmitTimeout', v != null ? String(v) : '')}
+              min={0}
+              max={495}
+              step={15}
+              allowDecimal={false}
             />
             <Checkbox
               label="Scan skip"

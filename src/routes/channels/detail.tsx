@@ -18,8 +18,9 @@ import {
 } from '../../lib/reportLookup.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 import { useOperatorPosition } from '../../state/operatorPosition.tsx';
+import { percentLabel } from '../../lib/channelFields/index.ts';
+import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { formatOffsetMhz, frequencyOffsetMhz } from '../../lib/bands.ts';
-import { formatFrequencyMhz } from '../../lib/formatFrequency.ts';
 import { formatDistanceM, haversineDistanceM } from '../../lib/geoDistance.ts';
 import { channelHasGeolocation } from '../../lib/channels.ts';
 import { coordsToLocator } from '../../lib/maidenhead.ts';
@@ -120,30 +121,42 @@ export default function ChannelDetail() {
       fields: [
         {
           label: 'RX frequency',
-          value: channel.rxFrequency ? formatFrequencyMhz(channel.rxFrequency) : '',
+          value: formatFrequencyHz(channel.rxFrequency),
         },
         {
           label: 'TX frequency',
-          value: channel.txFrequency ? formatFrequencyMhz(channel.txFrequency) : '',
+          value: formatFrequencyHz(channel.txFrequency),
         },
         {
           label: 'Offset',
           value: offset !== null ? formatOffsetMhz(offset) : '',
         },
-        { label: 'Bandwidth', value: channel.bandwidthKHz ? `${channel.bandwidthKHz} kHz` : '' },
-        { label: 'Power', value: channel.power },
-        { label: 'RX tone', value: channel.rxTone },
-        { label: 'TX tone', value: channel.txTone },
-        { label: 'Squelch', value: channel.squelch },
-        { label: 'RX only', value: channel.rxOnly },
+        {
+          label: 'Bandwidth',
+          value: channel.bandwidthKHz != null ? `${channel.bandwidthKHz} kHz` : '',
+        },
+        { label: 'Power', value: percentLabel(channel.power) },
+        {
+          label: 'RX tone',
+          value: channel.rxTone === 'none' ? '—' : channel.rxTone,
+        },
+        {
+          label: 'TX tone',
+          value: channel.txTone === 'none' ? '—' : channel.txTone,
+        },
+        { label: 'Squelch', value: percentLabel(channel.squelch) },
+        { label: 'RX only', value: channel.rxOnly ? 'Yes' : 'No' },
       ],
     },
     {
       title: 'DMR',
       fields: [
-        { label: 'Colour code', value: channel.colourCode },
-        { label: 'Timeslot', value: channel.timeslot },
-        { label: 'DMR ID', value: channel.dmrId },
+        {
+          label: 'Colour code',
+          value: channel.colourCode != null ? String(channel.colourCode) : '',
+        },
+        { label: 'Timeslot', value: channel.timeslot != null ? String(channel.timeslot) : '' },
+        { label: 'DMR ID', value: channel.dmrId != null ? String(channel.dmrId) : '' },
         {
           label: 'TX contact',
           value:
@@ -189,7 +202,10 @@ export default function ChannelDetail() {
       fields: [
         { label: 'Scan skip', value: channel.scanSkip ? 'Yes' : 'No' },
         { label: 'APRS config', value: channel.aprsConfigName },
-        { label: 'Transmit timeout', value: channel.transmitTimeout },
+        {
+          label: 'Transmit timeout',
+          value: channel.transmitTimeout != null ? String(channel.transmitTimeout) : '',
+        },
         { label: 'VOX', value: channel.voxEnabled ? 'Yes' : 'No' },
       ],
     },

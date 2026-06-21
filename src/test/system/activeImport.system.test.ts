@@ -127,7 +127,7 @@ describe('active import system workflow', () => {
       expect(delta.applyReport.channels.updated).toBe(1);
       expect(delta.applyReport.channels.unchanged).toBe(1);
       expect(delta.codeplugAfter.channels.find((c) => c.name === 'GB3DA DMR')?.rxFrequency).toBe(
-        '431.0',
+        431_000_000,
       );
     });
   });

@@ -6,13 +6,6 @@ export interface ValidationIssue {
   severity: 'error' | 'warning';
 }
 
-export function parseFrequencyMhz(value: string): number | null {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  const n = parseFloat(trimmed);
-  return Number.isFinite(n) && n > 0 ? n : null;
-}
-
 export function validateChannel(
   input: Partial<Channel> & { name: string },
   codeplug: Codeplug,
@@ -33,13 +26,16 @@ export function validateChannel(
     }
   }
 
-  const rx = parseFrequencyMhz(input.rxFrequency ?? '');
-  const tx = parseFrequencyMhz(input.txFrequency ?? '');
-
-  if (input.rxFrequency?.trim() && rx === null) {
+  if (
+    input.rxFrequency != null &&
+    (!Number.isFinite(input.rxFrequency) || input.rxFrequency <= 0)
+  ) {
     issues.push({ field: 'rxFrequency', message: 'Invalid RX frequency', severity: 'error' });
   }
-  if (input.txFrequency?.trim() && tx === null) {
+  if (
+    input.txFrequency != null &&
+    (!Number.isFinite(input.txFrequency) || input.txFrequency <= 0)
+  ) {
     issues.push({ field: 'txFrequency', message: 'Invalid TX frequency', severity: 'error' });
   }
 
@@ -74,9 +70,7 @@ export function hasValidationErrors(issues: ValidationIssue[]): boolean {
   return issues.some((i) => i.severity === 'error');
 }
 
-export function isSimplex(rxFrequency: string, txFrequency: string): boolean {
-  const rx = parseFrequencyMhz(rxFrequency);
-  const tx = parseFrequencyMhz(txFrequency);
-  if (rx === null || tx === null) return false;
-  return Math.abs(rx - tx) < 0.0001;
+export function isSimplex(rxFrequency: number | null, txFrequency: number | null): boolean {
+  if (rxFrequency == null || txFrequency == null) return false;
+  return rxFrequency === txFrequency;
 }
