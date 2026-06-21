@@ -10,10 +10,7 @@ import {
   setIdGenerator,
   type Codeplug,
 } from '../../../models/codeplug.ts';
-import {
-  buildImportedRxGroupList,
-  buildImportedZone,
-} from '../../../test/builders/index.ts';
+import { buildImportedRxGroupList, buildImportedZone } from '../../../test/builders/index.ts';
 import {
   CHANNEL_HEADERS,
   CONTACT_HEADERS,
@@ -21,9 +18,7 @@ import {
 } from '../../import/opengd77/columns.ts';
 import { serialiseOpenGd77Files } from './serialise.ts';
 
-function withoutId<T extends { id: string; meta?: EntityMeta }>(
-  item: T,
-): Omit<T, 'id'> {
+function withoutId<T extends { id: string; meta?: EntityMeta }>(item: T): Omit<T, 'id'> {
   const copy = { ...item };
   delete (copy as { id?: string }).id;
   if (copy.meta?.imported) {
@@ -126,9 +121,7 @@ Scotland,Scotland TS1,Local 9,,`;
     ).toEqual(
       stripIds({
         channels: first.channels!,
-        zones: [
-          buildImportedZone({ id: 'z', name: 'North', memberChannelIds: [] }, ['GB3DA DMR']),
-        ],
+        zones: [buildImportedZone({ id: 'z', name: 'North', memberChannelIds: [] }, ['GB3DA DMR'])],
         talkGroups: first.talkGroups!,
         contacts: first.contacts!,
         rxGroupLists: first.rxGroupLists!.map((l) =>

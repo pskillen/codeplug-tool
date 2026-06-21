@@ -68,9 +68,7 @@ export function stampImported<T extends WithEntityMeta>(entity: T, input: StampI
         formatId: input.formatId,
         sourceFile: input.sourceFile,
         importedAt: input.importedAt,
-        ...(input.memberWireNames !== undefined
-          ? { memberWireNames: input.memberWireNames }
-          : {}),
+        ...(input.memberWireNames !== undefined ? { memberWireNames: input.memberWireNames } : {}),
       },
     },
   };

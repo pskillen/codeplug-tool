@@ -257,15 +257,12 @@ function mergeZones(
         stats.unchanged++;
       } else {
         const idx = result.findIndex((z) => z.id === ex.id);
-        result[idx] = stampImported(
-          setMemberWireNames(ex, parsed.memberNames),
-          {
-            formatId: 'opengd77',
-            sourceFile: 'Zones.csv',
-            importedAt,
-            memberWireNames: parsed.memberNames,
-          },
-        );
+        result[idx] = stampImported(setMemberWireNames(ex, parsed.memberNames), {
+          formatId: 'opengd77',
+          sourceFile: 'Zones.csv',
+          importedAt,
+          memberWireNames: parsed.memberNames,
+        });
         stats.updated++;
       }
     } else {

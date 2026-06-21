@@ -12,10 +12,7 @@ import {
   formatOpenGd77ToneWire,
   formatOpenGd77TransmitTimeoutWire,
 } from './channelWire.ts';
-import {
-  rxGroupListExportMemberNames,
-  zoneExportMemberNames,
-} from '../../entityProvenance.ts';
+import { rxGroupListExportMemberNames, zoneExportMemberNames } from '../../entityProvenance.ts';
 
 /** OpenGD77 CSV serialisers — wire format in docs/reference/opengd77/;
  *  1701 profile limits in docs/reference/opengd77/radios/baofeng-1701.md. */

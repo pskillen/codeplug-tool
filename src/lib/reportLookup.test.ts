@@ -64,10 +64,11 @@ describe('reportLookup', () => {
   });
 
   it('resolveRxGroupListMembers splits talk groups, contacts, unresolved', () => {
-    const rgl = buildImportedRxGroupList(
-      { id: 'r1', name: 'Scotland' },
-      ['Scotland', 'MM9PDY', 'Missing'],
-    );
+    const rgl = buildImportedRxGroupList({ id: 'r1', name: 'Scotland' }, [
+      'Scotland',
+      'MM9PDY',
+      'Missing',
+    ]);
     const talkGroups = [buildTalkGroup({ id: 'tg1', name: 'Scotland', number: '950' })];
     const contacts = [buildContact({ id: 'ct1', name: 'MM9PDY', number: '123' })];
     const resolved = resolveRxGroupListMembers(rgl, talkGroups, contacts);
