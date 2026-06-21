@@ -24,7 +24,7 @@ At the **vendor boundary**, `Channel.contactName` and `Channel.rxGroupListName` 
 
 Wire-format column detail: [OpenGD77 reference](../../reference/opengd77/README.md). Radio-specific limits (zone member caps, feature availability) live in [radio profiles](../../reference/opengd77/radios/README.md) and apply at export time — not in the internal model.
 
-**Source:** [`src/models/codeplug.ts`](../../../src/models/codeplug.ts) · schema version **3**
+**Source:** [`src/models/codeplug.ts`](../../../src/models/codeplug.ts) · schema version **4**
 
 ## Design principles
 
@@ -35,7 +35,7 @@ Wire-format column detail: [OpenGD77 reference](../../reference/opengd77/README.
 | **Vendor names are display fields** | `Channel.name`, `Zone.name`, etc. are preserved for UI and export round-trip but are **not** internal foreign keys (except name-based wire fields below). |
 | **Name matching at import only** | Zone members resolve channel **names** → ids via `resolveZoneMembers`. RX group list members stay as `sourceMemberNames` for export. |
 | **JSON-serialisable** | Plain data objects for persistence and export. |
-| **Schema versioned** | `CODEPLUG_SCHEMA_VERSION = 3`; v1/v2 codeplugs migrate on load. |
+| **Schema versioned** | `CODEPLUG_SCHEMA_VERSION = 4`; v1–v3 codeplugs migrate on load. |
 | **CRUD is vendor-neutral** | Create/edit/delete in the SPA does not enforce radio cardinality (e.g. RX group list member count). Limits apply at import/export per [radio profiles](../../reference/opengd77/radios/README.md). |
 | **Vendor-specific fields are additive** | e.g. `vendorExtras`, opaque wire strings — store when useful; importer/exporter decides drop, warn, truncate, or round-trip. Do not reject or cap in CRUD because export might not round-trip. |
 
@@ -65,7 +65,6 @@ Wire-format column detail: [OpenGD77 reference](../../reference/opengd77/README.
 | `rxGroupListName` | `string` | Vendor `TG List` — RX group list name |
 | `location` | `GeoPoint \| null` | |
 | `useLocation` | `boolean` | |
-| `number` | `string` | |
 | `bandwidthKHz`, `colourCode`, `timeslot`, `dmrId` | `string` | DMR/FM extras |
 | `rxTone`, `txTone`, `squelch`, `power`, `rxOnly` | `string` | |
 | `aprsConfigName` | `string` | OpenGD77 `APRS` column |
@@ -74,6 +73,8 @@ Wire-format column detail: [OpenGD77 reference](../../reference/opengd77/README.
 | `scanSkip` | `boolean` | From `All Skip` |
 | `hideFromMap` | `boolean` | Internal only — exclude from map plots |
 | `vendorExtras` | `Record<string, string>` | Remaining OpenGD77-only columns |
+
+OpenGD77 `Channel Number` is **not** stored — assigned sequentially at export (see [OpenGD77 import/export](../import-export/opengd77/README.md)).
 
 ### `Zone`
 
@@ -113,7 +114,7 @@ Named RX group list from `TG_Lists.csv`. Members are **vendor names** (may be ta
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `schemaVersion` | `number` | Must match `CODEPLUG_SCHEMA_VERSION` (3) after migration |
+| `schemaVersion` | `number` | Must match `CODEPLUG_SCHEMA_VERSION` (4) after migration |
 | `importedAt` | `string \| null` | |
 | `sourceFiles` | `string[]` | |
 

@@ -9,7 +9,7 @@
 
 ## Overall status
 
-**Status:** In progress (Phase 0 scaffolding)
+**Status:** In progress (Phase 1 complete, pending PR)
 
 The model refactor is delivered as a **phased epic**. Each phase is a self-contained subplan, executed by a **separate agent session**, on its own branch + PR, merged to `main` **sequentially** before the next phase branches.
 
@@ -30,9 +30,9 @@ The model refactor is delivered as a **phased epic**. Each phase is a self-conta
 
 The next agent relies on these values. Keep them accurate.
 
-- **Current `CODEPLUG_SCHEMA_VERSION`:** 3 (no bump landed yet)
-- **Last merged phase:** none
-- **`main` is at:** (commit/PR after last merge) — N/A yet
+- **Current `CODEPLUG_SCHEMA_VERSION`:** 4 (Phase 1 landed on branch `53/paddy/drop-channel-number`)
+- **Last merged phase:** Phase 0 (#91, PR #94)
+- **`main` is at:** `c9b01a0` (after Phase 0 merge) — Phase 1 pending merge
 - **Epic ticket:** [#93](https://github.com/pskillen/codeplug-tool/issues/93). No per-phase child tickets — FK-by-UUID and provenance/rename are folded under #93.
 - **New tickets created in Phase 0:**
   - OpenGD77 export issues (tracking): [#95](https://github.com/pskillen/codeplug-tool/issues/95)
@@ -55,7 +55,7 @@ The next agent relies on these values. Keep them accurate.
 
 ## Phase 0 — Audit close-out, new tickets, scaffold (#91)
 
-**Status:** Complete (pending merge)
+**Status:** Complete (merged)
 **Branch:** `91/paddy/data-model-vendor-agnostic-review`
 **PR:** [#94](https://github.com/pskillen/codeplug-tool/pull/94) (Closes #91)
 
@@ -75,8 +75,22 @@ The next agent relies on these values. Keep them accurate.
 
 ## Phase 1 — Drop `Channel.number` (#53)
 
-**Status:** Not started
-**Branch:** `53/paddy/drop-channel-number` (from `origin/main` after Phase 0 merges)
+**Status:** Complete (pending PR)
+**Branch:** `53/paddy/drop-channel-number`
+
+**Delivered**
+
+- Export assigns `Channel Number` sequentially (`0bdcf8c`).
+- Import discards wire column; merge equality updated (`0f95e08`).
+- Channel edit/detail UI no longer shows channel number (`de1f117`).
+- `Channel.number` removed; schema v4 migration discards persisted values (`fb6ee6d`).
+- Docs: data-model README, persistence schema v4, OpenGD77 reference, map channels.
+
+**Verify**
+
+- `npm run lint && npm run test && npm run build` green.
+- v3→v4 migration fixture passes; round-trip test green.
+- Original import channel numbers are not preserved (by design).
 
 ---
 
@@ -111,5 +125,5 @@ The next agent relies on these values. Keep them accurate.
 
 ## Next
 
-- Finish Phase 0: create the three tickets, fix the persistence doc, open the PR closing #91.
-- Then generate the Phase 1 subplan in a fresh session and execute it.
+- Open PR for Phase 1 closing #53.
+- After merge, generate the Phase 2 subplan (#52 typed channel fields) in a fresh session.

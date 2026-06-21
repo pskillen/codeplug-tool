@@ -37,7 +37,7 @@ Columns are matched by **header name**, not column index.
 
 | Column | Used for |
 | --- | --- |
-| `Channel Number` | Stored; not shown on map |
+| `Channel Number` | Ignored on import; assigned at export — not stored in model |
 | `Channel Type` | Marker colour — mapped to specific mode; see [channel-modes](../../reference/channel-modes.md) |
 | `Rx Frequency` | Popup |
 | `Tx Frequency` | Popup |
@@ -54,7 +54,6 @@ See [data model — Channel](../data-model/README.md#channel). Example:
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
-  "number": "42",
   "name": "GB3CS Motherwell",
   "callsign": "GB3CS",
   "mode": "fm",
