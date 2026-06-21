@@ -75,8 +75,9 @@ The next agent relies on these values. Keep them accurate.
 
 ## Phase 1 — Drop `Channel.number` (#53)
 
-**Status:** Complete (pending PR)
+**Status:** Complete (pending merge)
 **Branch:** `53/paddy/drop-channel-number`
+**PR:** [#96](https://github.com/pskillen/codeplug-tool/pull/96) (Closes #53)
 
 **Delivered**
 
@@ -125,5 +126,5 @@ The next agent relies on these values. Keep them accurate.
 
 ## Next
 
-- Open PR for Phase 1 closing #53.
+- Merge PR #96 (Phase 1, closes #53).
 - After merge, generate the Phase 2 subplan (#52 typed channel fields) in a fresh session.
