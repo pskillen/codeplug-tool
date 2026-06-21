@@ -4,6 +4,7 @@
 **Epic plan:** `.cursor/plans/vendor-neutral_data_model_epic_941d5a01.plan.md`
 **Review doc:** [vendor-agnostic-review.md](vendor-agnostic-review.md)
 **Outstanding:** [pristine-model-refactor-outstanding.md](pristine-model-refactor-outstanding.md)
+**Doc audit:** [vendor-boundary-doc-audit.md](vendor-boundary-doc-audit.md) — documentation violations of the vendor-boundary / format-agnostic rules, scheduled by phase below
 
 ---
 
@@ -86,6 +87,7 @@ The next agent relies on these values. Keep them accurate.
 - Channel edit/detail UI no longer shows channel number (`de1f117`).
 - `Channel.number` removed; schema v4 migration discards persisted values (`fb6ee6d`).
 - Docs: data-model README, persistence schema v4, OpenGD77 reference, map channels.
+- Doc-compliance pass on **touched** files (data-model README, AGENTS.md, persistence, map README/channels/zones): name FKs reframed as transitional → UUID, OpenGD77/CSV defaults generalised. Remaining violations catalogued in [vendor-boundary-doc-audit.md](vendor-boundary-doc-audit.md) and scheduled under the phases below.
 
 **Verify**
 
@@ -100,12 +102,16 @@ The next agent relies on these values. Keep them accurate.
 **Status:** Not started
 **Branch:** `52/paddy/typed-channel-fields`
 
+**Doc debt to clear in this phase** (from [doc audit](vendor-boundary-doc-audit.md) #3): when adding `docs/reference/` entries for power/squelch/tones, split the OpenGD77 `import`/`export` columns out of the generic [`docs/reference/channel-modes.md`](../../reference/channel-modes.md) mode table (and its OpenGD77 footnote) into the OpenGD77 reference, leaving `channel-modes.md` format-neutral.
+
 ---
 
 ## Phase 3 — Import provenance to per-entity `meta` + `opengd77Extras` rename (new ticket)
 
 **Status:** Not started
 **Branch:** `{ticket}/paddy/import-provenance-meta`
+
+**Doc debt to clear in this phase** (from [doc audit](vendor-boundary-doc-audit.md) #4): when provenance reshapes member resolution/reporting, replace the literal `not in Channels.csv` reason string in [`src/lib/channels.ts`](../../../src/lib/channels.ts) with a format-neutral message; update `channels.test.ts` and the echo in [`map/zones.md`](../map/zones.md).
 
 ---
 
@@ -114,6 +120,8 @@ The next agent relies on these values. Keep them accurate.
 **Status:** Not started
 **Branch:** `{ticket}/paddy/fk-by-uuid`
 **Prerequisite:** Phase 3 provenance `meta` shape merged.
+
+**Doc debt to clear in this phase** (from [doc audit](vendor-boundary-doc-audit.md) #1, #2, #5): once FKs are id-keyed, rewrite the name-FK descriptions in [`crud/README.md`](../crud/README.md) (L38–41) and [`RxGroupListMemberPicker.md`](../../../src/components/crud/RxGroupListMemberPicker.md) (props move from `selectedNames` to id refs), and generalise "Vendor CSV serialises names" (crud README L41) to "the export adapter serialises per target format".
 
 ---
 
@@ -124,7 +132,15 @@ The next agent relies on these values. Keep them accurate.
 
 ---
 
+## Standalone doc hygiene (not phase-bound)
+
+From the [doc audit](vendor-boundary-doc-audit.md) #6–#8 — pure doc/anchor fixes, clearable in any small docs PR (not tied to a model change):
+
+- [`.cursor/rules/codeplug-tool.mdc`](../../../.cursor/rules/codeplug-tool.mdc) "Channel map" section points at non-existent `ChannelMap.tsx` / `Map.tsx` / `csv.ts`; update to `CodeplugMap`, real routes, and `src/lib/import/`.
+- [`README.md`](../../../README.md) (repo root) L53 — soften "import an OpenGD77 CPS export" to keep OpenGD77 as an example, not the definition.
+- Confirm no other stale `ChannelMap` anchors remain (see [`CodeplugMap.md`](../../../src/components/CodeplugMap/CodeplugMap.md)).
+
 ## Next
 
 - Merge PR #96 (Phase 1, closes #53).
-- After merge, generate the Phase 2 subplan (#52 typed channel fields) in a fresh session.
+- After merge, generate the Phase 2 subplan (#52 typed channel fields) in a fresh session; clear doc-audit #3 within it.
