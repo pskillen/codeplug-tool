@@ -246,3 +246,6 @@ Each slice should be **completable and committable in one session**. If a slice 
 - Creating progress files for a one-line fix.
 - Baking radio profile caps or target-radio constants into mutations, validation, or CRUD UI — see [AGENTS.md Vendor boundaries](../../../AGENTS.md#vendor-boundaries).
 - Planning `OPENGD77_MAX_*` (or similar) constants for new internal-model work without an explicit export-only slice.
+- Creating a plan in the local repo unless specifically asked. Use the common Cursor plans directory. If you're trying to create
+  one in the local dir it's likely you're not running in plan mode, so stop and ask the user to switch to plan mode.
+- Creating a `something.md` file - you should be making `something.plan.md` - again this is a symptom of not runnig in plan mode.
