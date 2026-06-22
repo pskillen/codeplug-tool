@@ -35,6 +35,7 @@ export function channelFieldDefaults(): Omit<Channel, 'id' | 'name' | 'callsign'
     transmitTimeout: null,
     scanSkip: false,
     hideFromMap: false,
+    comment: '',
     opengd77Extras: {},
   };
 }
@@ -73,6 +74,8 @@ export interface Channel {
   scanSkip: boolean;
   /** Internal only — exclude from map hulls/plots when true. */
   hideFromMap: boolean;
+  /** Operator comment — CHIRP `Comment` column and general notes. */
+  comment: string;
   /** OpenGD77-only columns keyed by canonical CSV header name. */
   opengd77Extras: Record<string, string>;
   meta?: EntityMeta;
@@ -125,7 +128,7 @@ export interface Codeplug {
   meta: CodeplugMeta;
 }
 
-export const CODEPLUG_SCHEMA_VERSION = 7;
+export const CODEPLUG_SCHEMA_VERSION = 8;
 
 let idGenerator: () => string = () => crypto.randomUUID();
 
