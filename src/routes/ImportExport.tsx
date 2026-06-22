@@ -14,8 +14,8 @@ export default function ImportExport() {
           <Text c="dimmed">
             Your codeplug is vendor-neutral inside the app. Choose the interchange format in the
             sidebar — where files came from for import, or where you want to send them for export.
-            OpenGD77 CPS CSV is supported today; qDMR YAML, native YAML, Baofeng DM-32 CPS, and
-            others are planned.
+            OpenGD77 CPS CSV and CHIRP CSV are supported today; qDMR YAML, native YAML, Baofeng
+            DM-32 CPS, and others are planned.
           </Text>
         </Stack>
 

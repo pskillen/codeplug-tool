@@ -93,7 +93,7 @@ export default function ImportIntoActivePanel({ vendorFormat }: ImportIntoActive
   const importHint =
     importAdapter.capabilities.delivery === 'single-file'
       ? `Drop a ${vendorFormat.label} memory CSV into the active codeplug.`
-      : 'Drop OpenGD77 CSV files into the active codeplug. Channels.csv, Zones.csv, Contacts.csv, and TG_Lists.csv are recognised.';
+      : `Drop ${vendorFormat.label} export files into the active codeplug.`;
 
   return (
     <Stack gap="sm">
