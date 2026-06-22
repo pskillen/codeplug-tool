@@ -16,6 +16,9 @@ import {
   RX_GROUP_LIST_HEADERS,
 } from '../../import/opengd77/columns.ts';
 import { serialiseOpenGd77Files } from './serialise.ts';
+import { DEFAULT_OPENGD77_PROFILE_ID } from '../../opengd77/profiles.ts';
+
+const OPGD77_IMPORT = { profileId: DEFAULT_OPENGD77_PROFILE_ID };
 
 function withoutId<T extends { id: string; meta?: EntityMeta }>(item: T): Omit<T, 'id'> {
   const copy = { ...item };
@@ -51,12 +54,15 @@ function stripIds(cp: Codeplug) {
 }
 
 async function importFromExport(files: ReturnType<typeof serialiseOpenGd77Files>) {
-  return importFiles([
-    new File([files['Channels.csv']], 'Channels.csv', { type: 'text/csv' }),
-    new File([files['Zones.csv']], 'Zones.csv', { type: 'text/csv' }),
-    new File([files['Contacts.csv']], 'Contacts.csv', { type: 'text/csv' }),
-    new File([files['TG_Lists.csv']], 'TG_Lists.csv', { type: 'text/csv' }),
-  ]);
+  return importFiles(
+    [
+      new File([files['Channels.csv']], 'Channels.csv', { type: 'text/csv' }),
+      new File([files['Zones.csv']], 'Zones.csv', { type: 'text/csv' }),
+      new File([files['Contacts.csv']], 'Contacts.csv', { type: 'text/csv' }),
+      new File([files['TG_Lists.csv']], 'TG_Lists.csv', { type: 'text/csv' }),
+    ],
+    OPGD77_IMPORT,
+  );
 }
 
 describe('OpenGD77 round-trip', () => {
@@ -80,14 +86,18 @@ Scotland TS1,2355,Group,1`;
     const tgListsCsv = `${RX_GROUP_LIST_HEADERS.join(',')}
 Scotland,Scotland TS1,Local 9,,`;
 
-    const first = await importFiles([
-      new File([channelsCsv], 'Channels.csv', { type: 'text/csv' }),
-      new File([zonesCsv], 'Zones.csv', { type: 'text/csv' }),
-      new File([contactsCsv], 'Contacts.csv', { type: 'text/csv' }),
-      new File([tgListsCsv], 'TG_Lists.csv', { type: 'text/csv' }),
-    ]);
+    const first = await importFiles(
+      [
+        new File([channelsCsv], 'Channels.csv', { type: 'text/csv' }),
+        new File([zonesCsv], 'Zones.csv', { type: 'text/csv' }),
+        new File([contactsCsv], 'Contacts.csv', { type: 'text/csv' }),
+        new File([tgListsCsv], 'TG_Lists.csv', { type: 'text/csv' }),
+      ],
+      OPGD77_IMPORT,
+    );
 
-    const exported = serialiseOpenGd77Files({
+    const exported = serialiseOpenGd77Files(
+      {
       channels: first.channels!,
       zones: [
         buildImportedZone(
@@ -101,7 +111,9 @@ Scotland,Scotland TS1,Local 9,,`;
         buildImportedRxGroupList({ id: 'rx1', name: l.name }, l.memberWireNames),
       ),
       meta: { schemaVersion: CODEPLUG_SCHEMA_VERSION, importedAt: null, sourceFiles: [] },
-    });
+      },
+      OPGD77_IMPORT,
+    );
 
     const second = await importFromExport(exported);
 
@@ -152,7 +164,7 @@ Scotland,Scotland TS1,Local 9,,`;
 
     expect(cp.rxGroupLists[0].memberRefs).toHaveLength(40);
 
-    const exported = serialiseOpenGd77Files(cp);
+    const exported = serialiseOpenGd77Files(cp, OPGD77_IMPORT);
     const reimported = await importFromExport(exported);
 
     expect(reimported.rxGroupLists).toHaveLength(1);

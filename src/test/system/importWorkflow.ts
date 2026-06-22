@@ -30,11 +30,14 @@ export async function runActiveImportWorkflow(opts: {
   files: File[];
   mode?: ImportApplyMode;
   steps?: ImportWorkflowStep[];
+  profileId?: string;
 }): Promise<ActiveImportWorkflowResult> {
   const mode = opts.mode ?? 'merge';
   const steps = opts.steps ?? ['parse', 'preview', 'apply'];
 
-  const parseResult = await importFiles(opts.files);
+  const parseResult = await importFiles(opts.files, {
+    profileId: opts.profileId ?? 'opengd77-1701',
+  });
   let previewReport = previewImportMerge(opts.codeplug, parseResult, mode);
   let codeplugAfter = opts.codeplug;
   let applyReport = previewReport;
@@ -70,9 +73,12 @@ export async function runActiveImportWorkflow(opts: {
 export async function runNewProjectImportWorkflow(opts: {
   files: File[];
   mode?: ImportApplyMode;
+  profileId?: string;
 }): Promise<{ parseResult: ImportResult; codeplug: Codeplug }> {
   const mode = opts.mode ?? 'merge';
-  const parseResult = await importFiles(opts.files);
+  const parseResult = await importFiles(opts.files, {
+    profileId: opts.profileId ?? 'opengd77-1701',
+  });
   const { codeplug } = applyImportToCodeplug(emptyCodeplug(), parseResult, mode);
   return { parseResult, codeplug };
 }

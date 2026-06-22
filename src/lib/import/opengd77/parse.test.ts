@@ -3,6 +3,8 @@ import { resetIdGenerator, setIdGenerator } from '../../../models/codeplug.ts';
 import { CHANNEL_HEADERS, CONTACT_HEADERS, RX_GROUP_LIST_HEADERS } from './columns.ts';
 import { parseChannels, parseContacts, parseRxGroupLists, parseZones } from './parse.ts';
 
+const OPGD77_CTX = { profileId: 'opengd77-1701' };
+
 describe('parseChannels', () => {
   beforeEach(() => {
     let n = 0;
@@ -20,7 +22,7 @@ describe('parseChannels', () => {
 1,GB3DA DMR,Digital,430.0,430.0,,2,1,Local 9,Scotland,,Off,Off,,,75%,Master,No,No,No,0,Off,No,No,None,56.5,-4.0,Yes
 2,GB3XX FM,Analogue,145.0,145.0,12.5,,,,,,,,None,103.5,Disabled,Master,No,No,Yes,0,On,No,No,None,57.0,-3.5,No`;
 
-    const channels = parseChannels(csv);
+    const channels = parseChannels(csv, OPGD77_CTX);
     expect(channels).toHaveLength(2);
     expect(channels[0]).toMatchObject({
       id: 'ch-1',
@@ -63,14 +65,14 @@ describe('parseChannels', () => {
   });
 
   it('throws when required column is missing', () => {
-    expect(() => parseChannels('Channel Name,Latitude\nFoo,1.0')).toThrow(
+    expect(() => parseChannels('Channel Name,Latitude\nFoo,1.0', OPGD77_CTX)).toThrow(
       'Missing column "Longitude"',
     );
   });
 
   it('tolerates BOM', () => {
     const csv = `\uFEFF${header}\n1,Test,Digital,430,430,,,,,,,,,,,,,,,,,,,,,56.5,-4.0,Yes`;
-    expect(parseChannels(csv)).toHaveLength(1);
+    expect(parseChannels(csv, OPGD77_CTX)).toHaveLength(1);
   });
 
   it('skips empty rows and rows without channel name', () => {
@@ -79,13 +81,13 @@ describe('parseChannels', () => {
 ,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 2,,Digital,430,430,,,,,,,,,,,,,,,,,,,,,56.5,-4.0,Yes`;
 
-    expect(parseChannels(csv)).toHaveLength(1);
-    expect(parseChannels(csv)[0].name).toBe('Named');
+    expect(parseChannels(csv, OPGD77_CTX)).toHaveLength(1);
+    expect(parseChannels(csv, OPGD77_CTX)[0].name).toBe('Named');
   });
 
   it('sets null location for invalid coordinates', () => {
     const csv = `${header}\n1,Test,Digital,430,430,,,,,,,,,,,,,,,,,,,,,not-a-lat,not-a-lon,Yes`;
-    const ch = parseChannels(csv)[0];
+    const ch = parseChannels(csv, OPGD77_CTX)[0];
     expect(ch.location).toBeNull();
   });
 });

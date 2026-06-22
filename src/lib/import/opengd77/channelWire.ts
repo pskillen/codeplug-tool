@@ -3,39 +3,17 @@ import {
   normalizeToneValue,
   parseFrequencyHzFromMhzWire,
 } from '../../channelFields/index.ts';
+import {
+  opengd77WireToPercent,
+  DEFAULT_OPENGD77_PROFILE_ID,
+} from '../../opengd77/profiles.ts';
 
-/** OpenGD77 `Power` column → internal percent (null = radio default). */
-const OPENGD77_POWER_WIRE_TO_PERCENT: Record<string, number | null> = {
-  Master: null,
-  P1: null,
-  P2: 25,
-  P3: 35,
-  P4: 50,
-  P5: 55,
-  P6: 60,
-  P7: 65,
-  P8: 75,
-  P10: 80,
-  P15: 85,
-  P20: 90,
-  P25: 95,
-  P30: 97,
-  P50: 98,
-  P100: 100,
-};
-
-export function parseOpenGd77PowerWire(wire: string): number | null {
-  const key = wire.trim();
-  if (!key) return null;
-  if (key in OPENGD77_POWER_WIRE_TO_PERCENT) {
-    return OPENGD77_POWER_WIRE_TO_PERCENT[key];
-  }
-  const match = /^P(\d+)$/i.exec(key);
-  if (match) {
-    const n = parseInt(match[1], 10);
-    if (Number.isFinite(n)) return clampPercent(n);
-  }
-  return null;
+/** OpenGD77 `Power` column → internal percent via profile ladder. */
+export function parseOpenGd77PowerWire(
+  wire: string,
+  profileId: string = DEFAULT_OPENGD77_PROFILE_ID,
+): number | null {
+  return opengd77WireToPercent(profileId, wire);
 }
 
 /** OpenGD77 `Squelch` column → internal percent (0 = open/disabled, null = radio default). */

@@ -5,6 +5,7 @@ import { extractCallsign } from '../../csv.ts';
 import type { Contact, TalkGroup } from '../../../models/codeplug.ts';
 import type { ParsedRxGroupList, ParsedZone } from '../types.ts';
 import { stampImported, type WithEntityMeta } from '../../entityProvenance.ts';
+import type { ImportParseContext } from '../../import-export/importAdapter.ts';
 import {
   CHANNEL_COL,
   CONTACT_COL,
@@ -53,7 +54,11 @@ function importStamp(
     });
 }
 
-export function parseChannels(text: string): Channel[] {
+export function parseChannels(text: string, ctx?: ImportParseContext): Channel[] {
+  const profileId = ctx?.profileId;
+  if (!profileId) {
+    throw new Error('OpenGD77 import requires a radio profile');
+  }
   const rows = parseCsv(text.replace(/^\uFEFF/, ''));
   if (!rows.length) throw new Error('Empty CSV');
 
@@ -109,7 +114,7 @@ export function parseChannels(text: string): Channel[] {
           rxTone: parseOpenGd77ToneWire(get(CHANNEL_COL.rxTone)),
           txTone: parseOpenGd77ToneWire(get(CHANNEL_COL.txTone)),
           squelch: parseOpenGd77SquelchWire(get(CHANNEL_COL.squelch)),
-          power: parseOpenGd77PowerWire(get(CHANNEL_COL.power)),
+          power: parseOpenGd77PowerWire(get(CHANNEL_COL.power), profileId),
           rxOnly: parseYesNo(get(CHANNEL_COL.rxOnly)),
           aprsConfigName: get(CHANNEL_COL.aprs),
           voxEnabled: parseVoxEnabled(get(CHANNEL_COL.vox)),
