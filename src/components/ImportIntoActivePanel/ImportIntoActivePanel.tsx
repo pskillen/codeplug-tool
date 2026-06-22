@@ -1,6 +1,6 @@
 import { Alert, Button, Group, Modal, SegmentedControl, Select, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ImportApplyMode, ImportMergeReport } from '../../lib/importMerge.ts';
 import { previewImportMerge } from '../../lib/importMerge.ts';
 import type { ImportResult } from '../../lib/import/types.ts';
@@ -29,6 +29,10 @@ export default function ImportIntoActivePanel({ vendorFormat }: ImportIntoActive
   const activeProfileId = formatProfiles
     ? (profileId ?? formatProfiles.defaultId)
     : undefined;
+
+  useEffect(() => {
+    setProfileId(formatProfiles?.defaultId ?? null);
+  }, [vendorFormat.id, formatProfiles?.defaultId]);
 
   const onParsed = useCallback(
     (result: ImportResult) => {

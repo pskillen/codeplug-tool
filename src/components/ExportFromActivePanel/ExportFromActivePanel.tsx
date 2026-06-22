@@ -134,7 +134,7 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
           leftSection={<IconDownload size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
           onClick={handleDownload}
         >
-          Download {adapter.defaultFileName}
+          Export
         </Button>
 
         {exportWarnings.length > 0 ? (
