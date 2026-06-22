@@ -23,6 +23,7 @@ This repo is a **Vite + React + TypeScript SPA** (Mantine UI, react-leaflet maps
 | `src/components/CodeplugMap/` | Codeplug map UI (react-leaflet) |
 | `src/models/` | Internal codeplug data models — [data-model](docs/features/data-model/README.md) |
 | `src/lib/import/`, `src/lib/export/` | CPS import/export adapters and registries — [import-export](docs/features/import-export/README.md) |
+| `src/lib/import-export/` | Shared `ImportAdapter` / `ExportAdapter` contracts and format registry |
 | `src/state/` | Central codeplug store (persistence-ready) |
 | `package.json`, `vite.config.ts`, `tsconfig.json` | SPA build and tooling |
 | `docs/build/` | Build and deploy documentation |
@@ -35,7 +36,7 @@ This repo is a **Vite + React + TypeScript SPA** (Mantine UI, react-leaflet maps
 
 ## OpenGD77 CSV inputs
 
-OpenGD77 CSV is the **first shipped import/export format**, not the only one — treat it as one format among siblings (DM32, qDMR, CHIRP, native YAML), not the default. Within the OpenGD77 format there are per-radio **variants** (OpenGD77-1701, OpenGD77-MD9600, GD-77, …); those are sub-variants applied at export, not separate formats. Authoritative column and conversion reference: [`docs/reference/opengd77/`](docs/reference/opengd77/README.md) (generic wire format) and [`docs/reference/opengd77/radios/`](docs/reference/opengd77/radios/README.md) (per-radio variant limits and features). Adapter behaviour: [import-export docs](docs/features/import-export/opengd77/README.md).
+OpenGD77 CSV was the **first shipped import/export format**; **CHIRP CSV** is the second ([#103](https://github.com/pskillen/codeplug-tool/issues/103)). Treat each as one format among siblings (DM32, qDMR, CHIRP, native YAML), not the default. Within the OpenGD77 format there are per-radio **variants** (OpenGD77-1701, OpenGD77-MD9600, GD-77, …); those are sub-variants applied at export, not separate formats. Authoritative column and conversion reference: [`docs/reference/opengd77/`](docs/reference/opengd77/README.md) (generic wire format) and [`docs/reference/opengd77/radios/`](docs/reference/opengd77/radios/README.md) (per-radio variant limits and features). Adapter behaviour: [import-export docs](docs/features/import-export/opengd77/README.md).
 
 The internal codeplug model is **format- and radio-agnostic**; format specifics and OpenGD77 radio-variant limits apply at export time. Today's OpenGD77 adapter is calibrated to the Baofeng 1701 variant.
 
@@ -56,6 +57,16 @@ The internal codeplug model is **vendor-neutral**. State explicitly **where** ra
 **Internal FK rules** (not radio-specific): the target is **UUID id** foreign keys for every relationship. Some FKs are still **name-based** today (e.g. `Channel.contactName`, `Channel.rxGroupListName`, RX group list members) — treat these as transitional wire baggage converting to ids in epic [#93](https://github.com/pskillen/codeplug-tool/issues/93) Phase 4, not a pattern to extend. Where names are still keys, wire-name uniqueness is required and talk-group/contact share a namespace. Cardinality and column survival defer to export per [radio profiles](docs/reference/opengd77/radios/README.md).
 
 Canonical model reference: [data-model](docs/features/data-model/README.md). If pre-existing vendor leakage remains in the codebase (e.g. zone member caps from an earlier slice), do not copy the pattern into new code — fix or defer explicitly.
+
+## Round-trip fidelity
+
+Import converts CPS wire values into the **internal codeplug model**. Export serialises **from model fields** — the model is the source of truth for channels created in the app as well as imported ones.
+
+**Do not fake round-trip** by stashing raw wire column strings in provenance or meta and replaying them on export (e.g. `meta.imported.wireColumns`). That pattern hides lossy mappers, ignores user edits when stash wins, and fails for entities without import provenance. If a system or unit round-trip test fails, extend the model and fix import/export mappers — or document the column as genuinely lossy in `docs/reference/<vendor>/`.
+
+**Approved opaque escape (legacy):** `opengd77Extras` for documented OpenGD77-only columns not yet first-class. Do **not** add new per-format wire bags (`chirpExtras`, `wireColumns`, etc.) for round-trip. See [`.cursor/rules/no-wire-stash-roundtrip.mdc`](.cursor/rules/no-wire-stash-roundtrip.mdc).
+
+**Known violation to remove:** CHIRP `wireColumns` on `ImportedProvenance` ([#103](https://github.com/pskillen/codeplug-tool/issues/103) follow-up).
 
 ## Working principles
 

@@ -13,7 +13,7 @@ Items **skipped**, **incomplete**, or **discovered during execution** — not fu
 
 ## Export
 
-- [ ] **Radio profile picker** — apply per-radio limits at export time ([#72](https://github.com/pskillen/codeplug-tool/issues/72)). Today's exporter uses the [Baofeng 1701 profile](../../reference/opengd77/radios/baofeng-1701.md) without a profile picker UI.
+- [ ] **Radio profile picker (OpenGD77)** — apply per-radio limits at export time ([#72](https://github.com/pskillen/codeplug-tool/issues/72)). CHIRP ships profile picker ([#103](https://github.com/pskillen/codeplug-tool/issues/103)); OpenGD77 exporter still uses Baofeng 1701 profile without picker UI.
 
 ## Fixtures
 

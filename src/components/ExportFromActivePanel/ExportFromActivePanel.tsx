@@ -1,16 +1,18 @@
-import { Alert, Button, Stack, Text } from '@mantine/core';
+import { Alert, Button, Select, Stack, Text } from '@mantine/core';
 import { IconDownload, IconPackage } from '@tabler/icons-react';
-import { opengd77ExportAdapter, type OpenGd77ExportFileName } from '../../lib/export/index.ts';
+import { useState } from 'react';
+import { getExportAdapter } from '../../lib/export/registry.ts';
+import {
+  chirpProfileSelectData,
+  DEFAULT_CHIRP_PROFILE_ID,
+} from '../../lib/export/chirp/profiles.ts';
+import {
+  isMultiFileExportAdapter,
+  isSingleFileExportAdapter,
+} from '../../lib/import-export/exportAdapter.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import type { VendorFormatOption } from '../../lib/vendorFormats.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
-
-const INDIVIDUAL_FILES: OpenGd77ExportFileName[] = [
-  'Channels.csv',
-  'Zones.csv',
-  'Contacts.csv',
-  'TG_Lists.csv',
-];
 
 export interface ExportFromActivePanelProps {
   vendorFormat: VendorFormatOption;
@@ -19,6 +21,8 @@ export interface ExportFromActivePanelProps {
 export default function ExportFromActivePanel({ vendorFormat }: ExportFromActivePanelProps) {
   const { codeplug } = useCodeplug();
   const hasData = codeplug.channels.length > 0;
+  const [chirpProfileId, setChirpProfileId] = useState(DEFAULT_CHIRP_PROFILE_ID);
+  const [exportWarnings, setExportWarnings] = useState<string[]>([]);
 
   if (vendorFormat.exportStatus !== 'shipped') {
     return (
@@ -29,7 +33,10 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
     );
   }
 
-  if (vendorFormat.id !== 'opengd77') {
+  let adapter;
+  try {
+    adapter = getExportAdapter(vendorFormat.id);
+  } catch {
     return (
       <Alert color="gray" title="Export not available">
         No exporter is registered for {vendorFormat.label}.
@@ -37,38 +44,103 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
     );
   }
 
-  return (
-    <Stack gap="sm">
-      {!hasData ? (
-        <Text size="sm" c="dimmed">
-          Import a codeplug first — there are no channels to export yet.
-        </Text>
-      ) : null}
+  if (isMultiFileExportAdapter(adapter)) {
+    return (
+      <Stack gap="sm">
+        {!hasData ? (
+          <Text size="sm" c="dimmed">
+            Import a codeplug first — there are no channels to export yet.
+          </Text>
+        ) : null}
 
-      <Stack gap="xs">
-        {INDIVIDUAL_FILES.map((fileName) => (
+        <Stack gap="xs">
+          {adapter.fileNames.map((fileName) => (
+            <Button
+              key={fileName}
+              variant="default"
+              disabled={!hasData}
+              leftSection={<IconDownload size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+              onClick={() => adapter.downloadFile(codeplug, fileName)}
+            >
+              Download {fileName}
+            </Button>
+          ))}
           <Button
-            key={fileName}
-            variant="default"
             disabled={!hasData}
-            leftSection={<IconDownload size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
-            onClick={() => opengd77ExportAdapter.downloadFile(codeplug, fileName)}
+            leftSection={<IconPackage size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+            onClick={() => adapter.downloadZip(codeplug)}
           >
-            Download {fileName}
+            Download all (.zip)
           </Button>
-        ))}
+        </Stack>
+        {vendorFormat.id === 'opengd77' ? (
+          <Text size="sm" c="dimmed">
+            The ZIP also includes header-only <code>DTMF.csv</code> and <code>APRS.csv</code> so the
+            bundle matches a full OpenGD77 export folder.
+          </Text>
+        ) : null}
+      </Stack>
+    );
+  }
+
+  if (isSingleFileExportAdapter(adapter)) {
+    const handleDownload = () => {
+      const result = adapter.download({
+        codeplug,
+        options: { profileId: chirpProfileId },
+      });
+      setExportWarnings(result.warnings);
+    };
+
+    return (
+      <Stack gap="sm">
+        {!hasData ? (
+          <Text size="sm" c="dimmed">
+            Import a codeplug first — there are no channels to export yet.
+          </Text>
+        ) : null}
+
+        {vendorFormat.id === 'chirp' ? (
+          <Select
+            label="Radio profile"
+            description="CHIRP memory layout and power ladder for target hardware"
+            data={chirpProfileSelectData()}
+            value={chirpProfileId}
+            onChange={(value) => value && setChirpProfileId(value)}
+            allowDeselect={false}
+          />
+        ) : null}
+
         <Button
           disabled={!hasData}
-          leftSection={<IconPackage size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
-          onClick={() => opengd77ExportAdapter.downloadZip(codeplug)}
+          leftSection={<IconDownload size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+          onClick={handleDownload}
         >
-          Download all (.zip)
+          Download {adapter.defaultFileName}
         </Button>
+
+        {exportWarnings.length > 0 ? (
+          <Alert color="yellow" title="Export notes">
+            {exportWarnings.map((warning) => (
+              <Text key={warning} size="sm">
+                {warning}
+              </Text>
+            ))}
+          </Alert>
+        ) : null}
+
+        {vendorFormat.id === 'chirp' ? (
+          <Text size="sm" c="dimmed">
+            Only analogue FM/AM channels are exported. Digital modes are skipped with a warning.
+          </Text>
+        ) : null}
       </Stack>
-      <Text size="sm" c="dimmed">
-        The ZIP also includes header-only <code>DTMF.csv</code> and <code>APRS.csv</code> so the
-        bundle matches a full OpenGD77 export folder.
-      </Text>
-    </Stack>
+    );
+  }
+
+  return (
+    <Alert color="gray" title="Export not available">
+      No exporter delivery mode is registered for {vendorFormat.label}.
+    </Alert>
   );
 }

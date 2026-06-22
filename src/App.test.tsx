@@ -84,6 +84,7 @@ describe('App', () => {
     renderApp('/');
     expect(screen.getByRole('heading', { name: 'MM9PDY Codeplug Tool' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Import codeplug' })).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Vendor format' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Start fresh' })).toBeInTheDocument();
   });
 

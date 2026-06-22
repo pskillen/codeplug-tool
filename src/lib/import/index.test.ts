@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { detectKind } from './opengd77/adapter.ts';
 import { importFiles } from './index.ts';
 import { CHANNEL_HEADERS, CONTACT_HEADERS, RX_GROUP_LIST_HEADERS } from './opengd77/columns.ts';
+import { chirpMinimalBundle } from '../../test/chirp/bundles.ts';
 
 describe('detectKind', () => {
   it('classifies by filename', () => {
@@ -53,13 +54,23 @@ Scotland,Local 9,,`;
     expect(result.rxGroupLists).toHaveLength(1);
   });
 
-  it('skips DTMF and unknown files without error', async () => {
+  it('skips DTMF and unknown files alongside recognised OpenGD77 files', async () => {
     const result = await importFiles([
+      new File([channelsCsv], 'Channels.csv', { type: 'text/csv' }),
       new File(['Contact Name,Code\n'], 'DTMF.csv', { type: 'text/csv' }),
       new File(['Name,Number\nFoo,1'], 'Mystery.csv', { type: 'text/csv' }),
     ]);
     expect(result.skipped).toHaveLength(2);
     expect(result.errors).toHaveLength(0);
+    expect(result.formatId).toBe('opengd77');
+  });
+
+  it('errors when the batch format cannot be detected', async () => {
+    const result = await importFiles([
+      new File(['Name,Number\nFoo,1'], 'Mystery.csv', { type: 'text/csv' }),
+    ]);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.fileName).toBe('(batch)');
   });
 
   it('records parse errors', async () => {
@@ -106,5 +117,15 @@ Scotland,Local 9,,`;
       { directoryName: 'DroppedFolder' },
     );
     expect(result.suggestedProjectName).toBe('DroppedFolder');
+  });
+
+  it('imports CHIRP CSV when vendorFormatId is chirp', async () => {
+    const csv = chirpMinimalBundle['chirp-minimal.csv']!;
+    const result = await importFiles([new File([csv], 'chirp-minimal.csv', { type: 'text/csv' })], {
+      vendorFormatId: 'chirp',
+    });
+    expect(result.formatId).toBe('chirp');
+    expect(result.channels?.length).toBeGreaterThan(0);
+    expect(result.errors).toHaveLength(0);
   });
 });

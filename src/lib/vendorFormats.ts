@@ -1,6 +1,8 @@
 /** Vendor interchange formats for import/export UI — aligned with adapter `id` values. */
 
-export type VendorFormatId = 'opengd77' | 'qdmr' | 'native-yaml' | 'dm32';
+import type { VendorFormatId } from './import-export/types.ts';
+
+export type { VendorFormatId };
 
 export type VendorFormatCapability = 'shipped' | 'planned';
 
@@ -22,6 +24,14 @@ export const vendorFormatOptions: VendorFormatOption[] = [
     hint: 'OpenGD77 Customer Programming Software export folder',
     importStatus: 'shipped',
     exportStatus: 'shipped',
+  },
+  {
+    id: 'chirp',
+    label: 'CHIRP CSV',
+    hint: 'CHIRP radio memory export (analogue FM/AM)',
+    importStatus: 'shipped',
+    exportStatus: 'shipped',
+    issue: '#103',
   },
   {
     id: 'qdmr',

@@ -6,6 +6,7 @@ import ReportPage from '../../components/report/ReportPage.tsx';
 import { applyFilters } from '../../lib/channels.ts';
 import ModePill from '../../components/crud/ModePill.tsx';
 import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
+import { formatSquelchListCell, percentLabel } from '../../lib/channelFields/percent.ts';
 import { coordsToLocator } from '../../lib/maidenhead.ts';
 import { CHANNEL_OPTIONAL_COLUMNS } from '../../hooks/channelListQueryUtils.ts';
 import { useChannelListColumns } from '../../hooks/useChannelListColumns.ts';
@@ -54,6 +55,20 @@ export default function ChannelsList() {
         key: col.key,
         header: col.header,
         render: (ch: Channel) => (position ? distanceLabelForChannel(ch, position) : '—'),
+      };
+    }
+    if (col.key === 'power') {
+      return {
+        key: col.key,
+        header: col.header,
+        render: (ch: Channel) => percentLabel(ch.power),
+      };
+    }
+    if (col.key === 'squelch') {
+      return {
+        key: col.key,
+        header: col.header,
+        render: (ch: Channel) => formatSquelchListCell(ch.squelch),
       };
     }
     return {

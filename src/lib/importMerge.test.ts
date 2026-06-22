@@ -3,6 +3,8 @@ import { resetIdGenerator, setIdGenerator } from '../models/codeplug.ts';
 import type { Channel } from '../models/codeplug.ts';
 import { buildChannel, buildImportedZone } from '../test/builders/index.ts';
 import type { ImportResult } from './import/types.ts';
+import { chirpMinimalBundle } from '../test/chirp/bundles.ts';
+import { parseChannels as parseChirpChannels } from './import/chirp/parse.ts';
 import { applyImportToCodeplug, emptyEntityStats, previewImportMerge } from './importMerge.ts';
 
 function channelsResult(channels: Channel[]): ImportResult {
@@ -237,6 +239,26 @@ describe('importMerge', () => {
 
   it('exports emptyEntityStats helper', () => {
     expect(emptyEntityStats()).toEqual({ added: 0, updated: 0, unchanged: 0, removed: 0 });
+  });
+
+  it('merges CHIRP channels-only import without touching zones', () => {
+    const chirpChannels = parseChirpChannels(chirpMinimalBundle['chirp-minimal.csv']!);
+    const existingZone = buildImportedZone({ id: 'z-1', name: 'North' });
+    const result: ImportResult = {
+      channels: chirpChannels,
+      recognised: ['chirp-minimal.csv'],
+      skipped: [],
+      errors: [],
+      formatId: 'chirp',
+    };
+    const { codeplug, report } = applyImportToCodeplug(
+      { ...emptyCodeplug(), zones: [existingZone] },
+      result,
+      'merge',
+    );
+    expect(report.channels.added).toBe(2);
+    expect(codeplug.zones).toHaveLength(1);
+    expect(codeplug.zones[0]?.id).toBe('z-1');
   });
 });
 

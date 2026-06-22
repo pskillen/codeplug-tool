@@ -2,7 +2,9 @@
 
 How CPS export files enter the app, become internal [codeplug models](../data-model/README.md), and leave again as vendor formats.
 
-**Tracking:** [codeplug-tool#7](https://github.com/pskillen/codeplug-tool/issues/7) (import foundation), [#38](https://github.com/pskillen/codeplug-tool/issues/38) (OpenGD77 full I/O), [#58](https://github.com/pskillen/codeplug-tool/issues/58) (active import), [#84](https://github.com/pskillen/codeplug-tool/issues/84) (doc collate)
+**Tracking:** [codeplug-tool#7](https://github.com/pskillen/codeplug-tool/issues/7) (import foundation), [#38](https://github.com/pskillen/codeplug-tool/issues/38) (OpenGD77 full I/O), [#58](https://github.com/pskillen/codeplug-tool/issues/58) (active import), [#84](https://github.com/pskillen/codeplug-tool/issues/84) (doc collate), [#103](https://github.com/pskillen/codeplug-tool/issues/103) (CHIRP)
+
+Operator workflow (create → edit → persist → export to multiple formats): [operator lifecycle](../workflows/operator-lifecycle.md).
 
 ## Problem
 
@@ -17,7 +19,7 @@ The internal model is **format- and radio-agnostic**. Format specifics — colum
 | Area | Status | Notes |
 | --- | --- | --- |
 | Internal models | Shipped | [`src/models/codeplug.ts`](../../../src/models/codeplug.ts) — schema v3 |
-| Import format registry | Shipped | OpenGD77 CSV only today; designed for sibling formats (DM32, qDMR, CHIRP, …) |
+| Adapter interface contracts | Shipped | [`src/lib/import-export/`](../../../src/lib/import-export/) — `ImportAdapter`, `ExportAdapter` |
 | Export format registry | Shipped | [`src/lib/export/`](../../../src/lib/export/) |
 | OpenGD77 import | Shipped | Channels, Zones, Contacts, TG_Lists ([#38](https://github.com/pskillen/codeplug-tool/issues/38)) |
 | OpenGD77 export | Shipped | Per-file + ZIP; DTMF/APRS header-only |
@@ -26,12 +28,14 @@ The internal model is **format- and radio-agnostic**. Format specifics — colum
 | Merge / overwrite modes | Shipped | [`importMerge.ts`](../../../src/lib/importMerge.ts) — idempotent merge by vendor name |
 | Name → id resolution | Shipped | Store + [`src/lib/codeplug.ts`](../../../src/lib/codeplug.ts) |
 | Export page (`/export`) | Shipped | Nav link when a project is active |
+| Delivery-aware export UI | Shipped | Registry dispatch + CHIRP profile picker ([#103](https://github.com/pskillen/codeplug-tool/issues/103)) |
 | LocalStorage persistence | Shipped | [#9](https://github.com/pskillen/codeplug-tool/issues/9) — [persistence/](../persistence/) |
 | Multi-project import | Shipped | Home creates project; Import & export merges into active — [codeplug-project/](../codeplug-project/) |
 | OpenGD77 radio-variant picker | Planned | Apply per-radio (1701, MD9600, …) limits within OpenGD77 export — [#72](https://github.com/pskillen/codeplug-tool/issues/72); OpenGD77-only, not cross-format |
 | qDMR YAML | Deferred | [#37](https://github.com/pskillen/codeplug-tool/issues/37) — UI placeholder |
 | Native YAML | Deferred | [#10](https://github.com/pskillen/codeplug-tool/issues/10) — UI placeholder |
 | Baofeng DM32 CPS | Future | [#67](https://github.com/pskillen/codeplug-tool/issues/67) — [dm32 stub](dm32/README.md) |
+| CHIRP CSV (analogue FM/AM) | Shipped | [#103](https://github.com/pskillen/codeplug-tool/issues/103) — [chirp/](chirp/README.md) |
 
 ## Documentation map
 
@@ -44,6 +48,8 @@ The internal model is **format- and radio-agnostic**. Format specifics — colum
 | [outstanding.md](outstanding.md) | Collated open debt |
 | [opengd77/progress.md](opengd77/progress.md) | OpenGD77 execution log |
 | [dm32/README.md](dm32/README.md) | DM32 placeholder |
+| [chirp/README.md](chirp/README.md) | CHIRP adapter behaviour ([#103](https://github.com/pskillen/codeplug-tool/issues/103)) |
+| [operator-lifecycle.md](../workflows/operator-lifecycle.md) | Multi-format operator workflow |
 | [Testing strategy](../../build/testing/README.md) | Format fidelity, layers, CI |
 | [persistence/README.md](../persistence/README.md) | LocalStorage envelope |
 | [codeplug-project/README.md](../codeplug-project/README.md) | Project wrapper + CRUD |
@@ -54,14 +60,15 @@ The internal model is **format- and radio-agnostic**. Format specifics — colum
 flowchart TD
   HomeUI["ImportDropzone (home)"] --> importFiles
   ExportUI["ImportIntoActivePanel (import & export page)"] --> importFiles
-  importFiles --> Adapter["format adapter (OpenGD77 today)"]
+  importFiles --> detect["detectImportAdapter / getImportAdapter"]
+  detect --> Adapter["format adapter (OpenGD77, CHIRP, …)"]
   Adapter --> Raw["ImportResult"]
   Raw --> Merge["importMerge — merge or overwrite"]
   Merge --> Store["codeplugStore — active project"]
   Store --> Resolve["resolveZoneMembers"]
   Resolve --> Codeplug["Codeplug"]
-  Codeplug --> Serialise["export adapter"]
-  Serialise --> Download["per-file CSV or ZIP"]
+  Codeplug --> Serialise["getExportAdapter — multi-file or single-file"]
+  Serialise --> Download["per-file CSV, ZIP, or single CHIRP CSV"]
 ```
 
 All vendor formats convert through the radio-agnostic internal model. Import adapters parse vendor files into entities; export adapters serialise entities back to vendor columns. Feature code (map, CRUD, store) works on the internal model only.
@@ -113,7 +120,8 @@ Authoritative column and conversion reference: [reference/opengd77/](../../refer
 
 | Symbol | File | Role |
 | --- | --- | --- |
-| `importFiles` | `src/lib/import/index.ts` | Read files, classify, parse |
+| `importFiles` | `src/lib/import/index.ts` | Read files, route by adapter, classify, parse |
+| `getImportAdapter` / `getExportAdapter` | `src/lib/import-export/registry.ts` | Format registry |
 | `previewImportMerge` / `applyImportToCodeplug` | `src/lib/importMerge.ts` | Merge/overwrite + stats |
 | `channelsImportEqual` | `src/lib/importEntityCompare.ts` | Idempotent field compare |
 | `opengd77Adapter` | `src/lib/import/opengd77/adapter.ts` | `detectKind`, delegates to parse |
@@ -128,8 +136,9 @@ Authoritative column and conversion reference: [reference/opengd77/](../../refer
 - **Import & export (`/export`):** `ImportIntoActivePanel` merges into the **active** project with confirm modal (`applyImportToActive`).
 - **Drop target:** multiple `.csv` files or a whole folder.
 - **New project naming** (Home import only): folder selection → leaf directory name; loose files (one or many) → `{adapter projectNameLabel} YYYY-MM-DD` (ISO date). Each import adapter sets `projectNameLabel` — see per-format docs (e.g. [OpenGD77](opengd77/README.md#new-project-naming)). See also [codeplug-project](../codeplug-project/README.md).
-- **Recognised (OpenGD77 today):** `Channels.csv`, `Zones.csv`, `Contacts.csv`, `TG_Lists.csv`
-- **Skipped (OpenGD77 today):** `DTMF.csv`, `APRS.csv`, other unknown CSVs
+- **Recognised (OpenGD77):** `Channels.csv`, `Zones.csv`, `Contacts.csv`, `TG_Lists.csv`
+- **Skipped (OpenGD77):** `DTMF.csv`, `APRS.csv`, other unknown CSVs when OpenGD77 files are present
+- **CHIRP:** single memory CSV with standard 21-column header fingerprint
 
 ## Automated tests
 

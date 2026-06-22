@@ -15,6 +15,14 @@ Checklist for contributors adding a CPS import/export format to codeplug-tool. T
 
 Do **not** bake radio profile caps into internal models, mutations, validation, or CRUD UI. See [AGENTS.md Vendor boundaries](../../../AGENTS.md#vendor-boundaries).
 
+### Round-trip fidelity (no wire stash)
+
+Import maps CPS wire values into the **internal model**; export serialises **from model fields** only. The model must round-trip columns that matter — including for channels created in the app, not only re-exports of imports.
+
+**Forbidden:** stashing raw wire cells in provenance/meta (e.g. `meta.imported.wireColumns`) and preferring them on export to pass round-trip tests. That is stash-and-replay, not conversion. If fidelity fails, add or fix first-class fields and boundary mappers, or document the column as lossy in reference docs.
+
+**Do not add** new per-format wire bags (`chirpExtras`, `wireColumns`, …) for round-trip. Legacy `opengd77Extras` is the only approved opaque escape — prefer modelling fields instead. See [AGENTS.md — Round-trip fidelity](../../../AGENTS.md#round-trip-fidelity) and [`.cursor/rules/no-wire-stash-roundtrip.mdc`](../../../.cursor/rules/no-wire-stash-roundtrip.mdc).
+
 ---
 
 ## 1. Reference docs
@@ -33,33 +41,57 @@ OpenGD77 example: [reference/opengd77/](../../reference/opengd77/README.md) + [r
 
 ## 2. Code layout
 
+### Shared adapter contracts
+
+Future formats implement typed interfaces in [`src/lib/import-export/`](../../../src/lib/import-export/):
+
+| File | Role |
+| --- | --- |
+| `types.ts` | `VendorFormatId`, `ImportAdapterCapabilities`, `ExportOptions`, `ExportResult` |
+| `importAdapter.ts` | `ImportAdapter` interface + `adapterSupportsKind()` |
+| `exportAdapter.ts` | `ExportAdapter` union (`MultiFileExportAdapter` \| `SingleFileExportAdapter`) + type guards |
+| `registry.ts` | `importAdapters`, `exportAdapters`, `getImportAdapter`, `getExportAdapter`, `detectImportAdapter` |
+| `adapterContract.test.ts` | Assert each shipped adapter satisfies its interface |
+
+Adapters use `satisfies ImportAdapter` / `satisfies MultiFileExportAdapter` / `satisfies SingleFileExportAdapter` — do not pass vendor shapes through to the internal model.
+
+### Delivery variants
+
+| `delivery` | Import | Export | UI |
+| --- | --- | --- | --- |
+| `multi-file` | Folder or loose CSV batch (OpenGD77) | Per-file + ZIP | `isMultiFileExportAdapter` — one button per `fileNames` entry + ZIP |
+| `single-file` | One memory CSV (CHIRP) | One CSV download | `isSingleFileExportAdapter` — profile picker when `ExportOptions.profileId` applies |
+
+### Per-format directories
+
 ```
+src/lib/import-export/     # shared contracts + registry (above)
 src/lib/import/<vendor>/
-  adapter.ts      # detectKind, id, delegates to parse
+  adapter.ts      # detectKind, id, capabilities, satisfies ImportAdapter
   parse.ts        # wire row → internal entities
   columns.ts      # header constants (shared with export)
   parse.test.ts   # column → field unit tests
 
 src/lib/export/<vendor>/
-  adapter.ts      # id, serialise entry points
-  serialise.ts    # internal entity → wire columns
+  adapter.ts      # id, delivery, satisfies ExportAdapter variant
+  serialise.ts    # internal entity → wire columns (+ warnings)
   roundtrip.test.ts   # import → export → re-import compare
 
 src/test/<vendor>/
   bundles.ts      # synthetic CSV/YAML maps keyed by filename
-  loadFixture.ts  # loadFixture(bundle) → File[]
+  loadFixture.ts  # loadFixture(bundle) → File[] (optional)
 ```
 
 Registration:
 
-- [ ] Add import adapter to [`src/lib/import/registry.ts`](../../../src/lib/import/registry.ts)
-- [ ] Add export adapter to [`src/lib/export/registry.ts`](../../../src/lib/export/registry.ts)
-- [ ] Add format option to [`src/lib/vendorFormats.ts`](../../../src/lib/vendorFormats.ts) (`importStatus` / `exportStatus`)
-- [ ] Extend `VendorFormatId` and `parseVendorFormatId` in [`useVendorFormatParam.ts`](../../../src/hooks/useVendorFormatParam.ts) if needed
+- [ ] Add import adapter to [`src/lib/import-export/registry.ts`](../../../src/lib/import-export/registry.ts) (re-exported from [`src/lib/import/registry.ts`](../../../src/lib/import/registry.ts))
+- [ ] Add export adapter to the same shared registry (re-exported from [`src/lib/export/registry.ts`](../../../src/lib/export/registry.ts))
+- [ ] Add format option to [`src/lib/vendorFormats.ts`](../../../src/lib/vendorFormats.ts) — import `VendorFormatId` from `import-export/types.ts`
+- [ ] Whitelist format id in [`useVendorFormatParam.ts`](../../../src/hooks/useVendorFormatParam.ts) if needed
 
-Adapter contract (import): implement `detectKind(fileName, headerRow)`, parse functions returning internal entities or raw intermediate shapes, report skipped files and parse errors via `ImportResult`, and set `projectNameLabel` (short string for default new-project names: `{projectNameLabel} YYYY-MM-DD` when the user did not pick a folder).
+Adapter contract (import): implement `detectKind(fileName, headerRow)`, `capabilities`, parse functions returning internal entities, report skipped files and parse errors via `ImportResult`, set `result.formatId`, and set `projectNameLabel` (short string for default new-project names: `{projectNameLabel} YYYY-MM-DD` when the user did not pick a folder).
 
-Adapter contract (export): serialise `Codeplug` to per-file downloads and/or ZIP bundle; apply radio profile limits at this layer when a profile is selected.
+Adapter contract (export): implement `delivery`; multi-file adapters expose `downloadFile` / `downloadZip`; single-file adapters expose `download(ctx) → ExportResult` with `warnings`. Apply radio profile limits at this layer when a profile is selected (`ExportOptions.profileId`).
 
 ---
 
@@ -73,6 +105,7 @@ Extend the internal model only when a field is **shared across vendors** or need
 | Talk group, contact, RX group list semantics | Columns that round-trip but have no UI yet |
 
 - [ ] Read [data-model/README.md](../data-model/README.md) before adding fields
+- [ ] Round-trip via **model fields**, not wire stash — see [Round-trip fidelity](#round-trip-fidelity-no-wire-stash) above
 - [ ] Bump schema version + migration if entity shape changes
 - [ ] Preserve **internal FK rules**: wire-name uniqueness where channels resolve contacts or RX lists by name; case-sensitive channel names (OpenGD77)
 - [ ] Do not cap entity counts in mutations — defer to export with warnings/truncation
@@ -88,15 +121,18 @@ Follow [format-fidelity.md](../../build/testing/format-fidelity.md). Every impor
 | Import fidelity | Unit beside `parse.ts` | Yes |
 | Export fidelity | Unit beside `serialise.ts` | Yes |
 | Same-format round-trip | `roundtrip.test.ts` | Yes |
+| File-level round-trip (test-data) | `src/test/system/*RoundTrip.system.test.ts` + `compareCsvRecords` | Yes — multiset row diff; exclude export-reassigned columns (`Location` for CHIRP) |
 | Re-import / merge | System (`importMerge.test.ts`, `runActiveImportWorkflow`) | When merge interaction matters |
-| Cross-format | Adapter matrix golden | When second vendor ships |
+| Cross-format | Adapter matrix golden | When second vendor ships (OpenGD77 ↔ CHIRP shipped) |
 | Lossy fields | Reference + fidelity assert | Document + test header-only / skipped files |
 
 Checklist:
 
 - [ ] Parse by **header name**, never column index
+- [ ] `adapterContract.test.ts`: required metadata, `capabilities`, delivery type guards
 - [ ] Add committed synthetic bundle under `src/test/<vendor>/` — see [fixtures.md](../../build/testing/fixtures.md)
 - [ ] `roundtrip.test.ts`: deterministic ids via `setIdGenerator`; `stripIds()` before semantic compare
+- [ ] File-level round-trip system test against committed `test-data/<vendor>/` fixtures: import → internal `Codeplug` → export → multiset row diff (`compareCsvRecords`); exclude columns documented as export-reassigned or lossy (CHIRP: `Location`; see `src/test/system/chirpRoundTrip.system.test.ts`). OpenGD77: [#108](https://github.com/pskillen/codeplug-tool/issues/108).
 - [ ] Fill a row/column in the adapter fidelity matrix in format-fidelity.md
 - [ ] System test via [`runActiveImportWorkflow`](../../../src/test/system/importWorkflow.ts) for multi-file batch scenarios
 
@@ -115,10 +151,12 @@ Import/export UI is format-aware via `useVendorFormatParam` (`?format=` query pa
 | --- | --- |
 | [`ImportDropzone`](../../../src/components/ImportDropzone/ImportDropzone.tsx) | Home — creates new project from import |
 | [`ImportIntoActivePanel`](../../../src/components/ImportIntoActivePanel/ImportIntoActivePanel.tsx) | Import & export page — merge/overwrite into active project |
-| [`ExportFromActivePanel`](../../../src/components/ExportFromActivePanel/ExportFromActivePanel.tsx) | Per-file + ZIP download |
+| [`ExportFromActivePanel`](../../../src/components/ExportFromActivePanel/ExportFromActivePanel.tsx) | Registry dispatch: multi-file per-file + ZIP, or single-file download + profile picker |
 | [`ImportExportSectionNav`](../../../src/components/SectionNav/sections/ImportExportSectionNav.tsx) | Secondary nav ([#81](https://github.com/pskillen/codeplug-tool/issues/81)) |
 
 - [ ] Wire format selector to `vendorFormats.ts` capabilities
+- [ ] Route import via `getImportAdapter(vendorFormat.id)`; home auto-detect via `detectImportAdapter()`
+- [ ] Route export via `getExportAdapter()` + `isMultiFileExportAdapter` / `isSingleFileExportAdapter`
 - [ ] Show "coming soon" for planned formats until adapters ship
 - [ ] Classification: adapter `detectKind` must handle typical CPS filenames and header-only detection
 - [ ] Confirm modal for active import shows merge stats (added/updated/removed/unchanged)
@@ -157,11 +195,16 @@ The internal model is the hub:
 FormatA → import → Codeplug → export → FormatB
 ```
 
-- [ ] Add cross-format golden test: import FormatA fixture → export FormatB → assert expected fields
+- [ ] Add cross-format golden test: import FormatA fixture → export FormatB → assert expected fields (see `src/lib/export/chirp/crossFormat.test.ts`)
 - [ ] Document expected loss at each boundary in reference docs
 - [ ] Optional: import FormatB → export FormatA round-trip subset
 
-Until a second vendor ships, document the pattern only (see format-fidelity matrix).
+Shipped cross-format pairs (v1):
+
+| Import | Export | Test | Expected loss |
+| --- | --- | --- | --- |
+| OpenGD77 | CHIRP | `crossFormat.test.ts` | DMR/digital channels skipped; zones/contacts/TGs not exported |
+| CHIRP | OpenGD77 | _(not in v1)_ | No zones/contacts; analogue-only channel subset |
 
 ---
 
@@ -170,13 +213,13 @@ Until a second vendor ships, document the pattern only (see format-fidelity matr
 End-to-end smoke test before PR:
 
 1. `npm run dev`
-2. Import a sample folder (home or active project)
+2. Import a sample folder **or single CSV** (home or active project)
 3. Touch data via CRUD (rename channel, add zone member)
-4. Export per-file or ZIP
+4. Export — per-file + ZIP (multi-file) or single CSV with profile picker (CHIRP)
 5. Re-import exported files — merge should show expected deltas
 6. Hard refresh — LocalStorage persistence intact
 
-Use `sample-exports/` locally (gitignored); committed fixtures in `src/test/<vendor>/` for CI.
+Use `sample-exports/` locally for manual realism (operator codeplugs — do not commit); committed fixtures in `src/test/<vendor>/` for CI. PR [#101](https://github.com/pskillen/codeplug-tool/pull/101) added reference CHIRP samples under `sample-exports/Chirp 2026-06-29/` for local testing.
 
 ---
 
@@ -199,6 +242,24 @@ Use this as a walk-through when adding DM32, qDMR, or another format.
 | Outstanding debt | APRS/DTMF not modelled — [outstanding.md](outstanding.md) |
 
 OpenGD77 teaches the **format vs profile** split: one CSV adapter, many radio profiles at export time.
+
+## Worked example: CHIRP
+
+Second shipped vendor — analogue single-file CSV ([#103](https://github.com/pskillen/codeplug-tool/issues/103)).
+
+| Step | CHIRP location |
+| --- | --- |
+| Reference hub | `docs/reference/chirp/README.md` |
+| Radio profiles | `docs/reference/chirp/radios/` (UV-5R Mini, UV-21Pro V2, RT95) |
+| Adapter behaviour | `docs/features/import-export/chirp/README.md` |
+| Import adapter | `src/lib/import/chirp/adapter.ts` — `delivery: 'single-file'`, `entityKinds: ['channels']` |
+| Export adapter | `src/lib/export/chirp/adapter.ts` — `satisfies SingleFileExportAdapter` |
+| Shared registry | `src/lib/import-export/registry.ts` |
+| UI format | `vendorFormats.ts` — `id: 'chirp'`, both shipped |
+| Fixtures | `src/test/chirp/bundles.ts` |
+| Round-trip | `src/lib/export/chirp/roundtrip.test.ts` |
+| Cross-format | `src/lib/export/chirp/crossFormat.test.ts` (OpenGD77 → CHIRP) |
+| Lossy fields | `Location` export-only; `Comment` not on internal model; DMR channels skipped on export |
 
 ---
 

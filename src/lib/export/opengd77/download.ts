@@ -1,5 +1,6 @@
 import { zipSync, strToU8 } from 'fflate';
 import type { Codeplug } from '../../../models/codeplug.ts';
+import type { ExportOptions } from '../../import-export/types.ts';
 import { serialiseOpenGd77Files, type OpenGd77ExportFiles } from './serialise.ts';
 
 export type OpenGd77ExportFileName = keyof OpenGd77ExportFiles;
@@ -28,7 +29,8 @@ export function downloadOpenGd77File(codeplug: Codeplug, fileName: OpenGd77Expor
   downloadBlob(blob, fileName);
 }
 
-export function downloadOpenGd77Zip(codeplug: Codeplug, zipName = 'opengd77-export.zip'): void {
+export function downloadOpenGd77Zip(codeplug: Codeplug, options?: ExportOptions): void {
+  const zipName = options?.fileName ?? 'opengd77-export.zip';
   const zip = buildOpenGd77Zip(codeplug);
   const blob = new Blob([new Uint8Array(zip)], { type: 'application/zip' });
   downloadBlob(blob, zipName);

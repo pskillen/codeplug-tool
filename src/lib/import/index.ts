@@ -1,6 +1,9 @@
 import { parseCsv } from '../csv.ts';
 import { deriveProjectNameFromImportFiles } from '../../models/codeplugProject.ts';
-import { importAdapters } from './registry.ts';
+import { adapterSupportsKind } from '../import-export/importAdapter.ts';
+import { detectImportAdapter, getImportAdapter } from '../import-export/registry.ts';
+import type { VendorFormatId } from '../import-export/types.ts';
+import type { ImportEntityKind } from '../import-export/types.ts';
 import type { ImportResult } from './types.ts';
 
 function headerRow(text: string): string[] {
@@ -8,9 +11,39 @@ function headerRow(text: string): string[] {
   return rows[0]?.map((h) => h.trim()) ?? [];
 }
 
+function parseEntity(
+  adapter: ReturnType<typeof getImportAdapter>,
+  kind: ImportEntityKind,
+  text: string,
+): Partial<ImportResult> {
+  switch (kind) {
+    case 'channels':
+      return { channels: adapter.parseChannels(text) };
+    case 'zones': {
+      if (!adapter.parseZones) {
+        throw new Error('Adapter does not support zone import');
+      }
+      return { zones: adapter.parseZones(text) };
+    }
+    case 'contacts': {
+      if (!adapter.parseContacts) {
+        throw new Error('Adapter does not support contact import');
+      }
+      const parsed = adapter.parseContacts(text);
+      return { contacts: parsed.contacts, talkGroups: parsed.talkGroups };
+    }
+    case 'rxGroupLists': {
+      if (!adapter.parseRxGroupLists) {
+        throw new Error('Adapter does not support RX group list import');
+      }
+      return { rxGroupLists: adapter.parseRxGroupLists(text) };
+    }
+  }
+}
+
 export async function importFiles(
   files: File[],
-  options?: { directoryName?: string },
+  options?: { directoryName?: string; vendorFormatId?: VendorFormatId },
 ): Promise<ImportResult> {
   const result: ImportResult = {
     recognised: [],
@@ -18,7 +51,34 @@ export async function importFiles(
     errors: [],
   };
 
-  const adapter = importAdapters[0];
+  if (!files.length) return result;
+
+  const vendorFormatId = options?.vendorFormatId;
+  const strictFormat = vendorFormatId != null;
+  let adapter;
+
+  if (strictFormat) {
+    adapter = getImportAdapter(vendorFormatId);
+  } else {
+    const detected = await detectImportAdapter(files);
+    if (detected === 'unknown') {
+      result.errors.push({
+        fileName: '(batch)',
+        message: 'Unrecognised CSV format',
+      });
+      return result;
+    }
+    if (detected === 'ambiguous') {
+      result.errors.push({
+        fileName: '(batch)',
+        message: 'Mixed CPS formats in one drop — import one format at a time',
+      });
+      return result;
+    }
+    adapter = getImportAdapter(detected);
+  }
+
+  result.formatId = adapter.id;
 
   for (const file of files) {
     const fileName = file.name;
@@ -37,28 +97,32 @@ export async function importFiles(
     const kind = adapter.detectKind(fileName, headers);
 
     if (kind === 'unknown') {
-      result.skipped.push({ fileName, message: 'Unrecognised CSV format' });
+      const message = strictFormat
+        ? `File is not a recognised ${adapter.label} export`
+        : 'Unrecognised CSV format';
+      if (strictFormat) {
+        result.errors.push({ fileName, message });
+      } else {
+        result.skipped.push({ fileName, message });
+      }
+      continue;
+    }
+
+    if (!adapterSupportsKind(adapter, kind)) {
+      result.errors.push({
+        fileName,
+        message: `Adapter does not support ${kind} import`,
+      });
       continue;
     }
 
     try {
-      switch (kind) {
-        case 'channels':
-          result.channels = adapter.parseChannels(text);
-          break;
-        case 'zones':
-          result.zones = adapter.parseZones(text);
-          break;
-        case 'contacts': {
-          const parsed = adapter.parseContacts(text);
-          result.contacts = parsed.contacts;
-          result.talkGroups = parsed.talkGroups;
-          break;
-        }
-        case 'rxGroupLists':
-          result.rxGroupLists = adapter.parseRxGroupLists(text);
-          break;
-      }
+      const parsed = parseEntity(adapter, kind, text);
+      if (parsed.channels !== undefined) result.channels = parsed.channels;
+      if (parsed.zones !== undefined) result.zones = parsed.zones;
+      if (parsed.contacts !== undefined) result.contacts = parsed.contacts;
+      if (parsed.talkGroups !== undefined) result.talkGroups = parsed.talkGroups;
+      if (parsed.rxGroupLists !== undefined) result.rxGroupLists = parsed.rxGroupLists;
       result.recognised.push(fileName);
     } catch (err) {
       result.errors.push({
@@ -133,3 +197,5 @@ export async function collectFilesFromDataTransfer(
     files: [...dt.files].filter((f) => f.name.toLowerCase().endsWith('.csv')),
   };
 }
+
+export { detectImportAdapter } from '../import-export/registry.ts';
