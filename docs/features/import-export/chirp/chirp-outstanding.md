@@ -12,10 +12,10 @@ Items **skipped**, **incomplete**, or **discovered during execution** — not fu
 - Registry-based import/export routing
 - CHIRP import + export shipped
 - Cross-format OpenGD77 → CHIRP test
+- File-level round-trip system tests (`test-data/chirp/`) with `wireColumns` provenance for verbatim export
 
 ## Open / deferred
 
-- [ ] **`Comment` column** — not on internal `Channel` model; lossy on CHIRP import (documented in reference)
-- [ ] **CHIRP → OpenGD77 cross-format** — not in v1; analogue channels could export but zones/contacts would be empty
-- [ ] **DCS tone round-trip** — export uses CTCSS-oriented defaults for DCS wire columns
-- [ ] **Real fixture round-trip** against `sample-exports/Chirp 2026-06-29/` files (manual verify; committed bundles cover CI)
+- [ ] **`Comment` column** — preserved via `wireColumns` on import for round-trip; not a first-class `Channel` field ([#108](https://github.com/pskillen/codeplug-tool/issues/108) pattern for modelled fields)
+- [ ] **CHIRP → OpenGD77 cross-format** — not in v1
+- [ ] **OpenGD77 file-level round-trip** — [#108](https://github.com/pskillen/codeplug-tool/issues/108)

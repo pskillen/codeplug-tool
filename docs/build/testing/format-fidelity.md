@@ -98,7 +98,7 @@ Extend this table as vendors ship. Each **cell** lists required test types for t
 | Import ↓ / Export → | OpenGD77 CSV | CHIRP CSV | qDMR YAML (future) |
 | --- | --- | --- | --- |
 | **OpenGD77 CSV** | Unit parse/serialise, `roundtrip.test.ts`, system merge scenarios | `crossFormat.test.ts` — analogue channels only | Cross-format golden (future) |
-| **CHIRP CSV** | _(not in v1)_ | `roundtrip.test.ts` | Cross-format golden (future) |
+| **CHIRP CSV** | `roundtrip.test.ts`, `chirpRoundTrip.system.test.ts` (test-data file diff) | Cross-format golden (future) |
 | **qDMR YAML (future)** | Cross-format golden (future) | Cross-format golden (future) | Vendor-specific round-trip |
 
 ### New vendor checklist

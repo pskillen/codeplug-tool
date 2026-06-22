@@ -112,6 +112,7 @@ Follow [format-fidelity.md](../../build/testing/format-fidelity.md). Every impor
 | Import fidelity | Unit beside `parse.ts` | Yes |
 | Export fidelity | Unit beside `serialise.ts` | Yes |
 | Same-format round-trip | `roundtrip.test.ts` | Yes |
+| File-level round-trip (test-data) | `src/test/system/*RoundTrip.system.test.ts` + `compareCsvRecords` | Yes — multiset row diff; exclude export-reassigned columns (`Location` for CHIRP) |
 | Re-import / merge | System (`importMerge.test.ts`, `runActiveImportWorkflow`) | When merge interaction matters |
 | Cross-format | Adapter matrix golden | When second vendor ships (OpenGD77 ↔ CHIRP shipped) |
 | Lossy fields | Reference + fidelity assert | Document + test header-only / skipped files |
@@ -122,6 +123,7 @@ Checklist:
 - [ ] `adapterContract.test.ts`: required metadata, `capabilities`, delivery type guards
 - [ ] Add committed synthetic bundle under `src/test/<vendor>/` — see [fixtures.md](../../build/testing/fixtures.md)
 - [ ] `roundtrip.test.ts`: deterministic ids via `setIdGenerator`; `stripIds()` before semantic compare
+- [ ] File-level round-trip system test against committed `test-data/<vendor>/` fixtures: import → internal `Codeplug` → export → multiset row diff (`compareCsvRecords`); exclude columns documented as export-reassigned or lossy (CHIRP: `Location`; see `src/test/system/chirpRoundTrip.system.test.ts`). OpenGD77: [#108](https://github.com/pskillen/codeplug-tool/issues/108).
 - [ ] Fill a row/column in the adapter fidelity matrix in format-fidelity.md
 - [ ] System test via [`runActiveImportWorkflow`](../../../src/test/system/importWorkflow.ts) for multi-file batch scenarios
 
