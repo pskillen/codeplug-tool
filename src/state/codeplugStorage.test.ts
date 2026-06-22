@@ -125,7 +125,7 @@ describe('codeplugStorage', () => {
     });
 
     const state = deserializeProjects(json);
-    expect(state?.projects[0].codeplug.meta.schemaVersion).toBe(7);
+    expect(state?.projects[0].codeplug.meta.schemaVersion).toBe(8);
     expect(state?.projects[0].codeplug.rxGroupLists[0]).toMatchObject({
       id: 'tg-1',
       name: 'Scotland',
@@ -162,7 +162,7 @@ describe('codeplugStorage', () => {
     });
 
     const state = deserializeProjects(json);
-    expect(state?.projects[0].codeplug.meta.schemaVersion).toBe(7);
+    expect(state?.projects[0].codeplug.meta.schemaVersion).toBe(8);
     expect(state?.projects[0].codeplug.channels[0].mode).toBe('fm');
     expect(state?.projects[0].codeplug.channels[1].mode).toBe('dmr');
   });
@@ -199,7 +199,7 @@ describe('codeplugStorage', () => {
     });
 
     const state = deserializeProjects(json);
-    expect(state?.projects[0].codeplug.meta.schemaVersion).toBe(7);
+    expect(state?.projects[0].codeplug.meta.schemaVersion).toBe(8);
     expect(state?.projects[0].codeplug.channels[0]).not.toHaveProperty('number');
     expect(state?.projects[0].codeplug.channels[0].name).toBe('Test');
   });
@@ -246,7 +246,7 @@ describe('codeplugStorage', () => {
 
     const state = deserializeProjects(json);
     const ch = state?.projects[0].codeplug.channels[0];
-    expect(state?.projects[0].codeplug.meta.schemaVersion).toBe(7);
+    expect(state?.projects[0].codeplug.meta.schemaVersion).toBe(8);
     expect(ch?.rxFrequency).toBe(430_000_000);
     expect(ch?.power).toBeNull();
     expect(ch?.squelch).toBe(75);
@@ -288,7 +288,7 @@ describe('codeplugStorage', () => {
     });
 
     const state = deserializeProjects(json);
-    expect(state?.projects[0].codeplug.meta.schemaVersion).toBe(7);
+    expect(state?.projects[0].codeplug.meta.schemaVersion).toBe(8);
     expect(state?.projects[0].codeplug.zones[0]).not.toHaveProperty('sourceMemberNames');
     expect(getMemberWireNames(state!.projects[0].codeplug.zones[0])).toEqual(['CH1', 'CH2']);
     expect(state?.projects[0].codeplug.rxGroupLists[0]).not.toHaveProperty('sourceMemberNames');
@@ -336,7 +336,7 @@ describe('codeplugStorage', () => {
 
     const state = deserializeProjects(json);
     const cp = state!.projects[0].codeplug;
-    expect(cp.meta.schemaVersion).toBe(7);
+    expect(cp.meta.schemaVersion).toBe(8);
     expect(cp.channels[0].contactRef).toEqual({ kind: 'talkGroup', id: 'tg-1' });
     expect(cp.channels[0].meta?.imported?.contactWireName).toBe('Scotland');
     expect(cp.channels[0]).not.toHaveProperty('contactName');

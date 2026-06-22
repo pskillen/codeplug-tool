@@ -6,6 +6,7 @@ import ImportDropzone from '../ImportDropzone/ImportDropzone.tsx';
 
 export interface ImportFormatDropzoneProps {
   vendorFormat: VendorFormatOption;
+  profileId?: string;
   onResult: (result: ImportResult) => void;
   persistenceError?: string | null;
   onDismissPersistenceError?: () => void;
@@ -14,6 +15,7 @@ export interface ImportFormatDropzoneProps {
 /** Import dropzone gated on shipped adapter + explicit vendor format (no auto-detect). */
 export default function ImportFormatDropzone({
   vendorFormat,
+  profileId,
   onResult,
   persistenceError,
   onDismissPersistenceError,
@@ -50,6 +52,7 @@ export default function ImportFormatDropzone({
       onDismissPersistenceError={onDismissPersistenceError}
       hint={importHint}
       vendorFormatId={vendorFormat.id}
+      profileId={profileId}
     />
   );
 }

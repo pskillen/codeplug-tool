@@ -62,6 +62,7 @@ export function channelsImportEqual(a: Channel, b: Channel): boolean {
     a.voxEnabled === b.voxEnabled &&
     a.transmitTimeout === b.transmitTimeout &&
     a.scanSkip === b.scanSkip &&
+    a.comment === b.comment &&
     opengd77ExtrasEqual(a.opengd77Extras, b.opengd77Extras)
   );
 }

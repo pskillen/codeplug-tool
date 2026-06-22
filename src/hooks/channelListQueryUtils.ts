@@ -1,6 +1,9 @@
 import { DISTANCE_FILTER_MARKS_KM } from '../lib/channels.ts';
 
 export const CHANNEL_LIST_COLUMN_STORAGE_KEY = 'channels-list-columns';
+export const CHANNEL_LIST_COLUMNS_SCHEMA_KEY = 'channels-list-columns-schema';
+/** Bump when adding optional columns that should be merged into existing saved prefs once. */
+export const CHANNEL_LIST_COLUMNS_SCHEMA_VERSION = 2;
 
 export type ChannelSortMode = 'name' | 'distance';
 
@@ -11,6 +14,7 @@ export const CHANNEL_OPTIONAL_COLUMNS = [
   { key: 'distance', header: 'Distance from me', defaultVisible: true },
   { key: 'power', header: 'Power', defaultVisible: true },
   { key: 'squelch', header: 'Squelch', defaultVisible: false },
+  { key: 'comment', header: 'Comment', defaultVisible: false },
 ] as const;
 
 export function defaultChannelVisibleColumns(): string[] {
@@ -23,16 +27,24 @@ export function loadChannelVisibleColumns(): string[] {
   try {
     const raw = localStorage.getItem(CHANNEL_LIST_COLUMN_STORAGE_KEY);
     if (raw) {
-      const stored = JSON.parse(raw) as string[];
-      let cols = stored.filter((k) =>
+      let cols = (JSON.parse(raw) as string[]).filter((k) =>
         validKeys.has(k as (typeof CHANNEL_OPTIONAL_COLUMNS)[number]['key']),
       );
-      if (!cols.includes('distance')) {
-        cols = [...cols, 'distance'];
+
+      const schema = Number.parseInt(
+        localStorage.getItem(CHANNEL_LIST_COLUMNS_SCHEMA_KEY) ?? '0',
+        10,
+      );
+      if (schema < CHANNEL_LIST_COLUMNS_SCHEMA_VERSION) {
+        if (!cols.includes('distance')) cols = [...cols, 'distance'];
+        if (!cols.includes('power')) cols = [...cols, 'power'];
+        localStorage.setItem(CHANNEL_LIST_COLUMN_STORAGE_KEY, JSON.stringify(cols));
+        localStorage.setItem(
+          CHANNEL_LIST_COLUMNS_SCHEMA_KEY,
+          String(CHANNEL_LIST_COLUMNS_SCHEMA_VERSION),
+        );
       }
-      if (!cols.includes('power')) {
-        cols = [...cols, 'power'];
-      }
+
       return cols;
     }
   } catch {

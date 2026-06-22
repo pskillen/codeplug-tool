@@ -1,16 +1,16 @@
 import { parseCsv, extractCallsign } from '../../csv.ts';
 import { channelFieldDefaults, newId, type Channel } from '../../../models/codeplug.ts';
 import { stampImported } from '../../entityProvenance.ts';
-import { CHIRP_COL, CHIRP_HEADERS } from './columns.ts';
+import type { ImportParseContext } from '../../import-export/importAdapter.ts';
+import { CHIRP_COL } from './columns.ts';
 import {
-  deriveChirpTxFrequencyHz,
+  parseChirpDuplex,
   parseChirpFrequencyWire,
   parseChirpModeWire,
   parseChirpOffsetMhz,
   parseChirpPowerWire,
   parseChirpScanSkip,
   parseChirpTones,
-  parseChirpTStepWire,
 } from './channelWire.ts';
 
 const CHIRP_FORMAT = 'chirp';
@@ -24,19 +24,15 @@ function cell(row: string[], index: number): string {
   return index >= 0 && index < row.length ? (row[index] ?? '').trim() : '';
 }
 
-function chirpWireColumns(row: string[], headers: string[]): Record<string, string> | undefined {
-  const cols: Record<string, string> = {};
-  for (const header of CHIRP_HEADERS) {
-    if (header === 'Location' || header === 'Name') continue;
-    const i = colIndex(headers, header);
-    if (i < 0) continue;
-    const value = cell(row, i);
-    if (value) cols[header] = value;
+function requireProfileId(ctx?: ImportParseContext): string {
+  if (!ctx?.profileId) {
+    throw new Error('CHIRP import requires a radio profile');
   }
-  return Object.keys(cols).length > 0 ? cols : undefined;
+  return ctx.profileId;
 }
 
-export function parseChannels(text: string): Channel[] {
+export function parseChannels(text: string, ctx?: ImportParseContext): Channel[] {
+  const profileId = requireProfileId(ctx);
   const rows = parseCsv(text.replace(/^\uFEFF/, ''));
   if (!rows.length) throw new Error('Empty CSV');
 
@@ -52,9 +48,9 @@ export function parseChannels(text: string): Channel[] {
     rToneFreq: colIndex(headers, CHIRP_COL.rToneFreq),
     cToneFreq: colIndex(headers, CHIRP_COL.cToneFreq),
     mode: colIndex(headers, CHIRP_COL.Mode),
-    tstep: colIndex(headers, CHIRP_COL.TStep),
     skip: colIndex(headers, CHIRP_COL.Skip),
     power: colIndex(headers, CHIRP_COL.Power),
+    comment: colIndex(headers, CHIRP_COL.Comment),
   };
 
   const importedAt = new Date().toISOString();
@@ -66,28 +62,32 @@ export function parseChannels(text: string): Channel[] {
     if (!name) continue;
 
     const rxFrequency = parseChirpFrequencyWire(cell(row, idx.frequency));
-    const duplex = cell(row, idx.duplex);
-    const offsetMhz = parseChirpOffsetMhz(cell(row, idx.offset));
-    const txFrequency = deriveChirpTxFrequencyHz(rxFrequency, duplex, offsetMhz);
+    const duplexWire = cell(row, idx.duplex);
+    const offsetWire = cell(row, idx.offset);
+    const offsetMhz = parseChirpOffsetMhz(offsetWire);
+    const { txFrequency, rxOnly } = parseChirpDuplex(duplexWire, rxFrequency, offsetMhz);
     const tones = parseChirpTones(
       cell(row, idx.tone),
       cell(row, idx.rToneFreq),
       cell(row, idx.cToneFreq),
     );
+    const { mode, bandwidthKHz } = parseChirpModeWire(cell(row, idx.mode));
 
     const channel: Channel = {
       id: newId(),
       name,
       callsign: extractCallsign(name),
-      mode: parseChirpModeWire(cell(row, idx.mode)),
+      mode,
       ...channelFieldDefaults(),
       rxFrequency,
       txFrequency,
       rxTone: tones.rxTone,
       txTone: tones.txTone,
-      bandwidthKHz: parseChirpTStepWire(cell(row, idx.tstep)),
-      power: parseChirpPowerWire(cell(row, idx.power)),
+      bandwidthKHz,
+      power: parseChirpPowerWire(cell(row, idx.power), profileId),
       scanSkip: parseChirpScanSkip(cell(row, idx.skip)),
+      rxOnly,
+      comment: cell(row, idx.comment),
     };
 
     channels.push(
@@ -95,7 +95,8 @@ export function parseChannels(text: string): Channel[] {
         formatId: CHIRP_FORMAT,
         sourceFile: null,
         importedAt,
-        wireColumns: chirpWireColumns(row, headers),
+        chirpDuplexWire: duplexWire,
+        chirpOffsetWire: offsetWire,
       }),
     );
   }

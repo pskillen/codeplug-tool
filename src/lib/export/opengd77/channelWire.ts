@@ -3,25 +3,13 @@ import {
   NONE_TONE,
   type ChannelTone,
 } from '../../channelFields/index.ts';
+import { opengd77PercentToWire, DEFAULT_OPENGD77_PROFILE_ID } from '../../opengd77/profiles.ts';
 
-/** Internal percent → OpenGD77 `Power` wire. */
-const OPENGD77_PERCENT_TO_POWER_WIRE: [number | null, string][] = [
-  [null, 'Master'],
-  [25, 'P2'],
-  [50, 'P4'],
-  [75, 'P8'],
-  [100, 'Master'],
-];
-
-export function formatOpenGd77PowerWire(percent: number | null): string {
-  if (percent == null) return 'Master';
-  for (const [p, wire] of OPENGD77_PERCENT_TO_POWER_WIRE) {
-    if (p === percent) return wire;
-  }
-  if (percent <= 25) return 'P2';
-  if (percent <= 50) return 'P4';
-  if (percent <= 75) return 'P8';
-  return 'Master';
+export function formatOpenGd77PowerWire(
+  percent: number | null,
+  profileId: string = DEFAULT_OPENGD77_PROFILE_ID,
+): string {
+  return opengd77PercentToWire(profileId, percent);
 }
 
 export function formatOpenGd77SquelchWire(percent: number | null): string {

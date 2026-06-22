@@ -1,6 +1,8 @@
 import type { Codeplug } from '../../../models/codeplug.ts';
 import { mapModeToOpenGd77ChannelType } from '../../channelModes.ts';
 import { formatCsv } from '../csvWrite.ts';
+import type { ExportOptions } from '../../import-export/types.ts';
+import { DEFAULT_OPENGD77_PROFILE_ID, getOpenGd77Profile } from '../../opengd77/profiles.ts';
 import {
   formatOpenGd77BandwidthWire,
   formatOpenGd77ColourCodeWire,
@@ -38,9 +40,9 @@ function padRow(headers: string[], values: Record<string, string>): string[] {
   return headers.map((h) => values[h] ?? '');
 }
 
-export function serialiseChannels(codeplug: Codeplug): string {
+export function serialiseChannels(codeplug: Codeplug, profileId?: string): string {
+  const profile = getOpenGd77Profile(profileId ?? DEFAULT_OPENGD77_PROFILE_ID);
   // Channel Number is assigned at export (1..n in channel list order), not stored in the model.
-  // OpenGD77 allows 1–1023; over-limit warning tracked in codeplug-tool#95.
   const rows = codeplug.channels.map((ch, i) => {
     const values: Record<string, string> = {
       [CHANNEL_COL.number]: String(i + 1),
@@ -57,7 +59,7 @@ export function serialiseChannels(codeplug: Codeplug): string {
       [CHANNEL_COL.rxTone]: formatOpenGd77ToneWire(ch.rxTone),
       [CHANNEL_COL.txTone]: formatOpenGd77ToneWire(ch.txTone),
       [CHANNEL_COL.squelch]: formatOpenGd77SquelchWire(ch.squelch),
-      [CHANNEL_COL.power]: formatOpenGd77PowerWire(ch.power),
+      [CHANNEL_COL.power]: formatOpenGd77PowerWire(ch.power, profile.id),
       [CHANNEL_COL.rxOnly]: wireYesNo(ch.rxOnly),
       [CHANNEL_COL.allSkip]: wireYesNo(ch.scanSkip),
       [CHANNEL_COL.tot]: formatOpenGd77TransmitTimeoutWire(ch.transmitTimeout),
@@ -78,8 +80,9 @@ export function serialiseChannels(codeplug: Codeplug): string {
   return formatCsv(CHANNEL_HEADERS, rows);
 }
 
-export function serialiseZones(codeplug: Codeplug): string {
-  const memberHeaders = zoneMemberHeaders();
+export function serialiseZones(codeplug: Codeplug, profileId?: string): string {
+  const profile = getOpenGd77Profile(profileId ?? DEFAULT_OPENGD77_PROFILE_ID);
+  const memberHeaders = zoneMemberHeaders(profile.zoneMembers);
   const rows = codeplug.zones.map((zone) => {
     const values: Record<string, string> = { 'Zone Name': zone.name };
     zoneExportMemberNames(zone, codeplug.channels).forEach((name, i) => {
@@ -118,8 +121,9 @@ export function serialiseContacts(codeplug: Codeplug): string {
   return formatCsv(CONTACT_HEADERS, rows);
 }
 
-export function serialiseRxGroupLists(codeplug: Codeplug): string {
-  const memberHeaders = rxGroupListMemberHeaders();
+export function serialiseRxGroupLists(codeplug: Codeplug, profileId?: string): string {
+  const profile = getOpenGd77Profile(profileId ?? DEFAULT_OPENGD77_PROFILE_ID);
+  const memberHeaders = rxGroupListMemberHeaders(profile.tgListMembers);
   const rows = codeplug.rxGroupLists.map((list) => {
     const values: Record<string, string> = { [RX_GROUP_LIST_COL.name]: list.name };
     rxGroupListExportMemberNames(list, codeplug.talkGroups, codeplug.contacts).forEach(
@@ -149,12 +153,16 @@ export interface OpenGd77ExportFiles {
   'APRS.csv': string;
 }
 
-export function serialiseOpenGd77Files(codeplug: Codeplug): OpenGd77ExportFiles {
+export function serialiseOpenGd77Files(
+  codeplug: Codeplug,
+  options?: ExportOptions,
+): OpenGd77ExportFiles {
+  const profileId = options?.profileId ?? DEFAULT_OPENGD77_PROFILE_ID;
   return {
-    'Channels.csv': serialiseChannels(codeplug),
-    'Zones.csv': serialiseZones(codeplug),
+    'Channels.csv': serialiseChannels(codeplug, profileId),
+    'Zones.csv': serialiseZones(codeplug, profileId),
     'Contacts.csv': serialiseContacts(codeplug),
-    'TG_Lists.csv': serialiseRxGroupLists(codeplug),
+    'TG_Lists.csv': serialiseRxGroupLists(codeplug, profileId),
     'DTMF.csv': serialiseDtmfHeaderOnly(),
     'APRS.csv': serialiseAprsHeaderOnly(),
   };

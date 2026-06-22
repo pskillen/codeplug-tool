@@ -121,6 +121,14 @@ function migrateChannel(raw: Record<string, unknown>, projectImportedAt: string 
     migrated.txTone = normalizeToneValue(partial.txTone);
   }
 
+  migrated.comment = typeof partial.comment === 'string' ? partial.comment : '';
+
+  if (meta?.imported && 'wireColumns' in meta.imported) {
+    const imported = { ...meta.imported };
+    delete (imported as { wireColumns?: unknown }).wireColumns;
+    meta = { ...meta, imported };
+  }
+
   return {
     id: partial.id ?? '',
     name: partial.name ?? '',

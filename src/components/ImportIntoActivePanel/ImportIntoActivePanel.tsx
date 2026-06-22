@@ -1,9 +1,10 @@
-import { Alert, Button, Group, Modal, SegmentedControl, Stack, Text } from '@mantine/core';
+import { Alert, Button, Group, Modal, SegmentedControl, Select, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { ImportApplyMode, ImportMergeReport } from '../../lib/importMerge.ts';
 import { previewImportMerge } from '../../lib/importMerge.ts';
 import type { ImportResult } from '../../lib/import/types.ts';
+import { getFormatProfiles } from '../../lib/import-export/registry.ts';
 import { formatImportFileSummary, formatMergeReportLines } from '../../lib/importSummary.ts';
 import type { VendorFormatOption } from '../../lib/vendorFormats.ts';
 import { useCodeplug, useProjects } from '../../state/codeplugStore.tsx';
@@ -21,6 +22,11 @@ export default function ImportIntoActivePanel({ vendorFormat }: ImportIntoActive
   const [pendingReport, setPendingReport] = useState<ImportMergeReport | null>(null);
   const [appliedSummary, setAppliedSummary] = useState<string | null>(null);
   const [confirmOpen, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
+  const formatProfiles = useMemo(() => getFormatProfiles(vendorFormat.id), [vendorFormat.id]);
+  const [profileId, setProfileId] = useState<string | null>(
+    () => formatProfiles?.defaultId ?? null,
+  );
+  const activeProfileId = formatProfiles ? (profileId ?? formatProfiles.defaultId) : undefined;
 
   const onParsed = useCallback(
     (result: ImportResult) => {
@@ -93,8 +99,20 @@ export default function ImportIntoActivePanel({ vendorFormat }: ImportIntoActive
           : 'Replace entire lists for each file type imported (e.g. all channels if Channels.csv is included).'}
       </Text>
 
+      {formatProfiles ? (
+        <Select
+          label="Radio profile"
+          description="Power ladder and cardinality for the target hardware"
+          data={formatProfiles.options}
+          value={activeProfileId}
+          onChange={(value) => value && setProfileId(value)}
+          allowDeselect={false}
+        />
+      ) : null}
+
       <ImportFormatDropzone
         vendorFormat={vendorFormat}
+        profileId={activeProfileId}
         onResult={onParsed}
         persistenceError={persistenceError}
         onDismissPersistenceError={clearPersistenceError}

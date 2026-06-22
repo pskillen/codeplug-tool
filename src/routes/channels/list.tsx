@@ -71,6 +71,13 @@ export default function ChannelsList() {
         render: (ch: Channel) => formatSquelchListCell(ch.squelch),
       };
     }
+    if (col.key === 'comment') {
+      return {
+        key: col.key,
+        header: col.header,
+        render: (ch: Channel) => ch.comment || '—',
+      };
+    }
     return {
       key: col.key,
       header: col.header,

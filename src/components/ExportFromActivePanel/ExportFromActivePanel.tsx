@@ -1,11 +1,12 @@
 import { Alert, Button, Select, Stack, Text } from '@mantine/core';
 import { IconDownload, IconPackage } from '@tabler/icons-react';
 import { useState } from 'react';
-import { getExportAdapter } from '../../lib/export/registry.ts';
+import { chirpProfileSelectData, DEFAULT_CHIRP_PROFILE_ID } from '../../lib/chirp/profiles.ts';
 import {
-  chirpProfileSelectData,
-  DEFAULT_CHIRP_PROFILE_ID,
-} from '../../lib/export/chirp/profiles.ts';
+  DEFAULT_OPENGD77_PROFILE_ID,
+  opengd77ProfileSelectData,
+} from '../../lib/opengd77/profiles.ts';
+import { getExportAdapter } from '../../lib/export/registry.ts';
 import {
   isMultiFileExportAdapter,
   isSingleFileExportAdapter,
@@ -22,6 +23,7 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
   const { codeplug } = useCodeplug();
   const hasData = codeplug.channels.length > 0;
   const [chirpProfileId, setChirpProfileId] = useState(DEFAULT_CHIRP_PROFILE_ID);
+  const [opengd77ProfileId, setOpenGd77ProfileId] = useState(DEFAULT_OPENGD77_PROFILE_ID);
   const [exportWarnings, setExportWarnings] = useState<string[]>([]);
 
   if (vendorFormat.exportStatus !== 'shipped') {
@@ -45,12 +47,25 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
   }
 
   if (isMultiFileExportAdapter(adapter)) {
+    const exportOptions = { profileId: opengd77ProfileId };
+
     return (
       <Stack gap="sm">
         {!hasData ? (
           <Text size="sm" c="dimmed">
             Import a codeplug first — there are no channels to export yet.
           </Text>
+        ) : null}
+
+        {vendorFormat.id === 'opengd77' ? (
+          <Select
+            label="Radio profile"
+            description="Power ladder and zone/TG member column counts for target hardware"
+            data={opengd77ProfileSelectData()}
+            value={opengd77ProfileId}
+            onChange={(value) => value && setOpenGd77ProfileId(value)}
+            allowDeselect={false}
+          />
         ) : null}
 
         <Stack gap="xs">
@@ -60,7 +75,7 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
               variant="default"
               disabled={!hasData}
               leftSection={<IconDownload size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
-              onClick={() => adapter.downloadFile(codeplug, fileName)}
+              onClick={() => adapter.downloadFile(codeplug, fileName, exportOptions)}
             >
               Download {fileName}
             </Button>
@@ -68,7 +83,7 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
           <Button
             disabled={!hasData}
             leftSection={<IconPackage size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
-            onClick={() => adapter.downloadZip(codeplug)}
+            onClick={() => adapter.downloadZip(codeplug, exportOptions)}
           >
             Download all (.zip)
           </Button>
@@ -116,7 +131,7 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
           leftSection={<IconDownload size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
           onClick={handleDownload}
         >
-          Download {adapter.defaultFileName}
+          Export
         </Button>
 
         {exportWarnings.length > 0 ? (

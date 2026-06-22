@@ -28,7 +28,7 @@ export default function ImportExport() {
                   Add or refresh data in the active codeplug without creating a new project.
                 </Text>
               </Stack>
-              <ImportIntoActivePanel vendorFormat={vendorFormat} />
+              <ImportIntoActivePanel key={vendorFormat.id} vendorFormat={vendorFormat} />
             </Stack>
           </Paper>
 

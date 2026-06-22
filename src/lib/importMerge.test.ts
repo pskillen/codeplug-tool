@@ -242,7 +242,9 @@ describe('importMerge', () => {
   });
 
   it('merges CHIRP channels-only import without touching zones', () => {
-    const chirpChannels = parseChirpChannels(chirpMinimalBundle['chirp-minimal.csv']!);
+    const chirpChannels = parseChirpChannels(chirpMinimalBundle['chirp-minimal.csv']!, {
+      profileId: 'baofeng-uv5r-mini',
+    });
     const existingZone = buildImportedZone({ id: 'z-1', name: 'North' });
     const result: ImportResult = {
       channels: chirpChannels,

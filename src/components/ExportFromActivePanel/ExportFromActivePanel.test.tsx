@@ -56,9 +56,7 @@ describe('ExportFromActivePanel', () => {
   it('renders CHIRP profile picker and single download', () => {
     renderPanel(vendorFormatById('chirp'));
     expect(screen.getByRole('combobox', { name: 'Radio profile' })).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /Download Baofeng_UV-5R Mini_export\.csv/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Export$/i })).toBeInTheDocument();
     expect(screen.getByText(/Only analogue FM\/AM channels/i)).toBeInTheDocument();
   });
 });

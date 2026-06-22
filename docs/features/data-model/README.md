@@ -86,6 +86,7 @@ Typed scalar fields use vendor-neutral semantics in the model; CPS wire strings 
 | `voxEnabled` | `boolean` | VOX enabled |
 | `transmitTimeout` | `number \| null` | Seconds; `0` = off; `null` when unset |
 | `scanSkip` | `boolean` | Exclude from scan |
+| `comment` | `string` | Operator notes; CHIRP `Comment` column (default `''`) |
 | `hideFromMap` | `boolean` | Internal only — exclude from map plots |
 | `opengd77Extras` | `Record<string, string>` | OpenGD77-only opaque wire columns preserved for round-trip |
 | `meta` | `EntityMeta` | Optional per-entity metadata (see below) |
@@ -133,7 +134,7 @@ Named RX (receive) group list driving promiscuous receive. Members are ordered `
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `schemaVersion` | `number` | Must match `CODEPLUG_SCHEMA_VERSION` (7) after migration |
+| `schemaVersion` | `number` | Must match `CODEPLUG_SCHEMA_VERSION` (8) after migration |
 | `importedAt` | `string \| null` | |
 | `sourceFiles` | `string[]` | |
 
