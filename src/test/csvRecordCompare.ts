@@ -129,10 +129,7 @@ export function compareCsvRecords(
   }
 
   return {
-    ok:
-      missingInExport.length === 0 &&
-      missingInOriginal.length === 0 &&
-      fieldDiffs.length === 0,
+    ok: missingInExport.length === 0 && missingInOriginal.length === 0 && fieldDiffs.length === 0,
     originalCount: originalSignatures.length,
     exportedCount: exportedSignatures.length,
     missingInExport,
@@ -146,6 +143,7 @@ export function formatCsvRecordCompareFailure(result: CsvRecordCompareResult): s
   if (result.originalCount !== result.exportedCount) {
     lines.push(`Record count: ${result.originalCount} original → ${result.exportedCount} exported`);
   }
+  /* eslint-disable no-control-regex */
   if (result.missingInExport.length) {
     lines.push(`Unmatched original rows: ${result.missingInExport.length}`);
     lines.push(`  e.g. ${result.missingInExport[0]?.replace(/\u0001/g, ' | ')}`);
@@ -154,6 +152,7 @@ export function formatCsvRecordCompareFailure(result: CsvRecordCompareResult): s
     lines.push(`Unmatched exported rows: ${result.missingInOriginal.length}`);
     lines.push(`  e.g. ${result.missingInOriginal[0]?.replace(/\u0001/g, ' | ')}`);
   }
+  /* eslint-enable no-control-regex */
   for (const diff of result.fieldDiffs.slice(0, 10)) {
     lines.push(
       `${diff.column}: ${JSON.stringify(diff.original)} → ${JSON.stringify(diff.exported)}`,

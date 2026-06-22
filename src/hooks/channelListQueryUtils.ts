@@ -24,7 +24,9 @@ export function loadChannelVisibleColumns(): string[] {
     const raw = localStorage.getItem(CHANNEL_LIST_COLUMN_STORAGE_KEY);
     if (raw) {
       const stored = JSON.parse(raw) as string[];
-      let cols = stored.filter((k) => validKeys.has(k as (typeof CHANNEL_OPTIONAL_COLUMNS)[number]['key']));
+      let cols = stored.filter((k) =>
+        validKeys.has(k as (typeof CHANNEL_OPTIONAL_COLUMNS)[number]['key']),
+      );
       if (!cols.includes('distance')) {
         cols = [...cols, 'distance'];
       }

@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { serialiseChirpCsv } from '../../lib/export/chirp/serialise.ts';
 import { importFiles } from '../../lib/import/index.ts';
-import { emptyCodeplug, resetIdGenerator, setIdGenerator, type Codeplug } from '../../models/codeplug.ts';
 import {
-  compareCsvRecords,
-  formatCsvRecordCompareFailure,
-} from '../csvRecordCompare.ts';
+  emptyCodeplug,
+  resetIdGenerator,
+  setIdGenerator,
+  type Codeplug,
+} from '../../models/codeplug.ts';
+import { compareCsvRecords, formatCsvRecordCompareFailure } from '../csvRecordCompare.ts';
 import { CHIRP_TEST_DATA_FIXTURES, readChirpTestData } from '../chirp/testData.ts';
 
 describe('CHIRP file-level round-trip (test-data)', () => {

@@ -19,11 +19,7 @@ function formatOffsetMhz(offsetMhz: number): string {
   return offsetMhz.toFixed(6);
 }
 
-function buildComputedChirpRow(
-  channel: Channel,
-  location: number,
-  profileId: string,
-): string[] {
+function buildComputedChirpRow(channel: Channel, location: number, profileId: string): string[] {
   const { duplex, offsetMhz } = deriveChirpDuplexAndOffset(
     channel.rxFrequency,
     channel.txFrequency,
@@ -55,11 +51,7 @@ function buildComputedChirpRow(
 }
 
 /** Map one internal channel to a CHIRP CSV row (header order). */
-export function channelToChirpRow(
-  channel: Channel,
-  location: number,
-  profileId: string,
-): string[] {
+export function channelToChirpRow(channel: Channel, location: number, profileId: string): string[] {
   const computed = buildComputedChirpRow(channel, location, profileId);
   const wire =
     channel.meta?.imported?.formatId === 'chirp' ? channel.meta.imported.wireColumns : undefined;

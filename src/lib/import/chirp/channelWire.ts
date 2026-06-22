@@ -1,7 +1,4 @@
-import {
-  normalizeToneValue,
-  parseFrequencyHzFromMhzWire,
-} from '../../channelFields/index.ts';
+import { normalizeToneValue, parseFrequencyHzFromMhzWire } from '../../channelFields/index.ts';
 import type { ChannelMode } from '../../channelModes.ts';
 import type { ChannelTone } from '../../channelFields/tones.ts';
 
@@ -150,10 +147,7 @@ export function formatChirpPowerWire(power: number | null, profileDefaultHigh = 
   return profileDefaultHigh;
 }
 
-export function formatChirpPowerWireForProfile(
-  power: number | null,
-  profileId: string,
-): string {
+export function formatChirpPowerWireForProfile(power: number | null, profileId: string): string {
   if (profileId === 'retevis-rt95') {
     if (power != null && power <= 30) return '10W';
     return power == null ? '10W' : '25W';

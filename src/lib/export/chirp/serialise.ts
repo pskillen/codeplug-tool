@@ -11,7 +11,10 @@ export interface ChirpSerialiseResult {
   warnings: string[];
 }
 
-export function serialiseChirpCsv(codeplug: Codeplug, options?: ExportOptions): ChirpSerialiseResult {
+export function serialiseChirpCsv(
+  codeplug: Codeplug,
+  options?: ExportOptions,
+): ChirpSerialiseResult {
   const profileId = options?.profileId ?? DEFAULT_CHIRP_PROFILE_ID;
   const profile = getChirpProfile(profileId);
   const warnings: string[] = [];

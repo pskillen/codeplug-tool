@@ -13,17 +13,13 @@ describe('compareCsvRecords', () => {
   it('ignores Location when excluded', () => {
     const original = `${header}10,Alpha,145.5`;
     const exported = `${header}1,Alpha,145.5`;
-    expect(
-      compareCsvRecords(original, exported, { excludeColumns: ['Location'] }).ok,
-    ).toBe(true);
+    expect(compareCsvRecords(original, exported, { excludeColumns: ['Location'] }).ok).toBe(true);
   });
 
   it('treats duplicate names as separate multiset rows', () => {
     const original = `${header}1,Alpha,145.5\n2,Alpha,433.5`;
     const exported = `${header}3,Alpha,433.5\n4,Alpha,145.5`;
-    expect(
-      compareCsvRecords(original, exported, { excludeColumns: ['Location'] }).ok,
-    ).toBe(true);
+    expect(compareCsvRecords(original, exported, { excludeColumns: ['Location'] }).ok).toBe(true);
   });
 
   it('reports field diffs when one row differs', () => {

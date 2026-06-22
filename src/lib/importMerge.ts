@@ -209,9 +209,7 @@ function mergeRxGroupLists(
     return { items: existing, stats: emptyEntityStats() };
   }
 
-  const asRx: RxGroupList[] = incoming.map((p) =>
-    parsedRxToRxGroupList(p, importedAt, formatId),
-  );
+  const asRx: RxGroupList[] = incoming.map((p) => parsedRxToRxGroupList(p, importedAt, formatId));
   return mergeNamedEntities(
     existing,
     asRx,

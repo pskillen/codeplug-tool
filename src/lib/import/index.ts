@@ -1,10 +1,7 @@
 import { parseCsv } from '../csv.ts';
 import { deriveProjectNameFromImportFiles } from '../../models/codeplugProject.ts';
 import { adapterSupportsKind } from '../import-export/importAdapter.ts';
-import {
-  detectImportAdapter,
-  getImportAdapter,
-} from '../import-export/registry.ts';
+import { detectImportAdapter, getImportAdapter } from '../import-export/registry.ts';
 import type { VendorFormatId } from '../import-export/types.ts';
 import type { ImportEntityKind } from '../import-export/types.ts';
 import type { ImportResult } from './types.ts';

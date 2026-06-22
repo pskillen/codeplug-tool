@@ -1,5 +1,10 @@
 import type { Codeplug } from '../../models/codeplug.ts';
-import type { ExportDownloadContext, ExportOptions, ExportResult, VendorFormatId } from './types.ts';
+import type {
+  ExportDownloadContext,
+  ExportOptions,
+  ExportResult,
+  VendorFormatId,
+} from './types.ts';
 
 export interface BaseExportAdapter {
   readonly id: VendorFormatId;
@@ -21,10 +26,14 @@ export interface SingleFileExportAdapter extends BaseExportAdapter {
 
 export type ExportAdapter = MultiFileExportAdapter | SingleFileExportAdapter;
 
-export function isMultiFileExportAdapter(adapter: ExportAdapter): adapter is MultiFileExportAdapter {
+export function isMultiFileExportAdapter(
+  adapter: ExportAdapter,
+): adapter is MultiFileExportAdapter {
   return adapter.delivery === 'multi-file';
 }
 
-export function isSingleFileExportAdapter(adapter: ExportAdapter): adapter is SingleFileExportAdapter {
+export function isSingleFileExportAdapter(
+  adapter: ExportAdapter,
+): adapter is SingleFileExportAdapter {
   return adapter.delivery === 'single-file';
 }

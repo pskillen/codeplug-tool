@@ -1,7 +1,4 @@
-export {
-  exportAdapters,
-  getExportAdapter,
-} from '../import-export/registry.ts';
+export { exportAdapters, getExportAdapter } from '../import-export/registry.ts';
 
 export type {
   ExportAdapter,

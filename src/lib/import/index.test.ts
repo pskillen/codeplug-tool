@@ -121,10 +121,9 @@ Scotland,Local 9,,`;
 
   it('imports CHIRP CSV when vendorFormatId is chirp', async () => {
     const csv = chirpMinimalBundle['chirp-minimal.csv']!;
-    const result = await importFiles(
-      [new File([csv], 'chirp-minimal.csv', { type: 'text/csv' })],
-      { vendorFormatId: 'chirp' },
-    );
+    const result = await importFiles([new File([csv], 'chirp-minimal.csv', { type: 'text/csv' })], {
+      vendorFormatId: 'chirp',
+    });
     expect(result.formatId).toBe('chirp');
     expect(result.channels?.length).toBeGreaterThan(0);
     expect(result.errors).toHaveLength(0);
