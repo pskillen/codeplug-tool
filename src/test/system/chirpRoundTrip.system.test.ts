@@ -27,7 +27,7 @@ describe('CHIRP file-level round-trip (test-data)', () => {
 
       const parseResult = await importFiles(
         [new File([originalCsv], fixture.fileName, { type: 'text/csv' })],
-        { vendorFormatId: 'chirp' },
+        { vendorFormatId: 'chirp', profileId: fixture.profileId },
       );
       expect(parseResult.errors).toHaveLength(0);
       expect(parseResult.channels?.length).toBeGreaterThan(0);

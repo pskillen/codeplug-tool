@@ -1,33 +1,37 @@
 import { normalizeToneValue, parseFrequencyHzFromMhzWire } from '../../channelFields/index.ts';
+import { chirpPercentToWire, chirpWireToPercent } from '../../chirp/profiles.ts';
 import type { ChannelMode } from '../../channelModes.ts';
 import type { ChannelTone } from '../../channelFields/tones.ts';
 
 const CHIRP_DEFAULT_TONE_FREQ = '88.5';
 
-/** CHIRP `Power` wire → internal percent (null = radio default / high). */
-export function parseChirpPowerWire(wire: string): number | null {
-  const trimmed = wire.trim();
-  if (!trimmed) return null;
-  if (trimmed === '1.0W') return 25;
-  if (trimmed === '5.0W' || trimmed === '10W' || trimmed === '25W') return null;
-  const match = /^([\d.]+)W$/i.exec(trimmed);
-  if (match) {
-    const watts = parseFloat(match[1]);
-    if (Number.isFinite(watts) && watts <= 1.5) return 25;
-  }
-  return null;
+/** CHIRP `Power` wire → internal percent via profile ladder. */
+export function parseChirpPowerWire(wire: string, profileId: string): number | null {
+  return chirpWireToPercent(profileId, wire);
 }
 
-export function parseChirpModeWire(wire: string): ChannelMode {
+export function formatChirpPowerWireForProfile(
+  power: number | null,
+  profileId: string,
+): string {
+  return chirpPercentToWire(profileId, power);
+}
+
+export function parseChirpModeWire(wire: string): {
+  mode: ChannelMode;
+  bandwidthKHz: number | null;
+} {
   const key = wire.trim().toUpperCase();
-  if (key === 'NFM' || key === 'FM') return 'fm';
-  if (key === 'AM') return 'am';
-  return 'other';
+  if (key === 'NFM') return { mode: 'fm', bandwidthKHz: 12.5 };
+  if (key === 'FM') return { mode: 'fm', bandwidthKHz: 25 };
+  if (key === 'AM') return { mode: 'am', bandwidthKHz: null };
+  return { mode: 'other', bandwidthKHz: null };
 }
 
-export function formatChirpModeWire(mode: ChannelMode): string {
-  if (mode === 'fm') return 'NFM';
+export function formatChirpModeWire(mode: ChannelMode, bandwidthKHz: number | null): string {
   if (mode === 'am') return 'AM';
+  if (mode === 'fm' && bandwidthKHz != null && bandwidthKHz >= 20) return 'FM';
+  if (mode === 'fm') return 'NFM';
   return 'NFM';
 }
 
@@ -45,28 +49,40 @@ export function parseChirpTones(
   }
 
   if (mode === 'TSQL') {
-    return {
-      rxTone: normalizeToneValue(rFreq),
-      txTone: normalizeToneValue(cFreq),
-    };
+    const tone = normalizeToneValue(cFreq);
+    return { rxTone: tone, txTone: tone };
   }
 
   if (mode === 'TONE') {
     return {
       rxTone: 'none',
-      txTone: normalizeToneValue(cFreq || rFreq),
+      txTone: normalizeToneValue(rFreq),
     };
   }
 
   return { rxTone: 'none', txTone: 'none' };
 }
 
-export function formatChirpToneMode(rxTone: ChannelTone, txTone: ChannelTone): string {
-  const hasRx = rxTone !== 'none';
-  const hasTx = txTone !== 'none';
-  if (hasRx && hasTx && rxTone !== txTone) return 'TSQL';
-  if (hasTx) return 'Tone';
-  return '';
+export function formatChirpToneColumns(
+  rxTone: ChannelTone,
+  txTone: ChannelTone,
+): { tone: string; rToneFreq: string; cToneFreq: string } {
+  if (rxTone !== 'none' && txTone !== 'none') {
+    const freq = formatChirpToneFreq(rxTone);
+    return { tone: 'TSQL', rToneFreq: CHIRP_DEFAULT_TONE_FREQ, cToneFreq: freq };
+  }
+  if (txTone !== 'none') {
+    return {
+      tone: 'Tone',
+      rToneFreq: formatChirpToneFreq(txTone),
+      cToneFreq: CHIRP_DEFAULT_TONE_FREQ,
+    };
+  }
+  return {
+    tone: '',
+    rToneFreq: CHIRP_DEFAULT_TONE_FREQ,
+    cToneFreq: CHIRP_DEFAULT_TONE_FREQ,
+  };
 }
 
 export function formatChirpToneFreq(tone: ChannelTone): string {
@@ -98,16 +114,36 @@ export function deriveChirpTxFrequencyHz(
 ): number | null {
   if (rxHz == null) return null;
   const d = duplex.trim().toLowerCase();
+  if (d === 'off') return rxHz;
   const offsetHz = Math.round(offsetMhz * 1_000_000);
   if (d === '+') return rxHz + offsetHz;
   if (d === '-') return rxHz - offsetHz;
   return rxHz;
 }
 
+export function parseChirpDuplex(
+  duplex: string,
+  rxHz: number | null,
+  offsetMhz: number,
+): { txFrequency: number | null; rxOnly: boolean } {
+  const d = duplex.trim().toLowerCase();
+  if (d === 'off') {
+    return { txFrequency: rxHz, rxOnly: true };
+  }
+  return {
+    txFrequency: deriveChirpTxFrequencyHz(rxHz, duplex, offsetMhz),
+    rxOnly: false,
+  };
+}
+
 export function deriveChirpDuplexAndOffset(
   rxHz: number | null,
   txHz: number | null,
+  rxOnly: boolean,
 ): { duplex: string; offsetMhz: number } {
+  if (rxOnly) {
+    return { duplex: 'off', offsetMhz: 0 };
+  }
   if (rxHz == null || txHz == null || rxHz === txHz) {
     return { duplex: '', offsetMhz: 0 };
   }
@@ -125,32 +161,7 @@ export function formatChirpScanSkip(scanSkip: boolean): string {
   return scanSkip ? 'S' : '';
 }
 
-export function parseChirpTStepWire(wire: string): number | null {
-  const trimmed = wire.trim().replace(',', '.');
-  if (!trimmed) return null;
-  const step = parseFloat(trimmed);
-  if (!Number.isFinite(step)) return null;
-  if (step <= 6.25) return 12.5;
-  if (step <= 12.5) return 12.5;
-  return 25;
-}
-
-export function formatChirpTStepWire(bandwidthKHz: number | null): string {
-  if (bandwidthKHz == null) return '5.00';
-  if (bandwidthKHz >= 20) return '25.00';
+/** TStep is ignored on import — export always emits `5.00`. */
+export function formatChirpTStepWire(): string {
   return '5.00';
-}
-
-export function formatChirpPowerWire(power: number | null, profileDefaultHigh = '5.0W'): string {
-  if (power == null) return profileDefaultHigh;
-  if (power <= 30) return '1.0W';
-  return profileDefaultHigh;
-}
-
-export function formatChirpPowerWireForProfile(power: number | null, profileId: string): string {
-  if (profileId === 'retevis-rt95') {
-    if (power != null && power <= 30) return '10W';
-    return power == null ? '10W' : '25W';
-  }
-  return formatChirpPowerWire(power, profileId === 'baofeng-uv21prov2' ? '5.0W' : '5.0W');
 }

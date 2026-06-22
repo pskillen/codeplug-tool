@@ -20,8 +20,9 @@ export interface ImportedProvenance {
   contactWireName?: string;
   /** Original TG List column wire name (channels only). */
   rxGroupListWireName?: string;
-  /** Vendor wire column values preserved for round-trip (CHIRP Comment, tone freqs, etc.). */
-  wireColumns?: Record<string, string>;
+  /** CHIRP Duplex/Offset wire when zero-offset split is indistinguishable from simplex in frequencies. */
+  chirpDuplexWire?: string;
+  chirpOffsetWire?: string;
 }
 
 export interface EntityMeta {
@@ -39,7 +40,8 @@ export interface StampImportedInput {
   memberWireNames?: string[];
   contactWireName?: string;
   rxGroupListWireName?: string;
-  wireColumns?: Record<string, string>;
+  chirpDuplexWire?: string;
+  chirpOffsetWire?: string;
 }
 
 export function getMemberWireNames(entity: WithEntityMeta): string[] {
@@ -83,7 +85,8 @@ export function stampImported<T extends WithEntityMeta>(entity: T, input: StampI
         ...(input.rxGroupListWireName !== undefined
           ? { rxGroupListWireName: input.rxGroupListWireName }
           : {}),
-        ...(input.wireColumns !== undefined ? { wireColumns: input.wireColumns } : {}),
+        ...(input.chirpDuplexWire !== undefined ? { chirpDuplexWire: input.chirpDuplexWire } : {}),
+        ...(input.chirpOffsetWire !== undefined ? { chirpOffsetWire: input.chirpOffsetWire } : {}),
       },
     },
   };
