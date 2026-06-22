@@ -34,7 +34,7 @@ interface CodeplugProject {
 }
 ```
 
-`newProject(name, codeplug?)` creates a project; `deriveProjectNameFromImportFiles(files)` derives a name from the import selection (folder leaf name, or `OpenGD77 YYYY-MM-DD` for a single file; fallback: first filename or `"Imported codeplug"`).
+`newProject(name, codeplug?)` creates a project. On import, `deriveProjectNameFromImportFiles(files, { formatLabel })` suggests a name: **folder leaf name** when the user picked or dropped a directory; otherwise **`{formatLabel} YYYY-MM-DD`** (ISO date — `formatLabel` comes from the active import adapter's `projectNameLabel`). Fallback when no suggestion: first recognised filename or `"Imported codeplug"`. Per-format examples: [import/export hub](../import-export/README.md#import-ui-behaviour).
 
 Identity and operator-facing metadata live on the wrapper so [`Codeplug`](../data-model/README.md) stays focused on CPS contents. `author` and `targetRadios` are **indicative human input only** — they must never drive import adapters, export profiles, or validation.
 

@@ -68,7 +68,10 @@ export async function importFiles(
     }
   }
 
-  result.suggestedProjectName = deriveProjectNameFromImportFiles(files, options);
+  result.suggestedProjectName = deriveProjectNameFromImportFiles(files, {
+    directoryName: options?.directoryName,
+    formatLabel: adapter.projectNameLabel,
+  });
 
   return result;
 }

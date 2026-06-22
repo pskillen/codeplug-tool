@@ -84,13 +84,19 @@ Scotland,Local 9,,`;
     expect(result.suggestedProjectName).toBe('my-codeplug');
   });
 
-  it('suggests OpenGD77 ISO date for a single loose file', async () => {
+  it('suggests OpenGD77 ISO date for loose file imports', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-21T12:00:00.000Z'));
-    const result = await importFiles([
+    const single = await importFiles([
       new File([channelsCsv], 'Channels.csv', { type: 'text/csv' }),
     ]);
-    expect(result.suggestedProjectName).toBe('OpenGD77 2026-06-21');
+    expect(single.suggestedProjectName).toBe('OpenGD77 2026-06-21');
+
+    const multiple = await importFiles([
+      new File([channelsCsv], 'Channels.csv', { type: 'text/csv' }),
+      new File([zonesCsv], 'Zones.csv', { type: 'text/csv' }),
+    ]);
+    expect(multiple.suggestedProjectName).toBe('OpenGD77 2026-06-21');
     vi.useRealTimers();
   });
 

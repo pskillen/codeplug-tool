@@ -44,14 +44,14 @@ function directoryNameFromWebkitPaths(files: File[]): string | null {
   return null;
 }
 
-function openGd77DatedProjectName(at: Date = new Date()): string {
-  return `OpenGD77 ${at.toISOString().slice(0, 10)}`;
+function formatDatedProjectName(formatLabel: string, at: Date = new Date()): string {
+  return `${formatLabel} ${at.toISOString().slice(0, 10)}`;
 }
 
 /** Derive a project display name from the files the user selected for import. */
 export function deriveProjectNameFromImportFiles(
   files: File[],
-  options?: { directoryName?: string },
+  options?: { directoryName?: string; formatLabel?: string },
 ): string {
   const directoryName = options?.directoryName?.trim();
   if (directoryName) return directoryName;
@@ -59,11 +59,8 @@ export function deriveProjectNameFromImportFiles(
   const folderFromPaths = directoryNameFromWebkitPaths(files);
   if (folderFromPaths) return folderFromPaths;
 
-  if (files.length === 1) {
-    return openGd77DatedProjectName();
-  }
-
-  return defaultProjectName(files.map((file) => file.name));
+  const formatLabel = options?.formatLabel?.trim() || DEFAULT_PROJECT_NAME;
+  return formatDatedProjectName(formatLabel);
 }
 
 export function newProject(name: string, codeplug: Codeplug = emptyCodeplug()): CodeplugProject {

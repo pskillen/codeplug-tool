@@ -81,24 +81,25 @@ describe('deriveProjectNameFromImportFiles', () => {
       fileWithPath('Channels.csv', 'opengd77-cps-export/Channels.csv'),
       fileWithPath('Zones.csv', 'opengd77-cps-export/Zones.csv'),
     ];
-    expect(deriveProjectNameFromImportFiles(files)).toBe('opengd77-cps-export');
+    expect(deriveProjectNameFromImportFiles(files, { formatLabel: 'OpenGD77' })).toBe(
+      'opengd77-cps-export',
+    );
   });
 
-  it('names a single loose file OpenGD77 with ISO date', () => {
+  it('names loose file imports with format label and ISO date', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-21T12:00:00.000Z'));
-    expect(deriveProjectNameFromImportFiles([fileWithPath('Channels.csv')])).toBe(
-      'OpenGD77 2026-06-21',
-    );
-    vi.useRealTimers();
-  });
-
-  it('falls back to first filename for multiple loose files', () => {
     expect(
-      deriveProjectNameFromImportFiles([
-        fileWithPath('Zones.csv'),
-        fileWithPath('Channels.csv'),
-      ]),
-    ).toBe('Zones');
+      deriveProjectNameFromImportFiles([fileWithPath('Channels.csv')], {
+        formatLabel: 'OpenGD77',
+      }),
+    ).toBe('OpenGD77 2026-06-21');
+    expect(
+      deriveProjectNameFromImportFiles(
+        [fileWithPath('Zones.csv'), fileWithPath('Channels.csv')],
+        { formatLabel: 'OpenGD77' },
+      ),
+    ).toBe('OpenGD77 2026-06-21');
+    vi.useRealTimers();
   });
 });
