@@ -128,7 +128,7 @@ Named RX (receive) group list driving promiscuous receive. Members are ordered `
 | --- | --- | --- |
 | `id`, `name` | | |
 | `memberRefs` | `EntityRef[]` | Ordered membership by id |
-| `meta` | `EntityMeta` | `meta.imported.memberWireNames` for export round-trip |
+| `meta` | `EntityMeta` | `meta.imported.memberWireNames` for merge/delta |
 
 ### `CodeplugMeta`
 
@@ -147,9 +147,9 @@ Per-entity import provenance — accessors in [`src/lib/entityProvenance.ts`](..
 | `meta.imported.formatId` | `string` | Source format (e.g. `'opengd77'`) |
 | `meta.imported.sourceFile` | `string \| null` | Source CSV filename when known |
 | `meta.imported.importedAt` | `string` | ISO-8601 timestamp |
-| `meta.imported.memberWireNames` | `string[]` | Ordered wire names for zone/RGL list members |
-| `meta.imported.contactWireName` | `string` | Channel TX contact wire string (channels only) |
-| `meta.imported.rxGroupListWireName` | `string` | Channel RX list wire string (channels only) |
+| `meta.imported.memberWireNames` | `string[]` | Ordered wire names for zone/RGL list members (merge/delta) |
+| `meta.imported.contactWireName` | `string` | Channel TX contact wire string — merge/delta (channels only) |
+| `meta.imported.rxGroupListWireName` | `string` | Channel RX list wire string — merge/delta (channels only) |
 
 ### `EntityRef`
 
@@ -172,7 +172,6 @@ flowchart LR
   Entities["talkGroups, contacts, channels, rxGroupLists"] --> Resolve
   Resolve --> Ids["memberChannelIds, contactRef, rxGroupListId, memberRefs"]
   Ids --> Export["export adapter derives wire strings"]
-  Prov --> Export
 ```
 
 ## Related

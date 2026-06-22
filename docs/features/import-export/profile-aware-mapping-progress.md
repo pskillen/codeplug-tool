@@ -31,4 +31,4 @@
 ## Notes
 
 - MD9600 ladder marked provisional pending CPS fixture validation.
-- CHIRP zero-offset split duplex preserved via `chirpDuplexWire`/`chirpOffsetWire` provenance (not full `wireColumns` stash).
+- CHIRP duplex export is model-derived (`txFrequency`, `rxFrequency`, `rxOnly`); zero-offset `+`/`-` is lossy at the wire boundary. `chirpDuplexWire`/`chirpOffsetWire` provenance retained for merge only.
