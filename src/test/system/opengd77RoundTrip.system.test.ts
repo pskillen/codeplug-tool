@@ -2,11 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { serialiseOpenGd77Files } from '../../lib/export/opengd77/serialise.ts';
 import { importFiles } from '../../lib/import/index.ts';
 import { applyImportToCodeplug } from '../../lib/importMerge.ts';
-import {
-  emptyCodeplug,
-  resetIdGenerator,
-  setIdGenerator,
-} from '../../models/codeplug.ts';
+import { emptyCodeplug, resetIdGenerator, setIdGenerator } from '../../models/codeplug.ts';
 import {
   compareCsvHeaders,
   compareCsvRecords,
@@ -62,10 +58,9 @@ describe('OpenGD77 file-level round-trip (test-data)', () => {
           nameColumn,
           excludeColumns,
         });
-        expect(
-          comparison.ok,
-          `${fileName}:\n${formatCsvRecordCompareFailure(comparison)}`,
-        ).toBe(true);
+        expect(comparison.ok, `${fileName}:\n${formatCsvRecordCompareFailure(comparison)}`).toBe(
+          true,
+        );
         expect(comparison.originalCount).toBe(comparison.exportedCount);
       }
 

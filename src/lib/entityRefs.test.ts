@@ -93,49 +93,28 @@ describe('entityRefs', () => {
     expect(resolveRxGroupListIdByName('None', lists)).toBeNull();
   });
 
-  it('contactRefWireNameForExport prefers provenance', () => {
+  it('contactRefWireNameForExport uses model refs and mode-aware None', () => {
     const codeplug = buildCodeplug({ talkGroups, contacts });
     expect(
       contactRefWireNameForExport(
-        {
-          contactRef: { kind: 'talkGroup', id: 'tg-1' },
-          meta: {
-            imported: {
-              formatId: 'opengd77',
-              sourceFile: null,
-              importedAt: '',
-              contactWireName: 'Wire TG',
-            },
-          },
-        },
+        { mode: 'dmr', contactRef: { kind: 'talkGroup', id: 'tg-1' } },
         codeplug,
       ),
-    ).toBe('Wire TG');
-    expect(
-      contactRefWireNameForExport({ contactRef: { kind: 'talkGroup', id: 'tg-1' } }, codeplug),
     ).toBe('Scotland');
+    expect(contactRefWireNameForExport({ mode: 'dmr', contactRef: null }, codeplug)).toBe('None');
+    expect(contactRefWireNameForExport({ mode: 'fm', contactRef: null }, codeplug)).toBe('');
   });
 
-  it('rxGroupListWireNameForExport prefers provenance', () => {
+  it('rxGroupListWireNameForExport uses model refs and mode-aware None', () => {
     const codeplug = buildCodeplug({
       rxGroupLists: [{ id: 'rgl-1', name: 'Scotland', memberRefs: [] }],
     });
-    expect(
-      rxGroupListWireNameForExport(
-        {
-          rxGroupListId: 'rgl-1',
-          meta: {
-            imported: {
-              formatId: 'opengd77',
-              sourceFile: null,
-              importedAt: '',
-              rxGroupListWireName: 'Wire RGL',
-            },
-          },
-        },
-        codeplug,
-      ),
-    ).toBe('Wire RGL');
-    expect(rxGroupListWireNameForExport({ rxGroupListId: 'rgl-1' }, codeplug)).toBe('Scotland');
+    expect(rxGroupListWireNameForExport({ mode: 'dmr', rxGroupListId: 'rgl-1' }, codeplug)).toBe(
+      'Scotland',
+    );
+    expect(rxGroupListWireNameForExport({ mode: 'dmr', rxGroupListId: null }, codeplug)).toBe(
+      'None',
+    );
+    expect(rxGroupListWireNameForExport({ mode: 'fm', rxGroupListId: null }, codeplug)).toBe('');
   });
 });

@@ -58,7 +58,7 @@ describe('parseChannels', () => {
     expect(channels[1].bandwidthKHz).toBe(12.5);
     expect(channels[1].rxTone).toBe('none');
     expect(channels[1].txTone).toBe('103.5');
-    expect(channels[1].squelch).toBe(0);
+    expect(channels[1].squelch).toBe(null);
     expect(channels[1].scanSkip).toBe(true);
     expect(channels[1].voxEnabled).toBe(true);
     expect(new Set(channels.map((c) => c.id)).size).toBe(2);

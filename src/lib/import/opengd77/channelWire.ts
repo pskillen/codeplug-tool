@@ -13,11 +13,11 @@ export function parseOpenGd77PowerWire(
   return opengd77WireToPercent(profileId, wire);
 }
 
-/** OpenGD77 `Squelch` column → internal percent (0 = open/disabled, null = radio default). */
+/** OpenGD77 `Squelch` column → internal percent (`null` = radio default / Disabled wire). */
 export function parseOpenGd77SquelchWire(wire: string): number | null {
   const trimmed = wire.trim();
   if (!trimmed) return null;
-  if (trimmed.toLowerCase() === 'disabled') return 0;
+  if (trimmed.toLowerCase() === 'disabled') return null;
   if (trimmed.toLowerCase() === 'master') return null;
   const pct = trimmed.endsWith('%') ? parseInt(trimmed.slice(0, -1), 10) : parseInt(trimmed, 10);
   if (Number.isFinite(pct)) return clampPercent(pct);

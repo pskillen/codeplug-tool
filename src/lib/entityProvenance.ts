@@ -14,11 +14,11 @@ export interface ImportedProvenance {
   formatId: string;
   sourceFile: string | null;
   importedAt: string;
-  /** Ordered wire names for list members (zone→channel names; RGL→contact/tg names). */
+  /** Ordered wire names for list members (zone→channel names; RGL→contact/tg names). Export may use when resolving list order; not a substitute for model fields. */
   memberWireNames?: string[];
-  /** Original Contact column wire name (channels only). */
+  /** Original Contact column at import — merge/delta only; export uses contactRef + mode rules. */
   contactWireName?: string;
-  /** Original TG List column wire name (channels only). */
+  /** Original TG List column at import — merge/delta only; export uses rxGroupListId + mode rules. */
   rxGroupListWireName?: string;
   /** CHIRP Duplex/Offset wire when zero-offset split is indistinguishable from simplex in frequencies. */
   chirpDuplexWire?: string;

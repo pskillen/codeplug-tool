@@ -36,7 +36,10 @@ const OPENGD77_TEST_DATA_MODULES = import.meta.glob('../../../test-data/opengd77
   import: 'default',
 }) as Record<string, string>;
 
-function fixtureModuleKey(fixture: OpenGd77TestDataFixture, fileName: OpenGd77TestDataFileName): string {
+function fixtureModuleKey(
+  fixture: OpenGd77TestDataFixture,
+  fileName: OpenGd77TestDataFileName,
+): string {
   return `../../../test-data/opengd77/${fixture.version}/${fileName}`;
 }
 
