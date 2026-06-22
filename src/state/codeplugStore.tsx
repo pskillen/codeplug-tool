@@ -87,7 +87,10 @@ function touchProject(project: CodeplugProject): CodeplugProject {
   return { ...project, updatedAt: new Date().toISOString() };
 }
 
-function commitNewProjectState(state: ProjectsState, metadata: ProjectMetadataPatch): ProjectsState {
+function commitNewProjectState(
+  state: ProjectsState,
+  metadata: ProjectMetadataPatch,
+): ProjectsState {
   const name = metadata.name?.trim() ?? '';
   const project = touchProject({
     ...newProject(name),

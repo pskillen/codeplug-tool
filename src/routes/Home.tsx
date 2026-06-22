@@ -29,9 +29,7 @@ export default function Home() {
         ) : null}
 
         <Stack gap="sm">
-          <Title order={3}>
-            {projects.length ? 'Start another codeplug' : 'Start fresh'}
-          </Title>
+          <Title order={3}>{projects.length ? 'Start another codeplug' : 'Start fresh'}</Title>
           <Text size="sm" c="dimmed">
             Build a new layout from scratch — channels, zones, and contacts added after you save.
           </Text>
