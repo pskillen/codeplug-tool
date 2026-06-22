@@ -124,6 +124,7 @@ export default function ChannelDetail() {
       fields: [
         { label: 'Name', value: channel.name },
         { label: 'Callsign', value: channel.callsign },
+        { label: 'Comment', value: channel.comment || '—' },
         { label: 'Mode', value: modeLabel(channel.mode) },
         { label: 'Band', value: <BandPillForChannel channel={channel} /> },
       ],

@@ -60,6 +60,7 @@ type ChannelFormValues = {
   voxEnabled: boolean;
   transmitTimeout: string;
   scanSkip: boolean;
+  comment: string;
   lat: string;
   lon: string;
   useLocation: boolean;
@@ -104,6 +105,7 @@ function channelToForm(ch: Channel): ChannelFormValues {
     voxEnabled: ch.voxEnabled,
     transmitTimeout: ch.transmitTimeout != null ? String(ch.transmitTimeout) : '',
     scanSkip: ch.scanSkip,
+    comment: ch.comment,
     lat: ch.location?.lat != null ? String(ch.location.lat) : '',
     lon: ch.location?.lon != null ? String(ch.location.lon) : '',
     useLocation: ch.useLocation,
@@ -135,6 +137,7 @@ function emptyForm(): ChannelFormValues {
     voxEnabled: defaults.voxEnabled,
     transmitTimeout: '',
     scanSkip: defaults.scanSkip,
+    comment: defaults.comment,
     lat: '',
     lon: '',
     useLocation: defaults.useLocation,
@@ -178,6 +181,7 @@ function formToChannelInput(values: ChannelFormValues): Omit<Channel, 'id' | 'ca
     voxEnabled: values.voxEnabled,
     transmitTimeout: tot != null && Number.isFinite(tot) && tot >= 0 ? tot : null,
     scanSkip: values.scanSkip,
+    comment: values.comment.trim(),
     location: hasCoords ? { lat, lon } : null,
     useLocation: values.useLocation,
     hideFromMap: values.hideFromMap,
@@ -371,6 +375,12 @@ export default function ChannelEdit() {
               required
               value={values.name}
               onChange={(e) => set('name', e.currentTarget.value)}
+            />
+            <TextInput
+              label="Comment"
+              description="Operator notes — exported to CHIRP Comment column"
+              value={values.comment}
+              onChange={(e) => set('comment', e.currentTarget.value)}
             />
             <ChannelModeSelect value={values.mode} onChange={(mode) => set('mode', mode)} />
           </Stack>
