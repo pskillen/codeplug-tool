@@ -7,7 +7,8 @@
 | Location | Committed | Use |
 | --- | --- | --- |
 | `src/test/opengd77/` | Yes | Synthetic bundles for system and component tests |
-| `sample-exports/` | No (gitignored) | Operator/manual testing; never commit personal codeplugs |
+| `src/test/chirp/` | Yes | Minimal CHIRP CSV bundles for parse/round-trip |
+| `sample-exports/` | Mixed | Operator/manual testing — personal codeplugs stay gitignored; reference subsets (e.g. CHIRP samples from #101) may be committed for local realism |
 | `e2e/fixtures/` (future) | Yes when [#40](https://github.com/pskillen/codeplug-tool/issues/40) lands | Minimal bundle for Playwright import → export |
 
 **Privacy:** Committed fixtures must be **synthetic and minimal**. If real OpenGD77 exports are needed for realism, copy a **sanitised subset** into `src/test/opengd77/` — strip operator identifiers, reduce row count, verify no secrets.
@@ -18,6 +19,11 @@
 src/test/opengd77/
   bundles.ts       # CSV string maps keyed by filename
   loadFixture.ts   # loadFixture(bundle) → File[]
+```
+
+```
+src/test/chirp/
+  bundles.ts       # CHIRP CSV string maps (minimal, TSQL)
 ```
 
 Per-vendor layout as adapters grow:

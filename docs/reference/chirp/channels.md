@@ -38,7 +38,7 @@ Parse by **header name**, not column index.
 | `TStep` | `Channel.bandwidthKHz` | kHz step string → number | Number → step string | Approximate | e.g. `5.00` → 12.5 kHz mapping TBD per profile |
 | `Skip` | `Channel.scanSkip` | `S` → `true`; empty → `false` | Inverse | Lossless boolean | Scan list skip |
 | `Power` | `Channel.power` | Wire string → percent | Percent → wire string | Profile-dependent | e.g. `5.0W`, `10W`, `1.0W` |
-| `Comment` | `Channel.description` | Trim | As stored | String pass-through | |
+| `Comment` | — | Ignored (not on internal model) | Empty | Lossy | Free-text not modelled in v1 |
 | `URCALL` | — | Ignored (analogue) | Empty | N/A | DMR — not modelled |
 | `RPT1CALL` | — | Ignored | Empty | N/A | DMR |
 | `RPT2CALL` | — | Ignored | Empty | N/A | DMR |

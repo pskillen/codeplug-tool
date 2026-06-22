@@ -11,10 +11,10 @@ Entity shapes: [data model](../../data-model/README.md).
 | Area | Status | Notes |
 | --- | --- | --- |
 | Wire reference | Shipped | [reference/chirp/](../../../reference/chirp/README.md) |
-| Import adapter | In progress | `src/lib/import/chirp/` |
-| Export adapter | In progress | `src/lib/export/chirp/` |
-| UI format entry | In progress | `vendorFormats.ts` |
-| Radio profile picker | In progress | Three fixture profiles |
+| Import adapter | Shipped | `src/lib/import/chirp/` |
+| Export adapter | Shipped | `src/lib/export/chirp/` |
+| UI format entry | Shipped | `vendorFormats.ts` — import + export |
+| Radio profile picker | Shipped | Three fixture profiles on export |
 
 ## Documentation map
 

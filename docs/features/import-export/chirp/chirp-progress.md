@@ -7,55 +7,29 @@
 
 ## Overall status
 
-**Status:** In progress
+**Status:** Complete — PR ready
 
 **Branch:** `103/paddy/chirp-import-export`
 
 ---
 
-## Slice 0: Workflow docs + scaffold
+## Slices
 
-**Status:** Done
-
----
-
-## Slice 1: CHIRP wire reference + feature hub
-
-**Status:** Done
-
----
-
-## Slice 2: Adapter interface contracts
-
-**Status:** Done
+| Slice | Status |
+| --- | --- |
+| 0: Workflow docs + scaffold | Done |
+| 1: CHIRP wire reference + feature hub | Done |
+| 2: Adapter interface contracts | Done |
+| 3: CHIRP import adapter | Done |
+| 4: Multi-format import plumbing | Done |
+| 5: CHIRP export adapter | Done |
+| 6: Delivery-aware export UI | Done |
+| 7: Doc reconciliation | Done |
 
 ---
 
-## Slice 3: CHIRP import adapter
+## Verify
 
-**Status:** Done
-
----
-
-## Slice 4: Multi-format import plumbing
-
-**Status:** Done
-
----
-
-## Slice 5: CHIRP export adapter
-
-**Status:** Done
-
-**Delivered**
-
-- `src/lib/export/chirp/` — serialise, profiles, download, adapter
-- Round-trip and cross-format tests; registered in export registry
-- CHIRP `exportStatus: shipped`
-
----
-
-## Next
-
-- Slice 6: Delivery-aware export UI
-- Slice 7: Doc reconciliation + PR
+- `npm run test` — 274+ tests including CHIRP parse, round-trip, cross-format, export UI
+- `npm run build` — passes
+- Manual: import CHIRP CSV → export with profile picker → re-import merge

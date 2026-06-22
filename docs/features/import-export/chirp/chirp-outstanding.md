@@ -6,16 +6,16 @@ Items **skipped**, **incomplete**, or **discovered during execution** — not fu
 
 ---
 
-## Checklist gaps for Slice 7
+## Resolved in #103
 
-From [adding-a-new-vendor.md](../adding-a-new-vendor.md) audit at kickoff:
+- Adapter interface contracts in `src/lib/import-export/`
+- Registry-based import/export routing
+- CHIRP import + export shipped
+- Cross-format OpenGD77 → CHIRP test
 
-- [ ] No `ImportAdapter` / `ExportAdapter` TypeScript interfaces — adapters are untyped `as const` objects
-- [ ] `importFiles()` hardcodes `importAdapters[0]` — no format routing
-- [ ] Export/import panels hardcode `id === 'opengd77'`
-- [ ] `importMerge` stamps `formatId: 'opengd77'` regardless of source format
-- [ ] `VendorFormatId` not shared between `vendorFormats.ts` and registries
-- [ ] CHIRP absent from `vendorFormats.ts`
-- [ ] adding-a-new-vendor §8 cross-format still "pattern only" — becomes real with CHIRP
-- [ ] adding-a-new-vendor §9 assumes multi-file folder import — needs single-CSV CHIRP path
-- [ ] `sample-exports/` described as gitignored in several docs — committed fixtures since #101
+## Open / deferred
+
+- [ ] **`Comment` column** — not on internal `Channel` model; lossy on CHIRP import (documented in reference)
+- [ ] **CHIRP → OpenGD77 cross-format** — not in v1; analogue channels could export but zones/contacts would be empty
+- [ ] **DCS tone round-trip** — export uses CTCSS-oriented defaults for DCS wire columns
+- [ ] **Real fixture round-trip** against `sample-exports/Chirp 2026-06-29/` files (manual verify; committed bundles cover CI)

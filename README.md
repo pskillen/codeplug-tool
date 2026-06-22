@@ -41,7 +41,7 @@ Your data lives in your browser's **LocalStorage** for now — nothing is upload
 | Channel map (markers, zone hulls, OSM/Mapbox tiles) | **Shipped** |
 | Format-agnostic internal data model | **Shipped** (refactor ongoing) |
 | Native YAML import / export | Planned |
-| Export to a chosen format (OpenGD77 shipped; CHIRP in progress; DM32, qDMR planned) | In progress |
+| Export to a chosen format (OpenGD77 + CHIRP shipped; DM32, qDMR planned) | In progress |
 | LocalStorage persistence | **Shipped** |
 | Multiple projects, switchable | **Shipped** |
 | CRUD for channels / zones / talk groups + TG lists / contacts | In progress |

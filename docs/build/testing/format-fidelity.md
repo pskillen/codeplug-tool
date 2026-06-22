@@ -68,7 +68,7 @@ Every import/export change should consider which scenarios apply:
 | **Re-import / merge** | Incremental imports idempotent; stable ids | System | `importMerge.test.ts`, `activeImport.system.test.ts` |
 | **Manual manipulation** | CRUD between import and export reflected in export | System (+ e2e later) | import → `codeplugMutations` → export diff |
 | **Persistence round-trip** | Reload does not corrupt model | System + e2e | `codeplugStorage.test.ts`; Playwright reload [#40](https://github.com/pskillen/codeplug-tool/issues/40) |
-| **Cross-format** | A → internal → B | Adapter matrix | Pattern only until second vendor ships |
+| **Cross-format** | A → internal → B | Adapter matrix | `crossFormat.test.ts` (OpenGD77 → CHIRP) |
 | **Lossy fields** | Known non-round-trip columns documented | Reference + fidelity tests | DTMF/APRS header-only; `vendorExtras` |
 
 ### Same-format round-trip
@@ -95,14 +95,15 @@ Harness: [`runActiveImportWorkflow`](../../../src/test/system/importWorkflow.ts)
 
 Extend this table as vendors ship. Each **cell** lists required test types for that import×export pair.
 
-| Import ↓ / Export → | OpenGD77 CSV | qDMR YAML (future) |
-| --- | --- | --- |
-| **OpenGD77 CSV** | Unit parse/serialise, `roundtrip.test.ts`, system merge scenarios | Cross-format golden (future) |
-| **qDMR YAML (future)** | Cross-format golden (future) | Vendor-specific round-trip |
+| Import ↓ / Export → | OpenGD77 CSV | CHIRP CSV | qDMR YAML (future) |
+| --- | --- | --- | --- |
+| **OpenGD77 CSV** | Unit parse/serialise, `roundtrip.test.ts`, system merge scenarios | `crossFormat.test.ts` — analogue channels only | Cross-format golden (future) |
+| **CHIRP CSV** | _(not in v1)_ | `roundtrip.test.ts` | Cross-format golden (future) |
+| **qDMR YAML (future)** | Cross-format golden (future) | Cross-format golden (future) | Vendor-specific round-trip |
 
 ### New vendor checklist
 
-1. Add adapter to [`import/registry.ts`](../../../src/lib/import/registry.ts) and [`export/registry.ts`](../../../src/lib/export/registry.ts).
+1. Add adapter to [`src/lib/import-export/registry.ts`](../../../src/lib/import-export/registry.ts) (re-exported from import/export registries).
 2. Author reference docs under `docs/reference/<vendor>/`.
 3. Add committed fixture bundle under `src/test/<vendor>/` — see [fixtures.md](fixtures.md).
 4. Fill matrix row/column with required scenarios.
@@ -117,6 +118,7 @@ Document known non-round-trip behaviour in reference docs; assert it in fidelity
 | DTMF / APRS | Header-only in export ZIP; not modelled | [dtmf-aprs.md](../../reference/opengd77/dtmf-aprs.md) |
 | `vendorExtras` | Opaque columns round-trip via map on channel | [file-format.md](../../reference/opengd77/file-format.md) |
 | App-only fields | e.g. `hideFromMap` — preserved on merge, not in CSV | [importMerge.ts](../../../src/lib/importMerge.ts) |
+| `Comment` (CHIRP) | Not on internal `Channel` model — dropped on import | [channels.md](../../reference/chirp/channels.md) |
 | Internal ids | Stripped from semantic compare; reassigned on overwrite | `stripIds` in round-trip tests |
 
 ## Normalisation for compares
