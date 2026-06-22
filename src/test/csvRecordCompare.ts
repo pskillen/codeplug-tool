@@ -1,6 +1,8 @@
 import { parseCsv } from '../lib/csv.ts';
 
 export interface CsvRecordCompareOptions {
+  /** Row key column (default `Name` — CHIRP). OpenGD77 uses e.g. `Channel Name`. */
+  nameColumn?: string;
   /** Columns excluded from field-by-field compare (e.g. `Location` reassigned on export). */
   excludeColumns?: string[];
 }
@@ -77,17 +79,29 @@ function multisetDiff(a: string[], b: string[]): string[] {
 }
 
 /**
+ * Compare header rows of two CSV files (normalised trim). Use for header-only exports.
+ */
+export function compareCsvHeaders(originalCsv: string, exportedCsv: string): boolean {
+  const originalRows = parseCsv(originalCsv.replace(/^\uFEFF/, '').trim());
+  const exportedRows = parseCsv(exportedCsv.replace(/^\uFEFF/, '').trim());
+  if (!originalRows.length || !exportedRows.length) return false;
+  const originalHeader = originalRows[0].map((h) => h.trim()).join(',');
+  const exportedHeader = exportedRows[0].map((h) => h.trim()).join(',');
+  return originalHeader === exportedHeader;
+}
+
+/**
  * Compare two CSV files as multisets of named records (row order ignored).
- * Rows with an empty `Name` are skipped (matches CHIRP import). Duplicate names
- * are compared as duplicate row signatures, not collapsed by key.
+ * Rows with an empty name column are skipped. Duplicate names are compared as
+ * duplicate row signatures, not collapsed by key.
  */
 export function compareCsvRecords(
   originalCsv: string,
   exportedCsv: string,
   options: CsvRecordCompareOptions = {},
 ): CsvRecordCompareResult {
-  const exclude = new Set(options.excludeColumns ?? ['Location']);
-  const nameColumn = 'Name';
+  const exclude = new Set(options.excludeColumns ?? []);
+  const nameColumn = options.nameColumn ?? 'Name';
 
   const originalRows = parseCsv(originalCsv.replace(/^\uFEFF/, '').trim());
   const exportedRows = parseCsv(exportedCsv.replace(/^\uFEFF/, '').trim());
