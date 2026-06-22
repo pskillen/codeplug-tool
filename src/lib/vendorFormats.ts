@@ -30,7 +30,7 @@ export const vendorFormatOptions: VendorFormatOption[] = [
     label: 'CHIRP CSV',
     hint: 'CHIRP radio memory export (analogue FM/AM)',
     importStatus: 'shipped',
-    exportStatus: 'planned',
+    exportStatus: 'shipped',
     issue: '#103',
   },
   {

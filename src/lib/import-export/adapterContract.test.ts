@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { opengd77Adapter } from '../import/opengd77/adapter.ts';
+import { chirpAdapter } from '../import/chirp/adapter.ts';
 import { opengd77ExportAdapter } from '../export/opengd77/adapter.ts';
-import { isMultiFileExportAdapter } from './exportAdapter.ts';
+import { chirpExportAdapter } from '../export/chirp/adapter.ts';
+import { isMultiFileExportAdapter, isSingleFileExportAdapter } from './exportAdapter.ts';
 import { adapterSupportsKind } from './importAdapter.ts';
 
 describe('adapter contracts', () => {
@@ -31,5 +33,13 @@ describe('adapter contracts', () => {
   it('adapterSupportsKind gates optional parsers', () => {
     expect(adapterSupportsKind(opengd77Adapter, 'channels')).toBe(true);
     expect(adapterSupportsKind(opengd77Adapter, 'unknown')).toBe(false);
+    expect(adapterSupportsKind(chirpAdapter, 'channels')).toBe(true);
+    expect(adapterSupportsKind(chirpAdapter, 'zones')).toBe(false);
+  });
+
+  it('chirp export adapter is single-file', () => {
+    expect(isSingleFileExportAdapter(chirpExportAdapter)).toBe(true);
+    expect(chirpExportAdapter.defaultFileName).toContain('.csv');
+    expect(typeof chirpExportAdapter.download).toBe('function');
   });
 });

@@ -2,7 +2,7 @@ import type { ImportFileKind } from '../../import-export/types.ts';
 import { isChirpHeaderRow } from './columns.ts';
 import { parseChannels } from './parse.ts';
 
-export function detectKind(fileName: string, headerRow: string[]): ImportFileKind {
+export function detectKind(_fileName: string, headerRow: string[]): ImportFileKind {
   if (isChirpHeaderRow(headerRow)) return 'channels';
   return 'unknown';
 }

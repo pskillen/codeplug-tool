@@ -56,11 +56,12 @@ export async function importFiles(
 
   if (!files.length) return result;
 
-  const strictFormat = options?.vendorFormatId != null;
+  const vendorFormatId = options?.vendorFormatId;
+  const strictFormat = vendorFormatId != null;
   let adapter;
 
   if (strictFormat) {
-    adapter = getImportAdapter(options.vendorFormatId);
+    adapter = getImportAdapter(vendorFormatId);
   } else {
     const detected = await detectImportAdapter(files);
     if (detected === 'unknown') {

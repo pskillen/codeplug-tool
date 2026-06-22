@@ -41,17 +41,21 @@
 
 **Status:** Done
 
+---
+
+## Slice 5: CHIRP export adapter
+
+**Status:** Done
+
 **Delivered**
 
-- `importFiles()` routes via `getImportAdapter` / `detectImportAdapter`
-- `importMerge` stamps `formatId` from import result
-- CHIRP `importStatus: shipped` in `vendorFormats`
-- Import UI uses adapter registry; CHIRP merge test
+- `src/lib/export/chirp/` — serialise, profiles, download, adapter
+- Round-trip and cross-format tests; registered in export registry
+- CHIRP `exportStatus: shipped`
 
 ---
 
 ## Next
 
-- Slice 5: CHIRP export adapter
 - Slice 6: Delivery-aware export UI
 - Slice 7: Doc reconciliation + PR

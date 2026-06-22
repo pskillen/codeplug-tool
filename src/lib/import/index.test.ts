@@ -126,7 +126,7 @@ Scotland,Local 9,,`;
       { vendorFormatId: 'chirp' },
     );
     expect(result.formatId).toBe('chirp');
-    expect(result.channels.length).toBeGreaterThan(0);
+    expect(result.channels?.length).toBeGreaterThan(0);
     expect(result.errors).toHaveLength(0);
   });
 });
