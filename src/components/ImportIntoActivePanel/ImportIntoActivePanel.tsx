@@ -7,9 +7,7 @@ import type { ImportResult } from '../../lib/import/types.ts';
 import { formatImportFileSummary, formatMergeReportLines } from '../../lib/importSummary.ts';
 import type { VendorFormatOption } from '../../lib/vendorFormats.ts';
 import { useCodeplug, useProjects } from '../../state/codeplugStore.tsx';
-import ImportDropzone from '../ImportDropzone/ImportDropzone.tsx';
-
-import { getImportAdapter } from '../../lib/import/registry.ts';
+import ImportFormatDropzone from '../ImportFormatDropzone/ImportFormatDropzone.tsx';
 
 export interface ImportIntoActivePanelProps {
   vendorFormat: VendorFormatOption;
@@ -79,22 +77,6 @@ export default function ImportIntoActivePanel({ vendorFormat }: ImportIntoActive
     );
   }
 
-  let importAdapter;
-  try {
-    importAdapter = getImportAdapter(vendorFormat.id);
-  } catch {
-    return (
-      <Alert color="gray" title="Import not available">
-        No importer is registered for {vendorFormat.label}.
-      </Alert>
-    );
-  }
-
-  const importHint =
-    importAdapter.capabilities.delivery === 'single-file'
-      ? `Drop a ${vendorFormat.label} memory CSV into the active codeplug.`
-      : `Drop ${vendorFormat.label} export files into the active codeplug.`;
-
   return (
     <Stack gap="sm">
       <SegmentedControl
@@ -111,12 +93,11 @@ export default function ImportIntoActivePanel({ vendorFormat }: ImportIntoActive
           : 'Replace entire lists for each file type imported (e.g. all channels if Channels.csv is included).'}
       </Text>
 
-      <ImportDropzone
+      <ImportFormatDropzone
+        vendorFormat={vendorFormat}
         onResult={onParsed}
         persistenceError={persistenceError}
         onDismissPersistenceError={clearPersistenceError}
-        hint={importHint}
-        vendorFormatId={vendorFormat.id}
       />
 
       {appliedSummary ? (

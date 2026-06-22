@@ -8,20 +8,22 @@ import './ImportDropzone.css';
 
 import { formatImportFileSummary } from '../../lib/importSummary.ts';
 
+import type { VendorFormatId } from '../../lib/import-export/types.ts';
+
 export interface ImportDropzoneProps {
   onResult: (result: ImportResult) => void;
   persistenceError?: string | null;
   onDismissPersistenceError?: () => void;
   hint?: string;
-  /** When set, only accept files for this format; otherwise auto-detect. */
-  vendorFormatId?: import('../../lib/import-export/types.ts').VendorFormatId;
+  /** Required — import does not auto-detect format. */
+  vendorFormatId: VendorFormatId;
 }
 
 export default function ImportDropzone({
   onResult,
   persistenceError,
   onDismissPersistenceError,
-  hint = 'Drop CPS CSV files or a whole export folder. OpenGD77 (Channels.csv, Zones.csv, …) and CHIRP (single memory CSV) are auto-detected.',
+  hint = 'Drop export files or a folder for the selected vendor format.',
   vendorFormatId,
 }: ImportDropzoneProps) {
   const [dragover, setDragover] = useState(false);
