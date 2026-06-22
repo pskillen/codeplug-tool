@@ -5,25 +5,33 @@ export const CHANNEL_LIST_COLUMN_STORAGE_KEY = 'channels-list-columns';
 export type ChannelSortMode = 'name' | 'distance';
 
 export const CHANNEL_OPTIONAL_COLUMNS = [
-  { key: 'contact', header: 'Contact' },
-  { key: 'rgl', header: 'RX group list' },
-  { key: 'loc', header: 'Locator' },
-  { key: 'distance', header: 'Distance from me' },
+  { key: 'contact', header: 'Contact', defaultVisible: true },
+  { key: 'rgl', header: 'RX group list', defaultVisible: true },
+  { key: 'loc', header: 'Locator', defaultVisible: true },
+  { key: 'distance', header: 'Distance from me', defaultVisible: true },
+  { key: 'power', header: 'Power', defaultVisible: true },
+  { key: 'squelch', header: 'Squelch', defaultVisible: false },
 ] as const;
 
 export function defaultChannelVisibleColumns(): string[] {
-  return CHANNEL_OPTIONAL_COLUMNS.map((c) => c.key);
+  return CHANNEL_OPTIONAL_COLUMNS.filter((c) => c.defaultVisible).map((c) => c.key);
 }
 
 export function loadChannelVisibleColumns(): string[] {
+  const validKeys = new Set(CHANNEL_OPTIONAL_COLUMNS.map((c) => c.key));
+
   try {
     const raw = localStorage.getItem(CHANNEL_LIST_COLUMN_STORAGE_KEY);
     if (raw) {
       const stored = JSON.parse(raw) as string[];
-      if (!stored.includes('distance')) {
-        return [...stored, 'distance'];
+      let cols = stored.filter((k) => validKeys.has(k as (typeof CHANNEL_OPTIONAL_COLUMNS)[number]['key']));
+      if (!cols.includes('distance')) {
+        cols = [...cols, 'distance'];
       }
-      return stored;
+      if (!cols.includes('power')) {
+        cols = [...cols, 'power'];
+      }
+      return cols;
     }
   } catch {
     /* ignore */
