@@ -46,7 +46,7 @@ Parse by **header name**, not column index.
 | `-` | Negative split | TX = RX − offset |
 | `off` | TX disabled | TX = RX, `rxOnly=true` |
 
-Zero-offset `+`/`-` splits that are mathematically simplex preserve wire via import provenance (`chirpDuplexWire` / `chirpOffsetWire`) for export only.
+Export uses `deriveChirpDuplexAndOffset(rxFrequency, txFrequency, rxOnly)` — the inverse of import. **Lossy:** zero-offset `+`/`-` (offset 0, TX = RX) collapse to simplex in the model and export with an empty `Duplex` column; CHIRP files that used `+`/`-` with offset `0` will not round-trip that wire literally.
 
 ## Tones
 

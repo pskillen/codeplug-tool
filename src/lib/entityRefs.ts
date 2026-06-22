@@ -1,5 +1,6 @@
+import type { ChannelMode } from './channelModes.ts';
+import { isDigitalMode } from './channelModes.ts';
 import type { Channel, Codeplug, Contact, RxGroupList, TalkGroup } from '../models/codeplug.ts';
-import type { EntityMeta } from './entityProvenance.ts';
 
 export type EntityRefKind = 'talkGroup' | 'contact';
 
@@ -166,34 +167,32 @@ export function resolveChannelContactRefs(
 }
 
 export interface ChannelContactExportSource {
+  mode: ChannelMode;
   contactRef: EntityRef | null;
-  meta?: EntityMeta;
 }
 
 export interface ChannelRxListExportSource {
+  mode: ChannelMode;
   rxGroupListId: string | null;
-  meta?: EntityMeta;
 }
 
 export function contactRefWireNameForExport(
   channel: ChannelContactExportSource,
   codeplug: Codeplug,
 ): string {
-  const provenance = channel.meta?.imported?.contactWireName;
-  if (provenance !== undefined) return provenance;
-
   const name = entityRefDisplayName(channel.contactRef, codeplug.talkGroups, codeplug.contacts);
-  return name ?? '';
+  if (name) return name;
+  if (isDigitalMode(channel.mode)) return 'None';
+  return '';
 }
 
 export function rxGroupListWireNameForExport(
   channel: ChannelRxListExportSource,
   codeplug: Codeplug,
 ): string {
-  const provenance = channel.meta?.imported?.rxGroupListWireName;
-  if (provenance !== undefined) return provenance;
-
-  if (!channel.rxGroupListId) return '';
+  if (!channel.rxGroupListId) {
+    return isDigitalMode(channel.mode) ? 'None' : '';
+  }
   const list = codeplug.rxGroupLists.find((r) => r.id === channel.rxGroupListId);
   return list?.name ?? '';
 }

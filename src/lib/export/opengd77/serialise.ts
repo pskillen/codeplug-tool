@@ -15,7 +15,7 @@ import {
   formatOpenGd77TransmitTimeoutWire,
 } from './channelWire.ts';
 import { contactRefWireNameForExport, rxGroupListWireNameForExport } from '../../entityRefs.ts';
-import { rxGroupListExportMemberNames, zoneExportMemberNames } from '../../entityProvenance.ts';
+import { rxGroupListExportMemberNames, zoneExportMemberNames } from './listWire.ts';
 
 /** OpenGD77 CSV serialisers — wire format in docs/reference/opengd77/;
  *  1701 profile limits in docs/reference/opengd77/radios/baofeng-1701.md. */
@@ -55,10 +55,10 @@ export function serialiseChannels(codeplug: Codeplug, profileId?: string): strin
       [CHANNEL_COL.timeslot]: formatOpenGd77TimeslotWire(ch.timeslot),
       [CHANNEL_COL.contact]: contactRefWireNameForExport(ch, codeplug),
       [CHANNEL_COL.tgList]: rxGroupListWireNameForExport(ch, codeplug),
-      [CHANNEL_COL.dmrId]: formatOpenGd77DmrIdWire(ch.dmrId),
-      [CHANNEL_COL.rxTone]: formatOpenGd77ToneWire(ch.rxTone),
-      [CHANNEL_COL.txTone]: formatOpenGd77ToneWire(ch.txTone),
-      [CHANNEL_COL.squelch]: formatOpenGd77SquelchWire(ch.squelch),
+      [CHANNEL_COL.dmrId]: formatOpenGd77DmrIdWire(ch.mode, ch.dmrId),
+      [CHANNEL_COL.rxTone]: formatOpenGd77ToneWire(ch.mode, ch.rxTone),
+      [CHANNEL_COL.txTone]: formatOpenGd77ToneWire(ch.mode, ch.txTone),
+      [CHANNEL_COL.squelch]: formatOpenGd77SquelchWire(ch.mode, ch.squelch),
       [CHANNEL_COL.power]: formatOpenGd77PowerWire(ch.power, profile.id),
       [CHANNEL_COL.rxOnly]: wireYesNo(ch.rxOnly),
       [CHANNEL_COL.allSkip]: wireYesNo(ch.scanSkip),

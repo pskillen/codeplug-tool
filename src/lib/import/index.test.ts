@@ -78,6 +78,29 @@ Scotland,Local 9,,`;
     expect(result.formatId).toBe('opengd77');
   });
 
+  it('skips DTMF and APRS when vendorFormatId is opengd77 (strict)', async () => {
+    const result = await importFiles(
+      [
+        new File([channelsCsv], 'Channels.csv', { type: 'text/csv' }),
+        new File(['Contact Name,Code\n'], 'DTMF.csv', { type: 'text/csv' }),
+        new File(
+          [
+            'APRS config Name,SSID,Via1,Via1 SSID,Via2,Via2 SSID,Icon table,Icon,Comment text,Ambiguity,Use position,Latitude,Longitude,TX Frequency,Transmit QSY,Baud rate setting',
+          ],
+          'APRS.csv',
+          { type: 'text/csv' },
+        ),
+      ],
+      { vendorFormatId: 'opengd77', ...OPGD77_IMPORT },
+    );
+    expect(result.skipped).toEqual([
+      { fileName: 'DTMF.csv', message: 'Header-only CPS file not imported into codeplug' },
+      { fileName: 'APRS.csv', message: 'Header-only CPS file not imported into codeplug' },
+    ]);
+    expect(result.errors).toHaveLength(0);
+    expect(result.recognised).toEqual(['Channels.csv']);
+  });
+
   it('errors when the batch format cannot be detected', async () => {
     const result = await importFiles([
       new File(['Name,Number\nFoo,1'], 'Mystery.csv', { type: 'text/csv' }),

@@ -10,10 +10,19 @@ import type { ImportParseContext } from '../import-export/importAdapter.ts';
 import type { VendorFormatId } from '../import-export/types.ts';
 import type { ImportEntityKind } from '../import-export/types.ts';
 import type { ImportResult } from './types.ts';
+import { APRS_HEADERS, DTMF_HEADERS } from './opengd77/columns.ts';
 
 function headerRow(text: string): string[] {
   const rows = parseCsv(text.replace(/^\uFEFF/, ''));
   return rows[0]?.map((h) => h.trim()) ?? [];
+}
+
+/** DTMF/APRS CPS files are header-only — not modelled; skip on full-folder import. */
+function isOpenGd77HeaderOnlyFile(fileName: string, headers: string[]): boolean {
+  const lower = fileName.toLowerCase();
+  if (lower === 'dtmf.csv' || lower === 'aprs.csv') return true;
+  const headerKey = headers.join(',');
+  return headerKey === DTMF_HEADERS.join(',') || headerKey === APRS_HEADERS.join(',');
 }
 
 function parseEntity(
@@ -126,6 +135,17 @@ export async function importFiles(
       const message = strictFormat
         ? `File is not a recognised ${adapter.label} export`
         : 'Unrecognised CSV format';
+      if (
+        strictFormat &&
+        adapter.id === 'opengd77' &&
+        isOpenGd77HeaderOnlyFile(fileName, headers)
+      ) {
+        result.skipped.push({
+          fileName,
+          message: 'Header-only CPS file not imported into codeplug',
+        });
+        continue;
+      }
       if (strictFormat) {
         result.errors.push({ fileName, message });
       } else {

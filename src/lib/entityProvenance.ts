@@ -1,26 +1,14 @@
-import type { Channel, Contact, RxGroupList, TalkGroup, Zone } from '../models/codeplug.ts';
-import { memberRefsToWireNames } from './entityRefs.ts';
-
-function channelNamesForIds(channels: Channel[], ids: string[]): string[] {
-  const names: string[] = [];
-  for (const id of ids) {
-    const ch = channels.find((c) => c.id === id);
-    if (ch) names.push(ch.name);
-  }
-  return names;
-}
-
 export interface ImportedProvenance {
   formatId: string;
   sourceFile: string | null;
   importedAt: string;
-  /** Ordered wire names for list members (zone→channel names; RGL→contact/tg names). */
+  /** Ordered wire names for list members (zone→channel names; RGL→contact/tg names). Merge/delta only. */
   memberWireNames?: string[];
-  /** Original Contact column wire name (channels only). */
+  /** Original Contact column at import — merge/delta only; export uses contactRef + mode rules. */
   contactWireName?: string;
-  /** Original TG List column wire name (channels only). */
+  /** Original TG List column at import — merge/delta only; export uses rxGroupListId + mode rules. */
   rxGroupListWireName?: string;
-  /** CHIRP Duplex/Offset wire when zero-offset split is indistinguishable from simplex in frequencies. */
+  /** CHIRP Duplex/Offset wire at import — merge/delta only; export uses txFrequency and rxOnly. */
   chirpDuplexWire?: string;
   chirpOffsetWire?: string;
 }
@@ -90,26 +78,4 @@ export function stampImported<T extends WithEntityMeta>(entity: T, input: StampI
       },
     },
   };
-}
-
-/** Names for zone export — provenance wire names if present, else derive from member ids. */
-export function zoneExportMemberNames(zone: Zone, channels: Channel[]): string[] {
-  const wireNames = getMemberWireNames(zone);
-  if (wireNames.length > 0) {
-    return wireNames;
-  }
-  return channelNamesForIds(channels, zone.memberChannelIds);
-}
-
-/** Names for RX group list export — provenance wire names if present, else derive from memberRefs. */
-export function rxGroupListExportMemberNames(
-  rgl: RxGroupList,
-  talkGroups: TalkGroup[],
-  contacts: Contact[],
-): string[] {
-  const wireNames = getMemberWireNames(rgl);
-  if (wireNames.length > 0) {
-    return wireNames;
-  }
-  return memberRefsToWireNames(rgl.memberRefs, talkGroups, contacts);
 }

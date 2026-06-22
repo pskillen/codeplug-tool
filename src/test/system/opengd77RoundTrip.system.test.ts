@@ -1,0 +1,74 @@
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { serialiseOpenGd77Files } from '../../lib/export/opengd77/serialise.ts';
+import { importFiles } from '../../lib/import/index.ts';
+import { applyImportToCodeplug } from '../../lib/importMerge.ts';
+import { emptyCodeplug, resetIdGenerator, setIdGenerator } from '../../models/codeplug.ts';
+import {
+  compareCsvHeaders,
+  compareCsvRecords,
+  formatCsvRecordCompareFailure,
+} from '../csvRecordCompare.ts';
+import {
+  OPENGD77_TEST_DATA_FIXTURES,
+  readOpenGd77TestData,
+  openGd77TestDataFiles,
+  type OpenGd77TestDataFileName,
+} from '../opengd77/testData.ts';
+
+const SUBSTANTIVE_FILES: {
+  fileName: OpenGd77TestDataFileName;
+  nameColumn: string;
+  excludeColumns?: string[];
+}[] = [
+  { fileName: 'Channels.csv', nameColumn: 'Channel Name', excludeColumns: ['Channel Number'] },
+  { fileName: 'Zones.csv', nameColumn: 'Zone Name' },
+  { fileName: 'Contacts.csv', nameColumn: 'Contact Name' },
+  { fileName: 'TG_Lists.csv', nameColumn: 'TG List Name' },
+];
+
+const HEADER_ONLY_FILES: OpenGd77TestDataFileName[] = ['DTMF.csv', 'APRS.csv'];
+
+describe('OpenGD77 file-level round-trip (test-data)', () => {
+  beforeEach(() => {
+    let n = 0;
+    setIdGenerator(() => `ogd77-sys-${++n}`);
+  });
+
+  afterEach(() => {
+    resetIdGenerator();
+  });
+
+  it.each(OPENGD77_TEST_DATA_FIXTURES)(
+    'import → codeplug → export matches $version CPS export',
+    async (fixture) => {
+      const parseResult = await importFiles(openGd77TestDataFiles(fixture), {
+        vendorFormatId: 'opengd77',
+        profileId: fixture.profileId,
+      });
+      expect(parseResult.errors).toHaveLength(0);
+      expect(parseResult.channels?.length).toBeGreaterThan(0);
+
+      const { codeplug } = applyImportToCodeplug(emptyCodeplug(), parseResult, 'merge');
+
+      const exported = serialiseOpenGd77Files(codeplug, { profileId: fixture.profileId });
+
+      for (const { fileName, nameColumn, excludeColumns } of SUBSTANTIVE_FILES) {
+        const originalCsv = readOpenGd77TestData(fixture, fileName);
+        const comparison = compareCsvRecords(originalCsv, exported[fileName], {
+          nameColumn,
+          excludeColumns,
+        });
+        expect(comparison.ok, `${fileName}:\n${formatCsvRecordCompareFailure(comparison)}`).toBe(
+          true,
+        );
+        expect(comparison.originalCount).toBe(comparison.exportedCount);
+      }
+
+      for (const fileName of HEADER_ONLY_FILES) {
+        const originalCsv = readOpenGd77TestData(fixture, fileName);
+        expect(exported[fileName].trim()).toBe(originalCsv.trim());
+        expect(compareCsvHeaders(originalCsv, exported[fileName])).toBe(true);
+      }
+    },
+  );
+});

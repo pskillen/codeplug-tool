@@ -1,15 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { importFiles } from '../../import/index.ts';
+import { applyImportToCodeplug } from '../../importMerge.ts';
 import { addRxGroupList, addTalkGroup } from '../../codeplugMutations.ts';
 import type { EntityMeta } from '../../entityProvenance.ts';
 import {
-  CODEPLUG_SCHEMA_VERSION,
   emptyCodeplug,
   resetIdGenerator,
   setIdGenerator,
   type Codeplug,
 } from '../../../models/codeplug.ts';
-import { buildImportedRxGroupList, buildImportedZone } from '../../../test/builders/index.ts';
 import {
   CHANNEL_HEADERS,
   CONTACT_HEADERS,
@@ -17,6 +16,7 @@ import {
 } from '../../import/opengd77/columns.ts';
 import { serialiseOpenGd77Files } from './serialise.ts';
 import { DEFAULT_OPENGD77_PROFILE_ID } from '../../opengd77/profiles.ts';
+import { entityRefDisplayName } from '../../entityRefs.ts';
 
 const OPGD77_IMPORT = { profileId: DEFAULT_OPENGD77_PROFILE_ID };
 
@@ -40,13 +40,30 @@ function withoutZoneIds(zone: Codeplug['zones'][number]) {
 
 function stripIds(cp: Codeplug) {
   return {
-    meta: cp.meta,
-    channels: cp.channels.map(withoutId),
+    meta: { ...cp.meta, importedAt: null, sourceFiles: [] },
+    channels: cp.channels.map((ch) => {
+      const copy = withoutId(ch) as Codeplug['channels'][number];
+      if (copy.contactRef) {
+        const name = entityRefDisplayName(copy.contactRef, cp.talkGroups, cp.contacts);
+        copy.contactRef = name ? { kind: copy.contactRef.kind, id: name } : null;
+      }
+      if (copy.rxGroupListId) {
+        const list = cp.rxGroupLists.find((r) => r.id === copy.rxGroupListId);
+        copy.rxGroupListId = list?.name ?? null;
+      }
+      return copy;
+    }),
     zones: cp.zones.map(withoutZoneIds),
     talkGroups: cp.talkGroups.map(withoutId),
     rxGroupLists: cp.rxGroupLists.map((rgl) => {
       const copy = withoutId(rgl) as Codeplug['rxGroupLists'][number];
-      copy.memberRefs = rgl.memberRefs.map((ref) => ({ ...ref }));
+      copy.memberRefs = rgl.memberRefs.map((ref) => ({
+        kind: ref.kind,
+        id:
+          ref.kind === 'talkGroup'
+            ? (cp.talkGroups.find((tg) => tg.id === ref.id)?.name ?? ref.id)
+            : (cp.contacts.find((c) => c.id === ref.id)?.name ?? ref.id),
+      }));
       return copy;
     }),
     contacts: cp.contacts.map(withoutId),
@@ -77,7 +94,7 @@ describe('OpenGD77 round-trip', () => {
 
   it('import → export → re-import preserves substantive data', async () => {
     const channelsCsv = `${CHANNEL_HEADERS.join(',')}
-1,GB3DA DMR,Digital,430.0,430.0,,2,1,Local 9,Scotland,,Off,Off,,,75%,Master,No,No,No,0,Off,No,No,None,56.5,-4.0,Yes`;
+1,GB3DA DMR,Digital,430.0,430.0,,2,1,Local 9,Scotland,,Off,Off,,,,Master,No,No,No,0,Off,No,No,None,56.5,-4.0,Yes`;
 
     const zonesCsv = `Zone Name,Channel1,Channel2\nNorth,GB3DA DMR,`;
     const contactsCsv = `${CONTACT_HEADERS.join(',')}
@@ -86,7 +103,7 @@ Scotland TS1,2355,Group,1`;
     const tgListsCsv = `${RX_GROUP_LIST_HEADERS.join(',')}
 Scotland,Scotland TS1,Local 9,,`;
 
-    const first = await importFiles(
+    const firstParsed = await importFiles(
       [
         new File([channelsCsv], 'Channels.csv', { type: 'text/csv' }),
         new File([zonesCsv], 'Zones.csv', { type: 'text/csv' }),
@@ -95,58 +112,16 @@ Scotland,Scotland TS1,Local 9,,`;
       ],
       OPGD77_IMPORT,
     );
+    const { codeplug: first } = applyImportToCodeplug(emptyCodeplug(), firstParsed, 'merge');
 
-    const exported = serialiseOpenGd77Files(
-      {
-        channels: first.channels!,
-        zones: [
-          buildImportedZone(
-            { id: 'z1', name: 'North', memberChannelIds: [] },
-            first.zones![0].memberNames,
-          ),
-        ],
-        talkGroups: first.talkGroups!,
-        contacts: first.contacts!,
-        rxGroupLists: first.rxGroupLists!.map((l) =>
-          buildImportedRxGroupList({ id: 'rx1', name: l.name }, l.memberWireNames),
-        ),
-        meta: { schemaVersion: CODEPLUG_SCHEMA_VERSION, importedAt: null, sourceFiles: [] },
-      },
-      OPGD77_IMPORT,
-    );
+    const exported = serialiseOpenGd77Files(first, OPGD77_IMPORT);
 
-    const second = await importFromExport(exported);
+    const secondParsed = await importFromExport(exported);
+    const { codeplug: second } = applyImportToCodeplug(emptyCodeplug(), secondParsed, 'merge');
 
-    expect(
-      stripIds({
-        channels: second.channels!,
-        zones: [
-          buildImportedZone(
-            { id: 'z', name: second.zones![0].name, memberChannelIds: [] },
-            second.zones![0].memberNames,
-          ),
-        ],
-        talkGroups: second.talkGroups!,
-        contacts: second.contacts!,
-        rxGroupLists: second.rxGroupLists!.map((l) =>
-          buildImportedRxGroupList({ id: 'rx', name: l.name }, l.memberWireNames),
-        ),
-        meta: { schemaVersion: CODEPLUG_SCHEMA_VERSION, importedAt: null, sourceFiles: [] },
-      }),
-    ).toEqual(
-      stripIds({
-        channels: first.channels!,
-        zones: [buildImportedZone({ id: 'z', name: 'North', memberChannelIds: [] }, ['GB3DA DMR'])],
-        talkGroups: first.talkGroups!,
-        contacts: first.contacts!,
-        rxGroupLists: first.rxGroupLists!.map((l) =>
-          buildImportedRxGroupList({ id: 'rx', name: l.name }, l.memberWireNames),
-        ),
-        meta: { schemaVersion: CODEPLUG_SCHEMA_VERSION, importedAt: null, sourceFiles: [] },
-      }),
-    );
-    expect(second.zones).toEqual(first.zones);
-    expect(second.rxGroupLists).toEqual(first.rxGroupLists);
+    expect(stripIds(second)).toEqual(stripIds(first));
+    expect(secondParsed.zones).toEqual(firstParsed.zones);
+    expect(secondParsed.rxGroupLists).toEqual(firstParsed.rxGroupLists);
   });
 
   it('export truncates RX group list members at OpenGD77 profile cap (boundary only)', async () => {
