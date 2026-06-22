@@ -31,9 +31,7 @@ export default function ImportNewProjectPanel({
     () => formatProfiles?.defaultId ?? null,
   );
 
-  const activeProfileId = formatProfiles
-    ? (profileId ?? formatProfiles.defaultId)
-    : undefined;
+  const activeProfileId = formatProfiles ? (profileId ?? formatProfiles.defaultId) : undefined;
 
   return (
     <Stack gap="sm">

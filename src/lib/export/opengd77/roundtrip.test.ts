@@ -98,19 +98,19 @@ Scotland,Scotland TS1,Local 9,,`;
 
     const exported = serialiseOpenGd77Files(
       {
-      channels: first.channels!,
-      zones: [
-        buildImportedZone(
-          { id: 'z1', name: 'North', memberChannelIds: [] },
-          first.zones![0].memberNames,
+        channels: first.channels!,
+        zones: [
+          buildImportedZone(
+            { id: 'z1', name: 'North', memberChannelIds: [] },
+            first.zones![0].memberNames,
+          ),
+        ],
+        talkGroups: first.talkGroups!,
+        contacts: first.contacts!,
+        rxGroupLists: first.rxGroupLists!.map((l) =>
+          buildImportedRxGroupList({ id: 'rx1', name: l.name }, l.memberWireNames),
         ),
-      ],
-      talkGroups: first.talkGroups!,
-      contacts: first.contacts!,
-      rxGroupLists: first.rxGroupLists!.map((l) =>
-        buildImportedRxGroupList({ id: 'rx1', name: l.name }, l.memberWireNames),
-      ),
-      meta: { schemaVersion: CODEPLUG_SCHEMA_VERSION, importedAt: null, sourceFiles: [] },
+        meta: { schemaVersion: CODEPLUG_SCHEMA_VERSION, importedAt: null, sourceFiles: [] },
       },
       OPGD77_IMPORT,
     );

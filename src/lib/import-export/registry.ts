@@ -1,12 +1,6 @@
 import { parseCsv } from '../csv.ts';
-import {
-  chirpProfileSelectData,
-  DEFAULT_CHIRP_PROFILE_ID,
-} from '../chirp/profiles.ts';
-import {
-  DEFAULT_OPENGD77_PROFILE_ID,
-  opengd77ProfileSelectData,
-} from '../opengd77/profiles.ts';
+import { chirpProfileSelectData, DEFAULT_CHIRP_PROFILE_ID } from '../chirp/profiles.ts';
+import { DEFAULT_OPENGD77_PROFILE_ID, opengd77ProfileSelectData } from '../opengd77/profiles.ts';
 import { opengd77Adapter } from '../import/opengd77/adapter.ts';
 import { chirpAdapter } from '../import/chirp/adapter.ts';
 import { opengd77ExportAdapter } from '../export/opengd77/adapter.ts';

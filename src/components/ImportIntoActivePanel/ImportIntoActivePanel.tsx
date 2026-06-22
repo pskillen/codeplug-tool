@@ -26,9 +26,7 @@ export default function ImportIntoActivePanel({ vendorFormat }: ImportIntoActive
   const [profileId, setProfileId] = useState<string | null>(
     () => formatProfiles?.defaultId ?? null,
   );
-  const activeProfileId = formatProfiles
-    ? (profileId ?? formatProfiles.defaultId)
-    : undefined;
+  const activeProfileId = formatProfiles ? (profileId ?? formatProfiles.defaultId) : undefined;
 
   useEffect(() => {
     setProfileId(formatProfiles?.defaultId ?? null);

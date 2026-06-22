@@ -2,10 +2,7 @@ import type { Codeplug } from '../../../models/codeplug.ts';
 import { mapModeToOpenGd77ChannelType } from '../../channelModes.ts';
 import { formatCsv } from '../csvWrite.ts';
 import type { ExportOptions } from '../../import-export/types.ts';
-import {
-  DEFAULT_OPENGD77_PROFILE_ID,
-  getOpenGd77Profile,
-} from '../../opengd77/profiles.ts';
+import { DEFAULT_OPENGD77_PROFILE_ID, getOpenGd77Profile } from '../../opengd77/profiles.ts';
 import {
   formatOpenGd77BandwidthWire,
   formatOpenGd77ColourCodeWire,

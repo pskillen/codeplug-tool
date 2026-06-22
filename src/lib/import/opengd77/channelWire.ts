@@ -3,10 +3,7 @@ import {
   normalizeToneValue,
   parseFrequencyHzFromMhzWire,
 } from '../../channelFields/index.ts';
-import {
-  opengd77WireToPercent,
-  DEFAULT_OPENGD77_PROFILE_ID,
-} from '../../opengd77/profiles.ts';
+import { opengd77WireToPercent, DEFAULT_OPENGD77_PROFILE_ID } from '../../opengd77/profiles.ts';
 
 /** OpenGD77 `Power` column → internal percent via profile ladder. */
 export function parseOpenGd77PowerWire(

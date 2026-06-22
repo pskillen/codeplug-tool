@@ -1,10 +1,7 @@
 import { Alert, Button, Select, Stack, Text } from '@mantine/core';
 import { IconDownload, IconPackage } from '@tabler/icons-react';
 import { useState } from 'react';
-import {
-  chirpProfileSelectData,
-  DEFAULT_CHIRP_PROFILE_ID,
-} from '../../lib/chirp/profiles.ts';
+import { chirpProfileSelectData, DEFAULT_CHIRP_PROFILE_ID } from '../../lib/chirp/profiles.ts';
 import {
   DEFAULT_OPENGD77_PROFILE_ID,
   opengd77ProfileSelectData,

@@ -21,7 +21,10 @@ export interface ImportAdapter {
   detectKind(fileName: string, headerRow: string[]): ImportFileKind;
   parseChannels(text: string, ctx?: ImportParseContext): Channel[];
   parseZones?(text: string, ctx?: ImportParseContext): ParsedZone[];
-  parseContacts?(text: string, ctx?: ImportParseContext): { contacts: Contact[]; talkGroups: TalkGroup[] };
+  parseContacts?(
+    text: string,
+    ctx?: ImportParseContext,
+  ): { contacts: Contact[]; talkGroups: TalkGroup[] };
   parseRxGroupLists?(text: string, ctx?: ImportParseContext): ParsedRxGroupList[];
 }
 

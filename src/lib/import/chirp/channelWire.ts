@@ -10,10 +10,7 @@ export function parseChirpPowerWire(wire: string, profileId: string): number | n
   return chirpWireToPercent(profileId, wire);
 }
 
-export function formatChirpPowerWireForProfile(
-  power: number | null,
-  profileId: string,
-): string {
+export function formatChirpPowerWireForProfile(power: number | null, profileId: string): string {
   return chirpPercentToWire(profileId, power);
 }
 
