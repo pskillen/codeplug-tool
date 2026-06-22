@@ -1,7 +1,7 @@
 import { parseCsv, extractCallsign } from '../../csv.ts';
 import { channelFieldDefaults, newId, type Channel } from '../../../models/codeplug.ts';
 import { stampImported } from '../../entityProvenance.ts';
-import { CHIRP_COL } from './columns.ts';
+import { CHIRP_COL, CHIRP_HEADERS } from './columns.ts';
 import {
   deriveChirpTxFrequencyHz,
   parseChirpFrequencyWire,
@@ -22,6 +22,18 @@ function colIndex(headers: string[], name: string): number {
 
 function cell(row: string[], index: number): string {
   return index >= 0 && index < row.length ? (row[index] ?? '').trim() : '';
+}
+
+function chirpWireColumns(row: string[], headers: string[]): Record<string, string> | undefined {
+  const cols: Record<string, string> = {};
+  for (const header of CHIRP_HEADERS) {
+    if (header === 'Location' || header === 'Name') continue;
+    const i = colIndex(headers, header);
+    if (i < 0) continue;
+    const value = cell(row, i);
+    if (value) cols[header] = value;
+  }
+  return Object.keys(cols).length > 0 ? cols : undefined;
 }
 
 export function parseChannels(text: string): Channel[] {
@@ -83,6 +95,7 @@ export function parseChannels(text: string): Channel[] {
         formatId: CHIRP_FORMAT,
         sourceFile: null,
         importedAt,
+        wireColumns: chirpWireColumns(row, headers),
       }),
     );
   }

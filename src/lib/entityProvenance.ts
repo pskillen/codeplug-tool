@@ -20,6 +20,8 @@ export interface ImportedProvenance {
   contactWireName?: string;
   /** Original TG List column wire name (channels only). */
   rxGroupListWireName?: string;
+  /** Vendor wire column values preserved for round-trip (CHIRP Comment, tone freqs, etc.). */
+  wireColumns?: Record<string, string>;
 }
 
 export interface EntityMeta {
@@ -37,6 +39,7 @@ export interface StampImportedInput {
   memberWireNames?: string[];
   contactWireName?: string;
   rxGroupListWireName?: string;
+  wireColumns?: Record<string, string>;
 }
 
 export function getMemberWireNames(entity: WithEntityMeta): string[] {
@@ -80,6 +83,7 @@ export function stampImported<T extends WithEntityMeta>(entity: T, input: StampI
         ...(input.rxGroupListWireName !== undefined
           ? { rxGroupListWireName: input.rxGroupListWireName }
           : {}),
+        ...(input.wireColumns !== undefined ? { wireColumns: input.wireColumns } : {}),
       },
     },
   };

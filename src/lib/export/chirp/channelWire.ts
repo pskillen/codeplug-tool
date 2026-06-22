@@ -1,4 +1,5 @@
 import type { Channel } from '../../../models/codeplug.ts';
+import { CHIRP_HEADERS } from '../../import/chirp/columns.ts';
 import {
   deriveChirpDuplexAndOffset,
   formatChirpFrequencyWire,
@@ -18,8 +19,7 @@ function formatOffsetMhz(offsetMhz: number): string {
   return offsetMhz.toFixed(6);
 }
 
-/** Map one internal channel to a CHIRP CSV row (header order). */
-export function channelToChirpRow(
+function buildComputedChirpRow(
   channel: Channel,
   location: number,
   profileId: string,
@@ -52,4 +52,24 @@ export function channelToChirpRow(
     '',
     '',
   ];
+}
+
+/** Map one internal channel to a CHIRP CSV row (header order). */
+export function channelToChirpRow(
+  channel: Channel,
+  location: number,
+  profileId: string,
+): string[] {
+  const computed = buildComputedChirpRow(channel, location, profileId);
+  const wire =
+    channel.meta?.imported?.formatId === 'chirp' ? channel.meta.imported.wireColumns : undefined;
+  if (!wire) return computed;
+
+  return CHIRP_HEADERS.map((header, index) => {
+    if (header === 'Location') return String(location);
+    if (header === 'Name') return channel.name;
+    const wireValue = wire[header];
+    if (wireValue !== undefined) return wireValue;
+    return computed[index] ?? '';
+  });
 }
