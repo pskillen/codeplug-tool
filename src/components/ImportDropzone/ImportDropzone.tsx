@@ -17,6 +17,8 @@ export interface ImportDropzoneProps {
   hint?: string;
   /** Required — import does not auto-detect format. */
   vendorFormatId: VendorFormatId;
+  /** Required for profile-aware formats (CHIRP, OpenGD77). */
+  profileId?: string;
 }
 
 export default function ImportDropzone({
@@ -25,6 +27,7 @@ export default function ImportDropzone({
   onDismissPersistenceError,
   hint = 'Drop export files or a folder for the selected vendor format.',
   vendorFormatId,
+  profileId,
 }: ImportDropzoneProps) {
   const [dragover, setDragover] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
@@ -36,7 +39,7 @@ export default function ImportDropzone({
     async (files: File[], directoryName?: string) => {
       if (!files.length) return;
       try {
-        const result = await importFiles(files, { directoryName, vendorFormatId });
+        const result = await importFiles(files, { directoryName, vendorFormatId, profileId });
         onResult(result);
         setSummary(formatImportFileSummary(result.recognised, result.skipped, result.errors));
         setError(result.errors.length ? result.errors.map((e) => e.message).join('; ') : null);
@@ -44,7 +47,7 @@ export default function ImportDropzone({
         setError(err instanceof Error ? err.message : String(err));
       }
     },
-    [onResult, vendorFormatId],
+    [onResult, vendorFormatId, profileId],
   );
 
   const onDrop = useCallback(
