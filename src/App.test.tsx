@@ -84,6 +84,16 @@ describe('App', () => {
     renderApp('/');
     expect(screen.getByRole('heading', { name: 'MM9PDY Codeplug Tool' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Import codeplug' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Start fresh' })).toBeInTheDocument();
+  });
+
+  it('start fresh on home opens new codeplug form without persisting', () => {
+    renderApp('/');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Start fresh' }));
+
+    expect(screen.getByRole('heading', { name: 'New codeplug' })).toBeInTheDocument();
+    expect(localStorage.getItem(CODEPLUG_STORAGE_KEY)).toBeNull();
   });
 
   it('shows minimal nav without an active project', () => {
