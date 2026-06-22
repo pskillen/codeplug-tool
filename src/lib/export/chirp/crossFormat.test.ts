@@ -25,9 +25,10 @@ describe('CHIRP cross-format export', () => {
 1,GB3DA DMR,Digital,430.0,430.0,,2,1,Local 9,Scotland,,Off,Off,,,75%,Master,No,No,No,0,Off,No,No,None,56.5,-4.0,Yes
 2,2m Calling,Analogue,145.5,145.5,,,,,,,,,,,,,,,,,,,,,,,Yes`;
 
-    const imported = await importFiles([
-      new File([channelsCsv], 'Channels.csv', { type: 'text/csv' }),
-    ]);
+    const imported = await importFiles(
+      [new File([channelsCsv], 'Channels.csv', { type: 'text/csv' })],
+      { profileId: 'opengd77-1701' },
+    );
 
     const codeplug: Codeplug = {
       channels: imported.channels!,

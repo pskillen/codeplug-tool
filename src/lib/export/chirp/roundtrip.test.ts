@@ -10,6 +10,7 @@ import {
   type Codeplug,
 } from '../../../models/codeplug.ts';
 import { chirpMinimalBundle } from '../../../test/chirp/bundles.ts';
+import { DEFAULT_CHIRP_PROFILE_ID } from '../../chirp/profiles.ts';
 import { serialiseChirpCsv } from './serialise.ts';
 
 function withoutId<T extends { id: string; meta?: EntityMeta }>(item: T): Omit<T, 'id'> {
@@ -31,6 +32,7 @@ function stripChannels(channels: Channel[]) {
 async function importChirpCsv(csv: string) {
   return importFiles([new File([csv], 'chirp.csv', { type: 'text/csv' })], {
     vendorFormatId: 'chirp',
+    profileId: DEFAULT_CHIRP_PROFILE_ID,
   });
 }
 
@@ -64,7 +66,9 @@ describe('CHIRP round-trip', () => {
   });
 
   it('assigns Location from channel list order on export', () => {
-    const channels = parseChannels(chirpMinimalBundle['chirp-minimal.csv']!);
+    const channels = parseChannels(chirpMinimalBundle['chirp-minimal.csv']!, {
+      profileId: DEFAULT_CHIRP_PROFILE_ID,
+    });
     const { csv } = serialiseChirpCsv({
       channels,
       zones: [],
