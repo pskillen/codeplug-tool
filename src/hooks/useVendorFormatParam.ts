@@ -10,7 +10,13 @@ import {
 const FORMAT_PARAM = 'format';
 
 function parseVendorFormatId(raw: string | null): VendorFormatId {
-  if (raw === 'opengd77' || raw === 'qdmr' || raw === 'native-yaml' || raw === 'dm32') {
+  if (
+    raw === 'opengd77' ||
+    raw === 'chirp' ||
+    raw === 'qdmr' ||
+    raw === 'native-yaml' ||
+    raw === 'dm32'
+  ) {
     return raw;
   }
   return defaultVendorFormatId;

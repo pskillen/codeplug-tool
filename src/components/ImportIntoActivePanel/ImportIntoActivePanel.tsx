@@ -9,6 +9,8 @@ import type { VendorFormatOption } from '../../lib/vendorFormats.ts';
 import { useCodeplug, useProjects } from '../../state/codeplugStore.tsx';
 import ImportDropzone from '../ImportDropzone/ImportDropzone.tsx';
 
+import { getImportAdapter } from '../../lib/import/registry.ts';
+
 export interface ImportIntoActivePanelProps {
   vendorFormat: VendorFormatOption;
 }
@@ -72,18 +74,26 @@ export default function ImportIntoActivePanel({ vendorFormat }: ImportIntoActive
     return (
       <Alert color="gray" title="Import not available yet">
         {vendorFormat.label} import is planned
-        {vendorFormat.issue ? ` (${vendorFormat.issue})` : ''}. OpenGD77 CPS CSV is supported today.
+        {vendorFormat.issue ? ` (${vendorFormat.issue})` : ''}.
       </Alert>
     );
   }
 
-  if (vendorFormat.id !== 'opengd77') {
+  let importAdapter;
+  try {
+    importAdapter = getImportAdapter(vendorFormat.id);
+  } catch {
     return (
       <Alert color="gray" title="Import not available">
         No importer is registered for {vendorFormat.label}.
       </Alert>
     );
   }
+
+  const importHint =
+    importAdapter.capabilities.delivery === 'single-file'
+      ? `Drop a ${vendorFormat.label} memory CSV into the active codeplug.`
+      : 'Drop OpenGD77 CSV files into the active codeplug. Channels.csv, Zones.csv, Contacts.csv, and TG_Lists.csv are recognised.';
 
   return (
     <Stack gap="sm">
@@ -105,7 +115,8 @@ export default function ImportIntoActivePanel({ vendorFormat }: ImportIntoActive
         onResult={onParsed}
         persistenceError={persistenceError}
         onDismissPersistenceError={clearPersistenceError}
-        hint="Drop OpenGD77 CSV files into the active codeplug. Channels.csv, Zones.csv, Contacts.csv, and TG_Lists.csv are recognised."
+        hint={importHint}
+        vendorFormatId={vendorFormat.id}
       />
 
       {appliedSummary ? (

@@ -180,14 +180,18 @@ function mergeTalkGroups(
   );
 }
 
-function parsedRxToRxGroupList(parsed: ParsedRxGroupList, importedAt: string): RxGroupList {
+function parsedRxToRxGroupList(
+  parsed: ParsedRxGroupList,
+  importedAt: string,
+  formatId: string,
+): RxGroupList {
   const base: RxGroupList = {
     id: newId(),
     name: parsed.name,
     memberRefs: [],
   };
   return stampImported(setMemberWireNames(base, parsed.memberWireNames), {
-    formatId: 'opengd77',
+    formatId,
     sourceFile: 'TG_Lists.csv',
     importedAt,
     memberWireNames: parsed.memberWireNames,
@@ -199,12 +203,15 @@ function mergeRxGroupLists(
   incoming: ParsedRxGroupList[] | undefined,
   mode: ImportApplyMode,
   importedAt: string,
+  formatId: string,
 ): { items: RxGroupList[]; stats: EntityImportStats } {
   if (!incoming) {
     return { items: existing, stats: emptyEntityStats() };
   }
 
-  const asRx: RxGroupList[] = incoming.map((p) => parsedRxToRxGroupList(p, importedAt));
+  const asRx: RxGroupList[] = incoming.map((p) =>
+    parsedRxToRxGroupList(p, importedAt, formatId),
+  );
   return mergeNamedEntities(
     existing,
     asRx,
@@ -214,14 +221,14 @@ function mergeRxGroupLists(
   );
 }
 
-function zoneFromParsed(parsed: ParsedZone, importedAt: string): Zone {
+function zoneFromParsed(parsed: ParsedZone, importedAt: string, formatId: string): Zone {
   const base: Zone = {
     id: newId(),
     name: parsed.name,
     memberChannelIds: [],
   };
   return stampImported(setMemberWireNames(base, parsed.memberNames), {
-    formatId: 'opengd77',
+    formatId,
     sourceFile: 'Zones.csv',
     importedAt,
     memberWireNames: parsed.memberNames,
@@ -233,13 +240,14 @@ function mergeZones(
   incoming: ParsedZone[] | undefined,
   mode: ImportApplyMode,
   importedAt: string,
+  formatId: string,
 ): { zones: Zone[]; stats: EntityImportStats } {
   if (!incoming) {
     return { zones: existing, stats: emptyEntityStats() };
   }
 
   if (mode === 'overwrite') {
-    const zones: Zone[] = incoming.map((parsed) => zoneFromParsed(parsed, importedAt));
+    const zones: Zone[] = incoming.map((parsed) => zoneFromParsed(parsed, importedAt, formatId));
     return {
       zones,
       stats: {
@@ -264,7 +272,7 @@ function mergeZones(
       } else {
         const idx = result.findIndex((z) => z.id === ex.id);
         result[idx] = stampImported(setMemberWireNames(ex, parsed.memberNames), {
-          formatId: 'opengd77',
+          formatId,
           sourceFile: 'Zones.csv',
           importedAt,
           memberWireNames: parsed.memberNames,
@@ -272,7 +280,7 @@ function mergeZones(
         stats.updated++;
       }
     } else {
-      result.push(zoneFromParsed(parsed, importedAt));
+      result.push(zoneFromParsed(parsed, importedAt, formatId));
       stats.added++;
     }
   }
@@ -319,6 +327,7 @@ function applyImportInternal(
   mode: ImportApplyMode,
 ): { codeplug: Codeplug; report: ImportMergeReport } {
   const importedAt = new Date().toISOString();
+  const formatId = result.formatId ?? 'opengd77';
   const { channels, stats: channelStats } = mergeChannels(codeplug.channels, result.channels, mode);
   const { items: contacts, stats: contactStats } = mergeContacts(
     codeplug.contacts,
@@ -335,6 +344,7 @@ function applyImportInternal(
     result.rxGroupLists,
     mode,
     importedAt,
+    formatId,
   );
   const resolvedRxGroupLists = resolveRxGroupListMemberRefs(rxGroupLists, talkGroups, contacts);
 
@@ -343,6 +353,7 @@ function applyImportInternal(
     result.zones,
     mode,
     importedAt,
+    formatId,
   );
 
   const nameToId = buildNameToChannelId(channels);

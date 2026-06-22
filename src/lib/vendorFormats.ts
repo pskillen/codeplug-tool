@@ -26,6 +26,14 @@ export const vendorFormatOptions: VendorFormatOption[] = [
     exportStatus: 'shipped',
   },
   {
+    id: 'chirp',
+    label: 'CHIRP CSV',
+    hint: 'CHIRP radio memory export (analogue FM/AM)',
+    importStatus: 'shipped',
+    exportStatus: 'planned',
+    issue: '#103',
+  },
+  {
     id: 'qdmr',
     label: 'qDMR YAML',
     hint: 'qDMR codeplug YAML',

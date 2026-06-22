@@ -13,13 +13,16 @@ export interface ImportDropzoneProps {
   persistenceError?: string | null;
   onDismissPersistenceError?: () => void;
   hint?: string;
+  /** When set, only accept files for this format; otherwise auto-detect. */
+  vendorFormatId?: import('../../lib/import-export/types.ts').VendorFormatId;
 }
 
 export default function ImportDropzone({
   onResult,
   persistenceError,
   onDismissPersistenceError,
-  hint = 'Drop OpenGD77 CSV files or a whole export folder. Channels.csv, Zones.csv, Contacts.csv, and TG_Lists.csv are recognised; DTMF.csv and APRS.csv are skipped.',
+  hint = 'Drop CPS CSV files or a whole export folder. OpenGD77 (Channels.csv, Zones.csv, …) and CHIRP (single memory CSV) are auto-detected.',
+  vendorFormatId,
 }: ImportDropzoneProps) {
   const [dragover, setDragover] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
@@ -31,7 +34,7 @@ export default function ImportDropzone({
     async (files: File[], directoryName?: string) => {
       if (!files.length) return;
       try {
-        const result = await importFiles(files, { directoryName });
+        const result = await importFiles(files, { directoryName, vendorFormatId });
         onResult(result);
         setSummary(formatImportFileSummary(result.recognised, result.skipped, result.errors));
         setError(result.errors.length ? result.errors.map((e) => e.message).join('; ') : null);
@@ -39,7 +42,7 @@ export default function ImportDropzone({
         setError(err instanceof Error ? err.message : String(err));
       }
     },
-    [onResult],
+    [onResult, vendorFormatId],
   );
 
   const onDrop = useCallback(

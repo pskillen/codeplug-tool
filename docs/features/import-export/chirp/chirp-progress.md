@@ -15,20 +15,43 @@
 
 ## Slice 0: Workflow docs + scaffold
 
-**Status:** In progress
+**Status:** Done
+
+---
+
+## Slice 1: CHIRP wire reference + feature hub
+
+**Status:** Done
+
+---
+
+## Slice 2: Adapter interface contracts
+
+**Status:** Done
+
+---
+
+## Slice 3: CHIRP import adapter
+
+**Status:** Done
+
+---
+
+## Slice 4: Multi-format import plumbing
+
+**Status:** Done
 
 **Delivered**
 
-- `docs/features/workflows/operator-lifecycle.md`
-- `chirp-progress.md` + `chirp-outstanding.md`
-- Cross-links in feature index and hub READMEs
-
-**Verify**
-
-- Docs render; links resolve
+- `importFiles()` routes via `getImportAdapter` / `detectImportAdapter`
+- `importMerge` stamps `formatId` from import result
+- CHIRP `importStatus: shipped` in `vendorFormats`
+- Import UI uses adapter registry; CHIRP merge test
 
 ---
 
 ## Next
 
-- Slice 1: CHIRP wire reference + feature hub
+- Slice 5: CHIRP export adapter
+- Slice 6: Delivery-aware export UI
+- Slice 7: Doc reconciliation + PR
