@@ -61,8 +61,18 @@ function seedActiveProject() {
 function seedActiveProjectWithChannels() {
   const project = newProject('Test repeaters');
   let codeplug = project.codeplug;
-  codeplug = addChannel(codeplug, { ...channelFieldDefaults(), callsign: 'GB3SE', name: 'Edinburgh', mode: 'dmr' });
-  codeplug = addChannel(codeplug, { ...channelFieldDefaults(), callsign: 'GB3IV', name: 'Inverness', mode: 'dmr' });
+  codeplug = addChannel(codeplug, {
+    ...channelFieldDefaults(),
+    callsign: 'GB3SE',
+    name: 'Edinburgh',
+    mode: 'dmr',
+  });
+  codeplug = addChannel(codeplug, {
+    ...channelFieldDefaults(),
+    callsign: 'GB3IV',
+    name: 'Inverness',
+    mode: 'dmr',
+  });
   const withChannels = { ...project, codeplug };
   localStorage.setItem(
     CODEPLUG_STORAGE_KEY,
