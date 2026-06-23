@@ -42,6 +42,7 @@ The internal model is **format- and radio-agnostic**. Format specifics — colum
 
 | Doc | Contents |
 | --- | --- |
+| [channel-name-parsing.md](channel-name-parsing.md) | CPS wire name → `callsign` + `name` split ([#54](https://github.com/pskillen/codeplug-tool/issues/54)) |
 | [data-model/README.md](../data-model/README.md) | Entity definitions (canonical, vendor-neutral) |
 | [opengd77/README.md](opengd77/README.md) | OpenGD77 adapter behaviour; columns in [reference/opengd77/](../../reference/opengd77/README.md) |
 | [adding-a-new-vendor.md](adding-a-new-vendor.md) | Contributor checklist for new formats |
