@@ -1,4 +1,5 @@
 import { extractCallsign } from './csv.ts';
+import { syncChannelFromPrimaryProfile } from './channelExpansion/index.ts';
 import {
   channelFieldDefaults,
   newId,
@@ -61,13 +62,24 @@ export function deriveCallsignFromName(name: string): string {
   return extractCallsign(name);
 }
 
+/** Normalise multi-mode flags and sync primary profile ↔ top-level fields. */
+export function normalizeChannelForSave(channel: Channel): Channel {
+  if (!channel.multiMode) {
+    return { ...channel, multiMode: false, modeProfiles: [] };
+  }
+  if (channel.modeProfiles.length === 0) {
+    return { ...channel, multiMode: false, modeProfiles: [] };
+  }
+  return syncChannelFromPrimaryProfile(channel);
+}
+
 export function addChannel(codeplug: Codeplug, input: ChannelInput): Codeplug {
-  const channel: Channel = {
+  const channel = normalizeChannelForSave({
     ...channelFieldDefaults(),
     ...input,
     id: newId(),
     callsign: deriveCallsignFromName(input.name),
-  };
+  });
   return {
     ...codeplug,
     channels: [...codeplug.channels, channel],
@@ -84,13 +96,13 @@ export function updateChannel(
 
   const existing = codeplug.channels[index];
   const name = patch.name ?? existing.name;
-  const updated: Channel = {
+  const updated = normalizeChannelForSave({
     ...existing,
     ...patch,
     id: channelId,
     name,
     callsign: deriveCallsignFromName(name),
-  };
+  });
 
   const channels = [...codeplug.channels];
   channels[index] = updated;

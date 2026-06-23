@@ -1,7 +1,7 @@
-import { parseCsv } from '../../csv.ts';
+import { mergeImportChannelsBestEffort } from '../../channelExpansion/index.ts';
+import { parseCsv, extractCallsign } from '../../csv.ts';
 import { channelFieldDefaults, newId, type Channel } from '../../../models/codeplug.ts';
 import { mapOpenGd77ChannelType } from '../../channelModes.ts';
-import { extractCallsign } from '../../csv.ts';
 import type { Contact, TalkGroup } from '../../../models/codeplug.ts';
 import type { ParsedRxGroupList, ParsedZone } from '../types.ts';
 import { stampImported, type WithEntityMeta } from '../../entityProvenance.ts';
@@ -131,7 +131,7 @@ export function parseChannels(text: string, ctx?: ImportParseContext): Channel[]
       ),
     );
   }
-  return out;
+  return mergeImportChannelsBestEffort(out).channels;
 }
 
 export interface ParsedContacts {

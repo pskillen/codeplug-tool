@@ -1,4 +1,5 @@
-import type { Channel, Codeplug } from '../../models/codeplug.ts';
+import type { Channel, ChannelModeProfile, Codeplug } from '../../models/codeplug.ts';
+import { isDmrMode } from '../channelModes.ts';
 
 export interface ValidationIssue {
   field: string;
@@ -61,6 +62,76 @@ export function validateChannel(
         field: 'rxGroupListId',
         message: 'Selected RX group list not found in project',
         severity: 'warning',
+      });
+    }
+  }
+
+  if (input.multiMode) {
+    const profiles = input.modeProfiles ?? [];
+    if (profiles.length < 2) {
+      issues.push({
+        field: 'modeProfiles',
+        message: 'Multi-mode channels need at least two mode profiles',
+        severity: 'error',
+      });
+    }
+    const modes = new Set<string>();
+    for (let i = 0; i < profiles.length; i++) {
+      const profile = profiles[i];
+      if (modes.has(profile.mode)) {
+        issues.push({
+          field: `modeProfiles.${i}.mode`,
+          message: `Duplicate mode profile: ${profile.mode}`,
+          severity: 'error',
+        });
+      }
+      modes.add(profile.mode);
+      issues.push(...validateModeProfile(profile, codeplug, i));
+    }
+  }
+
+  return issues;
+}
+
+function validateModeProfile(
+  profile: ChannelModeProfile,
+  codeplug: Codeplug,
+  index: number,
+): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+  const prefix = `modeProfiles.${index}`;
+
+  if (profile.contactRef) {
+    const ref = profile.contactRef;
+    const exists =
+      ref.kind === 'talkGroup'
+        ? codeplug.talkGroups.some((tg) => tg.id === ref.id)
+        : codeplug.contacts.some((c) => c.id === ref.id);
+    if (!exists) {
+      issues.push({
+        field: `${prefix}.contactRef`,
+        message: 'Selected TX contact not found in project',
+        severity: 'warning',
+      });
+    }
+  }
+
+  if (profile.rxGroupListId?.trim()) {
+    if (!codeplug.rxGroupLists.some((list) => list.id === profile.rxGroupListId)) {
+      issues.push({
+        field: `${prefix}.rxGroupListId`,
+        message: 'Selected RX group list not found in project',
+        severity: 'warning',
+      });
+    }
+  }
+
+  if (isDmrMode(profile.mode)) {
+    if (profile.colourCode != null && (profile.colourCode < 0 || profile.colourCode > 15)) {
+      issues.push({
+        field: `${prefix}.colourCode`,
+        message: 'Colour code must be 0–15',
+        severity: 'error',
       });
     }
   }

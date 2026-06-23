@@ -10,6 +10,7 @@ import {
   deleteRxGroupList,
   deleteTalkGroup,
   deleteZone,
+  normalizeChannelForSave,
   OPENGD77_MAX_ZONE_MEMBERS,
   setRxGroupListMembers,
   setZoneMembers,
@@ -21,6 +22,7 @@ import {
 } from './codeplugMutations.ts';
 import {
   channelFieldDefaults,
+  channelModeProfileDefaults,
   emptyCodeplug,
   resetIdGenerator,
   setIdGenerator,
@@ -59,6 +61,47 @@ describe('codeplugMutations', () => {
     expect(next.channels).toHaveLength(1);
     expect(next.channels[0].id).toBe('gen-1');
     expect(next.channels[0].callsign).toBe('GB3DA');
+  });
+
+  it('addChannel clears modeProfiles when multiMode is false', () => {
+    const cp = emptyCodeplug();
+    const next = addChannel(cp, {
+      ...channelFieldDefaults(),
+      name: 'GB7GL',
+      mode: 'fm',
+      multiMode: false,
+      modeProfiles: [channelModeProfileDefaults('dmr')],
+    });
+    expect(next.channels[0].multiMode).toBe(false);
+    expect(next.channels[0].modeProfiles).toEqual([]);
+  });
+
+  it('addChannel syncs primary profile for multi-mode', () => {
+    const cp = emptyCodeplug();
+    const next = addChannel(cp, {
+      ...channelFieldDefaults(),
+      name: 'GB7GL',
+      mode: 'dmr',
+      multiMode: true,
+      modeProfiles: [
+        channelModeProfileDefaults('fm'),
+        { ...channelModeProfileDefaults('dmr'), colourCode: 3 },
+      ],
+    });
+    expect(next.channels[0].multiMode).toBe(true);
+    expect(next.channels[0].colourCode).toBe(3);
+  });
+
+  it('normalizeChannelForSave is exported for tests', () => {
+    const ch = buildChannel({
+      id: '1',
+      name: 'X',
+      mode: 'fm',
+      multiMode: true,
+      modeProfiles: [channelModeProfileDefaults('fm'), channelModeProfileDefaults('dmr')],
+    });
+    const normalized = normalizeChannelForSave(ch);
+    expect(normalized.modeProfiles).toHaveLength(2);
   });
 
   it('updateChannel rename refreshes zone member wire names', () => {

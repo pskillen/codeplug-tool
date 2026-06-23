@@ -30,6 +30,12 @@ import { formatMhzNumber } from '../../lib/formatFrequency.ts';
 import { formatOffsetMhz, frequencyOffsetMhz } from '../../lib/bands.ts';
 import { BandPillsForFrequencies } from '../../components/crud/BandPill.tsx';
 import ChannelModeSelect from '../../components/crud/ChannelModeSegmentedControl.tsx';
+import ChannelModeProfilesEditor, {
+  formProfileToModel,
+  modeProfileToForm,
+  type ModeProfileFormValues,
+} from '../../components/crud/ChannelModeProfilesEditor.tsx';
+import { channelModeProfileDefaults } from '../../models/codeplug.ts';
 import { isAnalogMode, isDmrMode } from '../../lib/channelModes.ts';
 import { coordsToLocator, isValidLocator, locatorToCoords } from '../../lib/maidenhead.ts';
 import { channelSectionAnchorId } from '../../lib/channelPageSections.ts';
@@ -66,6 +72,8 @@ type ChannelFormValues = {
   useLocation: boolean;
   hideFromMap: boolean;
   locator: string;
+  multiMode: boolean;
+  modeProfiles: ModeProfileFormValues[];
 };
 
 function hzToMhzInput(hz: number | null): string {
@@ -82,6 +90,44 @@ function selectValueToPercent(value: string): number | null {
   if (!value || value === 'default') return null;
   const n = parseInt(value, 10);
   return Number.isFinite(n) ? n : null;
+}
+
+function emptyModeProfileForm(mode: ChannelMode): ModeProfileFormValues {
+  return modeProfileToForm(channelModeProfileDefaults(mode));
+}
+
+function seedMultiModeProfiles(values: ChannelFormValues): ModeProfileFormValues[] {
+  const fm: ModeProfileFormValues =
+    values.mode === 'fm'
+      ? {
+          mode: 'fm',
+          bandwidthKHz: values.bandwidthKHz,
+          colourCode: '',
+          timeslot: '',
+          contactRefKey: '',
+          rxGroupListId: '',
+          dmrId: '',
+          rxTone: values.rxTone,
+          txTone: values.txTone,
+          squelch: values.squelch,
+        }
+      : emptyModeProfileForm('fm');
+  const dmr: ModeProfileFormValues =
+    values.mode === 'dmr'
+      ? {
+          mode: 'dmr',
+          bandwidthKHz: values.bandwidthKHz,
+          colourCode: values.colourCode,
+          timeslot: values.timeslot,
+          contactRefKey: values.contactRefKey,
+          rxGroupListId: values.rxGroupListId,
+          dmrId: values.dmrId,
+          rxTone: values.rxTone,
+          txTone: values.txTone,
+          squelch: values.squelch,
+        }
+      : emptyModeProfileForm('dmr');
+  return [fm, dmr];
 }
 
 function channelToForm(ch: Channel): ChannelFormValues {
@@ -112,6 +158,8 @@ function channelToForm(ch: Channel): ChannelFormValues {
     hideFromMap: ch.hideFromMap,
     locator:
       ch.location && ch.useLocation ? coordsToLocator(ch.location.lat, ch.location.lon, 6) : '',
+    multiMode: ch.multiMode,
+    modeProfiles: ch.multiMode ? ch.modeProfiles.map(modeProfileToForm) : [],
   };
 }
 
@@ -143,6 +191,8 @@ function emptyForm(): ChannelFormValues {
     useLocation: defaults.useLocation,
     hideFromMap: defaults.hideFromMap,
     locator: '',
+    multiMode: false,
+    modeProfiles: [],
   };
 }
 
@@ -156,13 +206,47 @@ function formToChannelInput(values: ChannelFormValues): Omit<Channel, 'id' | 'ca
   const timeslot: ChannelTimeslot | null = timeslotRaw === '1' ? 1 : timeslotRaw === '2' ? 2 : null;
   const dmrId = values.dmrId.trim() ? parseInt(values.dmrId, 10) : null;
   const bandwidth = values.bandwidthKHz.trim() ? parseFloat(values.bandwidthKHz) : null;
+  const modeProfiles = values.multiMode ? values.modeProfiles.map(formProfileToModel) : [];
 
-  return {
+  const base = {
     ...channelFieldDefaults(),
     name: values.name.trim(),
     mode: values.mode,
+    multiMode: values.multiMode,
+    modeProfiles,
     rxFrequency: parseFrequencyHzFromMhzInput(values.rxFrequencyMhz),
     txFrequency: parseFrequencyHzFromMhzInput(values.txFrequencyMhz),
+    power: selectValueToPercent(values.power),
+    rxOnly: values.rxOnly,
+    aprsConfigName: values.aprsConfigName,
+    voxEnabled: values.voxEnabled,
+    transmitTimeout: tot != null && Number.isFinite(tot) && tot >= 0 ? tot : null,
+    scanSkip: values.scanSkip,
+    comment: values.comment.trim(),
+    location: hasCoords ? { lat, lon } : null,
+    useLocation: values.useLocation,
+    hideFromMap: values.hideFromMap,
+    opengd77Extras: {},
+  };
+
+  if (values.multiMode && modeProfiles.length > 0) {
+    const primary = modeProfiles.find((p) => p.mode === values.mode) ?? modeProfiles[0];
+    return {
+      ...base,
+      bandwidthKHz: primary.bandwidthKHz,
+      colourCode: primary.colourCode,
+      timeslot: primary.timeslot,
+      contactRef: primary.contactRef,
+      rxGroupListId: primary.rxGroupListId,
+      dmrId: primary.dmrId,
+      rxTone: primary.rxTone,
+      txTone: primary.txTone,
+      squelch: primary.squelch,
+    };
+  }
+
+  return {
+    ...base,
     bandwidthKHz: bandwidth != null && Number.isFinite(bandwidth) ? bandwidth : null,
     colourCode:
       colourCode != null && Number.isFinite(colourCode) && colourCode >= 0 && colourCode <= 15
@@ -344,8 +428,9 @@ export default function ChannelEdit() {
     }
   };
 
-  const showAnalogFields = isAnalogMode(values.mode);
-  const showDmrFields = isDmrMode(values.mode);
+  const showAnalogFields = !values.multiMode && isAnalogMode(values.mode);
+  const showDmrFields = !values.multiMode && isDmrMode(values.mode);
+  const showSingleModeRfExtras = !values.multiMode;
 
   return (
     <ReportPage title={isNew ? 'New channel' : `Edit ${existing?.name ?? 'channel'}`}>
@@ -383,7 +468,35 @@ export default function ChannelEdit() {
               onChange={(e) => set('comment', e.currentTarget.value)}
             />
             <ChannelModeSelect value={values.mode} onChange={(mode) => set('mode', mode)} />
+            <Checkbox
+              label="Multi-mode channel"
+              description="One logical site with FM and DMR (and other) profiles — expands on OpenGD77 export"
+              checked={values.multiMode}
+              onChange={(e) => {
+                const checked = e.currentTarget.checked;
+                setValues((prev) => ({
+                  ...prev,
+                  multiMode: checked,
+                  modeProfiles: checked ? seedMultiModeProfiles(prev) : [],
+                  mode: checked ? 'fm' : prev.mode,
+                }));
+              }}
+            />
           </Stack>
+
+          {values.multiMode ? (
+            <Stack gap="sm" id={channelSectionAnchorId('Mode profiles')}>
+              <Title order={4}>Mode profiles</Title>
+              <Text size="sm" c="dimmed">
+                Per-mode RF settings. Frequencies, power, and location are shared below.
+              </Text>
+              <ChannelModeProfilesEditor
+                profiles={values.modeProfiles}
+                codeplug={codeplug}
+                onChange={(modeProfiles) => setValues((prev) => ({ ...prev, modeProfiles }))}
+              />
+            </Stack>
+          ) : null}
 
           <Stack gap="sm" id={channelSectionAnchorId('RF')}>
             <Title order={4}>RF</Title>
@@ -405,13 +518,15 @@ export default function ChannelEdit() {
               </Text>
             ) : null}
             <BandPillsForFrequencies rxFrequency={rxHz} txFrequency={txHz} />
-            <Select
-              label="Bandwidth (kHz)"
-              data={bandwidthSelectData}
-              value={values.bandwidthKHz}
-              onChange={(v) => set('bandwidthKHz', v ?? '')}
-              clearable
-            />
+            {showSingleModeRfExtras ? (
+              <Select
+                label="Bandwidth (kHz)"
+                data={bandwidthSelectData}
+                value={values.bandwidthKHz}
+                onChange={(v) => set('bandwidthKHz', v ?? '')}
+                clearable
+              />
+            ) : null}
             <Select
               label="Power"
               data={powerSelectData}
@@ -436,12 +551,14 @@ export default function ChannelEdit() {
                 />
               </Group>
             ) : null}
-            <Select
-              label="Squelch"
-              data={squelchSelectData}
-              value={values.squelch}
-              onChange={(v) => set('squelch', v ?? 'default')}
-            />
+            {showSingleModeRfExtras ? (
+              <Select
+                label="Squelch"
+                data={squelchSelectData}
+                value={values.squelch}
+                onChange={(v) => set('squelch', v ?? 'default')}
+              />
+            ) : null}
             <Checkbox
               label="RX only"
               checked={values.rxOnly}

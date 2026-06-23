@@ -1,10 +1,17 @@
 import type { Channel } from '../models/codeplug.ts';
+import { modeExportNameSuffix, resolveChannelModeProfiles } from './channelExpansion/index.ts';
 
 /** Case-sensitive, first-wins name → channel id map (OpenGD77 quirk at import boundary only). */
 export function buildNameToChannelId(channels: Channel[]): Map<string, string> {
   const map = new Map<string, string>();
   for (const ch of channels) {
     if (!map.has(ch.name)) map.set(ch.name, ch.id);
+    if (ch.multiMode) {
+      for (const profile of resolveChannelModeProfiles(ch)) {
+        const alias = `${ch.name}${modeExportNameSuffix(profile.mode)}`;
+        if (!map.has(alias)) map.set(alias, ch.id);
+      }
+    }
   }
   return map;
 }

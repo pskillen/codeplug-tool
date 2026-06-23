@@ -1,8 +1,16 @@
 import type { Codeplug } from '../../../models/codeplug.ts';
 import { mapModeToOpenGd77ChannelType } from '../../channelModes.ts';
+import {
+  expandAllChannelsForExport,
+  type ExpandedChannelRow,
+} from '../../channelExpansion/index.ts';
 import { formatCsv } from '../csvWrite.ts';
 import type { ExportOptions } from '../../import-export/types.ts';
-import { DEFAULT_OPENGD77_PROFILE_ID, getOpenGd77Profile } from '../../opengd77/profiles.ts';
+import {
+  DEFAULT_OPENGD77_PROFILE_ID,
+  getOpenGd77Profile,
+  type OpenGd77RadioProfile,
+} from '../../opengd77/profiles.ts';
 import {
   formatOpenGd77BandwidthWire,
   formatOpenGd77ColourCodeWire,
@@ -40,43 +48,53 @@ function padRow(headers: string[], values: Record<string, string>): string[] {
   return headers.map((h) => values[h] ?? '');
 }
 
+function channelRowValues(
+  row: ExpandedChannelRow,
+  codeplug: Codeplug,
+  profile: OpenGd77RadioProfile,
+  rowNumber: number,
+): Record<string, string> {
+  const values: Record<string, string> = {
+    [CHANNEL_COL.number]: String(rowNumber),
+    [CHANNEL_COL.name]: row.wireName,
+    [CHANNEL_COL.type]: mapModeToOpenGd77ChannelType(row.mode),
+    [CHANNEL_COL.rx]: formatOpenGd77FrequencyWire(row.rxFrequency),
+    [CHANNEL_COL.tx]: formatOpenGd77FrequencyWire(row.txFrequency),
+    [CHANNEL_COL.bandwidth]: formatOpenGd77BandwidthWire(row.bandwidthKHz),
+    [CHANNEL_COL.colourCode]: formatOpenGd77ColourCodeWire(row.colourCode),
+    [CHANNEL_COL.timeslot]: formatOpenGd77TimeslotWire(row.timeslot),
+    [CHANNEL_COL.contact]: contactRefWireNameForExport(row, codeplug),
+    [CHANNEL_COL.tgList]: rxGroupListWireNameForExport(row, codeplug),
+    [CHANNEL_COL.dmrId]: formatOpenGd77DmrIdWire(row.mode, row.dmrId),
+    [CHANNEL_COL.rxTone]: formatOpenGd77ToneWire(row.mode, row.rxTone),
+    [CHANNEL_COL.txTone]: formatOpenGd77ToneWire(row.mode, row.txTone),
+    [CHANNEL_COL.squelch]: formatOpenGd77SquelchWire(row.mode, row.squelch),
+    [CHANNEL_COL.power]: formatOpenGd77PowerWire(row.power, profile.id),
+    [CHANNEL_COL.rxOnly]: wireYesNo(row.rxOnly),
+    [CHANNEL_COL.allSkip]: wireYesNo(row.scanSkip),
+    [CHANNEL_COL.tot]: formatOpenGd77TransmitTimeoutWire(row.transmitTimeout),
+    [CHANNEL_COL.vox]: wireVoxEnabled(row.voxEnabled),
+    [CHANNEL_COL.aprs]: row.aprsConfigName,
+    [CHANNEL_COL.lat]: row.location ? String(row.location.lat) : '',
+    [CHANNEL_COL.lon]: row.location ? String(row.location.lon) : '',
+    [CHANNEL_COL.useLocation]: wireYesNo(row.useLocation),
+  };
+
+  for (const header of VENDOR_EXTRA_HEADERS) {
+    values[header] = row.opengd77Extras[header] ?? '';
+  }
+
+  return values;
+}
+
 export function serialiseChannels(codeplug: Codeplug, profileId?: string): string {
   const profile = getOpenGd77Profile(profileId ?? DEFAULT_OPENGD77_PROFILE_ID);
-  // Channel Number is assigned at export (1..n in channel list order), not stored in the model.
-  const rows = codeplug.channels.map((ch, i) => {
-    const values: Record<string, string> = {
-      [CHANNEL_COL.number]: String(i + 1),
-      [CHANNEL_COL.name]: ch.name,
-      [CHANNEL_COL.type]: mapModeToOpenGd77ChannelType(ch.mode),
-      [CHANNEL_COL.rx]: formatOpenGd77FrequencyWire(ch.rxFrequency),
-      [CHANNEL_COL.tx]: formatOpenGd77FrequencyWire(ch.txFrequency),
-      [CHANNEL_COL.bandwidth]: formatOpenGd77BandwidthWire(ch.bandwidthKHz),
-      [CHANNEL_COL.colourCode]: formatOpenGd77ColourCodeWire(ch.colourCode),
-      [CHANNEL_COL.timeslot]: formatOpenGd77TimeslotWire(ch.timeslot),
-      [CHANNEL_COL.contact]: contactRefWireNameForExport(ch, codeplug),
-      [CHANNEL_COL.tgList]: rxGroupListWireNameForExport(ch, codeplug),
-      [CHANNEL_COL.dmrId]: formatOpenGd77DmrIdWire(ch.mode, ch.dmrId),
-      [CHANNEL_COL.rxTone]: formatOpenGd77ToneWire(ch.mode, ch.rxTone),
-      [CHANNEL_COL.txTone]: formatOpenGd77ToneWire(ch.mode, ch.txTone),
-      [CHANNEL_COL.squelch]: formatOpenGd77SquelchWire(ch.mode, ch.squelch),
-      [CHANNEL_COL.power]: formatOpenGd77PowerWire(ch.power, profile.id),
-      [CHANNEL_COL.rxOnly]: wireYesNo(ch.rxOnly),
-      [CHANNEL_COL.allSkip]: wireYesNo(ch.scanSkip),
-      [CHANNEL_COL.tot]: formatOpenGd77TransmitTimeoutWire(ch.transmitTimeout),
-      [CHANNEL_COL.vox]: wireVoxEnabled(ch.voxEnabled),
-      [CHANNEL_COL.aprs]: ch.aprsConfigName,
-      [CHANNEL_COL.lat]: ch.location ? String(ch.location.lat) : '',
-      [CHANNEL_COL.lon]: ch.location ? String(ch.location.lon) : '',
-      [CHANNEL_COL.useLocation]: wireYesNo(ch.useLocation),
-    };
-
-    for (const header of VENDOR_EXTRA_HEADERS) {
-      values[header] = ch.opengd77Extras[header] ?? '';
-    }
-
-    return padRow(CHANNEL_HEADERS, values);
+  const expanded = expandAllChannelsForExport(codeplug.channels, {
+    maxNameLength: 16,
   });
-
+  const rows = expanded.map((row, i) =>
+    padRow(CHANNEL_HEADERS, channelRowValues(row, codeplug, profile, i + 1)),
+  );
   return formatCsv(CHANNEL_HEADERS, rows);
 }
 
@@ -85,7 +103,7 @@ export function serialiseZones(codeplug: Codeplug, profileId?: string): string {
   const memberHeaders = zoneMemberHeaders(profile.zoneMembers);
   const rows = codeplug.zones.map((zone) => {
     const values: Record<string, string> = { 'Zone Name': zone.name };
-    zoneExportMemberNames(zone, codeplug.channels).forEach((name, i) => {
+    zoneExportMemberNames(zone, codeplug.channels, profileId).forEach((name, i) => {
       if (i < memberHeaders.length) values[memberHeaders[i]] = name;
     });
     return padRow(ZONE_HEADERS, values);

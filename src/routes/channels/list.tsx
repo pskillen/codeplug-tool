@@ -1,10 +1,11 @@
-import { Stack, Text } from '@mantine/core';
+import { Group, Stack, Text } from '@mantine/core';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import { BandPillForChannel } from '../../components/crud/BandPill.tsx';
 import EntityTable from '../../components/report/EntityTable.tsx';
 import ReportPage from '../../components/report/ReportPage.tsx';
 import { applyFilters } from '../../lib/channels.ts';
 import ModePill from '../../components/crud/ModePill.tsx';
+import { resolveChannelModeProfiles } from '../../lib/channelExpansion/index.ts';
 import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { formatSquelchListCell, percentLabel } from '../../lib/channelFields/percent.ts';
 import { coordsToLocator } from '../../lib/maidenhead.ts';
@@ -98,7 +99,20 @@ export default function ChannelsList() {
           }}
           columns={[
             { key: 'band', header: 'Band', render: (ch) => <BandPillForChannel channel={ch} /> },
-            { key: 'mode', header: 'Mode', render: (ch) => <ModePill mode={ch.mode} /> },
+            {
+              key: 'mode',
+              header: 'Mode',
+              render: (ch) =>
+                ch.multiMode ? (
+                  <Group gap={4}>
+                    {resolveChannelModeProfiles(ch).map((p) => (
+                      <ModePill key={p.mode} mode={p.mode} size="xs" />
+                    ))}
+                  </Group>
+                ) : (
+                  <ModePill mode={ch.mode} />
+                ),
+            },
             {
               key: 'rx',
               header: 'RX MHz',

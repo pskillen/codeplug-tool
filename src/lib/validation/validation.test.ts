@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { channelFieldDefaults, emptyCodeplug } from '../../models/codeplug.ts';
+import {
+  channelFieldDefaults,
+  channelModeProfileDefaults,
+  emptyCodeplug,
+} from '../../models/codeplug.ts';
 import { buildChannel } from '../../test/builders/index.ts';
 import { hasValidationErrors, isSimplex, validateChannel } from './channel.ts';
 import { validateContact } from './contact.ts';
@@ -35,6 +39,20 @@ describe('validateChannel', () => {
     expect(isSimplex(freq, freq)).toBe(true);
     expect(isSimplex(freq, freq)).toBe(true);
     expect(isSimplex(freq, 145_175_000)).toBe(false);
+  });
+
+  it('requires at least two profiles when multiMode', () => {
+    const issues = validateChannel(
+      {
+        ...channelFieldDefaults(),
+        name: 'GB7GL',
+        mode: 'fm',
+        multiMode: true,
+        modeProfiles: [channelModeProfileDefaults('fm')],
+      },
+      emptyCodeplug(),
+    );
+    expect(issues.some((i) => i.field === 'modeProfiles' && i.severity === 'error')).toBe(true);
   });
 });
 
