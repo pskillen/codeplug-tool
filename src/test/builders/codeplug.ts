@@ -12,15 +12,15 @@ import {
 import { setMemberWireNames, stampImported } from '../../lib/entityProvenance.ts';
 
 export function buildChannel(overrides: Partial<Channel> & Pick<Channel, 'id' | 'name'>): Channel {
-  const { id, name, callsign, mode, ...rest } = overrides;
+  const { id, name, callsign, mode, multiMode, modeProfiles, ...rest } = overrides;
   return {
+    ...channelFieldDefaults(),
     id,
     name,
     callsign: callsign ?? name.split(/\s+/)[0],
     mode: mode ?? ('dmr' as ChannelMode),
-    multiMode: false,
-    modeProfiles: [],
-    ...channelFieldDefaults(),
+    multiMode: multiMode ?? false,
+    modeProfiles: modeProfiles ?? [],
     ...rest,
   };
 }

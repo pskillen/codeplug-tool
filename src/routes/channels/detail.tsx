@@ -17,6 +17,7 @@ import {
 import { entityRefDisplayName } from '../../lib/entityRefs.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 import { useOperatorPosition } from '../../state/operatorPosition.tsx';
+import { modeLabel } from '../../lib/channelModes.ts';
 import { percentLabel } from '../../lib/channelFields/index.ts';
 import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { formatOffsetMhz, frequencyOffsetMhz } from '../../lib/bands.ts';
@@ -25,7 +26,8 @@ import { channelHasGeolocation } from '../../lib/channels.ts';
 import { coordsToLocator } from '../../lib/maidenhead.ts';
 import { channelSectionAnchorId } from '../../lib/channelPageSections.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
-import { modeLabel } from '../../lib/channelModes.ts';
+import ModePill from '../../components/crud/ModePill.tsx';
+import { resolveChannelModeProfiles } from '../../lib/channelExpansion/index.ts';
 
 function formatLocation(lat: number | undefined, lon: number | undefined): string {
   if (lat == null || lon == null) return '—';
@@ -118,6 +120,8 @@ export default function ChannelDetail() {
       : []),
   ];
 
+  const modeProfiles = resolveChannelModeProfiles(channel);
+
   const sections = [
     {
       title: 'Identity',
@@ -125,7 +129,21 @@ export default function ChannelDetail() {
         { label: 'Name', value: channel.name },
         { label: 'Callsign', value: channel.callsign },
         { label: 'Comment', value: channel.comment || '—' },
-        { label: 'Mode', value: modeLabel(channel.mode) },
+        {
+          label: 'Mode',
+          value: channel.multiMode ? (
+            <Group gap={6}>
+              {modeProfiles.map((p) => (
+                <ModePill key={p.mode} mode={p.mode} size="xs" />
+              ))}
+            </Group>
+          ) : (
+            modeLabel(channel.mode)
+          ),
+        },
+        ...(channel.multiMode
+          ? [{ label: 'Multi-mode', value: 'Yes — expands on OpenGD77 export' }]
+          : []),
         { label: 'Band', value: <BandPillForChannel channel={channel} /> },
       ],
     },
@@ -144,62 +162,121 @@ export default function ChannelDetail() {
           label: 'Offset',
           value: offset !== null ? formatOffsetMhz(offset) : '',
         },
-        {
-          label: 'Bandwidth',
-          value: channel.bandwidthKHz != null ? `${channel.bandwidthKHz} kHz` : '',
-        },
-        { label: 'Power', value: percentLabel(channel.power) },
-        {
-          label: 'RX tone',
-          value: channel.rxTone === 'none' ? '—' : channel.rxTone,
-        },
-        {
-          label: 'TX tone',
-          value: channel.txTone === 'none' ? '—' : channel.txTone,
-        },
-        { label: 'Squelch', value: percentLabel(channel.squelch) },
+        ...(channel.multiMode
+          ? []
+          : [
+              {
+                label: 'Bandwidth',
+                value: channel.bandwidthKHz != null ? `${channel.bandwidthKHz} kHz` : '',
+              },
+              { label: 'Power', value: percentLabel(channel.power) },
+              {
+                label: 'RX tone',
+                value: channel.rxTone === 'none' ? '—' : channel.rxTone,
+              },
+              {
+                label: 'TX tone',
+                value: channel.txTone === 'none' ? '—' : channel.txTone,
+              },
+              { label: 'Squelch', value: percentLabel(channel.squelch) },
+            ]),
         { label: 'RX only', value: channel.rxOnly ? 'Yes' : 'No' },
+        ...(channel.multiMode ? [{ label: 'Power', value: percentLabel(channel.power) }] : []),
       ],
     },
-    {
-      title: 'DMR',
-      fields: [
-        {
-          label: 'Colour code',
-          value: channel.colourCode != null ? String(channel.colourCode) : '',
-        },
-        { label: 'Timeslot', value: channel.timeslot != null ? String(channel.timeslot) : '' },
-        { label: 'DMR ID', value: channel.dmrId != null ? String(channel.dmrId) : '' },
-        {
-          label: 'TX contact',
-          value: contactLabel ? (
-            txContact ? (
-              <Anchor component={Link} to={`/contacts/${txContact.id}`}>
-                {contactLabel}
-              </Anchor>
-            ) : txTalkGroup ? (
-              <Anchor component={Link} to={`/talk-groups/${txTalkGroup.id}`}>
-                {contactLabel}
-              </Anchor>
-            ) : (
-              contactLabel
-            )
-          ) : (
-            '—'
-          ),
-        },
-        {
-          label: 'RX group list',
-          value: rxList ? (
-            <Anchor component={Link} to={`/rx-group-lists/${rxList.id}`}>
-              {rxList.name}
-            </Anchor>
-          ) : (
-            '—'
-          ),
-        },
-      ],
-    },
+    ...(channel.multiMode
+      ? modeProfiles.map((profile) => ({
+          title: `${modeLabel(profile.mode)} profile`,
+          fields: [
+            {
+              label: 'Bandwidth',
+              value: profile.bandwidthKHz != null ? `${profile.bandwidthKHz} kHz` : '—',
+            },
+            {
+              label: 'RX tone',
+              value: profile.rxTone === 'none' ? '—' : profile.rxTone,
+            },
+            {
+              label: 'TX tone',
+              value: profile.txTone === 'none' ? '—' : profile.txTone,
+            },
+            { label: 'Squelch', value: percentLabel(profile.squelch) },
+            {
+              label: 'Colour code',
+              value: profile.colourCode != null ? String(profile.colourCode) : '—',
+            },
+            {
+              label: 'Timeslot',
+              value: profile.timeslot != null ? String(profile.timeslot) : '—',
+            },
+            {
+              label: 'DMR ID',
+              value: profile.dmrId != null ? String(profile.dmrId) : '—',
+            },
+            {
+              label: 'TX contact',
+              value:
+                entityRefDisplayName(
+                  profile.contactRef,
+                  codeplug.talkGroups,
+                  codeplug.contacts,
+                ) || '—',
+            },
+            {
+              label: 'RX group list',
+              value: profile.rxGroupListId
+                ? (codeplug.rxGroupLists.find((r) => r.id === profile.rxGroupListId)?.name ?? '—')
+                : '—',
+            },
+          ],
+        }))
+      : []),
+    ...(channel.multiMode
+      ? []
+      : [
+          {
+            title: 'DMR',
+            fields: [
+              {
+                label: 'Colour code',
+                value: channel.colourCode != null ? String(channel.colourCode) : '',
+              },
+              {
+                label: 'Timeslot',
+                value: channel.timeslot != null ? String(channel.timeslot) : '',
+              },
+              { label: 'DMR ID', value: channel.dmrId != null ? String(channel.dmrId) : '' },
+              {
+                label: 'TX contact',
+                value: contactLabel ? (
+                  txContact ? (
+                    <Anchor component={Link} to={`/contacts/${txContact.id}`}>
+                      {contactLabel}
+                    </Anchor>
+                  ) : txTalkGroup ? (
+                    <Anchor component={Link} to={`/talk-groups/${txTalkGroup.id}`}>
+                      {contactLabel}
+                    </Anchor>
+                  ) : (
+                    contactLabel
+                  )
+                ) : (
+                  '—'
+                ),
+              },
+              {
+                label: 'RX group list',
+                value: rxList ? (
+                  <Anchor component={Link} to={`/rx-group-lists/${rxList.id}`}>
+                    {rxList.name}
+                  </Anchor>
+                ) : (
+                  '—'
+                ),
+              },
+            ],
+          },
+        ]),
     {
       title: 'Location',
       fields: locationFields,
