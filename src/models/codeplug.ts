@@ -26,9 +26,7 @@ export interface ChannelModeProfile {
   rxGroupListId: string | null;
 }
 
-export function channelModeProfileDefaults(
-  mode: ChannelMode = 'fm',
-): ChannelModeProfile {
+export function channelModeProfileDefaults(mode: ChannelMode = 'fm'): ChannelModeProfile {
   return {
     mode,
     bandwidthKHz: null,

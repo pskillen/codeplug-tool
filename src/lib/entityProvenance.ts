@@ -11,6 +11,13 @@ export interface ImportedProvenance {
   /** CHIRP Duplex/Offset wire at import — merge/delta only; export uses txFrequency and rxOnly. */
   chirpDuplexWire?: string;
   chirpOffsetWire?: string;
+  /** Per-profile wire names after multi-mode import merge — merge/delta only. */
+  multiModeProfileWire?: Array<{
+    mode: string;
+    contactWireName?: string;
+    rxGroupListWireName?: string;
+    opengd77Extras?: Record<string, string>;
+  }>;
 }
 
 export interface EntityMeta {

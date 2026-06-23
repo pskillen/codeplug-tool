@@ -8,9 +8,7 @@ import { parseCsv } from '../../csv.ts';
 function csvToRecords(csv: string): Record<string, string>[] {
   const rows = parseCsv(csv.trim());
   const [headers, ...data] = rows;
-  return data.map((row) =>
-    Object.fromEntries(headers.map((h, i) => [h, row[i] ?? ''])),
-  );
+  return data.map((row) => Object.fromEntries(headers.map((h, i) => [h, row[i] ?? ''])));
 }
 
 describe('OpenGD77 multi-mode export', () => {

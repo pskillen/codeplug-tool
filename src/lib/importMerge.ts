@@ -17,6 +17,7 @@ import {
   resolveChannelRxGroupListIds,
   resolveRxGroupListMemberRefs,
 } from './entityRefs.ts';
+import { resolveMultiModeChannelProfiles } from './channelExpansion/index.ts';
 import {
   newId,
   type Channel,
@@ -357,7 +358,12 @@ function applyImportInternal(
   const nameToId = buildNameToChannelId(channels);
   const { zones, unresolved } = resolveZones(mergedZones, nameToId);
   const resolvedChannels = resolveChannelContactRefs(
-    resolveChannelRxGroupListIds(channels, resolvedRxGroupLists),
+    resolveMultiModeChannelProfiles(
+      resolveChannelRxGroupListIds(channels, resolvedRxGroupLists),
+      talkGroups,
+      contacts,
+      resolvedRxGroupLists,
+    ),
     talkGroups,
     contacts,
   );

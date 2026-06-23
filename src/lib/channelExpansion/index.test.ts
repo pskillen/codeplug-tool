@@ -80,10 +80,7 @@ describe('channelExpansion', () => {
       name: 'GB7GL',
       mode: 'fm',
       multiMode: true,
-      modeProfiles: [
-        channelModeProfileDefaults('fm'),
-        channelModeProfileDefaults('dmr'),
-      ],
+      modeProfiles: [channelModeProfileDefaults('fm'), channelModeProfileDefaults('dmr')],
     });
     const zone = buildZone({ id: 'z1', name: 'Zone', memberChannelIds: ['c1'] });
     const { names } = expandZoneMemberWireNames(zone, [ch]);

@@ -1,6 +1,13 @@
-import { isAnalogMode } from '../channelModes.ts';
-import type { ChannelMode } from '../channelModes.ts';
-import type { Channel, ChannelModeProfile, Zone } from '../../models/codeplug.ts';
+import { resolveContactRefByWireName, resolveRxGroupListIdByName } from '../entityRefs.ts';
+import { isAnalogMode, type ChannelMode } from '../channelModes.ts';
+import type {
+  Channel,
+  ChannelModeProfile,
+  Contact,
+  RxGroupList,
+  TalkGroup,
+  Zone,
+} from '../../models/codeplug.ts';
 import { channelModeProfileDefaults } from '../../models/codeplug.ts';
 
 /** Resolved export row — shared channel fields merged with one mode profile. */
@@ -82,7 +89,22 @@ function uniqueWireName(base: string, reserved: Set<string>): string {
   return `${base} ${n}`;
 }
 
-function rowFromProfile(channel: Channel, profile: ChannelModeProfile, wireName: string): ExpandedChannelRow {
+function profileOpenGd77Extras(
+  channel: Channel,
+  profile: ChannelModeProfile,
+): Record<string, string> {
+  const wire = channel.meta?.imported?.multiModeProfileWire?.find((w) => w.mode === profile.mode);
+  if (wire?.opengd77Extras) {
+    return { ...channel.opengd77Extras, ...wire.opengd77Extras };
+  }
+  return channel.opengd77Extras;
+}
+
+function rowFromProfile(
+  channel: Channel,
+  profile: ChannelModeProfile,
+  wireName: string,
+): ExpandedChannelRow {
   return {
     sourceChannelId: channel.id,
     wireName,
@@ -106,7 +128,7 @@ function rowFromProfile(channel: Channel, profile: ChannelModeProfile, wireName:
     voxEnabled: channel.voxEnabled,
     transmitTimeout: channel.transmitTimeout,
     scanSkip: channel.scanSkip,
-    opengd77Extras: channel.opengd77Extras,
+    opengd77Extras: profileOpenGd77Extras(channel, profile),
   };
 }
 
@@ -134,7 +156,9 @@ export function expandChannelForExport(
     const candidate = uniqueWireName(`${channel.name}${suffix}`, reserved);
     reserved.add(candidate);
     if (options.maxNameLength != null && candidate.length > options.maxNameLength) {
-      warnings?.push(`Derived channel name "${candidate}" exceeds ${options.maxNameLength} characters`);
+      warnings?.push(
+        `Derived channel name "${candidate}" exceeds ${options.maxNameLength} characters`,
+      );
     }
     rows.push(rowFromProfile(channel, profile, candidate));
   }
@@ -183,7 +207,9 @@ export function expandZoneMemberWireNames(
     });
     for (const row of expanded) {
       if (options.maxMembers != null && names.length >= options.maxMembers) {
-        warnings.push(`Zone "${zone.name}" exceeds ${options.maxMembers} members after multi-mode expansion`);
+        warnings.push(
+          `Zone "${zone.name}" exceeds ${options.maxMembers} members after multi-mode expansion`,
+        );
         return { names, warnings };
       }
       names.push(row.wireName);
@@ -222,15 +248,38 @@ function canMergePair(a: Channel, b: Channel): boolean {
 }
 
 function mergeTwoChannels(primary: Channel, secondary: Channel): Channel {
-  const profiles = [profileFromChannelFields(primary), profileFromChannelFields(secondary)];
-  const primaryMode = isAnalogMode(primary.mode) ? primary.mode : secondary.mode;
-  return {
-    ...primary,
-    name: stripModeExportSuffix(primary.name),
+  const fmSource = isAnalogMode(primary.mode) ? primary : secondary;
+  const dmrSource = isAnalogMode(primary.mode) ? secondary : primary;
+  const modeProfiles = [profileFromChannelFields(fmSource), profileFromChannelFields(dmrSource)];
+  const imported = primary.meta?.imported ?? secondary.meta?.imported;
+  return syncChannelFromPrimaryProfile({
+    ...fmSource,
+    name: stripModeExportSuffix(fmSource.name),
     multiMode: true,
-    mode: primaryMode,
-    modeProfiles: profiles,
-  };
+    mode: 'fm',
+    modeProfiles,
+    meta: {
+      imported: {
+        formatId: imported?.formatId ?? 'opengd77',
+        sourceFile: imported?.sourceFile ?? 'Channels.csv',
+        importedAt: imported?.importedAt ?? new Date().toISOString(),
+        multiModeProfileWire: [
+          {
+            mode: fmSource.mode,
+            contactWireName: fmSource.meta?.imported?.contactWireName,
+            rxGroupListWireName: fmSource.meta?.imported?.rxGroupListWireName,
+            opengd77Extras: fmSource.opengd77Extras,
+          },
+          {
+            mode: dmrSource.mode,
+            contactWireName: dmrSource.meta?.imported?.contactWireName,
+            rxGroupListWireName: dmrSource.meta?.imported?.rxGroupListWireName,
+            opengd77Extras: dmrSource.opengd77Extras,
+          },
+        ],
+      },
+    },
+  });
 }
 
 /** Best-effort collapse of paired flat import rows into multi-mode channels. */
@@ -291,10 +340,7 @@ export function syncChannelFromPrimaryProfile(channel: Channel): Channel {
 }
 
 /** Update or insert a profile on a multi-mode channel. */
-export function upsertModeProfile(
-  channel: Channel,
-  profile: ChannelModeProfile,
-): Channel {
+export function upsertModeProfile(channel: Channel, profile: ChannelModeProfile): Channel {
   const existing = channel.modeProfiles.findIndex((p) => p.mode === profile.mode);
   const modeProfiles =
     existing >= 0
@@ -305,4 +351,36 @@ export function upsertModeProfile(
 
 export function emptyModeProfile(mode: ChannelMode): ChannelModeProfile {
   return channelModeProfileDefaults(mode);
+}
+
+/** Resolve per-profile contact/RGL refs from multi-mode import merge wire stash. */
+export function resolveMultiModeChannelProfiles(
+  channels: Channel[],
+  talkGroups: TalkGroup[],
+  contacts: Contact[],
+  rxGroupLists: RxGroupList[],
+): Channel[] {
+  return channels.map((ch) => {
+    const wires = ch.meta?.imported?.multiModeProfileWire;
+    if (!ch.multiMode || !wires?.length) return ch;
+
+    const modeProfiles = ch.modeProfiles.map((profile) => {
+      const wire = wires.find((w) => w.mode === profile.mode);
+      if (!wire) return profile;
+
+      let contactRef = profile.contactRef;
+      if (!contactRef && wire.contactWireName) {
+        contactRef = resolveContactRefByWireName(wire.contactWireName, talkGroups, contacts);
+      }
+
+      let rxGroupListId = profile.rxGroupListId;
+      if (!rxGroupListId && wire.rxGroupListWireName) {
+        rxGroupListId = resolveRxGroupListIdByName(wire.rxGroupListWireName, rxGroupLists);
+      }
+
+      return { ...profile, contactRef, rxGroupListId };
+    });
+
+    return syncChannelFromPrimaryProfile({ ...ch, modeProfiles });
+  });
 }

@@ -8,11 +8,11 @@ Tabbed form for `ChannelModeProfile` entries when `Channel.multiMode` is enabled
 
 ## Props
 
-| Prop | Type | Description |
-| --- | --- | --- |
-| `profiles` | `ModeProfileFormValues[]` | Editable profile rows |
-| `codeplug` | `Codeplug` | Contact/RGL option sources |
-| `onChange` | `(profiles) => void` | Profile list update |
+| Prop       | Type                      | Description                |
+| ---------- | ------------------------- | -------------------------- |
+| `profiles` | `ModeProfileFormValues[]` | Editable profile rows      |
+| `codeplug` | `Codeplug`                | Contact/RGL option sources |
+| `onChange` | `(profiles) => void`      | Profile list update        |
 
 ## Related
 

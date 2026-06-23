@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { channelFieldDefaults, channelModeProfileDefaults, emptyCodeplug } from '../../models/codeplug.ts';
+import {
+  channelFieldDefaults,
+  channelModeProfileDefaults,
+  emptyCodeplug,
+} from '../../models/codeplug.ts';
 import { buildChannel } from '../../test/builders/index.ts';
 import { hasValidationErrors, isSimplex, validateChannel } from './channel.ts';
 import { validateContact } from './contact.ts';

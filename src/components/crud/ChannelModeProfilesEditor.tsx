@@ -48,8 +48,7 @@ export function formProfileToModel(form: ModeProfileFormValues): ChannelModeProf
   const timeslot: ChannelTimeslot | null = timeslotRaw === '1' ? 1 : timeslotRaw === '2' ? 2 : null;
   const dmrId = form.dmrId.trim() ? parseInt(form.dmrId, 10) : null;
   const bandwidth = form.bandwidthKHz.trim() ? parseFloat(form.bandwidthKHz) : null;
-  const squelch =
-    form.squelch === 'default' ? null : parseInt(form.squelch, 10);
+  const squelch = form.squelch === 'default' ? null : parseInt(form.squelch, 10);
 
   return {
     mode: form.mode,
@@ -175,9 +174,7 @@ export default function ChannelModeProfilesEditor({
                 <Group grow>
                   <NumberInput
                     label="Colour code"
-                    value={
-                      profile.colourCode === '' ? undefined : parseInt(profile.colourCode, 10)
-                    }
+                    value={profile.colourCode === '' ? undefined : parseInt(profile.colourCode, 10)}
                     onChange={(v) =>
                       updateProfile(index, { colourCode: v != null ? String(v) : '' })
                     }

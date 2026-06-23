@@ -216,11 +216,8 @@ export default function ChannelDetail() {
             {
               label: 'TX contact',
               value:
-                entityRefDisplayName(
-                  profile.contactRef,
-                  codeplug.talkGroups,
-                  codeplug.contacts,
-                ) || '—',
+                entityRefDisplayName(profile.contactRef, codeplug.talkGroups, codeplug.contacts) ||
+                '—',
             },
             {
               label: 'RX group list',

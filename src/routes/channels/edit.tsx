@@ -206,9 +206,7 @@ function formToChannelInput(values: ChannelFormValues): Omit<Channel, 'id' | 'ca
   const timeslot: ChannelTimeslot | null = timeslotRaw === '1' ? 1 : timeslotRaw === '2' ? 2 : null;
   const dmrId = values.dmrId.trim() ? parseInt(values.dmrId, 10) : null;
   const bandwidth = values.bandwidthKHz.trim() ? parseFloat(values.bandwidthKHz) : null;
-  const modeProfiles = values.multiMode
-    ? values.modeProfiles.map(formProfileToModel)
-    : [];
+  const modeProfiles = values.multiMode ? values.modeProfiles.map(formProfileToModel) : [];
 
   const base = {
     ...channelFieldDefaults(),
