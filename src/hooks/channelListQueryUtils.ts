@@ -29,7 +29,7 @@ export function loadChannelVisibleColumns(): string[] {
 
   try {
     const raw = localStorage.getItem(CHANNEL_LIST_COLUMN_STORAGE_KEY);
-    if (raw) {
+    if (raw !== null) {
       let cols = (JSON.parse(raw) as string[]).filter((k) =>
         validKeys.has(k as (typeof CHANNEL_OPTIONAL_COLUMNS)[number]['key']),
       );

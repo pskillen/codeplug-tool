@@ -32,9 +32,8 @@ function loadFromStorage(storageKey: string, defs: ColumnVisibilityDef[]): strin
   const validKeys = new Set(defs.map((d) => d.key));
   try {
     const raw = localStorage.getItem(storageKey);
-    if (raw) {
-      const parsed = (JSON.parse(raw) as string[]).filter((k) => validKeys.has(k));
-      if (parsed.length > 0) return parsed;
+    if (raw !== null) {
+      return (JSON.parse(raw) as string[]).filter((k) => validKeys.has(k));
     }
   } catch {
     /* ignore */

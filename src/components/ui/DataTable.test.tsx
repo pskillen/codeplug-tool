@@ -84,7 +84,6 @@ describe('DataTable', () => {
           key: 'score',
           header: 'Score',
           render: (row) => row.score,
-          sortable: true,
           sortValue: (row) => row.score,
           hideable: true,
           defaultVisible: false,
@@ -101,6 +100,24 @@ describe('DataTable', () => {
     });
     expect(screen.queryByRole('columnheader', { name: 'Score' })).not.toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Extra' })).toBeInTheDocument();
+  });
+
+  it('hides all hideable columns when visibility is empty', () => {
+    renderTable({
+      columns: [
+        {
+          key: 'score',
+          header: 'Score',
+          render: (row) => row.score,
+          sortValue: (row) => row.score,
+          hideable: true,
+          defaultVisible: true,
+        },
+      ],
+      columnVisibility: [],
+    });
+    expect(screen.queryByRole('columnheader', { name: 'Score' })).not.toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: /Name/i })).toBeInTheDocument();
   });
 
   it('calls onSelectedKeysChange when row checkbox toggled', () => {

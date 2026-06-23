@@ -284,6 +284,7 @@ export default function DataTable<T>({
               data={columnPickerData}
               value={visibleHideableKeys}
               onChange={setVisibleHideableKeys}
+              clearable
               style={{ flex: '1 1 10rem', minWidth: '8rem' }}
               aria-label="Visible columns"
             />

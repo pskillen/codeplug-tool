@@ -17,10 +17,7 @@ import {
   CHANNEL_OPTIONAL_COLUMNS,
 } from '../../hooks/channelListQueryUtils.ts';
 import { useChannelListQuery } from '../../hooks/useChannelListQuery.ts';
-import {
-  DATATABLE_CALLSIGN_SORT_KEY,
-  DATATABLE_NAME_SORT_KEY,
-} from '../../lib/dataTable/sort.ts';
+import { DATATABLE_CALLSIGN_SORT_KEY, DATATABLE_NAME_SORT_KEY } from '../../lib/dataTable/sort.ts';
 import { distanceLabelForChannel, useFilteredChannels } from '../../hooks/useChannelListFilters.ts';
 import type { Channel } from '../../models/codeplug.ts';
 import { entityRefDisplayName } from '../../lib/entityRefs.ts';

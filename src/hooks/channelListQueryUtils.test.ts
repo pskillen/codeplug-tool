@@ -64,4 +64,22 @@ describe('loadChannelVisibleColumns', () => {
       else localStorage.setItem(schemaKey, previousSchema);
     }
   });
+
+  it('persists an explicitly empty column selection', () => {
+    const key = CHANNEL_LIST_COLUMN_STORAGE_KEY;
+    const schemaKey = CHANNEL_LIST_COLUMNS_SCHEMA_KEY;
+    const previous = localStorage.getItem(key);
+    const previousSchema = localStorage.getItem(schemaKey);
+    localStorage.setItem(key, JSON.stringify([]));
+    localStorage.setItem(schemaKey, String(CHANNEL_LIST_COLUMNS_SCHEMA_VERSION));
+
+    try {
+      expect(loadChannelVisibleColumns()).toEqual([]);
+    } finally {
+      if (previous == null) localStorage.removeItem(key);
+      else localStorage.setItem(key, previous);
+      if (previousSchema == null) localStorage.removeItem(schemaKey);
+      else localStorage.setItem(schemaKey, previousSchema);
+    }
+  });
 });
