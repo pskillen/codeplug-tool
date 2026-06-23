@@ -16,7 +16,7 @@ Heuristic token shapes used when splitting CPS **channel wire names** into inter
 
 | Region | Prefix / shape | Examples |
 | --- | --- | --- |
-| **UK** | `GB` + digit + 2–3 letters; also `G`, `M`, `GM`, `GW`, `GI`, `GD`, `2E` blocks | `GB7GL`, `GB3DA`, `G0ABC`, `M0PSE`, `2E0XYZ` |
+| **UK** | `GB` + digit + 2–3 letters; `MB` + digit + 2-3 letters (simplex repeater); also `G`, `M`, `GM`, `GW`, `GI`, `GD`, `2E` blocks | `GB7GL`, `GB3DA`, `MB7IOH`, `G0ABC`, `M0PSE`, `2E0XYZ` |
 | **USA** | `K`, `N`, `W`, `A`, `AA`–`AL` + optional extra letter + digit + suffix | `W1AW`, `K1JT`, `N3ZZZ`, `AE7QG` |
 | **Canada** | `VA`–`VG`, `VO`, `VY`, `CY` + digit + suffix | `VE3ABC`, `VA2XYZ` |
 | **Spain** | `EA`–`EH` + digit + suffix | `EA4AB`, `EB1ABC` |

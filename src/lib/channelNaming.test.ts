@@ -12,6 +12,8 @@ describe('isCallsignToken', () => {
     expect(isCallsignToken('GB7GL')).toBe(true);
     expect(isCallsignToken('GB3DA')).toBe(true);
     expect(isCallsignToken('G0ABC')).toBe(true);
+    expect(isCallsignToken('MB7IOH')).toBe(true);
+    expect(isCallsignToken('MB7IKB')).toBe(true);
   });
 
   it('accepts international phase-1 callsigns', () => {
@@ -38,6 +40,8 @@ describe('isCallsignToken', () => {
 describe('parseChannelWireName', () => {
   it.each([
     ['GB7GL Glasgow', 'GB7GL', 'Glasgow'],
+    ['MB7IOH Houston', 'MB7IOH', 'Houston'],
+    ['MB7IKB East Kilb', 'MB7IKB', 'East Kilb'],
     ['Glasgow GB7GL', 'GB7GL', 'Glasgow'],
     ['GB7GL-F', 'GB7GL', ''],
     ['W1AW Mt Greylock', 'W1AW', 'Mt Greylock'],

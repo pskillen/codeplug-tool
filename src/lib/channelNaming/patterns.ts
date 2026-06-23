@@ -14,6 +14,11 @@ export const CALLSIGN_TOKEN_PATTERNS: readonly CallsignPattern[] = [
     regex: /^GB\d[A-Z]{2,3}$/i,
   },
   {
+    id: 'uk-mb-simplex',
+    label: 'UK simplex repeater',
+    regex: /^MB[0-9][A-Z]{2,3}$/i,
+  },
+  {
     id: 'uk',
     label: 'UK',
     regex: /^(?:GM|GW|GI|GD|G|M|2E)\d[A-Z]{1,4}$/i,
