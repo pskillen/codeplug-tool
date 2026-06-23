@@ -2,6 +2,7 @@ import { syncChannelFromPrimaryProfile } from '../../channelExpansion/index.ts';
 import type { ChannelTone } from '../../channelFields/index.ts';
 import { normalizeToneValue } from '../../channelFields/index.ts';
 import type { ChannelInput } from '../../codeplugMutations.ts';
+import { deriveCallsignFromName } from '../../codeplugMutations.ts';
 import { locatorToCoords } from '../../maidenhead.ts';
 import {
   channelFieldDefaults,
@@ -88,14 +89,18 @@ export function mapListingToChannelInput(
       txTone: shared.txTone,
       colourCode: parsed.colourCode,
     };
-    input = syncChannelFromPrimaryProfile({
+    const synced = syncChannelFromPrimaryProfile({
       ...channelFieldDefaults(),
+      id: '__map__',
       name: listing.repeater,
+      callsign: deriveCallsignFromName(listing.repeater),
       mode: 'fm',
       multiMode: true,
       modeProfiles: [fmProfile, dmrProfile],
       ...shared,
-    }) as ChannelInput;
+    });
+    const { id: _id, callsign: _callsign, ...rest } = synced;
+    input = rest as ChannelInput;
   } else {
     const mode = primaryModeFromCodes(parsed);
     input = {

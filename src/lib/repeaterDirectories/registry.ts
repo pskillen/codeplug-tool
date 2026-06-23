@@ -40,6 +40,6 @@ export {
   diffHasChanges,
 } from './channelDiff.ts';
 export type { ChannelDiffRow, ChannelDiffField } from './channelDiff.ts';
-export { EtccDirectoryError } from './ukrepeater/client.ts';
+export { EtccDirectoryError, fetchByCallsign, fetchListingById } from './ukrepeater/client.ts';
 export type { EtccListing } from './ukrepeater/types.ts';
 export { parseModeCodes, isOperationalStatus, formatModeCodesSummary } from './ukrepeater/modeCodes.ts';

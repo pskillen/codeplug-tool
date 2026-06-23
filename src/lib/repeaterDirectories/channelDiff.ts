@@ -171,7 +171,7 @@ export function diffChannelFromListing(
 }
 
 export function buildPatchFromDiff(
-  channel: Channel,
+  _channel: Channel,
   listing: EtccListing,
   selectedFields: ChannelDiffField[],
 ): Partial<ChannelInput> {

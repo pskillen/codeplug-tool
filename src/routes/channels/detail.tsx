@@ -9,6 +9,7 @@ import DetailSections, { DetailLinkList } from '../../components/report/DetailSe
 import NotFoundEntity from '../../components/report/NotFoundEntity.tsx';
 import { Page, PageHeader } from '../../components/ui/index.ts';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
+import UkRepeaterVerify from '../../components/UkRepeaterVerify/UkRepeaterVerify.tsx';
 import {
   externalChannelLinks,
   findEntityById,
@@ -357,6 +358,11 @@ export default function ChannelDetail() {
         <DetailSections sections={sections} />
 
         <DetailLinkList title="Zones" items={zoneLinks} />
+
+        <Stack gap="sm" id={channelSectionAnchorId('ukrepeater')}>
+          <Title order={3}>ukrepeater.net</Title>
+          <UkRepeaterVerify channel={channel} />
+        </Stack>
 
         <Stack gap="sm" id={channelSectionAnchorId('External links')}>
           <Title order={3}>External links</Title>
