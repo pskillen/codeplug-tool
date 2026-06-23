@@ -1,28 +1,21 @@
 # OpenGD77 — multi-talkgroup denormalisation
 
-**Status:** Planned — not implemented. Tracking: [codeplug-tool#36](https://github.com/pskillen/codeplug-tool/issues/36).
+**Status:** **Not applicable** to OpenGD77. Tracking context: [codeplug-tool#36](https://github.com/pskillen/codeplug-tool/issues/36).
 
-## Problem
+## Why N/A
 
-The lean OpenGD77 model uses **one channel row per repeater/site** with promiscuous RX via TG lists. Some operator workflows (and other vendor formats such as qDMR) use **one row per repeater×talk-group** combination.
+OpenGD77 CPS supports **promiscuous RX natively** via `Channels.TG List` and `TG_Lists.csv`. The lean export pattern — one channel row per repeater/site with a TG list reference — is correct for 1701, MD9600, and other OpenGD77 radios.
 
-This reference doc will hold denormalisation rules when #36 is implemented:
+Multi-talkgroup **expansion** (one logical channel → many wire rows) is for formats that **cannot** represent RX group lists on the wire. See the format-agnostic rules in [multi-talkgroup-expansion.md](../multi-talkgroup-expansion.md).
 
-- When to expand a single logical site into multiple `Channels.csv` rows
-- Naming template for derived channel names (e.g. `{site} {tgName}`)
-- Zone membership for expanded rows
-- Contact / TG list assignment per expanded row
-- Round-trip: can normalised rows collapse back to lean model on import?
+## OpenGD77 operators
 
-## Placeholder constraints
-
-Until specified in #36:
-
-- Do not assume denormalisation in import or export adapters.
-- Generic [channels](channels.md) and [tg-lists](tg-lists.md) semantics apply to each row independently.
+- Model promiscuous RX with `rxGroupListId` on the channel (and per-profile when `multiMode`).
+- Export produces one row + `TG List` column — no expansion pass.
+- Import maps flat rows best-effort; use **Find merge candidates** if per-TG rows need collapsing into one logical channel + RGL.
 
 ## Related
 
-- [#36 — multi-talkgroup](https://github.com/pskillen/codeplug-tool/issues/36)
-- [TG lists](tg-lists.md)
-- [Baofeng 1701 layout conventions](radios/baofeng-1701.md)
+- [TG lists](tg-lists.md) — promiscuous RX on OpenGD77
+- [Multi-mode](multi-mode.md) — separate Analogue/Digital rows (orthogonal axis)
+- [Multi-talkgroup expansion](../multi-talkgroup-expansion.md) — domain rules for other formats

@@ -7,6 +7,26 @@
 
 ## Overall status
 
+**Status:** In progress
+
+**Branch:** `36/paddy/multi-talkgroup-export`
+
+---
+
+## Multi-talkgroup (#36)
+
+**Tracking:** [codeplug-tool#36](https://github.com/pskillen/codeplug-tool/issues/36)
+
+**Status:** In progress
+
+### Slice 1: Documentation
+
+**Status:** In progress
+
+---
+
+## Multi-mode (#46) — complete
+
 **Status:** Complete — PR opened
 
 **Branch:** `46/pskillen/multi-mode-channels`

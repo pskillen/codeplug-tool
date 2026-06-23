@@ -28,7 +28,7 @@ OpenGD77 uses TG lists for **promiscuous receive** on digital channels:
 - **Promiscuous RX:** set `Channels.TG List` to a list name; list members define which talk groups the radio listens for on that channel.
 - Typical pattern: set `Contact` **or** use `TG List` for RX-heavy repeater channels — see [channels.md](channels.md) examples.
 
-The app does not expand TG list membership into per-TG channel rows — one channel row per repeater/site is the lean model.
+The app exports one channel row per repeater/site with a TG list reference — the lean model. Formats without native RGL support use shared [multi-talkgroup expansion](../../reference/multi-talkgroup-expansion.md) instead ([#36](https://github.com/pskillen/codeplug-tool/issues/36)).
 
 ## Import / export notes
 
@@ -40,4 +40,4 @@ The app does not expand TG list membership into per-TG channel rows — one chan
 
 - [Contacts](contacts.md) · [Channels](channels.md)
 - [File format rules](file-format.md)
-- [Multi-talkgroup denormalisation](multi-talkgroup.md) (planned [#36](https://github.com/pskillen/codeplug-tool/issues/36))
+- [Multi-talkgroup expansion](../reference/multi-talkgroup-expansion.md) — domain rules for formats without native RGL (N/A for OpenGD77)

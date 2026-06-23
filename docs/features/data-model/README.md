@@ -119,6 +119,20 @@ Export adapters expand multi-mode logical channels into vendor-specific rows at 
 
 **Merging split channels:** Import may collapse paired rows best-effort at the format boundary. Operators can also run **Find merge candidates** on an existing codeplug ([#116](https://github.com/pskillen/codeplug-tool/issues/116)) to detect same-frequency, similar-name single-mode channels and combine them into one `multiMode` channel with per-profile `contactRef` / `rxGroupListId` from model fields. Zone membership is rewired to the survivor channel id.
 
+#### Multi-talkgroup expansion ([#36](https://github.com/pskillen/codeplug-tool/issues/36))
+
+The internal model does **not** add a per-channel multi-talkgroup flag or on-channel TG list. Promiscuous RX is modelled with **`rxGroupListId`** and **`RxGroupList.memberRefs`** — RGL CRUD is the operator surface.
+
+Some CPS formats (e.g. Baofeng DM32 — [#67](https://github.com/pskillen/codeplug-tool/issues/67)) have **no RX group list on the wire** and require one channel row per talk group. For those formats only, export expands each logical digital channel into *n* rows (one per RGL member), and zones fan out accordingly. **OpenGD77 is excluded** — native `TG List` / `TG_Lists.csv` makes lean export correct.
+
+| Concern | Where it lives |
+| --- | --- |
+| Expansion rules (naming, zone fan-out, import collapse) | Tier-2 [multi-talkgroup-expansion.md](../../reference/multi-talkgroup-expansion.md) |
+| Shared implementation | [`src/lib/channelExpansion/`](../../src/lib/channelExpansion/) |
+| OpenGD77 | N/A — [opengd77/multi-talkgroup.md](../../reference/opengd77/multi-talkgroup.md) |
+
+Import may best-effort collapse flat per-TG rows into one logical channel + RGL. **Find merge candidates** ([#116](https://github.com/pskillen/codeplug-tool/issues/116)) repairs groups collapse missed.
+
 ### `Zone`
 
 | Field | Type | Notes |
