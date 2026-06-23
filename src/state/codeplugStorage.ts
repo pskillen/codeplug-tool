@@ -122,6 +122,10 @@ function migrateChannel(raw: Record<string, unknown>, projectImportedAt: string 
   }
 
   migrated.comment = typeof partial.comment === 'string' ? partial.comment : '';
+  migrated.multiMode = partial.multiMode === true;
+  migrated.modeProfiles = Array.isArray(partial.modeProfiles)
+    ? (partial.modeProfiles as Channel['modeProfiles'])
+    : [];
 
   if (meta?.imported && 'wireColumns' in meta.imported) {
     const imported = { ...meta.imported };
@@ -138,6 +142,8 @@ function migrateChannel(raw: Record<string, unknown>, projectImportedAt: string 
     mode: migrated.mode!,
     hideFromMap: migrated.hideFromMap ?? false,
     opengd77Extras: migrated.opengd77Extras ?? {},
+    multiMode: migrated.multiMode ?? false,
+    modeProfiles: migrated.modeProfiles ?? [],
     meta,
   };
 }

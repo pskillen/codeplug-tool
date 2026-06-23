@@ -12,6 +12,37 @@ export interface GeoPoint {
   lon: number;
 }
 
+/** Per-mode settings when a channel carries more than one RF mode. */
+export interface ChannelModeProfile {
+  mode: ChannelMode;
+  bandwidthKHz: number | null;
+  colourCode: number | null;
+  timeslot: ChannelTimeslot | null;
+  dmrId: number | null;
+  rxTone: ChannelTone;
+  txTone: ChannelTone;
+  squelch: number | null;
+  contactRef: EntityRef | null;
+  rxGroupListId: string | null;
+}
+
+export function channelModeProfileDefaults(
+  mode: ChannelMode = 'fm',
+): ChannelModeProfile {
+  return {
+    mode,
+    bandwidthKHz: null,
+    colourCode: null,
+    timeslot: null,
+    dmrId: null,
+    rxTone: 'none',
+    txTone: 'none',
+    squelch: null,
+    contactRef: null,
+    rxGroupListId: null,
+  };
+}
+
 /** Default values for optional Channel fields — spread in tests and migration. */
 export function channelFieldDefaults(): Omit<Channel, 'id' | 'name' | 'callsign' | 'mode'> {
   return {
@@ -37,6 +68,8 @@ export function channelFieldDefaults(): Omit<Channel, 'id' | 'name' | 'callsign'
     hideFromMap: false,
     comment: '',
     opengd77Extras: {},
+    multiMode: false,
+    modeProfiles: [],
   };
 }
 
@@ -78,6 +111,10 @@ export interface Channel {
   comment: string;
   /** OpenGD77-only columns keyed by canonical CSV header name. */
   opengd77Extras: Record<string, string>;
+  /** When true, mode-specific fields live in modeProfiles (2+ entries). */
+  multiMode: boolean;
+  /** Per-mode configuration when multiMode is enabled. */
+  modeProfiles: ChannelModeProfile[];
   meta?: EntityMeta;
 }
 
@@ -128,7 +165,7 @@ export interface Codeplug {
   meta: CodeplugMeta;
 }
 
-export const CODEPLUG_SCHEMA_VERSION = 8;
+export const CODEPLUG_SCHEMA_VERSION = 9;
 
 let idGenerator: () => string = () => crypto.randomUUID();
 

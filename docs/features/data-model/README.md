@@ -158,7 +158,7 @@ Named RX (receive) group list driving promiscuous receive. Members are ordered `
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `schemaVersion` | `number` | Must match `CODEPLUG_SCHEMA_VERSION` (8) after migration |
+| `schemaVersion` | `number` | Must match `CODEPLUG_SCHEMA_VERSION` (9) after migration |
 | `importedAt` | `string \| null` | |
 | `sourceFiles` | `string[]` | |
 

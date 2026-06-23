@@ -15,7 +15,7 @@
 
 ## Slice 1: Docs kickoff
 
-**Status:** In progress
+**Status:** Complete
 
 **Delivered**
 
@@ -26,6 +26,18 @@
 
 ---
 
+## Slice 2: Model + migration + channelExpansion
+
+**Status:** Complete
+
+**Delivered**
+
+- `ChannelModeProfile`, `multiMode`, `modeProfiles` on `Channel`
+- `CODEPLUG_SCHEMA_VERSION = 9`
+- `src/lib/channelExpansion/` resolver + unit tests
+
+---
+
 ## Next
 
-- Slice 2: Model + schema v9 migration + `channelExpansion` helpers
+- Slice 3: Validation + mutations

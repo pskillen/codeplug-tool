@@ -18,6 +18,8 @@ export function buildChannel(overrides: Partial<Channel> & Pick<Channel, 'id' | 
     name,
     callsign: callsign ?? name.split(/\s+/)[0],
     mode: mode ?? ('dmr' as ChannelMode),
+    multiMode: false,
+    modeProfiles: [],
     ...channelFieldDefaults(),
     ...rest,
   };
