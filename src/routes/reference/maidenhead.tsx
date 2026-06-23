@@ -15,7 +15,7 @@ import { useDebouncedValue } from '@mantine/hooks';
 import { useCallback, useMemo, useState } from 'react';
 import MapLocationPicker from '../../components/MapLocationPicker/MapLocationPicker.tsx';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
-import ReportPage from '../../components/report/ReportPage.tsx';
+import { Page, PageHeader, PageSection } from '../../components/ui/index.ts';
 import { useMapSettings } from '../../hooks/useMapSettings.ts';
 import { GeocodeError, geocodeQuery, type GeocodeProvider } from '../../lib/geocode.ts';
 import {
@@ -184,12 +184,14 @@ export default function MaidenheadConverter() {
   };
 
   return (
-    <ReportPage title="Maidenhead converter">
-      <Stack gap="lg">
-        <Text c="dimmed">
-          Convert between Maidenhead grid locators and WGS84 coordinates. Updates live as you type.
-        </Text>
+    <Page>
+      <PageHeader
+        title="Maidenhead converter"
+        description="Convert between Maidenhead grid locators and WGS84 coordinates. Updates live as you type."
+      />
 
+      <PageSection title="Converter">
+      <Stack gap="lg">
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
           <Stack gap="sm">
             <Title order={4}>Locator</Title>
@@ -318,6 +320,7 @@ export default function MaidenheadConverter() {
           </Stack>
         </SimpleGrid>
       </Stack>
-    </ReportPage>
+      </PageSection>
+    </Page>
   );
 }
