@@ -10,7 +10,7 @@
 | 1 Core DataTable | Complete | Mantine Table extension; tests + styleguide |
 | 2 Simple entity lists | Complete | Search in table toolbar; `?q=` preserved |
 | 3 Embedded detail tables | Complete | variant=embedded, header sort |
-| 4 Channels + section nav | Pending | |
+| 4 Channels + section nav | Complete | Column picker in table; header sort + URL sync |
 | 5 Documentation | Pending | |
 
 ## Implementation decision
