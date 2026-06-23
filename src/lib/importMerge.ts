@@ -1,5 +1,5 @@
 import { buildNameToChannelId, resolveZoneMembers } from './codeplug.ts';
-import { incomingChannelMergeKey, channelImportMergeKeys } from './channelNaming.ts';
+import { incomingChannelMergeKey, channelImportMergeKeys, normalizeImportedChannelNaming } from './channelNaming.ts';
 import {
   channelsImportEqual,
   contactsImportEqual,
@@ -194,20 +194,21 @@ function mergeChannels(
 
   for (const inc of deduped) {
     const key = incomingChannelMergeKey(inc);
+    const incReady = normalizeImportedChannelNaming([inc])[0];
     const ex = byKey.get(key);
     if (ex) {
-      if (channelsImportEqual(ex, inc)) {
+      if (channelsImportEqual(ex, incReady)) {
         stats.unchanged++;
       } else {
         const idx = result.findIndex((item) => item.id === ex.id);
-        result[idx] = mergeChannelOntoExisting(ex, inc);
+        result[idx] = mergeChannelOntoExisting(ex, incReady);
         stats.updated++;
       }
     } else {
-      result.push(inc);
+      result.push(incReady);
       stats.added++;
-      for (const mergeKey of channelImportMergeKeys(inc)) {
-        if (!byKey.has(mergeKey)) byKey.set(mergeKey, inc);
+      for (const mergeKey of channelImportMergeKeys(incReady)) {
+        if (!byKey.has(mergeKey)) byKey.set(mergeKey, incReady);
       }
     }
   }
@@ -434,7 +435,7 @@ function applyImportInternal(
     contacts,
     resolvedRxGroupLists,
   );
-  const resolvedChannels = tgCollapsed.channels;
+  const resolvedChannels = normalizeImportedChannelNaming(tgCollapsed.channels);
   const finalRxGroupLists = tgCollapsed.rxGroupLists;
 
   const nameToId = buildNameToChannelId(resolvedChannels, {

@@ -66,8 +66,8 @@ export function parseChannelWireName(wire: string): ParsedChannelWireName {
 export function composeChannelWireName(
   channel: Pick<Channel, 'callsign' | 'name' | 'exportNameMode'>,
 ): string {
-  const callsign = channel.callsign.trim();
-  const name = channel.name.trim();
+  const callsign = (channel.callsign ?? '').trim();
+  const name = (channel.name ?? '').trim();
 
   switch (channel.exportNameMode) {
     case 'callsign_name':
@@ -113,6 +113,30 @@ export function normalizeImportedChannelNaming(channels: Channel[]): Channel[] {
       exportNameMode: parsed.exportNameMode,
     };
   });
+}
+
+/** Verbatim CPS Channel Name cell — from provenance or transient parse `name`. */
+export function importedChannelWireCell(channel: Channel): string {
+  return channel.meta?.imported?.channelWireName ?? channel.name;
+}
+
+/** After collapse merge: stash all source wire names for re-import identity. */
+export function withMergedChannelWireProvenance(survivor: Channel, sources: Channel[]): Channel {
+  const wireNames = [...new Set(sources.map(importedChannelWireCell).filter(Boolean))];
+  if (wireNames.length === 0) return survivor;
+  const imported = survivor.meta?.imported;
+  if (!imported) return survivor;
+  return {
+    ...survivor,
+    meta: {
+      ...survivor.meta,
+      imported: {
+        ...imported,
+        channelWireName: wireNames[0],
+        ...(wireNames.length > 1 ? { channelWireNames: wireNames } : {}),
+      },
+    },
+  };
 }
 
 /** Merge identity for active import — stashed wire name first. */

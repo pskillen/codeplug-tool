@@ -17,6 +17,7 @@ import type {
   Zone,
 } from '../../models/codeplug.ts';
 import { channelModeProfileDefaults, newId } from '../../models/codeplug.ts';
+import { withMergedChannelWireProvenance } from '../channelNaming.ts';
 
 /** Resolved export row — shared channel fields merged with one mode profile. */
 export interface ExpandedChannelRow {
@@ -520,7 +521,7 @@ export function mergeChannelsToMultiTalkgroup(
     rxGroupListId,
   };
 
-  return { channel, rxGroupLists };
+  return { channel: withMergedChannelWireProvenance(channel, sources), rxGroupLists };
 }
 
 function canMergeMultiTalkgroupPair(
@@ -768,7 +769,7 @@ export function mergeChannelsToMultiMode(
     };
   }
 
-  return syncChannelFromPrimaryProfile(base);
+  return syncChannelFromPrimaryProfile(withMergedChannelWireProvenance(base, sources));
 }
 
 function canMergePair(a: Channel, b: Channel): boolean {
