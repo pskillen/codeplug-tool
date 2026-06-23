@@ -273,11 +273,7 @@ export function channelLocationsMatch(a: Channel, b: Channel): boolean {
   return a.location.lat === b.location.lat && a.location.lon === b.location.lon;
 }
 
-function channelNameStemsMatch(
-  a: Channel,
-  b: Channel,
-  threshold: number,
-): boolean {
+function channelNameStemsMatch(a: Channel, b: Channel, threshold: number): boolean {
   const stemA = channelNameStem(a.name);
   const stemB = channelNameStem(b.name);
   if (threshold <= 0) return stemA === stemB;
@@ -329,8 +325,7 @@ export function mergeChannelsToMultiMode(
 
   const primary = pickPrimarySource(sources);
   const survivorId = options.survivorId ?? primary.id;
-  const resultName =
-    options.resultName ?? channelNameStem(primary.name);
+  const resultName = options.resultName ?? channelNameStem(primary.name);
   const modeProfiles = sources.map((ch) => profileFromChannelFields(ch));
 
   const base: Channel = {

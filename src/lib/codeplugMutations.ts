@@ -157,11 +157,7 @@ export function mergeChannelsIntoOne(
     .map((ch) => (ch.id === survivorId ? normalized : ch));
 
   const zones = codeplug.zones.map((zone) => {
-    const memberChannelIds = replaceZoneMemberIds(
-      zone.memberChannelIds,
-      survivorId,
-      absorbed,
-    );
+    const memberChannelIds = replaceZoneMemberIds(zone.memberChannelIds, survivorId, absorbed);
     return zoneWithMemberIds(zone, memberChannelIds, channels);
   });
 

@@ -96,10 +96,7 @@ function classifyGroup(channels: Channel[]): {
   return { mergeKind: 'multiMode' };
 }
 
-function buildGroupsInBucket(
-  bucket: Channel[],
-  threshold: number,
-): ChannelMergeCandidateGroup[] {
+function buildGroupsInBucket(bucket: Channel[], threshold: number): ChannelMergeCandidateGroup[] {
   const groups: ChannelMergeCandidateGroup[] = [];
   const used = new Set<string>();
 

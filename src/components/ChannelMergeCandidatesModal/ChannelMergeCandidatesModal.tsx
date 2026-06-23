@@ -131,7 +131,12 @@ export default function ChannelMergeCandidatesModal({
               const isActionable = group.mergeKind === 'multiMode';
 
               return (
-                <Stack key={group.id} gap="xs" p="sm" style={{ border: '1px solid var(--mantine-color-gray-3)', borderRadius: 8 }}>
+                <Stack
+                  key={group.id}
+                  gap="xs"
+                  p="sm"
+                  style={{ border: '1px solid var(--mantine-color-gray-3)', borderRadius: 8 }}
+                >
                   <Group justify="space-between" align="flex-start">
                     <Checkbox
                       label="Apply this merge"

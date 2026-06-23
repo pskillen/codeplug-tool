@@ -24,6 +24,7 @@ import {
   deleteRxGroupList as deleteRxGroupListMutation,
   deleteTalkGroup as deleteTalkGroupMutation,
   deleteZone as deleteZoneMutation,
+  setRxGroupListMembers as setRxGroupListMembersMutation,
   setZoneMembers as setZoneMembersMutation,
   updateChannel as updateChannelMutation,
   updateContact as updateContactMutation,
@@ -264,8 +265,9 @@ function projectsReducer(state: ProjectsState, action: ProjectsAction): Projects
       );
 
     case 'APPLY_CHANNEL_MERGES':
-      return updateActiveCodeplug(state, (cp) =>
-        applyChannelMerges(cp, action.selections, action.candidates).codeplug,
+      return updateActiveCodeplug(
+        state,
+        (cp) => applyChannelMerges(cp, action.selections, action.candidates).codeplug,
       );
 
     case 'UPDATE_PROJECT': {
