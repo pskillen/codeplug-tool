@@ -102,9 +102,33 @@ describe('App', () => {
 
     expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Reference' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Debug' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Settings' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Summary' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Channels' })).not.toBeInTheDocument();
+  });
+
+  it('renders the debug index without an active project', () => {
+    renderApp('/debug');
+
+    expect(screen.getByRole('heading', { name: 'Debug' })).toBeInTheDocument();
+    expect(screen.getByText(/view persisted keys and their JSON values/i)).toBeInTheDocument();
+  });
+
+  it('lists localStorage keys on the debug localStorage page', () => {
+    renderApp('/debug/local-storage');
+
+    expect(screen.getByRole('heading', { name: 'LocalStorage' })).toBeInTheDocument();
+    expect(screen.getByText(CODEPLUG_STORAGE_KEY)).toBeInTheDocument();
+  });
+
+  it('renders codeplug JSON in the localStorage viewer', () => {
+    seedActiveProject();
+
+    renderApp(`/debug/local-storage/${encodeURIComponent(CODEPLUG_STORAGE_KEY)}`);
+
+    expect(screen.getByRole('heading', { name: 'Codeplug projects' })).toBeInTheDocument();
+    expect(screen.getByText('Test repeaters')).toBeInTheDocument();
   });
 
   it('renders the reference index without an active project', () => {
