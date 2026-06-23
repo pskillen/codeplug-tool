@@ -150,4 +150,5 @@
 
 ## Next
 
-- Merge PR closing #46
+- Open PR closing #36 and #123
+- DM32 adapter (#67) consumes `expandAllChannelsForExport` with `expandRxGroupLists: true`
