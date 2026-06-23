@@ -8,7 +8,7 @@ Create, edit, and delete codeplug entities against the internal vendor-neutral m
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| Channel CRUD | Complete | `src/routes/channels/` |
+| Channel CRUD | Complete | `src/routes/channels/` — multi-mode editor ([#46](https://github.com/pskillen/codeplug-tool/issues/46)) |
 | Zone CRUD | Complete | `src/routes/zones/` + `ZoneMemberPicker` |
 | Talk group CRUD | Complete | `TalkGroupEdit`, list/detail |
 | RX group list CRUD | Complete | `RxGroupListEdit`, `RxGroupListMemberPicker` |
