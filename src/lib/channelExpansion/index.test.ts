@@ -282,7 +282,7 @@ describe('channelExpansion', () => {
     });
     const codeplug = buildCodeplug({
       talkGroups: [tg1],
-      contacts: [{ id: 'ct1', name: 'Private', number: '', timeslotOverride: '' }],
+      contacts: [{ id: 'ct1', name: 'Private', identifier: '', signalingMode: 'dmr' as const }],
       rxGroupLists: [rgl],
     });
     const ch = buildChannel({

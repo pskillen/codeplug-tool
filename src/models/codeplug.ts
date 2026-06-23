@@ -142,11 +142,16 @@ export interface RxGroupList {
   meta?: EntityMeta;
 }
 
+/** Signalling family for a contact — not RF channel mode. */
+export type ContactSignalingMode = 'dmr' | 'dtmf';
+
 export interface Contact {
   id: string;
   name: string;
-  number: string;
-  timeslotOverride: string;
+  /** DMR ID or DTMF code — string preserves leading zeros. */
+  identifier: string;
+  signalingMode: ContactSignalingMode;
+  timeslotOverride?: string;
   meta?: EntityMeta;
 }
 
@@ -165,7 +170,7 @@ export interface Codeplug {
   meta: CodeplugMeta;
 }
 
-export const CODEPLUG_SCHEMA_VERSION = 9;
+export const CODEPLUG_SCHEMA_VERSION = 10;
 
 let idGenerator: () => string = () => crypto.randomUUID();
 
