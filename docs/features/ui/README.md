@@ -1,4 +1,4 @@
-# UI — icons and shell navigation
+# UI — icons, navigation, and component kit
 
 Contributor docs for shared UI conventions in the SPA.
 
@@ -10,6 +10,7 @@ Contributor docs for shared UI conventions in the SPA.
 | Shared size constants | Shipped | `src/lib/iconSizes.ts` |
 | Display conventions | Shipped | [display-conventions.md](../../reference/display-conventions.md) |
 | Two-section navigation | Shipped | [#81](https://github.com/pskillen/codeplug-tool/issues/81) — `AppNav`, `SectionNav`, `src/nav/` |
+| Layout & component kit | In progress | [#105](https://github.com/pskillen/codeplug-tool/issues/105) — `src/components/ui/` |
 | CRUD actions | Shipped | List/detail/edit routes, ConfirmDeleteModal, ZoneMemberPicker |
 | Import/export/workflows | Shipped | ImportDropzone, Export, SummaryCard, ProjectList |
 | Map/location | Shipped | MapControls, UseMyLocationButton |
@@ -22,7 +23,50 @@ Contributor docs for shared UI conventions in the SPA.
 | [icons-outstanding.md](icons-outstanding.md) | Icons debt |
 | [nav-progress.md](nav-progress.md) | Two-section nav execution log ([#81](https://github.com/pskillen/codeplug-tool/issues/81)) |
 | [nav-outstanding.md](nav-outstanding.md) | Nav debt discovered during #81 |
+| [component-kit-progress.md](component-kit-progress.md) | Component kit execution log ([#105](https://github.com/pskillen/codeplug-tool/issues/105)) |
+| [component-kit-outstanding.md](component-kit-outstanding.md) | Kit debt discovered during #105 |
 | [display-conventions.md](../../reference/display-conventions.md) | Icons, badges, nav layout |
+
+## Layout & component kit
+
+Shared page chrome lives in [`src/components/ui/`](../../src/components/ui/). **Reference layout:** import/export (`src/routes/ImportExport.tsx`) — page title + dimmed description, bordered section cards in a responsive grid.
+
+### Page width tokens
+
+Defined in [`tokens.ts`](../../src/components/ui/tokens.ts) and applied via `Page`:
+
+| Variant | Mantine `Container` size | Typical routes |
+| --- | --- | --- |
+| `narrow` | `sm` | Home, Settings |
+| `default` | `lg` | CRUD, import/export, report |
+| `wide` | `xl` | Reserved for data-heavy reference pages |
+
+### Spacing conventions
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `PAGE_STACK_GAP` | `lg` | Between major page blocks |
+| `PAGE_HEADER_GAP` | `xs` | Title + description |
+| `PAGE_SECTION_GAP` | `md` | Inside bordered section cards |
+| Section card | `Paper withBorder`, `p="md"`, `radius="md"` | Grouped settings, import/export panels |
+
+### Styleguide
+
+Hidden dev route (no nav link): `/#/styleguide` — demos every kit primitive.
+
+### Primitives inventory
+
+| Component | Role |
+| --- | --- |
+| `Page` | Outer shell — width, vertical padding |
+| `PageHeader` | `Title order={1}` + description + optional actions |
+| `PageSection` | Bordered card with optional title/description |
+| `PageSectionGrid` | Responsive 1–2 column section layout |
+| `ListPage` | List-route shell |
+| `FormPage` | Edit-route shell with sticky mobile footer |
+| `FormSection` | Titled field group |
+| `DataTable` | Entity list table with empty state |
+| `EmptyState` | Zero-row / empty project placeholder |
 
 ## Two-section navigation architecture
 
