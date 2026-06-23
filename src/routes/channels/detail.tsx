@@ -9,6 +9,7 @@ import DetailSections, { DetailLinkList } from '../../components/report/DetailSe
 import NotFoundEntity from '../../components/report/NotFoundEntity.tsx';
 import { Page, PageHeader } from '../../components/ui/index.ts';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
+import UkRepeaterVerify from '../../components/UkRepeaterVerify/UkRepeaterVerify.tsx';
 import {
   externalChannelLinks,
   findEntityById,
@@ -332,7 +333,8 @@ export default function ChannelDetail() {
               Channels
             </Group>
           </Anchor>
-          <Group gap="sm">
+          <Group gap="sm" align="flex-start">
+            <UkRepeaterVerify channel={channel} />
             <Button
               component={Link}
               to={`/channels/${channel.id}/edit`}

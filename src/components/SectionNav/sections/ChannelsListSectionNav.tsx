@@ -1,5 +1,5 @@
 import { Button, MultiSelect, Select, Slider, Stack, Switch, Text, TextInput } from '@mantine/core';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus, IconWorldSearch } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import UseMyLocationButton from '../../UseMyLocationButton/UseMyLocationButton.tsx';
@@ -57,6 +57,16 @@ export default function ChannelsListSectionNav({ variant }: SectionNavProps) {
         fullWidth={isSidebar}
       >
         New channel
+      </Button>
+
+      <Button
+        component={Link}
+        to="/channels/add-from-ukrepeater"
+        variant="light"
+        leftSection={<IconWorldSearch size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+        fullWidth={isSidebar}
+      >
+        Add from ukrepeater.net
       </Button>
 
       <TextInput

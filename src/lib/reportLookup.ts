@@ -165,6 +165,10 @@ export function externalChannelLinks(callsign: string): { label: string; url: st
   const q = encodeURIComponent(callsign);
   return [
     {
+      label: 'ukrepeater.net',
+      url: `https://ukrepeater.net/repeaterlist.html?filter=${q}`,
+    },
+    {
       label: 'RepeaterBook',
       url: `https://www.repeaterbook.com/repeaters/display.php?state=&call=${q}`,
     },

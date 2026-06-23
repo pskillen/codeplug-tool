@@ -20,6 +20,7 @@ import NewCodeplug from './routes/project/new.tsx';
 import ChannelsList from './routes/channels/list.tsx';
 import ChannelDetail from './routes/channels/detail.tsx';
 import ChannelEdit from './routes/channels/edit.tsx';
+import AddFromUkrepeater from './routes/channels/addFromUkrepeater.tsx';
 import ZonesList from './routes/zones/list.tsx';
 import ZoneDetail from './routes/zones/detail.tsx';
 import ZoneEdit from './routes/zones/edit.tsx';
@@ -97,6 +98,7 @@ export default function App() {
             <Route path="/summary" element={<Summary />} />
             <Route path="/summary/edit" element={<ProjectEdit />} />
             <Route path="/channels" element={<ChannelsList />} />
+            <Route path="/channels/add-from-ukrepeater" element={<AddFromUkrepeater />} />
             <Route path="/channels/new" element={<ChannelEdit />} />
             <Route path="/channels/:id/edit" element={<ChannelEdit />} />
             <Route path="/channels/:id" element={<ChannelDetail />} />

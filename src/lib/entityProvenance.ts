@@ -20,8 +20,43 @@ export interface ImportedProvenance {
   }>;
 }
 
+/** Remote repeater directory snapshot — verify/display only, not export source of truth. */
+export interface RepeaterDirectoryProvenance {
+  sourceId: 'ukrepeater';
+  remoteListingId: number;
+  fetchedAt: string;
+  /** Opaque ETCC listing fields at fetch time — typed in ukrepeater module. */
+  snapshot: Record<string, unknown>;
+}
+
 export interface EntityMeta {
   imported?: ImportedProvenance | null;
+  repeaterDirectory?: RepeaterDirectoryProvenance | null;
+}
+
+export interface StampRepeaterDirectoryInput {
+  sourceId: 'ukrepeater';
+  remoteListingId: number;
+  fetchedAt: string;
+  snapshot: Record<string, unknown>;
+}
+
+export function stampRepeaterDirectory<T extends WithEntityMeta>(
+  entity: T,
+  input: StampRepeaterDirectoryInput,
+): T {
+  return {
+    ...entity,
+    meta: {
+      ...entity.meta,
+      repeaterDirectory: {
+        sourceId: input.sourceId,
+        remoteListingId: input.remoteListingId,
+        fetchedAt: input.fetchedAt,
+        snapshot: input.snapshot,
+      },
+    },
+  };
 }
 
 export interface WithEntityMeta {
