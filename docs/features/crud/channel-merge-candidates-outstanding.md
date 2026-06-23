@@ -8,7 +8,7 @@ Items **skipped**, **incomplete**, or **discovered during execution** — not th
 
 ## Deferred scope
 
-- [ ] Multi-talkgroup merge apply ([#36](https://github.com/pskillen/codeplug-tool/issues/36)) — detection stub only in v1
+- [x] Multi-talkgroup merge apply ([#36](https://github.com/pskillen/codeplug-tool/issues/36)) — shipped in `36/paddy/multi-talkgroup-export`
 - [ ] Full-page review route ([#113](https://github.com/pskillen/codeplug-tool/issues/113)) — modal v1 ships first
 - [ ] Automatic detection on load — button-initiated only
 

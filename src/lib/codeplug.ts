@@ -1,8 +1,23 @@
-import type { Channel } from '../models/codeplug.ts';
-import { modeExportNameSuffix, resolveChannelModeProfiles } from './channelExpansion/index.ts';
+import type { Channel, Codeplug } from '../models/codeplug.ts';
+import {
+  expandAllChannelsForExport,
+  modeExportNameSuffix,
+  resolveChannelModeProfiles,
+  type TalkGroupMemberFilter,
+} from './channelExpansion/index.ts';
+
+export interface BuildNameToChannelIdOptions {
+  /** When set with expandTalkGroups, register TG-expanded wire name aliases. */
+  codeplug?: Codeplug;
+  expandTalkGroups?: boolean;
+  talkGroupMembers?: TalkGroupMemberFilter;
+}
 
 /** Case-sensitive, first-wins name → channel id map (OpenGD77 quirk at import boundary only). */
-export function buildNameToChannelId(channels: Channel[]): Map<string, string> {
+export function buildNameToChannelId(
+  channels: Channel[],
+  options: BuildNameToChannelIdOptions = {},
+): Map<string, string> {
   const map = new Map<string, string>();
   for (const ch of channels) {
     if (!map.has(ch.name)) map.set(ch.name, ch.id);
@@ -13,6 +28,18 @@ export function buildNameToChannelId(channels: Channel[]): Map<string, string> {
       }
     }
   }
+
+  if (options.expandTalkGroups && options.codeplug) {
+    const expanded = expandAllChannelsForExport(channels, {
+      expandTalkGroups: true,
+      talkGroupMembers: options.talkGroupMembers,
+      codeplug: options.codeplug,
+    });
+    for (const row of expanded) {
+      if (!map.has(row.wireName)) map.set(row.wireName, row.sourceChannelId);
+    }
+  }
+
   return map;
 }
 

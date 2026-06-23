@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { buildChannel, buildCodeplug, buildZone } from '../test/builders/codeplug.ts';
+import {
+  buildChannel,
+  buildCodeplug,
+  buildTalkGroup,
+  buildZone,
+} from '../test/builders/codeplug.ts';
 import {
   applyChannelMerges,
   findChannelMergeCandidates,
@@ -244,5 +249,93 @@ describe('channelMergeCandidates', () => {
     expect(merged.channels).toHaveLength(1);
     expect(merged.channels[0].multiMode).toBe(true);
     expect(merged.zones[0].memberChannelIds).toEqual(['fm']);
+  });
+
+  it('findChannelMergeCandidates groups flat per-TG DMR rows as multiTalkgroup', () => {
+    const tg1 = buildTalkGroup({ id: 'tg1', name: 'Scotland TS1' });
+    const tg2 = buildTalkGroup({ id: 'tg2', name: 'Local 9' });
+    const ch1 = buildChannel({
+      id: '1',
+      name: 'GB7GL Scotland TS1',
+      mode: 'dmr',
+      rxFrequency: 430_850_000,
+      txFrequency: 438_450_000,
+      colourCode: 7,
+      timeslot: 2,
+      contactRef: { kind: 'talkGroup', id: 'tg1' },
+    });
+    const ch2 = buildChannel({
+      id: '2',
+      name: 'GB7GL Local 9',
+      mode: 'dmr',
+      rxFrequency: 430_850_000,
+      txFrequency: 438_450_000,
+      colourCode: 7,
+      timeslot: 2,
+      contactRef: { kind: 'talkGroup', id: 'tg2' },
+    });
+    const codeplug = buildCodeplug({
+      channels: [ch1, ch2],
+      talkGroups: [tg1, tg2],
+    });
+
+    const groups = findChannelMergeCandidates(codeplug);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].mergeKind).toBe('multiTalkgroup');
+    expect(groups[0].suggestedName).toBe('GB7GL');
+  });
+
+  it('applyChannelMerges merges multi-talkgroup group into one channel + RGL', () => {
+    const tg1 = buildTalkGroup({ id: 'tg1', name: 'Scotland TS1' });
+    const tg2 = buildTalkGroup({ id: 'tg2', name: 'Local 9' });
+    const ch1 = buildChannel({
+      id: '1',
+      name: 'GB7GL Scotland TS1',
+      mode: 'dmr',
+      rxFrequency: 430_850_000,
+      txFrequency: 438_450_000,
+      colourCode: 7,
+      timeslot: 2,
+      contactRef: { kind: 'talkGroup', id: 'tg1' },
+    });
+    const ch2 = buildChannel({
+      id: '2',
+      name: 'GB7GL Local 9',
+      mode: 'dmr',
+      rxFrequency: 430_850_000,
+      txFrequency: 438_450_000,
+      colourCode: 7,
+      timeslot: 2,
+      contactRef: { kind: 'talkGroup', id: 'tg2' },
+    });
+    const zone = buildZone({ id: 'z1', name: 'Local', memberChannelIds: ['1', '2'] });
+    const codeplug = buildCodeplug({
+      channels: [ch1, ch2],
+      talkGroups: [tg1, tg2],
+      zones: [zone],
+    });
+    const candidates = findChannelMergeCandidates(codeplug);
+
+    const { codeplug: merged, report } = applyChannelMerges(
+      codeplug,
+      [
+        {
+          groupId: candidates[0].id,
+          sourceChannelIds: candidates[0].sourceChannelIds,
+          resultName: 'GB7GL',
+          enabled: true,
+        },
+      ],
+      candidates,
+    );
+
+    expect(report.mergedCount).toBe(1);
+    expect(merged.channels).toHaveLength(1);
+    expect(merged.channels[0].name).toBe('GB7GL');
+    expect(merged.channels[0].contactRef).toBeNull();
+    expect(merged.channels[0].rxGroupListId).toBeTruthy();
+    expect(merged.rxGroupLists).toHaveLength(1);
+    expect(merged.rxGroupLists[0].memberRefs).toHaveLength(2);
+    expect(merged.zones[0].memberChannelIds).toEqual(['1']);
   });
 });

@@ -95,6 +95,56 @@ Adapter contract (export): implement `delivery`; multi-file adapters expose `dow
 
 ---
 
+## Expandable channels (multi-mode / multi-talkgroup)
+
+The internal model lets operators keep **fewer logical channels** than the target CPS may require on the wire. Shared expansion lives in [`src/lib/channelExpansion/`](../../../src/lib/channelExpansion/) — adapters decide **whether** each axis applies; not every format needs either.
+
+**When scoping a new vendor, consider:**
+
+| Question | If yes on wire | If no on wire |
+| --- | --- | --- |
+| **Dual / multi RF mode** on one channel row? (e.g. DM32 `Fixed Analog` / `Fixed Digital`) | Map to `multiMode` + `modeProfiles` on import; collapse on export to **one** row per logical channel ([#67](https://github.com/pskillen/codeplug-tool/issues/67)) | Use mode expansion on export — separate rows per profile ([#46](https://github.com/pskillen/codeplug-tool/issues/46)); best-effort collapse on import. OpenGD77 example: [multi-mode.md](../../reference/opengd77/multi-mode.md) |
+| **Promiscuous RX / RX group lists**? (e.g. OpenGD77 `TG List` + `TG_Lists.csv`) | Lean export — one channel row + list reference; import maps list members to `RxGroupList.memberRefs` | Use multi-talkgroup expansion on export — one row per (channel × talk group) from the logical channel’s RGL ([#36](https://github.com/pskillen/codeplug-tool/issues/36)); best-effort collapse on import. DM32 is the next consumer ([#67](https://github.com/pskillen/codeplug-tool/issues/67)) |
+
+Neither axis is automatic — **document the choice** in `docs/reference/<vendor>/` and the adapter behaviour README.
+
+### Export pipeline (when expansion applies)
+
+```
+logical Channel[]
+  → expandAllChannelsForExport(channels, { codeplug, expandTalkGroups?, … })
+  → ExpandedChannelRow[]   (mode expand; optional TG expand)
+  → serialise each row to vendor columns
+```
+
+- **Multi-mode:** always expand when the format has no native dual-mode row (OpenGD77). Skip when the format carries multiple modes on one row (DM32 — #67).
+- **Multi-talkgroup:** set `expandTalkGroups: true` (and `talkGroupMembers` if the format distinguishes private vs group contacts) only when the format **cannot** represent `RxGroupList` on the wire. Do **not** enable for OpenGD77 — native `TG List` is correct.
+- Zone members: use `expandZoneMemberWireNames` so logical zone ids fan out to all derived wire names; warn/truncate at profile caps.
+
+### Import pipeline (best-effort collapse)
+
+After parsing flat channel rows, run vendor-neutral merge helpers from `channelExpansion/` (order: multi-mode first, then multi-talkgroup):
+
+- `mergeImportChannelsBestEffort` — paired Analogue/Digital rows → one `multiMode` channel
+- `mergeImportChannelsMultiTalkgroupBestEffort` — same-site digital rows differing only by TX talk group → one logical channel + RGL
+
+Collapse is **best-effort** — ambiguous groups stay flat. Operators can repair post-import via **Find merge candidates** on the channels list ([#116](https://github.com/pskillen/codeplug-tool/issues/116)).
+
+Register derived wire-name aliases in [`buildNameToChannelId`](../../../src/lib/codeplug.ts) so zone import resolves expanded row names back to logical channel ids.
+
+### Checklist (per new vendor)
+
+- [ ] Document whether the format needs **mode expansion**, **TG expansion**, both, or neither
+- [ ] Reference tier-2 rules: [multi-talkgroup-expansion.md](../../reference/multi-talkgroup-expansion.md); format-specific notes under `docs/reference/<vendor>/`
+- [ ] Wire export through `expandAllChannelsForExport` when either axis applies; pass `ExportOptions` flags only for axes this format needs
+- [ ] Wire import collapse after parse when flat rows may represent one logical channel
+- [ ] Tests: expanded row count, zone fan-out, naming collisions, import collapse, round-trip where applicable
+- [ ] Do not add per-channel expansion flags to the internal model — expansion is an export/import boundary concern
+
+Domain background: [data-model README — multi-mode](../data-model/README.md), [channel-modes reference](../../reference/channel-modes.md).
+
+---
+
 ## 3. Data model
 
 Extend the internal model only when a field is **shared across vendors** or needed for app features (map, CRUD, reports).
@@ -179,6 +229,7 @@ Document and test known non-round-trip behaviour:
 
 - [ ] `docs/features/import-export/README.md` — implementation status row
 - [ ] `docs/features/import-export/<vendor>/README.md` — adapter behaviour (not column tables)
+- [ ] `docs/features/import-export/adding-a-new-vendor.md` — expandable-channel row if the format introduces a new pattern (mode vs TG expansion)
 - [ ] `docs/features/README.md` — index row if new top-level vendor subtree
 - [ ] `docs/build/testing/format-fidelity.md` — fidelity matrix row/column
 - [ ] `docs/build/testing/fixtures.md` — bundle layout if new pattern
@@ -242,6 +293,19 @@ Use this as a walk-through when adding DM32, qDMR, or another format.
 | Outstanding debt | APRS/DTMF not modelled — [outstanding.md](outstanding.md) |
 
 OpenGD77 teaches the **format vs profile** split: one CSV adapter, many radio profiles at export time.
+
+**Expandable channels:** mode expansion on export (FM + DMR → two rows); **no** multi-talkgroup expansion — native RGL on the wire.
+
+## Worked example: DM32 (planned)
+
+Next DMR format ([#67](https://github.com/pskillen/codeplug-tool/issues/67)) — illustrates the opposite split from OpenGD77.
+
+| Axis | DM32 (expected) |
+| --- | --- |
+| Multi-mode | Native dual-mode on **one** row — map to `multiMode` / `modeProfiles`; do not mode-expand on export |
+| Multi-talkgroup | **No RGL on wire** — enable `expandTalkGroups` on export; collapse flat per-TG rows on import |
+
+Stub: [dm32/README.md](dm32/README.md). Expansion core: [#36](https://github.com/pskillen/codeplug-tool/issues/36).
 
 ## Worked example: CHIRP
 

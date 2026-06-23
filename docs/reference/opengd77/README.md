@@ -67,7 +67,7 @@ See [file-format.md](file-format.md) for header-name parsing, case-sensitive for
 | [contacts.md](contacts.md) | `Contacts.csv` columns |
 | [tg-lists.md](tg-lists.md) | `TG_Lists.csv` columns |
 | [dtmf-aprs.md](dtmf-aprs.md) | Deferred files + radio availability |
-| [multi-talkgroup.md](multi-talkgroup.md) | Planned denormalisation ([#36](https://github.com/pskillen/codeplug-tool/issues/36)) |
+| [multi-talkgroup.md](multi-talkgroup.md) | N/A — native RGL; see [multi-talkgroup-expansion.md](../../reference/multi-talkgroup-expansion.md) |
 | [multi-mode.md](multi-mode.md) | Multi-mode channel expansion ([#46](https://github.com/pskillen/codeplug-tool/issues/46)) |
 | [radios/README.md](radios/README.md) | Radio profile concept and index |
 

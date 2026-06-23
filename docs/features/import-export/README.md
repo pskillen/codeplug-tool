@@ -34,7 +34,8 @@ The internal model is **format- and radio-agnostic**. Format specifics — colum
 | OpenGD77 radio-variant picker | Planned | Apply per-radio (1701, MD9600, …) limits within OpenGD77 export — [#72](https://github.com/pskillen/codeplug-tool/issues/72); OpenGD77-only, not cross-format |
 | qDMR YAML | Deferred | [#37](https://github.com/pskillen/codeplug-tool/issues/37) — UI placeholder |
 | Native YAML | Deferred | [#10](https://github.com/pskillen/codeplug-tool/issues/10) — UI placeholder |
-| Baofeng DM32 CPS | Future | [#67](https://github.com/pskillen/codeplug-tool/issues/67) — [dm32 stub](dm32/README.md) |
+| Baofeng DM32 CPS | Future | [#67](https://github.com/pskillen/codeplug-tool/issues/67) — [dm32 stub](dm32/README.md); consumes [#36](https://github.com/pskillen/codeplug-tool/issues/36) TG expansion |
+| Multi-talkgroup expansion (shared lib) | Shipped | [#36](https://github.com/pskillen/codeplug-tool/issues/36) — `channelExpansion/`; OpenGD77 export unchanged |
 | CHIRP CSV (analogue FM/AM) | Shipped | [#103](https://github.com/pskillen/codeplug-tool/issues/103) — [chirp/](chirp/README.md) |
 
 ## Documentation map
@@ -72,6 +73,19 @@ flowchart TD
 ```
 
 All vendor formats convert through the radio-agnostic internal model. Import adapters parse vendor files into entities; export adapters serialise entities back to vendor columns. Feature code (map, CRUD, store) works on the internal model only.
+
+### Channel expansion (multi-mode / multi-talkgroup)
+
+Shared logic in [`src/lib/channelExpansion/`](../../../src/lib/channelExpansion/) — adapters call `expandAllChannelsForExport` before serialising wire rows:
+
+| Axis | When to enable | OpenGD77 |
+| --- | --- | --- |
+| Multi-mode | Format has no native dual-mode row | Always (separate Analogue/Digital rows) |
+| Multi-talkgroup | Format has **no native RX group lists** | **Never** — lean export with `TG List` |
+
+Pass `ExportOptions.expandRxGroupLists` and `expandRxGroupListMembers` through `expandOptionsFromExport()` ([`exportOptions.ts`](../../../src/lib/channelExpansion/exportOptions.ts)). Zone export uses `expandZoneMemberWireNames` with the same flags.
+
+Domain rules: [multi-talkgroup-expansion.md](../../reference/multi-talkgroup-expansion.md). DM32 ([#67](https://github.com/pskillen/codeplug-tool/issues/67)) will enable TG expansion on export.
 
 ## Import modes ([#58](https://github.com/pskillen/codeplug-tool/issues/58))
 

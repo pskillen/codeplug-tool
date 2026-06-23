@@ -3,15 +3,18 @@ import {
   channelLocationsMatch,
   channelMergeNameStem,
   channelsAreMultiModeMergeCandidates,
+  channelsAreMultiTalkgroupMergeCandidates,
+  channelTalkGroupStem,
   levenshteinRatio,
   mergeChannelsToMultiMode,
+  mergeChannelsToMultiTalkgroup,
   type ChannelMergeCandidateOptions,
 } from './channelExpansion/index.ts';
 import { frequencyHzToMhz } from './channelFields/frequencies.ts';
-import { isAnalogMode } from './channelModes.ts';
+import { isAnalogMode, isDmrMode } from './channelModes.ts';
 import { formatMhzNumber } from './formatFrequency.ts';
 import { mergeChannelsIntoOne } from './codeplugMutations.ts';
-import type { Channel, Codeplug } from '../models/codeplug.ts';
+import type { Channel, Codeplug, RxGroupList } from '../models/codeplug.ts';
 import { validateChannel, type ValidationIssue } from './validation/channel.ts';
 
 export type ChannelMergeKind = 'multiMode' | 'multiTalkgroup' | 'ambiguous';
@@ -76,6 +79,8 @@ export interface ChannelMergePreview {
   mergedChannel: Channel;
   validationIssues: ValidationIssue[];
   zoneImpacts: ChannelMergeZoneImpact[];
+  /** Present when merge creates or selects an RX group list. */
+  rxGroupLists?: RxGroupList[];
 }
 
 export interface ChannelMergeApplyReport {
@@ -179,16 +184,31 @@ function classifyGroup(channels: Channel[]): {
   if (channels.length < 2) {
     return { mergeKind: 'ambiguous', ambiguousReason: 'Fewer than two channels' };
   }
-  if (hasDuplicateModes(channels)) {
-    return { mergeKind: 'ambiguous', ambiguousReason: 'Duplicate modes in group' };
-  }
   if (hasLocationConflict(channels)) {
     return { mergeKind: 'ambiguous', ambiguousReason: 'Conflicting coordinates' };
+  }
+
+  const modes = new Set(channels.map((ch) => ch.mode));
+  if (modes.size === 1 && isDmrMode(channels[0].mode)) {
+    const tgRefs = channels.map((ch) => ch.contactRef);
+    const allTalkGroups = tgRefs.every((ref) => ref?.kind === 'talkGroup');
+    const distinctTgs = new Set(tgRefs.map((ref) => ref?.id)).size === channels.length;
+    if (allTalkGroups && distinctTgs) {
+      return { mergeKind: 'multiTalkgroup' };
+    }
+    return {
+      mergeKind: 'ambiguous',
+      ambiguousReason: 'Same-mode group is not all distinct talk groups',
+    };
+  }
+
+  if (hasDuplicateModes(channels)) {
+    return { mergeKind: 'ambiguous', ambiguousReason: 'Duplicate modes in group' };
   }
   return { mergeKind: 'multiMode' };
 }
 
-function buildGroupsInBucket(
+function buildMultiModeGroupsInBucket(
   bucket: Channel[],
   options: ChannelMergeCandidateOptions,
 ): ChannelMergeCandidateGroup[] {
@@ -219,7 +239,72 @@ function buildGroupsInBucket(
     if (!stemsAreCompatible(stems, threshold)) continue;
 
     const { mergeKind, ambiguousReason } = classifyGroup(members);
+    if (mergeKind !== 'multiMode') continue;
+
     const suggestedName = mergeNameStem(members[0].name);
+    groups.push({
+      id: members
+        .map((ch) => ch.id)
+        .sort()
+        .join('|'),
+      mergeKind,
+      sourceChannelIds: members.map((ch) => ch.id),
+      suggestedName,
+      ambiguousReason,
+    });
+  }
+
+  return groups;
+}
+
+function buildMultiTalkgroupGroupsInBucket(
+  bucket: Channel[],
+  options: ChannelMergeCandidateOptions,
+  codeplug: Codeplug,
+): ChannelMergeCandidateGroup[] {
+  const threshold = options.nameFuzzyThreshold ?? DEFAULT_NAME_FUZZY_THRESHOLD;
+  const groups: ChannelMergeCandidateGroup[] = [];
+  const used = new Set<string>();
+  const eligible = bucket.filter((ch) => !ch.multiMode && isDmrMode(ch.mode));
+
+  for (const seed of eligible) {
+    if (used.has(seed.id)) continue;
+
+    const members: Channel[] = [seed];
+    used.add(seed.id);
+
+    for (const candidate of eligible) {
+      if (used.has(candidate.id)) continue;
+      const matchesAll = members.every((member) =>
+        channelsAreMultiTalkgroupMergeCandidates(
+          member,
+          candidate,
+          codeplug.talkGroups,
+          codeplug.contacts,
+          options,
+        ),
+      );
+      if (matchesAll) {
+        members.push(candidate);
+        used.add(candidate.id);
+      }
+    }
+
+    if (members.length < 2) continue;
+
+    const stems = members.map((ch) =>
+      channelTalkGroupStem(mergeNameStem(ch.name), codeplug.talkGroups, codeplug.contacts),
+    );
+    if (!stemsAreCompatible(stems, threshold)) continue;
+
+    const { mergeKind, ambiguousReason } = classifyGroup(members);
+    if (mergeKind !== 'multiTalkgroup') continue;
+
+    const suggestedName = channelTalkGroupStem(
+      mergeNameStem(members[0].name),
+      codeplug.talkGroups,
+      codeplug.contacts,
+    );
     groups.push({
       id: members
         .map((ch) => ch.id)
@@ -255,7 +340,8 @@ export function findChannelMergeCandidates(
   const groups: ChannelMergeCandidateGroup[] = [];
   for (const bucket of byBucket.values()) {
     if (bucket.length < 2) continue;
-    groups.push(...buildGroupsInBucket(bucket, options));
+    groups.push(...buildMultiModeGroupsInBucket(bucket, options));
+    groups.push(...buildMultiTalkgroupGroupsInBucket(bucket, options, codeplug));
   }
 
   return groups.sort((a, b) => a.suggestedName.localeCompare(b.suggestedName));
@@ -291,7 +377,9 @@ function zoneImpactsForMerge(
 export function previewChannelMerges(
   codeplug: Codeplug,
   selections: ChannelMergeSelection[],
+  candidates: ChannelMergeCandidateGroup[] = [],
 ): ChannelMergePreview[] {
+  const candidateById = new Map(candidates.map((g) => [g.id, g]));
   const previews: ChannelMergePreview[] = [];
 
   for (const selection of selections) {
@@ -302,11 +390,28 @@ export function previewChannelMerges(
       .filter((ch): ch is Channel => ch != null);
     if (sources.length < 2) continue;
 
+    const group = candidateById.get(selection.groupId);
     const survivorId = sources[0].id;
-    let mergedChannel = mergeChannelsToMultiMode(sources, {
-      survivorId,
-      resultName: selection.resultName.trim() || mergeNameStem(sources[0].name),
-    });
+    let mergedChannel: Channel;
+    let rxGroupLists: RxGroupList[] | undefined;
+
+    if (group?.mergeKind === 'multiTalkgroup') {
+      const result = mergeChannelsToMultiTalkgroup(sources, {
+        survivorId,
+        resultName: selection.resultName.trim() || group.suggestedName,
+        talkGroups: codeplug.talkGroups,
+        contacts: codeplug.contacts,
+        rxGroupLists: codeplug.rxGroupLists,
+      });
+      mergedChannel = result.channel;
+      rxGroupLists = result.rxGroupLists;
+    } else {
+      mergedChannel = mergeChannelsToMultiMode(sources, {
+        survivorId,
+        resultName: selection.resultName.trim() || mergeNameStem(sources[0].name),
+      });
+    }
+
     mergedChannel = withSelectionFrequencies(mergedChannel, selection);
 
     const absorbedIds = sources.slice(1).map((ch) => ch.id);
@@ -318,6 +423,7 @@ export function previewChannelMerges(
       mergedChannel,
       validationIssues,
       zoneImpacts: zoneImpactsForMerge(codeplug, survivorId, absorbedIds),
+      rxGroupLists,
     });
   }
 
@@ -345,12 +451,12 @@ export function applyChannelMerges(
     if (!selection.enabled) continue;
 
     const group = candidateById.get(selection.groupId);
-    if (!group || group.mergeKind !== 'multiMode') {
+    if (!group || (group.mergeKind !== 'multiMode' && group.mergeKind !== 'multiTalkgroup')) {
       report.skippedAmbiguous++;
       continue;
     }
 
-    const preview = previewChannelMerges(next, [selection])[0];
+    const preview = previewChannelMerges(next, [selection], candidates)[0];
     if (!preview) continue;
 
     if (preview.validationIssues.some((i) => i.severity === 'error')) {
@@ -368,6 +474,9 @@ export function applyChannelMerges(
     }
 
     next = mergeChannelsIntoOne(next, survivorId, absorbedIds, preview.mergedChannel);
+    if (preview.rxGroupLists) {
+      next = { ...next, rxGroupLists: preview.rxGroupLists };
+    }
     report.mergedCount++;
     report.mergedNames.push(preview.resultName);
   }

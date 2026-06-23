@@ -7,6 +7,42 @@
 
 ## Overall status
 
+**Status:** Complete (pending PR)
+
+**Branch:** `36/paddy/multi-talkgroup-export`
+
+---
+
+## Multi-talkgroup (#36)
+
+**Tracking:** [codeplug-tool#36](https://github.com/pskillen/codeplug-tool/issues/36)
+
+**Status:** Complete (pending PR)
+
+### Slice 1: Documentation
+
+**Status:** Complete
+
+### Slice 2: Expansion core
+
+**Status:** Complete
+
+### Slice 3: Adapter contract
+
+**Status:** Complete
+
+### Slice 4: Import collapse
+
+**Status:** Complete
+
+### Slice 5: Merge candidates apply
+
+**Status:** Complete
+
+---
+
+## Multi-mode (#46) — complete
+
 **Status:** Complete — PR opened
 
 **Branch:** `46/pskillen/multi-mode-channels`
@@ -114,4 +150,5 @@
 
 ## Next
 
-- Merge PR closing #46
+- Open PR closing #36 and #123
+- DM32 adapter (#67) consumes `expandAllChannelsForExport` with `expandRxGroupLists: true`
