@@ -15,6 +15,7 @@ Create, edit, and delete codeplug entities against the internal vendor-neutral m
 | Contact CRUD | Complete | `ContactEdit`, list/detail |
 | Store mutations | Complete | `codeplugMutations.ts`, `codeplugStore` |
 | Validation | Complete | `src/lib/validation/` |
+| Channel merge candidates | In progress | [#116](https://github.com/pskillen/codeplug-tool/issues/116) — post-hoc multi-mode merge detection and apply |
 
 ## Vendor boundaries
 
