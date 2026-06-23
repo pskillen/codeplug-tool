@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  maskSensitiveToken,
-  parseStorageRaw,
-  redactParsedValue,
-} from './parseStorageValue.ts';
+import { maskSensitiveToken, parseStorageRaw, redactParsedValue } from './parseStorageValue.ts';
 
 describe('parseStorageRaw', () => {
   it('returns null parsed for missing value', () => {

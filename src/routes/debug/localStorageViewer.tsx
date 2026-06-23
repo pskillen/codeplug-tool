@@ -60,9 +60,7 @@ export default function DebugLocalStorageViewer() {
           </>
         ) : null}
 
-        {entry.present && entry.parseError && entry.raw ? (
-          <Code block>{entry.raw}</Code>
-        ) : null}
+        {entry.present && entry.parseError && entry.raw ? <Code block>{entry.raw}</Code> : null}
       </Stack>
     </Page>
   );

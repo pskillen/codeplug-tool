@@ -2,11 +2,7 @@ import {
   CHANNEL_LIST_COLUMNS_SCHEMA_KEY,
   CHANNEL_LIST_COLUMN_STORAGE_KEY,
 } from '../../hooks/channelListQueryUtils.ts';
-import {
-  STORAGE_KEY_MAIDENHEAD_GRID,
-  STORAGE_KEY_TILE,
-  STORAGE_KEY_TOKEN,
-} from '../mapTiles.ts';
+import { STORAGE_KEY_MAIDENHEAD_GRID, STORAGE_KEY_TILE, STORAGE_KEY_TOKEN } from '../mapTiles.ts';
 import { CODEPLUG_STORAGE_KEY } from '../../state/codeplugStorage.ts';
 import { parseStorageRaw, redactParsedValue } from './parseStorageValue.ts';
 
@@ -92,9 +88,7 @@ export function readStorageEntry(descriptor: StorageKeyDescriptor): StorageEntry
   const present = raw !== null;
   const { parsed, parseError } = parseStorageRaw(raw);
   const viewParsed =
-    parsed !== null && parseError === null
-      ? redactParsedValue(parsed, descriptor.redact)
-      : parsed;
+    parsed !== null && parseError === null ? redactParsedValue(parsed, descriptor.redact) : parsed;
 
   return {
     raw,

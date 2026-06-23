@@ -39,9 +39,7 @@ describe('storageKeyRegistry', () => {
     const rows = listStorageKeys();
     expect(rows.some((row) => row.key === CODEPLUG_STORAGE_KEY)).toBe(true);
     expect(rows.some((row) => row.key === 'mm9pdy-codeplug-tool.extra')).toBe(true);
-    expect(rows.find((row) => row.key === 'mm9pdy-codeplug-tool.extra')?.label).toBe(
-      'Unknown key',
-    );
+    expect(rows.find((row) => row.key === 'mm9pdy-codeplug-tool.extra')?.label).toBe('Unknown key');
   });
 
   it('readStorageEntry redacts mapbox token values', () => {

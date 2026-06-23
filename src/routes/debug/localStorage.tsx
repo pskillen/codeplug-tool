@@ -30,9 +30,7 @@ export default function DebugLocalStorage() {
           {
             key: 'key',
             header: 'Key',
-            render: (row) => (
-              <Code style={{ whiteSpace: 'nowrap' }}>{row.key}</Code>
-            ),
+            render: (row) => <Code style={{ whiteSpace: 'nowrap' }}>{row.key}</Code>,
           },
           {
             key: 'size',
