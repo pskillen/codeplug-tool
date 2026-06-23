@@ -36,6 +36,7 @@ import Settings from './routes/Settings.tsx';
 import ReferenceIndex from './routes/reference/index.tsx';
 import BandPlan from './routes/reference/band-plan.tsx';
 import MaidenheadConverter from './routes/reference/maidenhead.tsx';
+import Styleguide from './routes/styleguide.tsx';
 import { useProjects } from './state/codeplugStore.tsx';
 
 export default function App() {
@@ -90,6 +91,8 @@ export default function App() {
           <Route path="/reference/band-plan" element={<BandPlan />} />
           <Route path="/reference/maidenhead" element={<MaidenheadConverter />} />
           <Route path="/codeplug/new" element={<NewCodeplug />} />
+          {/* Intentionally unlinked dev page — UI kit reference */}
+          <Route path="/styleguide" element={<Styleguide />} />
           <Route element={<RequireActiveProject />}>
             <Route path="/summary" element={<Summary />} />
             <Route path="/summary/edit" element={<ProjectEdit />} />
