@@ -20,7 +20,6 @@ import { useChannelListQuery } from '../../hooks/useChannelListQuery.ts';
 import {
   DATATABLE_CALLSIGN_SORT_KEY,
   DATATABLE_NAME_SORT_KEY,
-  sortDataTableRows,
 } from '../../lib/dataTable/sort.ts';
 import { distanceLabelForChannel, useFilteredChannels } from '../../hooks/useChannelListFilters.ts';
 import type { Channel } from '../../models/codeplug.ts';
@@ -54,8 +53,10 @@ export default function ChannelsList() {
         state.columnKey === DATATABLE_NAME_SORT_KEY ||
         state.columnKey === DATATABLE_CALLSIGN_SORT_KEY
       ) {
-        setColumnSortOverride(null);
-        query.setSortMode('name');
+        setColumnSortOverride(state);
+        if (query.sortMode === 'distance') {
+          query.setSortMode('name');
+        }
         return;
       }
       if (state.columnKey === 'distance') {
@@ -203,10 +204,7 @@ export default function ChannelsList() {
     [tableColumns],
   );
 
-  const displayedRows = useMemo(
-    () => sortDataTableRows(filtered, effectiveSort, sortCtx),
-    [filtered, effectiveSort, sortCtx],
-  );
+  const displayedRows = filtered;
 
   const distanceSortPending = query.sortMode === 'distance' && !position;
 
