@@ -356,29 +356,6 @@ export default function ChannelDetail() {
 
         <DetailSections sections={sections} />
 
-        {geolocated ? (
-          <Stack gap="xs">
-            {position ? (
-              <>
-                {position.accuracyMeters != null && Number.isFinite(position.accuracyMeters) ? (
-                  <Text size="xs" c="dimmed">
-                    Location accuracy ±{Math.round(position.accuracyMeters)} m
-                  </Text>
-                ) : null}
-                <Button variant="subtle" size="compact-sm" onClick={clearPosition}>
-                  Clear my location
-                </Button>
-              </>
-            ) : (
-              <UseMyLocationButton
-                onLocation={(lat, lon, accuracyMeters) =>
-                  setPosition({ lat, lon, accuracyMeters: accuracyMeters ?? null })
-                }
-              />
-            )}
-          </Stack>
-        ) : null}
-
         <DetailLinkList title="Zones" items={zoneLinks} />
 
         <Stack gap="sm" id={channelSectionAnchorId('External links')}>
@@ -397,6 +374,27 @@ export default function ChannelDetail() {
 
         <Stack gap="sm" id={channelSectionAnchorId('Map')}>
           <Title order={3}>Map</Title>
+          {geolocated ? (
+            position ? (
+              <Group gap="sm" align="center">
+                {position.accuracyMeters != null && Number.isFinite(position.accuracyMeters) ? (
+                  <Text size="sm" c="dimmed">
+                    My location accuracy ±{Math.round(position.accuracyMeters)} m
+                  </Text>
+                ) : null}
+                <Button variant="subtle" size="compact-sm" onClick={clearPosition}>
+                  Clear my location
+                </Button>
+              </Group>
+            ) : (
+              <UseMyLocationButton
+                label="Show my location"
+                onLocation={(lat, lon, accuracyMeters) =>
+                  setPosition({ lat, lon, accuracyMeters: accuracyMeters ?? null })
+                }
+              />
+            )
+          ) : null}
           <CodeplugMap
             channels={[channel]}
             zones={codeplug.zones}

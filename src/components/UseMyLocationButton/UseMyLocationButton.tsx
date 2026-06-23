@@ -6,9 +6,15 @@ import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 export interface UseMyLocationButtonProps {
   onLocation: (lat: number, lon: number, accuracyMeters?: number | null) => void;
   disabled?: boolean;
+  /** Button label. Default: "Use my location" */
+  label?: string;
 }
 
-export default function UseMyLocationButton({ onLocation, disabled }: UseMyLocationButtonProps) {
+export default function UseMyLocationButton({
+  onLocation,
+  disabled,
+  label = 'Use my location',
+}: UseMyLocationButtonProps) {
   const { requestLocation, loading, error, accuracyMeters } = useGeolocation();
 
   const handleClick = async () => {
@@ -28,7 +34,7 @@ export default function UseMyLocationButton({ onLocation, disabled }: UseMyLocat
         leftSection={<IconCurrentLocation size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
         onClick={() => void handleClick()}
       >
-        Use my location
+        {label}
       </Button>
       {error ? (
         <Text size="sm" c="red">

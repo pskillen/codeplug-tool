@@ -453,7 +453,10 @@ export default function ChannelEdit() {
           <Button component={Link} to={cancelPath} variant="default">
             Cancel
           </Button>
-          <Button type="submit" leftSection={<IconDeviceFloppy size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}>
+          <Button
+            type="submit"
+            leftSection={<IconDeviceFloppy size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+          >
             Save
           </Button>
         </>
@@ -471,294 +474,292 @@ export default function ChannelEdit() {
           Back
         </Button>
 
-          {formError ? (
-            <Text c="red" size="sm">
-              {formError}
+        {formError ? (
+          <Text c="red" size="sm">
+            {formError}
+          </Text>
+        ) : null}
+
+        <Stack gap="sm" id={channelSectionAnchorId('Channel config')}>
+          <Title order={4}>Channel config</Title>
+          <TextInput
+            label="Name"
+            required
+            value={values.name}
+            onChange={(e) => set('name', e.currentTarget.value)}
+          />
+          <TextInput
+            label="Comment"
+            description="Operator notes"
+            value={values.comment}
+            onChange={(e) => set('comment', e.currentTarget.value)}
+          />
+          <Checkbox
+            label="Multi-mode channel"
+            description="One logical site with separate settings per RF mode"
+            checked={values.multiMode}
+            onChange={(e) => {
+              const checked = e.currentTarget.checked;
+              setValues((prev) => ({
+                ...prev,
+                multiMode: checked,
+                modeProfiles: checked ? seedMultiModeProfiles(prev) : [],
+                mode: checked ? 'fm' : prev.mode,
+              }));
+            }}
+          />
+          {values.multiMode ? (
+            <>
+              <ChannelModesMultiSelect
+                value={values.modeProfiles.map((p) => p.mode)}
+                onChange={(modes) => {
+                  setValues((prev) => {
+                    const modeProfiles = syncProfilesFromModeSelection(modes, prev.modeProfiles);
+                    const mode = modes.includes(prev.mode) ? prev.mode : (modes[0] ?? prev.mode);
+                    return { ...prev, modeProfiles, mode };
+                  });
+                }}
+              />
+              {values.modeProfiles.length > 0 ? (
+                <ChannelPrimaryModeSelect
+                  value={values.mode}
+                  modes={values.modeProfiles.map((p) => p.mode)}
+                  onChange={(mode) => set('mode', mode)}
+                />
+              ) : null}
+            </>
+          ) : (
+            <ChannelModeSelect value={values.mode} onChange={(mode) => set('mode', mode)} />
+          )}
+          <NumberInput
+            label="Transmit timeout (seconds)"
+            value={values.transmitTimeout === '' ? undefined : parseInt(values.transmitTimeout, 10)}
+            onChange={(v) => set('transmitTimeout', v != null ? String(v) : '')}
+            min={0}
+            max={495}
+            step={15}
+            allowDecimal={false}
+          />
+          <Checkbox
+            label="VOX"
+            checked={values.voxEnabled}
+            onChange={(e) => set('voxEnabled', e.currentTarget.checked)}
+          />
+          <Checkbox
+            label="Scan skip"
+            checked={values.scanSkip}
+            onChange={(e) => set('scanSkip', e.currentTarget.checked)}
+          />
+        </Stack>
+
+        <Stack gap="sm" id={channelSectionAnchorId('RF')}>
+          <Title order={4}>RF</Title>
+          <Group grow>
+            <TextInput
+              label="RX MHz"
+              value={values.rxFrequencyMhz}
+              onChange={(e) => set('rxFrequencyMhz', e.currentTarget.value)}
+            />
+            <TextInput
+              label="TX MHz"
+              value={values.txFrequencyMhz}
+              onChange={(e) => set('txFrequencyMhz', e.currentTarget.value)}
+            />
+          </Group>
+          {offset !== null ? (
+            <Text size="sm" c="dimmed">
+              Offset: {formatOffsetMhz(offset)}
             </Text>
           ) : null}
-
-          <Stack gap="sm" id={channelSectionAnchorId('Channel config')}>
-            <Title order={4}>Channel config</Title>
-            <TextInput
-              label="Name"
-              required
-              value={values.name}
-              onChange={(e) => set('name', e.currentTarget.value)}
-            />
-            <TextInput
-              label="Comment"
-              description="Operator notes"
-              value={values.comment}
-              onChange={(e) => set('comment', e.currentTarget.value)}
-            />
-            <Checkbox
-              label="Multi-mode channel"
-              description="One logical site with separate settings per RF mode"
-              checked={values.multiMode}
-              onChange={(e) => {
-                const checked = e.currentTarget.checked;
-                setValues((prev) => ({
-                  ...prev,
-                  multiMode: checked,
-                  modeProfiles: checked ? seedMultiModeProfiles(prev) : [],
-                  mode: checked ? 'fm' : prev.mode,
-                }));
-              }}
-            />
-            {values.multiMode ? (
-              <>
-                <ChannelModesMultiSelect
-                  value={values.modeProfiles.map((p) => p.mode)}
-                  onChange={(modes) => {
-                    setValues((prev) => {
-                      const modeProfiles = syncProfilesFromModeSelection(modes, prev.modeProfiles);
-                      const mode = modes.includes(prev.mode) ? prev.mode : (modes[0] ?? prev.mode);
-                      return { ...prev, modeProfiles, mode };
-                    });
-                  }}
-                />
-                {values.modeProfiles.length > 0 ? (
-                  <ChannelPrimaryModeSelect
-                    value={values.mode}
-                    modes={values.modeProfiles.map((p) => p.mode)}
-                    onChange={(mode) => set('mode', mode)}
-                  />
-                ) : null}
-              </>
-            ) : (
-              <ChannelModeSelect value={values.mode} onChange={(mode) => set('mode', mode)} />
-            )}
-            <NumberInput
-              label="Transmit timeout (seconds)"
-              value={
-                values.transmitTimeout === '' ? undefined : parseInt(values.transmitTimeout, 10)
-              }
-              onChange={(v) => set('transmitTimeout', v != null ? String(v) : '')}
-              min={0}
-              max={495}
-              step={15}
-              allowDecimal={false}
-            />
-            <Checkbox
-              label="VOX"
-              checked={values.voxEnabled}
-              onChange={(e) => set('voxEnabled', e.currentTarget.checked)}
-            />
-            <Checkbox
-              label="Scan skip"
-              checked={values.scanSkip}
-              onChange={(e) => set('scanSkip', e.currentTarget.checked)}
-            />
-          </Stack>
-
-          <Stack gap="sm" id={channelSectionAnchorId('RF')}>
-            <Title order={4}>RF</Title>
-            <Group grow>
-              <TextInput
-                label="RX MHz"
-                value={values.rxFrequencyMhz}
-                onChange={(e) => set('rxFrequencyMhz', e.currentTarget.value)}
-              />
-              <TextInput
-                label="TX MHz"
-                value={values.txFrequencyMhz}
-                onChange={(e) => set('txFrequencyMhz', e.currentTarget.value)}
-              />
-            </Group>
-            {offset !== null ? (
-              <Text size="sm" c="dimmed">
-                Offset: {formatOffsetMhz(offset)}
-              </Text>
-            ) : null}
-            <BandPillsForFrequencies rxFrequency={rxHz} txFrequency={txHz} />
-            {showSingleModeAnalogFields ? (
-              <Select
-                label="Bandwidth (kHz)"
-                data={bandwidthSelectData}
-                value={values.bandwidthKHz}
-                onChange={(v) => set('bandwidthKHz', v ?? '')}
-                clearable
-              />
-            ) : null}
+          <BandPillsForFrequencies rxFrequency={rxHz} txFrequency={txHz} />
+          {showSingleModeAnalogFields ? (
             <Select
-              label="Power"
-              data={powerSelectData}
-              value={values.power}
-              onChange={(v) => set('power', v ?? 'default')}
+              label="Bandwidth (kHz)"
+              data={bandwidthSelectData}
+              value={values.bandwidthKHz}
+              onChange={(v) => set('bandwidthKHz', v ?? '')}
+              clearable
             />
-            {showSingleModeAnalogFields ? (
-              <Group grow>
-                <Select
-                  label="RX tone"
-                  data={toneSelectOptions()}
-                  value={values.rxTone}
-                  onChange={(v) => set('rxTone', (v ?? 'none') as ChannelTone)}
-                  searchable
-                />
-                <Select
-                  label="TX tone"
-                  data={toneSelectOptions()}
-                  value={values.txTone}
-                  onChange={(v) => set('txTone', (v ?? 'none') as ChannelTone)}
-                  searchable
-                />
-              </Group>
-            ) : null}
-            {showSingleModeAnalogFields ? (
+          ) : null}
+          <Select
+            label="Power"
+            data={powerSelectData}
+            value={values.power}
+            onChange={(v) => set('power', v ?? 'default')}
+          />
+          {showSingleModeAnalogFields ? (
+            <Group grow>
               <Select
-                label="Squelch"
-                data={squelchSelectData}
-                value={values.squelch}
-                onChange={(v) => set('squelch', v ?? 'default')}
+                label="RX tone"
+                data={toneSelectOptions()}
+                value={values.rxTone}
+                onChange={(v) => set('rxTone', (v ?? 'none') as ChannelTone)}
+                searchable
               />
-            ) : null}
-            <Checkbox
-              label="RX only"
-              checked={values.rxOnly}
-              onChange={(e) => set('rxOnly', e.currentTarget.checked)}
+              <Select
+                label="TX tone"
+                data={toneSelectOptions()}
+                value={values.txTone}
+                onChange={(v) => set('txTone', (v ?? 'none') as ChannelTone)}
+                searchable
+              />
+            </Group>
+          ) : null}
+          {showSingleModeAnalogFields ? (
+            <Select
+              label="Squelch"
+              data={squelchSelectData}
+              value={values.squelch}
+              onChange={(v) => set('squelch', v ?? 'default')}
+            />
+          ) : null}
+          <Checkbox
+            label="RX only"
+            checked={values.rxOnly}
+            onChange={(e) => set('rxOnly', e.currentTarget.checked)}
+          />
+        </Stack>
+
+        <Stack gap="sm" id={channelSectionAnchorId('Location')}>
+          <Title order={4}>Location</Title>
+          <TextInput
+            label="Maidenhead locator"
+            value={values.locator}
+            onChange={(e) => set('locator', e.currentTarget.value)}
+            onBlur={(e) => applyLocator(e.currentTarget.value)}
+          />
+          <Group grow>
+            <NumberInput
+              label="Latitude"
+              value={values.lat}
+              onChange={(v) => {
+                const lat = String(v ?? '');
+                set('lat', lat);
+                const lon = parseFloat(values.lon);
+                const latN = parseFloat(lat);
+                if (Number.isFinite(latN) && Number.isFinite(lon)) {
+                  set('locator', coordsToLocator(latN, lon, 6));
+                }
+              }}
+              decimalScale={6}
+            />
+            <NumberInput
+              label="Longitude"
+              value={values.lon}
+              onChange={(v) => {
+                const lon = String(v ?? '');
+                set('lon', lon);
+                const lat = parseFloat(values.lat);
+                const lonN = parseFloat(lon);
+                if (Number.isFinite(lat) && Number.isFinite(lonN)) {
+                  set('locator', coordsToLocator(lat, lonN, 6));
+                }
+              }}
+              decimalScale={6}
+            />
+          </Group>
+          <Checkbox
+            label="Use Location"
+            checked={values.useLocation}
+            onChange={(e) => set('useLocation', e.currentTarget.checked)}
+          />
+          <Checkbox
+            label="Hide from map"
+            checked={values.hideFromMap}
+            onChange={(e) => set('hideFromMap', e.currentTarget.checked)}
+          />
+          <Group justify="space-between" align="flex-end">
+            <UseMyLocationButton onLocation={applyCoords} />
+            <Group gap="xs" align="flex-end">
+              <Text size="xs" c="dimmed">
+                Click the map to set coordinates.
+              </Text>
+              <Button type="button" variant="subtle" size="compact-sm" onClick={clearPosition}>
+                Clear position
+              </Button>
+            </Group>
+          </Group>
+          <CodeplugMap
+            channels={mapPreviewChannels}
+            talkGroups={codeplug.talkGroups}
+            contacts={codeplug.contacts}
+            rxGroupLists={codeplug.rxGroupLists}
+            height={240}
+            compactMode
+            showControls={false}
+            defaultShowZones={false}
+            onLocationPick={applyCoords}
+          />
+        </Stack>
+
+        {values.multiMode ? (
+          <Stack gap="sm" id={channelSectionAnchorId('Mode profiles')}>
+            <Title order={4}>Mode profiles</Title>
+            <Text size="sm" c="dimmed">
+              Per-mode RF settings. Frequencies, power, and location are shared above.
+            </Text>
+            <ChannelModeProfilesEditor
+              profiles={values.modeProfiles}
+              codeplug={codeplug}
+              onChange={(modeProfiles) => setValues((prev) => ({ ...prev, modeProfiles }))}
             />
           </Stack>
+        ) : null}
 
-          <Stack gap="sm" id={channelSectionAnchorId('Location')}>
-            <Title order={4}>Location</Title>
-            <TextInput
-              label="Maidenhead locator"
-              value={values.locator}
-              onChange={(e) => set('locator', e.currentTarget.value)}
-              onBlur={(e) => applyLocator(e.currentTarget.value)}
-            />
+        {showDmrFields ? (
+          <Stack gap="sm" id={channelSectionAnchorId('DMR')}>
+            <Title order={4}>DMR</Title>
             <Group grow>
               <NumberInput
-                label="Latitude"
-                value={values.lat}
-                onChange={(v) => {
-                  const lat = String(v ?? '');
-                  set('lat', lat);
-                  const lon = parseFloat(values.lon);
-                  const latN = parseFloat(lat);
-                  if (Number.isFinite(latN) && Number.isFinite(lon)) {
-                    set('locator', coordsToLocator(latN, lon, 6));
-                  }
-                }}
-                decimalScale={6}
-              />
-              <NumberInput
-                label="Longitude"
-                value={values.lon}
-                onChange={(v) => {
-                  const lon = String(v ?? '');
-                  set('lon', lon);
-                  const lat = parseFloat(values.lat);
-                  const lonN = parseFloat(lon);
-                  if (Number.isFinite(lat) && Number.isFinite(lonN)) {
-                    set('locator', coordsToLocator(lat, lonN, 6));
-                  }
-                }}
-                decimalScale={6}
-              />
-            </Group>
-            <Checkbox
-              label="Use Location"
-              checked={values.useLocation}
-              onChange={(e) => set('useLocation', e.currentTarget.checked)}
-            />
-            <Checkbox
-              label="Hide from map"
-              checked={values.hideFromMap}
-              onChange={(e) => set('hideFromMap', e.currentTarget.checked)}
-            />
-            <Group justify="space-between" align="flex-end">
-              <UseMyLocationButton onLocation={applyCoords} />
-              <Group gap="xs" align="flex-end">
-                <Text size="xs" c="dimmed">
-                  Click the map to set coordinates.
-                </Text>
-                <Button type="button" variant="subtle" size="compact-sm" onClick={clearPosition}>
-                  Clear position
-                </Button>
-              </Group>
-            </Group>
-            <CodeplugMap
-              channels={mapPreviewChannels}
-              talkGroups={codeplug.talkGroups}
-              contacts={codeplug.contacts}
-              rxGroupLists={codeplug.rxGroupLists}
-              height={240}
-              compactMode
-              showControls={false}
-              defaultShowZones={false}
-              onLocationPick={applyCoords}
-            />
-          </Stack>
-
-          {values.multiMode ? (
-            <Stack gap="sm" id={channelSectionAnchorId('Mode profiles')}>
-              <Title order={4}>Mode profiles</Title>
-              <Text size="sm" c="dimmed">
-                Per-mode RF settings. Frequencies, power, and location are shared above.
-              </Text>
-              <ChannelModeProfilesEditor
-                profiles={values.modeProfiles}
-                codeplug={codeplug}
-                onChange={(modeProfiles) => setValues((prev) => ({ ...prev, modeProfiles }))}
-              />
-            </Stack>
-          ) : null}
-
-          {showDmrFields ? (
-            <Stack gap="sm" id={channelSectionAnchorId('DMR')}>
-              <Title order={4}>DMR</Title>
-              <Group grow>
-                <NumberInput
-                  label="Colour code"
-                  value={values.colourCode === '' ? undefined : parseInt(values.colourCode, 10)}
-                  onChange={(v) => set('colourCode', v != null ? String(v) : '')}
-                  min={0}
-                  max={15}
-                  allowDecimal={false}
-                />
-                <Select
-                  label="Timeslot"
-                  data={timeslotSelectData}
-                  value={values.timeslot}
-                  onChange={(v) => set('timeslot', v ?? '')}
-                  clearable
-                />
-              </Group>
-              <NumberInput
-                label="DMR ID"
-                value={values.dmrId === '' ? undefined : parseInt(values.dmrId, 10)}
-                onChange={(v) => set('dmrId', v != null ? String(v) : '')}
-                min={1}
+                label="Colour code"
+                value={values.colourCode === '' ? undefined : parseInt(values.colourCode, 10)}
+                onChange={(v) => set('colourCode', v != null ? String(v) : '')}
+                min={0}
+                max={15}
                 allowDecimal={false}
               />
               <Select
-                label="TX contact"
-                data={contactOptions}
-                value={values.contactRefKey || ''}
-                onChange={(v) => set('contactRefKey', v ?? '')}
-                searchable
+                label="Timeslot"
+                data={timeslotSelectData}
+                value={values.timeslot}
+                onChange={(v) => set('timeslot', v ?? '')}
                 clearable
               />
-              <Select
-                label="RX group list"
-                data={rglOptions}
-                value={values.rxGroupListId || ''}
-                onChange={(v) => set('rxGroupListId', v ?? '')}
-                searchable
-                clearable
-              />
-            </Stack>
-          ) : null}
-
-          <Stack gap="sm" id={channelSectionAnchorId('Scan / APRS')}>
-            <Title order={4}>Scan / APRS</Title>
-            <TextInput
-              label="APRS config"
-              value={values.aprsConfigName}
-              onChange={(e) => set('aprsConfigName', e.currentTarget.value)}
+            </Group>
+            <NumberInput
+              label="DMR ID"
+              value={values.dmrId === '' ? undefined : parseInt(values.dmrId, 10)}
+              onChange={(v) => set('dmrId', v != null ? String(v) : '')}
+              min={1}
+              allowDecimal={false}
+            />
+            <Select
+              label="TX contact"
+              data={contactOptions}
+              value={values.contactRefKey || ''}
+              onChange={(v) => set('contactRefKey', v ?? '')}
+              searchable
+              clearable
+            />
+            <Select
+              label="RX group list"
+              data={rglOptions}
+              value={values.rxGroupListId || ''}
+              onChange={(v) => set('rxGroupListId', v ?? '')}
+              searchable
+              clearable
             />
           </Stack>
+        ) : null}
+
+        <Stack gap="sm" id={channelSectionAnchorId('Scan / APRS')}>
+          <Title order={4}>Scan / APRS</Title>
+          <TextInput
+            label="APRS config"
+            value={values.aprsConfigName}
+            onChange={(e) => set('aprsConfigName', e.currentTarget.value)}
+          />
+        </Stack>
       </Stack>
     </FormPage>
   );

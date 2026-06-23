@@ -110,15 +110,18 @@ export default function ZoneDetail() {
           <Title order={3}>Map</Title>
           {position ? (
             <Group gap="sm" align="center">
-              <Text size="sm" c="dimmed">
-                My location: {position.lat.toFixed(5)}, {position.lon.toFixed(5)}
-              </Text>
+              {position.accuracyMeters != null && Number.isFinite(position.accuracyMeters) ? (
+                <Text size="sm" c="dimmed">
+                  My location accuracy ±{Math.round(position.accuracyMeters)} m
+                </Text>
+              ) : null}
               <Button variant="subtle" size="compact-sm" onClick={clearPosition}>
                 Clear my location
               </Button>
             </Group>
           ) : (
             <UseMyLocationButton
+              label="Show my location"
               onLocation={(lat, lon, accuracyMeters) =>
                 setPosition({ lat, lon, accuracyMeters: accuracyMeters ?? null })
               }

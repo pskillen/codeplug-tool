@@ -1,14 +1,17 @@
-import { Stack } from '@mantine/core';
+import { Button, Group, Stack, Text } from '@mantine/core';
 import { useMemo } from 'react';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import { DataTable, ListPage } from '../../components/ui/index.ts';
+import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
 import { filterRowsByName, useListNameQuery } from '../../hooks/useListNameQuery.ts';
 import { sortByName } from '../../lib/reportLookup.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
+import { useOperatorPosition } from '../../state/operatorPosition.tsx';
 
 export default function ZonesList() {
   const { codeplug } = useCodeplug();
   const { channels, zones } = codeplug;
+  const { position, setPosition, clearPosition } = useOperatorPosition();
   const { nameFilter } = useListNameQuery();
   const sorted = useMemo(() => {
     return filterRowsByName(sortByName(zones), nameFilter, (z) => z.name);
@@ -33,6 +36,26 @@ export default function ZonesList() {
           ]}
         />
 
+        {position ? (
+          <Group gap="sm" align="center">
+            {position.accuracyMeters != null && Number.isFinite(position.accuracyMeters) ? (
+              <Text size="sm" c="dimmed">
+                My location accuracy ±{Math.round(position.accuracyMeters)} m
+              </Text>
+            ) : null}
+            <Button variant="subtle" size="compact-sm" onClick={clearPosition}>
+              Clear my location
+            </Button>
+          </Group>
+        ) : (
+          <UseMyLocationButton
+            label="Show my location"
+            onLocation={(lat, lon, accuracyMeters) =>
+              setPosition({ lat, lon, accuracyMeters: accuracyMeters ?? null })
+            }
+          />
+        )}
+
         <CodeplugMap
           channels={channels}
           zones={zones}
@@ -40,6 +63,7 @@ export default function ZonesList() {
           talkGroups={codeplug.talkGroups}
           contacts={codeplug.contacts}
           rxGroupLists={codeplug.rxGroupLists}
+          operatorPosition={position}
         />
       </Stack>
     </ListPage>

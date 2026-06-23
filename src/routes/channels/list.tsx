@@ -1,7 +1,8 @@
-import { Group, Stack, Text } from '@mantine/core';
+import { Button, Group, Stack, Text } from '@mantine/core';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import { BandPillForChannel } from '../../components/crud/BandPill.tsx';
 import { DataTable, ListPage } from '../../components/ui/index.ts';
+import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
 import { applyFilters } from '../../lib/channels.ts';
 import ModePill from '../../components/crud/ModePill.tsx';
 import { resolveChannelModeProfiles } from '../../lib/channelExpansion/index.ts';
@@ -20,7 +21,7 @@ import { useOperatorPosition } from '../../state/operatorPosition.tsx';
 export default function ChannelsList() {
   const { codeplug } = useCodeplug();
   const { channels, zones } = codeplug;
-  const { position } = useOperatorPosition();
+  const { position, setPosition, clearPosition } = useOperatorPosition();
   const query = useChannelListQuery();
   const filtered = useFilteredChannels(channels, query, position);
   const [visibleCols] = useChannelListColumns();
@@ -134,6 +135,26 @@ export default function ChannelsList() {
             coordinates, Use Location = No, hidden from map, or 0,0).
           </Text>
         ) : null}
+
+        {position ? (
+          <Group gap="sm" align="center">
+            {position.accuracyMeters != null && Number.isFinite(position.accuracyMeters) ? (
+              <Text size="sm" c="dimmed">
+                My location accuracy ±{Math.round(position.accuracyMeters)} m
+              </Text>
+            ) : null}
+            <Button variant="subtle" size="compact-sm" onClick={clearPosition}>
+              Clear my location
+            </Button>
+          </Group>
+        ) : (
+          <UseMyLocationButton
+            label="Show my location"
+            onLocation={(lat, lon, accuracyMeters) =>
+              setPosition({ lat, lon, accuracyMeters: accuracyMeters ?? null })
+            }
+          />
+        )}
 
         <CodeplugMap
           channels={mapChannels}
