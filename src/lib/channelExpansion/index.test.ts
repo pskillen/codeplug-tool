@@ -1,11 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { buildChannel } from '../../test/builders/codeplug.ts';
+import {
+  buildChannel,
+  buildCodeplug,
+  buildRxGroupList,
+  buildTalkGroup,
+} from '../../test/builders/codeplug.ts';
 import {
   channelMergeNameStem,
   channelNameStem,
   channelsAreMultiModeMergeCandidates,
   expandAllChannelsForExport,
   expandChannelForExport,
+  expandTalkGroupsForExport,
   expandZoneMemberWireNames,
   levenshteinRatio,
   mergeChannelsToMultiMode,
@@ -13,6 +19,7 @@ import {
   modeExportNameSuffix,
   resolveChannelModeProfiles,
   stripModeExportSuffix,
+  stripTalkGroupExportSuffix,
   syncChannelFromPrimaryProfile,
 } from './index.ts';
 import { buildZone } from '../../test/builders/codeplug.ts';
@@ -205,5 +212,156 @@ describe('channelExpansion', () => {
     });
     expect(merged.modeProfiles.find((p) => p.mode === 'dmr')?.colourCode).toBe(1);
     expect(merged.meta?.imported).toBeUndefined();
+  });
+
+  it('expandTalkGroupsForExport emits one row per RGL talk group on DMR channels', () => {
+    const tg1 = buildTalkGroup({ id: 'tg1', name: 'Scotland TS1' });
+    const tg2 = buildTalkGroup({ id: 'tg2', name: 'Local 9' });
+    const rgl = buildRxGroupList({
+      id: 'rgl1',
+      name: 'GB7GL',
+      memberRefs: [
+        { kind: 'talkGroup', id: 'tg1' },
+        { kind: 'talkGroup', id: 'tg2' },
+      ],
+    });
+    const codeplug = buildCodeplug({
+      talkGroups: [tg1, tg2],
+      rxGroupLists: [rgl],
+    });
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'GB7GL',
+      mode: 'dmr',
+      rxGroupListId: 'rgl1',
+      contactRef: null,
+    });
+    const modeRows = expandChannelForExport(ch);
+    const rows = expandTalkGroupsForExport(modeRows, {
+      expandTalkGroups: true,
+      codeplug,
+    });
+    expect(rows).toHaveLength(2);
+    expect(rows.map((r) => r.wireName).sort()).toEqual(['GB7GL Local 9', 'GB7GL Scotland TS1']);
+    expect(rows.every((r) => r.rxGroupListId === null)).toBe(true);
+    expect(rows.map((r) => r.contactRef?.id).sort()).toEqual(['tg1', 'tg2']);
+  });
+
+  it('expandTalkGroupsForExport skips analog rows', () => {
+    const tg1 = buildTalkGroup({ id: 'tg1', name: 'Scotland TS1' });
+    const rgl = buildRxGroupList({
+      id: 'rgl1',
+      name: 'List',
+      memberRefs: [{ kind: 'talkGroup', id: 'tg1' }],
+    });
+    const codeplug = buildCodeplug({ talkGroups: [tg1], rxGroupLists: [rgl] });
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'GB7GL-F',
+      mode: 'fm',
+      rxGroupListId: 'rgl1',
+    });
+    const rows = expandTalkGroupsForExport(expandChannelForExport(ch), {
+      expandTalkGroups: true,
+      codeplug,
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0].wireName).toBe('GB7GL-F');
+  });
+
+  it('expandTalkGroupsForExport respects talkGroupsOnly filter', () => {
+    const tg1 = buildTalkGroup({ id: 'tg1', name: 'Scotland TS1' });
+    const rgl = buildRxGroupList({
+      id: 'rgl1',
+      name: 'List',
+      memberRefs: [
+        { kind: 'talkGroup', id: 'tg1' },
+        { kind: 'contact', id: 'ct1' },
+      ],
+    });
+    const codeplug = buildCodeplug({
+      talkGroups: [tg1],
+      contacts: [{ id: 'ct1', name: 'Private', number: '', timeslotOverride: '' }],
+      rxGroupLists: [rgl],
+    });
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'GB7GL',
+      mode: 'dmr',
+      rxGroupListId: 'rgl1',
+    });
+    const rows = expandTalkGroupsForExport(expandChannelForExport(ch), {
+      expandTalkGroups: true,
+      talkGroupMembers: 'talkGroupsOnly',
+      codeplug,
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0].wireName).toBe('GB7GL Scotland TS1');
+  });
+
+  it('expandAllChannelsForExport combines multi-mode and multi-talkgroup', () => {
+    const tg1 = buildTalkGroup({ id: 'tg1', name: 'Scotland TS1' });
+    const tg2 = buildTalkGroup({ id: 'tg2', name: 'Local 9' });
+    const rgl = buildRxGroupList({
+      id: 'rgl1',
+      name: 'GB7GL',
+      memberRefs: [
+        { kind: 'talkGroup', id: 'tg1' },
+        { kind: 'talkGroup', id: 'tg2' },
+      ],
+    });
+    const codeplug = buildCodeplug({ talkGroups: [tg1, tg2], rxGroupLists: [rgl] });
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'GB7GL',
+      mode: 'fm',
+      multiMode: true,
+      modeProfiles: [
+        channelModeProfileDefaults('fm'),
+        { ...channelModeProfileDefaults('dmr'), rxGroupListId: 'rgl1', colourCode: 7 },
+      ],
+    });
+    const rows = expandAllChannelsForExport([ch], {
+      expandTalkGroups: true,
+      codeplug,
+    });
+    expect(rows.map((r) => r.wireName).sort()).toEqual([
+      'GB7GL-D Local 9',
+      'GB7GL-D Scotland TS1',
+      'GB7GL-F',
+    ]);
+  });
+
+  it('stripTalkGroupExportSuffix removes known member suffixes', () => {
+    expect(stripTalkGroupExportSuffix('GB7GL Scotland TS1', ['Scotland TS1', 'Local 9'])).toBe(
+      'GB7GL',
+    );
+    expect(stripTalkGroupExportSuffix('GB7GL', ['Scotland TS1'])).toBe('GB7GL');
+  });
+
+  it('expandZoneMemberWireNames fans out TG-expanded digital members', () => {
+    const tg1 = buildTalkGroup({ id: 'tg1', name: 'Scotland TS1' });
+    const tg2 = buildTalkGroup({ id: 'tg2', name: 'Local 9' });
+    const rgl = buildRxGroupList({
+      id: 'rgl1',
+      name: 'GB7GL',
+      memberRefs: [
+        { kind: 'talkGroup', id: 'tg1' },
+        { kind: 'talkGroup', id: 'tg2' },
+      ],
+    });
+    const codeplug = buildCodeplug({ talkGroups: [tg1, tg2], rxGroupLists: [rgl] });
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'GB7GL',
+      mode: 'dmr',
+      rxGroupListId: 'rgl1',
+    });
+    const zone = buildZone({ id: 'z1', name: 'Zone', memberChannelIds: ['c1'] });
+    const { names } = expandZoneMemberWireNames(zone, [ch], {
+      expandTalkGroups: true,
+      codeplug,
+    });
+    expect(names).toEqual(['GB7GL Scotland TS1', 'GB7GL Local 9']);
   });
 });

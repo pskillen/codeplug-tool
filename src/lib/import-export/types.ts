@@ -17,11 +17,17 @@ export interface ImportAdapterCapabilities {
   entityKinds: readonly ImportEntityKind[];
 }
 
+export type ExpandRxGroupListMembers = 'all' | 'talkGroupsOnly';
+
 export interface ExportOptions {
   /** CHIRP and other profile-aware formats. */
   profileId?: string;
   /** Suggested download filename for single-file export. */
   fileName?: string;
+  /** Expand logical channels with RX group lists into one row per member (formats without native RGL). */
+  expandRxGroupLists?: boolean;
+  /** Which RX list members to expand when expandRxGroupLists is true. Default `all`. */
+  expandRxGroupListMembers?: ExpandRxGroupListMembers;
 }
 
 export interface ExportResult {

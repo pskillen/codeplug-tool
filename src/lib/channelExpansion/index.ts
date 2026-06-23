@@ -1,8 +1,14 @@
-import { resolveContactRefByWireName, resolveRxGroupListIdByName } from '../entityRefs.ts';
-import { CHANNEL_MODES, isAnalogMode, type ChannelMode } from '../channelModes.ts';
+import {
+  entityRefDisplayName,
+  resolveContactRefByWireName,
+  resolveRxGroupListIdByName,
+} from '../entityRefs.ts';
+import type { EntityRef } from '../entityRefs.ts';
+import { CHANNEL_MODES, isAnalogMode, isDmrMode, type ChannelMode } from '../channelModes.ts';
 import type {
   Channel,
   ChannelModeProfile,
+  Codeplug,
   Contact,
   RxGroupList,
   TalkGroup,
@@ -37,12 +43,20 @@ export interface ExpandedChannelRow {
   opengd77Extras: Record<string, string>;
 }
 
+export type TalkGroupMemberFilter = 'all' | 'talkGroupsOnly';
+
 export interface ExpandChannelOptions {
   /** Wire names already reserved (other channels + prior expanded rows). */
   reservedWireNames?: ReadonlySet<string>;
   /** Max display length before export warning (e.g. 1701 LCD). */
   maxNameLength?: number;
   warnings?: string[];
+  /** Expand RX group list members into per-TG rows (formats without native RGL). */
+  expandTalkGroups?: boolean;
+  /** Which RX list members to expand. Default `all`. */
+  talkGroupMembers?: TalkGroupMemberFilter;
+  /** Required when expandTalkGroups is true — resolves RGL member refs. */
+  codeplug?: Codeplug;
 }
 
 /** Build a profile from top-level channel mode-specific fields (single-mode path). */
@@ -172,6 +186,117 @@ export function expandChannelForExport(
   return rows;
 }
 
+function filterRglMemberRefs(
+  memberRefs: EntityRef[],
+  filter: TalkGroupMemberFilter,
+): EntityRef[] {
+  if (filter === 'all') return memberRefs;
+  return memberRefs.filter((ref) => ref.kind === 'talkGroup');
+}
+
+function expandableRglMembers(
+  row: ExpandedChannelRow,
+  codeplug: Codeplug,
+  filter: TalkGroupMemberFilter,
+  warnings?: string[],
+): EntityRef[] {
+  if (!row.rxGroupListId) return [];
+  const rgl = codeplug.rxGroupLists.find((r) => r.id === row.rxGroupListId);
+  if (!rgl) return [];
+  const filtered = filterRglMemberRefs(rgl.memberRefs, filter);
+  if (filter === 'talkGroupsOnly' && filtered.length < rgl.memberRefs.length) {
+    warnings?.push(
+      `Channel "${row.wireName}" skipped ${rgl.memberRefs.length - filtered.length} non-talk-group RX list member(s)`,
+    );
+  }
+  return filtered;
+}
+
+/** Strip trailing ` {memberWireName}` suffixes used on TG-expanded export rows. */
+export function stripTalkGroupExportSuffix(
+  name: string,
+  knownMemberWireNames: readonly string[],
+): string {
+  const sorted = [...knownMemberWireNames].sort((a, b) => b.length - a.length);
+  for (const memberName of sorted) {
+    const suffix = ` ${memberName}`;
+    if (name.endsWith(suffix)) {
+      return name.slice(0, -suffix.length);
+    }
+  }
+  return name;
+}
+
+/** Second pass: expand digital rows with RX group lists into one row per member. */
+export function expandTalkGroupsForExport(
+  rows: ExpandedChannelRow[],
+  options: ExpandChannelOptions = {},
+): ExpandedChannelRow[] {
+  if (!options.expandTalkGroups || !options.codeplug) {
+    return rows;
+  }
+
+  const codeplug = options.codeplug;
+  const filter = options.talkGroupMembers ?? 'all';
+  const reserved = new Set(options.reservedWireNames ?? []);
+  const warnings = options.warnings;
+  const result: ExpandedChannelRow[] = [];
+
+  for (const row of rows) {
+    if (!isDmrMode(row.mode)) {
+      result.push(row);
+      reserved.add(row.wireName);
+      continue;
+    }
+
+    const members = expandableRglMembers(row, codeplug, filter, warnings);
+    if (members.length === 0) {
+      if (row.rxGroupListId) {
+        warnings?.push(`Channel "${row.wireName}" has no expandable RX list members`);
+      }
+      result.push(row);
+      reserved.add(row.wireName);
+      continue;
+    }
+
+    for (const member of members) {
+      const memberName = entityRefDisplayName(member, codeplug.talkGroups, codeplug.contacts);
+      if (!memberName) continue;
+      const candidate = uniqueWireName(`${row.wireName} ${memberName}`, reserved);
+      reserved.add(candidate);
+      if (options.maxNameLength != null && candidate.length > options.maxNameLength) {
+        warnings?.push(
+          `Derived channel name "${candidate}" exceeds ${options.maxNameLength} characters`,
+        );
+      }
+      result.push({
+        ...row,
+        wireName: candidate,
+        contactRef: member,
+        rxGroupListId: null,
+      });
+    }
+  }
+
+  return result;
+}
+
+function expandChannelRowsForExport(
+  channel: Channel,
+  options: ExpandChannelOptions,
+  reserved: Set<string>,
+): ExpandedChannelRow[] {
+  const modeRows = expandChannelForExport(channel, { ...options, reservedWireNames: reserved });
+  for (const row of modeRows) {
+    reserved.add(row.wireName);
+  }
+  const tgRows = expandTalkGroupsForExport(modeRows, { ...options, reservedWireNames: reserved });
+  for (const row of tgRows) {
+    reserved.add(row.wireName);
+  }
+  return tgRows;
+}
+
 /** Expand all channels for export, preserving order and unique wire names. */
 export function expandAllChannelsForExport(
   channels: Channel[],
@@ -180,11 +305,7 @@ export function expandAllChannelsForExport(
   const reserved = new Set<string>();
   const rows: ExpandedChannelRow[] = [];
   for (const ch of channels) {
-    const expanded = expandChannelForExport(ch, { ...options, reservedWireNames: reserved });
-    for (const row of expanded) {
-      reserved.add(row.wireName);
-      rows.push(row);
-    }
+    rows.push(...expandChannelRowsForExport(ch, options, reserved));
   }
   return rows;
 }
@@ -207,20 +328,15 @@ export function expandZoneMemberWireNames(
   for (const memberId of zone.memberChannelIds) {
     const ch = byId.get(memberId);
     if (!ch) continue;
-    const expanded = expandChannelForExport(ch, {
-      ...options,
-      reservedWireNames: reserved,
-      warnings,
-    });
+    const expanded = expandChannelRowsForExport(ch, { ...options, warnings }, reserved);
     for (const row of expanded) {
       if (options.maxMembers != null && names.length >= options.maxMembers) {
         warnings.push(
-          `Zone "${zone.name}" exceeds ${options.maxMembers} members after multi-mode expansion`,
+          `Zone "${zone.name}" exceeds ${options.maxMembers} members after channel expansion`,
         );
         return { names, warnings };
       }
       names.push(row.wireName);
-      reserved.add(row.wireName);
     }
   }
 
