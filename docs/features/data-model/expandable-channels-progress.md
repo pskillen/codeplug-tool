@@ -7,7 +7,7 @@
 
 ## Overall status
 
-**Status:** In progress
+**Status:** Complete (pending PR)
 
 **Branch:** `36/paddy/multi-talkgroup-export`
 
@@ -17,11 +17,27 @@
 
 **Tracking:** [codeplug-tool#36](https://github.com/pskillen/codeplug-tool/issues/36)
 
-**Status:** In progress
+**Status:** Complete (pending PR)
 
 ### Slice 1: Documentation
 
-**Status:** In progress
+**Status:** Complete
+
+### Slice 2: Expansion core
+
+**Status:** Complete
+
+### Slice 3: Adapter contract
+
+**Status:** Complete
+
+### Slice 4: Import collapse
+
+**Status:** Complete
+
+### Slice 5: Merge candidates apply
+
+**Status:** Complete
 
 ---
 

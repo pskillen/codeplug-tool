@@ -96,7 +96,7 @@ function CandidateGroupCard({
   const sources = group.sourceChannelIds
     .map((id) => channelById(snapshotChannels, id))
     .filter((ch): ch is Channel => ch != null);
-  const isActionable = group.mergeKind === 'multiMode';
+  const isActionable = group.mergeKind === 'multiMode' || group.mergeKind === 'multiTalkgroup';
   const hasErrors = preview?.validationIssues.some((i) => i.severity === 'error');
 
   return (
@@ -116,13 +116,13 @@ function CandidateGroupCard({
             Merged
           </Text>
         ) : null}
-        {isActionable ? (
+        {group.mergeKind === 'multiMode' ? (
           <Badge color="teal" variant="light" ml="auto">
             Multi-mode
           </Badge>
         ) : group.mergeKind === 'multiTalkgroup' ? (
-          <Badge color="gray" variant="light" ml="auto">
-            Multi-talkgroup (not yet supported)
+          <Badge color="teal" variant="light" ml="auto">
+            Multi-talkgroup
           </Badge>
         ) : (
           <Badge color="orange" variant="light" ml="auto">
@@ -283,13 +283,18 @@ export default function ChannelMergeCandidatesModal({
 
   const previewForGroup = useCallback(
     (group: ChannelMergeCandidateGroup) =>
-      previewChannelMerges(codeplug, [buildSelection(group)])[0],
-    [buildSelection, codeplug],
+      previewChannelMerges(codeplug, [buildSelection(group)], candidates)[0],
+    [buildSelection, codeplug, candidates],
   );
 
   const handleMergeOne = useCallback(
     (group: ChannelMergeCandidateGroup) => {
-      if (mergedIds.has(group.id) || group.mergeKind !== 'multiMode') return;
+      if (
+        mergedIds.has(group.id) ||
+        (group.mergeKind !== 'multiMode' && group.mergeKind !== 'multiTalkgroup')
+      ) {
+        return;
+      }
 
       const selection = buildSelection(group);
       const preview = previewForGroup(group);
