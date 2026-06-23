@@ -59,13 +59,17 @@
 
 ## Slice 5: Review UI
 
-**Status:** In progress
+**Status:** Complete
+
+**Delivered**
+
+- `ChannelMergeCandidatesModal` + section nav entry button
 
 ---
 
 ## Slice 6: Final docs + PR
 
-**Status:** Not started
+**Status:** In progress
 
 ---
 
