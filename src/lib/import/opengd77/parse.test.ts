@@ -90,6 +90,19 @@ describe('parseChannels', () => {
     const ch = parseChannels(csv, OPGD77_CTX)[0];
     expect(ch.location).toBeNull();
   });
+
+  it('merges paired Analogue+Digital rows into one multi-mode channel', () => {
+    const csv = `${header}
+1,GB7GL-F,Analogue,430.0,430.0,12.5,,,,,,,,None,88.5,Disabled,Master,No,No,No,0,Off,No,No,None,56.5,-4.0,Yes
+2,GB7GL-D,Digital,430.0,430.0,,2,1,Local 9,Scotland,,Off,Off,,,75%,Master,No,No,No,0,Off,No,No,None,56.5,-4.0,Yes`;
+
+    const channels = parseChannels(csv, OPGD77_CTX);
+    expect(channels).toHaveLength(1);
+    expect(channels[0].multiMode).toBe(true);
+    expect(channels[0].name).toBe('GB7GL');
+    expect(channels[0].modeProfiles).toHaveLength(2);
+    expect(channels[0].modeProfiles.map((p) => p.mode).sort()).toEqual(['dmr', 'fm']);
+  });
 });
 
 describe('parseZones', () => {
