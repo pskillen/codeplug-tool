@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import EntityTable from '../components/report/EntityTable.tsx';
-import ReportPage from '../components/report/ReportPage.tsx';
+import { DataTable, ListPage } from '../components/ui/index.ts';
 import { filterRowsByName, useListNameQuery } from '../hooks/useListNameQuery.ts';
 import {
   channelsReferencingContactId,
@@ -19,8 +18,8 @@ export default function ContactsList() {
   }, [contacts, nameFilter]);
 
   return (
-    <ReportPage title="Contacts">
-      <EntityTable
+    <ListPage title="Contacts">
+      <DataTable
         rows={sorted}
         rowKey={(c) => c.id}
         nameColumn={{
@@ -46,6 +45,6 @@ export default function ContactsList() {
           },
         ]}
       />
-    </ReportPage>
+    </ListPage>
   );
 }

@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import EntityTable from '../components/report/EntityTable.tsx';
-import ReportPage from '../components/report/ReportPage.tsx';
+import { DataTable, ListPage } from '../components/ui/index.ts';
 import { getMemberWireNames } from '../lib/entityProvenance.ts';
 import { filterRowsByName, useListNameQuery } from '../hooks/useListNameQuery.ts';
 import {
@@ -19,8 +18,8 @@ export default function RxGroupListsList() {
   }, [rxGroupLists, nameFilter]);
 
   return (
-    <ReportPage title="RX Group Lists">
-      <EntityTable
+    <ListPage title="RX Group Lists">
+      <DataTable
         rows={sorted}
         rowKey={(r) => r.id}
         nameColumn={{
@@ -40,6 +39,6 @@ export default function RxGroupListsList() {
           },
         ]}
       />
-    </ReportPage>
+    </ListPage>
   );
 }

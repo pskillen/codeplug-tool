@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import EntityTable from '../components/report/EntityTable.tsx';
-import ReportPage from '../components/report/ReportPage.tsx';
+import { DataTable, ListPage } from '../components/ui/index.ts';
 import { filterRowsByName, useListNameQuery } from '../hooks/useListNameQuery.ts';
 import {
   channelsReferencingTalkGroupId,
@@ -19,8 +18,8 @@ export default function TalkGroupsList() {
   }, [talkGroups, nameFilter]);
 
   return (
-    <ReportPage title="Talk groups">
-      <EntityTable
+    <ListPage title="Talk groups">
+      <DataTable
         rows={sorted}
         rowKey={(tg) => tg.id}
         nameColumn={{
@@ -47,6 +46,6 @@ export default function TalkGroupsList() {
           },
         ]}
       />
-    </ReportPage>
+    </ListPage>
   );
 }

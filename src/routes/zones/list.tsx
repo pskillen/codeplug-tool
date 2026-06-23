@@ -1,8 +1,7 @@
 import { Stack } from '@mantine/core';
 import { useMemo } from 'react';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
-import EntityTable from '../../components/report/EntityTable.tsx';
-import ReportPage from '../../components/report/ReportPage.tsx';
+import { DataTable, ListPage } from '../../components/ui/index.ts';
 import { filterRowsByName, useListNameQuery } from '../../hooks/useListNameQuery.ts';
 import { sortByName } from '../../lib/reportLookup.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
@@ -16,9 +15,9 @@ export default function ZonesList() {
   }, [zones, nameFilter]);
 
   return (
-    <ReportPage title="Zones">
+    <ListPage title="Zones">
       <Stack gap="lg">
-        <EntityTable
+        <DataTable
           rows={sorted}
           rowKey={(z) => z.id}
           nameColumn={{
@@ -43,6 +42,6 @@ export default function ZonesList() {
           rxGroupLists={codeplug.rxGroupLists}
         />
       </Stack>
-    </ReportPage>
+    </ListPage>
   );
 }

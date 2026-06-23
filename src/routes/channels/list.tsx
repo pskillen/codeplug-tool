@@ -1,8 +1,7 @@
 import { Group, Stack, Text } from '@mantine/core';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import { BandPillForChannel } from '../../components/crud/BandPill.tsx';
-import EntityTable from '../../components/report/EntityTable.tsx';
-import ReportPage from '../../components/report/ReportPage.tsx';
+import { DataTable, ListPage } from '../../components/ui/index.ts';
 import { applyFilters } from '../../lib/channels.ts';
 import ModePill from '../../components/crud/ModePill.tsx';
 import { resolveChannelModeProfiles } from '../../lib/channelExpansion/index.ts';
@@ -88,9 +87,9 @@ export default function ChannelsList() {
   });
 
   return (
-    <ReportPage title="Channels">
+    <ListPage title="Channels">
       <Stack gap="lg">
-        <EntityTable
+        <DataTable
           rows={filtered}
           rowKey={(ch) => ch.id}
           nameColumn={{
@@ -146,6 +145,6 @@ export default function ChannelsList() {
           operatorPosition={position}
         />
       </Stack>
-    </ReportPage>
+    </ListPage>
   );
 }
