@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  DATATABLE_NAME_SORT_KEY,
-  nextSortState,
-  sortDataTableRows,
-} from './sort.ts';
+import { DATATABLE_NAME_SORT_KEY, nextSortState, sortDataTableRows } from './sort.ts';
 
 interface Row {
   id: string;
@@ -27,7 +23,11 @@ const ctx = {
 
 describe('sortDataTableRows', () => {
   it('sorts by name locale-aware ascending', () => {
-    const sorted = sortDataTableRows(rows, { columnKey: DATATABLE_NAME_SORT_KEY, direction: 'asc' }, ctx);
+    const sorted = sortDataTableRows(
+      rows,
+      { columnKey: DATATABLE_NAME_SORT_KEY, direction: 'asc' },
+      ctx,
+    );
     expect(sorted.map((r) => r.name)).toEqual(['Alpha', 'Mike', 'Zulu']);
   });
 

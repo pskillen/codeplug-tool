@@ -6,35 +6,35 @@ Standardised entity list table: sticky header, column sort, optional toolbar (se
 
 ## Props
 
-| Prop | Type | Default | Notes |
-| --- | --- | --- | --- |
-| `rows` | `T[]` | — | Rows to display (may be pre-filtered by route) |
-| `rowKey` | `(row: T) => string` | — | Stable row id |
-| `nameColumn` | `DataTableLinkedColumn<T>` | — | Linked name cell (required) |
-| `callsignColumn` | `DataTableLinkedColumn<T>` | — | Optional leading linked column |
-| `columns` | `DataTableColumn<T>[]` | — | Additional columns |
-| `variant` | `'list' \| 'embedded'` | `'list'` | Embedded hides search/column picker/selection by default |
-| `sort` / `onSortChange` / `defaultSort` | `DataTableSortState` | internal | Controlled or uncontrolled header sort |
-| `search` / `onSearchChange` | `string` | — | Controlled search; pair with `showSearch` |
-| `showSearch` | `boolean` | `true` when `onSearchChange` set | Toolbar search input |
-| `columnVisibility` / `onColumnVisibilityChange` | `string[]` | — | Controlled hideable column keys |
-| `columnVisibilityStorageKey` | `string` | — | Persist hideable columns in `localStorage` |
-| `selectable` | `boolean` | `false` | Checkbox column for bulk selection |
-| `selectedKeys` / `onSelectedKeysChange` | `string[]` | internal | Controlled selection |
-| `totalRowCount` | `number` | — | Unfiltered count; enables filtered-empty copy |
-| `filteredEmptyMessage` | `string` | `'No matches'` | When `rows` empty but `totalRowCount > 0` |
-| `emptyState` | `ReactNode` | `EmptyState` | Truly empty table |
-| `toolbar` | `ReactNode` | — | Trailing toolbar slot |
-| `mobileColumnPolicy` | `'none' \| 'collapse'` | `'none'` | #68 extension point |
+| Prop                                            | Type                       | Default                          | Notes                                                    |
+| ----------------------------------------------- | -------------------------- | -------------------------------- | -------------------------------------------------------- |
+| `rows`                                          | `T[]`                      | —                                | Rows to display (may be pre-filtered by route)           |
+| `rowKey`                                        | `(row: T) => string`       | —                                | Stable row id                                            |
+| `nameColumn`                                    | `DataTableLinkedColumn<T>` | —                                | Linked name cell (required)                              |
+| `callsignColumn`                                | `DataTableLinkedColumn<T>` | —                                | Optional leading linked column                           |
+| `columns`                                       | `DataTableColumn<T>[]`     | —                                | Additional columns                                       |
+| `variant`                                       | `'list' \| 'embedded'`     | `'list'`                         | Embedded hides search/column picker/selection by default |
+| `sort` / `onSortChange` / `defaultSort`         | `DataTableSortState`       | internal                         | Controlled or uncontrolled header sort                   |
+| `search` / `onSearchChange`                     | `string`                   | —                                | Controlled search; pair with `showSearch`                |
+| `showSearch`                                    | `boolean`                  | `true` when `onSearchChange` set | Toolbar search input                                     |
+| `columnVisibility` / `onColumnVisibilityChange` | `string[]`                 | —                                | Controlled hideable column keys                          |
+| `columnVisibilityStorageKey`                    | `string`                   | —                                | Persist hideable columns in `localStorage`               |
+| `selectable`                                    | `boolean`                  | `false`                          | Checkbox column for bulk selection                       |
+| `selectedKeys` / `onSelectedKeysChange`         | `string[]`                 | internal                         | Controlled selection                                     |
+| `totalRowCount`                                 | `number`                   | —                                | Unfiltered count; enables filtered-empty copy            |
+| `filteredEmptyMessage`                          | `string`                   | `'No matches'`                   | When `rows` empty but `totalRowCount > 0`                |
+| `emptyState`                                    | `ReactNode`                | `EmptyState`                     | Truly empty table                                        |
+| `toolbar`                                       | `ReactNode`                | —                                | Trailing toolbar slot                                    |
+| `mobileColumnPolicy`                            | `'none' \| 'collapse'`     | `'none'`                         | #68 extension point                                      |
 
 ### Column fields
 
-| Field | Notes |
-| --- | --- |
-| `sortable` | Default `true` when `sortValue` is set |
-| `sortValue` | `string \| number \| null` for comparator; nulls sort last |
-| `hideable` | Shown in column picker when `true` |
-| `defaultVisible` | Initial visibility for hideable columns (default `true`) |
+| Field            | Notes                                                      |
+| ---------------- | ---------------------------------------------------------- |
+| `sortable`       | Default `true` when `sortValue` is set                     |
+| `sortValue`      | `string \| number \| null` for comparator; nulls sort last |
+| `hideable`       | Shown in column picker when `true`                         |
+| `defaultVisible` | Initial visibility for hideable columns (default `true`)   |
 
 ## Usage
 
@@ -65,7 +65,7 @@ const filtered = useMemo(
       sortValue: (c) => c.identifier,
     },
   ]}
-/>
+/>;
 ```
 
 ## Behaviour

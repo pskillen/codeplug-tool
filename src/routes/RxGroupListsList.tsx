@@ -2,10 +2,7 @@ import { useMemo } from 'react';
 import { DataTable, ListPage } from '../components/ui/index.ts';
 import { getMemberWireNames } from '../lib/entityProvenance.ts';
 import { filterRowsByName, useListNameQuery } from '../hooks/useListNameQuery.ts';
-import {
-  channelsWithRxGroupListId,
-  formatReferenceCount,
-} from '../lib/reportLookup.ts';
+import { channelsWithRxGroupListId, formatReferenceCount } from '../lib/reportLookup.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
 
 export default function RxGroupListsList() {

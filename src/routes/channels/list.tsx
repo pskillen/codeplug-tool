@@ -150,11 +150,11 @@ export default function ChannelsList() {
       return {
         ...base,
         render: (ch: Channel) =>
-          ch.location && ch.useLocation ? coordsToLocator(ch.location.lat, ch.location.lon, 6) : '—',
-        sortValue: (ch: Channel) =>
           ch.location && ch.useLocation
             ? coordsToLocator(ch.location.lat, ch.location.lon, 6)
-            : '',
+            : '—',
+        sortValue: (ch: Channel) =>
+          ch.location && ch.useLocation ? coordsToLocator(ch.location.lat, ch.location.lon, 6) : '',
       };
     });
   }, [codeplug.contacts, codeplug.rxGroupLists, codeplug.talkGroups, position]);

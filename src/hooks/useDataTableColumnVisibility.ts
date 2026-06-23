@@ -56,7 +56,13 @@ const stores = new Map<
 function getStore(storageKey: string, defs: ColumnVisibilityDef[], customLoad?: () => string[]) {
   let store = stores.get(storageKey);
   if (!store) {
-    store = { listeners: new Set(), cachedSnapshot: null, cachedStorageValue: undefined, defs, customLoad };
+    store = {
+      listeners: new Set(),
+      cachedSnapshot: null,
+      cachedStorageValue: undefined,
+      defs,
+      customLoad,
+    };
     stores.set(storageKey, store);
   }
   store.defs = defs;
@@ -68,7 +74,11 @@ function readStorageValue(storageKey: string): string | null {
   return localStorage.getItem(storageKey);
 }
 
-function getSnapshot(storageKey: string, defs: ColumnVisibilityDef[], customLoad?: () => string[]): string[] {
+function getSnapshot(
+  storageKey: string,
+  defs: ColumnVisibilityDef[],
+  customLoad?: () => string[],
+): string[] {
   const store = getStore(storageKey, defs, customLoad);
   const raw = customLoad ? null : readStorageValue(storageKey);
   if (store.cachedSnapshot && raw === store.cachedStorageValue && !customLoad) {
@@ -103,13 +113,9 @@ export function useDataTableColumnVisibility(
       return () => store.listeners.delete(listener);
     },
     () =>
-      enabled
-        ? getSnapshot(storageKey, defs, customLoad)
-        : getDisabledSnapshot(storageKey, defs),
+      enabled ? getSnapshot(storageKey, defs, customLoad) : getDisabledSnapshot(storageKey, defs),
     () =>
-      enabled
-        ? getSnapshot(storageKey, defs, customLoad)
-        : getDisabledSnapshot(storageKey, defs),
+      enabled ? getSnapshot(storageKey, defs, customLoad) : getDisabledSnapshot(storageKey, defs),
   );
 
   const setVisibleCols = useCallback(

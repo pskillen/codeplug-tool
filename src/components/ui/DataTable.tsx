@@ -112,9 +112,7 @@ function SortableHeader({
       type="button"
       className={classes.sortButton}
       onClick={() => onSort(columnKey)}
-      aria-sort={
-        active ? (sortState.direction === 'asc' ? 'ascending' : 'descending') : 'none'
-      }
+      aria-sort={active ? (sortState.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
     >
       <span>{label}</span>
       <Icon
@@ -199,7 +197,9 @@ export default function DataTable<T>({
 
   const visibleColumns = useMemo(() => {
     const hideableSet = new Set(hideableDefs.map((d) => d.key));
-    return columns.filter((col) => !hideableSet.has(col.key) || visibleHideableKeys.includes(col.key));
+    return columns.filter(
+      (col) => !hideableSet.has(col.key) || visibleHideableKeys.includes(col.key),
+    );
   }, [columns, hideableDefs, visibleHideableKeys]);
 
   const [internalSort, setInternalSort] = useState<DataTableSortState | null>(defaultSort ?? null);
