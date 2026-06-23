@@ -297,9 +297,10 @@ export default function DataTable<T>({
         </Group>
       ) : null}
 
-      <ScrollArea
-        className={isList ? classes.scrollAreaList : classes.scrollAreaEmbedded}
+      <ScrollArea.Autosize
+        mah={isList ? '60vh' : '40vh'}
         type="auto"
+        offsetScrollbars
         data-testid="datatable-scroll"
       >
         <Table striped highlightOnHover withTableBorder>
@@ -393,7 +394,7 @@ export default function DataTable<T>({
             )}
           </Table.Tbody>
         </Table>
-      </ScrollArea>
+      </ScrollArea.Autosize>
       {caption ? (
         typeof caption === 'string' ? (
           <Text size="sm" c="dimmed">

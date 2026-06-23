@@ -1,11 +1,3 @@
-.scrollAreaList {
-  max-height: 60vh;
-}
-
-.scrollAreaEmbedded {
-  max-height: 40vh;
-}
-
 .stickyTh {
   position: sticky;
   top: 0;

@@ -71,7 +71,7 @@ const filtered = useMemo(
 ## Behaviour
 
 - **Sort:** click header toggles asc/desc on same column; new column starts asc. Name/callsign use internal sort keys.
-- **Sticky header:** `Table.Th` sticks inside bounded `ScrollArea` (`60vh` list, `40vh` embedded).
+- **Sticky header:** `Table.Th` sticks inside bounded `ScrollArea` (`mah` 60vh list, 40vh embedded).
 - **Column picker:** `MultiSelect` for columns with `hideable: true`.
 - **Selection:** header checkbox selects all visible rows; row checkboxes do not block link navigation.
 - **Empty states:** `rows.length === 0` with `totalRowCount > 0` shows `filteredEmptyMessage`; otherwise `emptyState`.
