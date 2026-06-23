@@ -1,8 +1,9 @@
-import { AppShell, Box, Burger, Divider, Group, Text } from '@mantine/core';
+import { AppShell, Box, Divider, Group } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import AppNav from './components/AppNav/AppNav.tsx';
 import SectionNav from './components/SectionNav/SectionNav.tsx';
+import AppHeader from './components/ui/AppHeader.tsx';
 import RequireActiveProject from './components/RequireActiveProject/RequireActiveProject.tsx';
 import BuildFooter from './components/BuildFooter.tsx';
 import {
@@ -57,10 +58,7 @@ export default function App() {
       padding="md"
     >
       <AppShell.Header>
-        <Group h="100%" px="md">
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Text fw={600}>MM9PDY Codeplug Tool</Text>
-        </Group>
+        <AppHeader opened={opened} onToggle={toggle} />
       </AppShell.Header>
 
       <AppShell.Navbar p={0}>

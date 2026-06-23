@@ -20,4 +20,6 @@ export { default as FormPage } from './FormPage.tsx';
 export type { FormPageProps } from './FormPage.tsx';
 export { default as FormSection } from './FormSection.tsx';
 export type { FormSectionProps } from './FormSection.tsx';
+export { default as AppHeader } from './AppHeader.tsx';
+export type { AppHeaderProps } from './AppHeader.tsx';
 export * from './tokens.ts';
