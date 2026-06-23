@@ -7,6 +7,9 @@ import {
   mergeChannelsToMultiMode,
   type ChannelMergeCandidateOptions,
 } from './channelExpansion/index.ts';
+import { frequencyHzToMhz } from './channelFields/frequencies.ts';
+import { isAnalogMode } from './channelModes.ts';
+import { formatMhzNumber } from './formatFrequency.ts';
 import { mergeChannelsIntoOne } from './codeplugMutations.ts';
 import type { Channel, Codeplug } from '../models/codeplug.ts';
 import { validateChannel, type ValidationIssue } from './validation/channel.ts';
@@ -26,6 +29,38 @@ export interface ChannelMergeSelection {
   sourceChannelIds: string[];
   resultName: string;
   enabled: boolean;
+  /** Survivor RX/TX Hz — set when operator edits merge result frequencies. */
+  rxFrequency?: number | null;
+  txFrequency?: number | null;
+}
+
+/** Default logical-channel frequencies from the FM primary (or first source). */
+export function suggestedMergeResultFrequencies(sources: Channel[]): {
+  rxFrequency: number | null;
+  txFrequency: number | null;
+} {
+  if (sources.length === 0) {
+    return { rxFrequency: null, txFrequency: null };
+  }
+  const primary = sources.find((ch) => isAnalogMode(ch.mode)) ?? sources[0];
+  return { rxFrequency: primary.rxFrequency, txFrequency: primary.txFrequency };
+}
+
+export function formatMhzInputFromHz(hz: number | null): string {
+  if (hz == null) return '';
+  const mhz = frequencyHzToMhz(hz);
+  return mhz != null ? formatMhzNumber(mhz) : '';
+}
+
+function withSelectionFrequencies(channel: Channel, selection: ChannelMergeSelection): Channel {
+  if (selection.rxFrequency === undefined && selection.txFrequency === undefined) {
+    return channel;
+  }
+  return {
+    ...channel,
+    ...(selection.rxFrequency !== undefined ? { rxFrequency: selection.rxFrequency } : {}),
+    ...(selection.txFrequency !== undefined ? { txFrequency: selection.txFrequency } : {}),
+  };
 }
 
 export interface ChannelMergeZoneImpact {
@@ -268,10 +303,11 @@ export function previewChannelMerges(
     if (sources.length < 2) continue;
 
     const survivorId = sources[0].id;
-    const mergedChannel = mergeChannelsToMultiMode(sources, {
+    let mergedChannel = mergeChannelsToMultiMode(sources, {
       survivorId,
       resultName: selection.resultName.trim() || mergeNameStem(sources[0].name),
     });
+    mergedChannel = withSelectionFrequencies(mergedChannel, selection);
 
     const absorbedIds = sources.slice(1).map((ch) => ch.id);
     const validationIssues = validateChannel(mergedChannel, codeplug, survivorId);

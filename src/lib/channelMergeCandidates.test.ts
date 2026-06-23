@@ -144,6 +144,36 @@ describe('channelMergeCandidates', () => {
     expect(nameSimilaritySliderToThreshold(100)).toBe(0.35);
   });
 
+  it('previewChannelMerges applies operator-edited result frequencies', () => {
+    const fm = buildChannel({
+      id: 'fm',
+      name: 'FIRE Repeaters-F',
+      mode: 'fm',
+      rxFrequency: 462_587_500,
+      txFrequency: 462_587_500,
+    });
+    const dmr = buildChannel({
+      id: 'dmr',
+      name: 'FIRE Repeaters/P',
+      mode: 'dmr',
+      rxFrequency: 462_587_500,
+      txFrequency: 457_037_500,
+    });
+    const codeplug = buildCodeplug({ channels: [fm, dmr] });
+    const previews = previewChannelMerges(codeplug, [
+      {
+        groupId: 'dmr|fm',
+        sourceChannelIds: ['fm', 'dmr'],
+        resultName: 'FIRE Repeaters',
+        enabled: true,
+        rxFrequency: 462_587_500,
+        txFrequency: 457_037_500,
+      },
+    ]);
+    expect(previews[0].mergedChannel.rxFrequency).toBe(462_587_500);
+    expect(previews[0].mergedChannel.txFrequency).toBe(457_037_500);
+  });
+
   it('previewChannelMerges builds multi-mode survivor and zone impacts', () => {
     const fm = buildChannel({
       id: 'fm',

@@ -17,13 +17,16 @@ import {
   defaultChannelMergeFindSettings,
   findChannelMergeCandidates,
   formatChannelMergeReportLines,
+  formatMhzInputFromHz,
   nameSimilaritySliderToThreshold,
   nameSimilarityThresholdToSlider,
   previewChannelMerges,
+  suggestedMergeResultFrequencies,
   type ChannelMergeCandidateGroup,
   type ChannelMergeFindSettings,
   type ChannelMergeSelection,
 } from '../../lib/channelMergeCandidates.ts';
+import { parseFrequencyHzFromMhzInput } from '../../lib/channelFields/frequencies.ts';
 import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { entityRefDisplayName } from '../../lib/entityRefs.ts';
 import type { Channel, Codeplug } from '../../models/codeplug.ts';
@@ -70,6 +73,10 @@ function CandidateGroupCard({
   displayCodeplug,
   resultName,
   onResultNameChange,
+  rxMhz,
+  txMhz,
+  onRxMhzChange,
+  onTxMhzChange,
   preview,
   onMerge,
 }: {
@@ -79,6 +86,10 @@ function CandidateGroupCard({
   displayCodeplug: Codeplug;
   resultName: string;
   onResultNameChange: (name: string) => void;
+  rxMhz: string;
+  txMhz: string;
+  onRxMhzChange: (mhz: string) => void;
+  onTxMhzChange: (mhz: string) => void;
   preview: ReturnType<typeof previewChannelMerges>[number] | undefined;
   onMerge: () => void;
 }) {
@@ -131,12 +142,36 @@ function CandidateGroupCard({
       ))}
 
       {isActionable && !merged ? (
-        <TextInput
-          label="Result name"
-          value={resultName}
-          onChange={(e) => onResultNameChange(e.currentTarget.value)}
-          size="sm"
-        />
+        <>
+          <TextInput
+            label="Result name"
+            value={resultName}
+            onChange={(e) => onResultNameChange(e.currentTarget.value)}
+            size="sm"
+          />
+          <Group gap="sm" align="flex-end" wrap="nowrap">
+            <Text size="sm" fw={500} style={{ flexShrink: 0 }}>
+              RX
+            </Text>
+            <TextInput
+              flex={1}
+              value={rxMhz}
+              onChange={(e) => onRxMhzChange(e.currentTarget.value)}
+              size="sm"
+              aria-label="Result RX MHz"
+            />
+            <Text size="sm" fw={500} style={{ flexShrink: 0 }}>
+              TX
+            </Text>
+            <TextInput
+              flex={1}
+              value={txMhz}
+              onChange={(e) => onTxMhzChange(e.currentTarget.value)}
+              size="sm"
+              aria-label="Result TX MHz"
+            />
+          </Group>
+        </>
       ) : null}
 
       {hasErrors ? (
@@ -171,6 +206,9 @@ export default function ChannelMergeCandidatesModal({
   const [snapshotChannels] = useState(() => codeplug.channels);
   const [mergedGroups, setMergedGroups] = useState<ChannelMergeCandidateGroup[]>([]);
   const [resultNames, setResultNames] = useState<Record<string, string>>({});
+  const [resultFreqMhz, setResultFreqMhz] = useState<Record<string, { rx: string; tx: string }>>(
+    {},
+  );
   const [lastMergeNote, setLastMergeNote] = useState<string | null>(null);
 
   const candidates = useMemo(
@@ -194,32 +232,66 @@ export default function ChannelMergeCandidatesModal({
     setResultNames((prev) => ({ ...prev, [groupId]: resultName }));
   }, []);
 
-  const previewForGroup = useCallback(
+  const sourcesForGroup = useCallback(
+    (group: ChannelMergeCandidateGroup) =>
+      group.sourceChannelIds
+        .map((id) => channelById(snapshotChannels, id))
+        .filter((ch): ch is Channel => ch != null),
+    [snapshotChannels],
+  );
+
+  const freqMhzForGroup = useCallback(
     (group: ChannelMergeCandidateGroup) => {
-      const resultName = resultNames[group.id]?.trim() || group.suggestedName;
-      const selection: ChannelMergeSelection = {
+      const suggested = suggestedMergeResultFrequencies(sourcesForGroup(group));
+      const stored = resultFreqMhz[group.id];
+      return {
+        rx: stored?.rx ?? formatMhzInputFromHz(suggested.rxFrequency),
+        tx: stored?.tx ?? formatMhzInputFromHz(suggested.txFrequency),
+      };
+    },
+    [resultFreqMhz, sourcesForGroup],
+  );
+
+  const setResultFreqMhzForGroup = useCallback(
+    (group: ChannelMergeCandidateGroup, patch: Partial<{ rx: string; tx: string }>) => {
+      const current = freqMhzForGroup(group);
+      setResultFreqMhz((prev) => ({
+        ...prev,
+        [group.id]: {
+          rx: patch.rx ?? current.rx,
+          tx: patch.tx ?? current.tx,
+        },
+      }));
+    },
+    [freqMhzForGroup],
+  );
+
+  const buildSelection = useCallback(
+    (group: ChannelMergeCandidateGroup): ChannelMergeSelection => {
+      const { rx, tx } = freqMhzForGroup(group);
+      return {
         groupId: group.id,
         sourceChannelIds: group.sourceChannelIds,
-        resultName,
+        resultName: resultNames[group.id]?.trim() || group.suggestedName,
         enabled: true,
+        rxFrequency: parseFrequencyHzFromMhzInput(rx),
+        txFrequency: parseFrequencyHzFromMhzInput(tx),
       };
-      return previewChannelMerges(codeplug, [selection])[0];
     },
-    [codeplug, resultNames],
+    [freqMhzForGroup, resultNames],
+  );
+
+  const previewForGroup = useCallback(
+    (group: ChannelMergeCandidateGroup) =>
+      previewChannelMerges(codeplug, [buildSelection(group)])[0],
+    [buildSelection, codeplug],
   );
 
   const handleMergeOne = useCallback(
     (group: ChannelMergeCandidateGroup) => {
       if (mergedIds.has(group.id) || group.mergeKind !== 'multiMode') return;
 
-      const resultName = resultNames[group.id]?.trim() || group.suggestedName;
-      const selection: ChannelMergeSelection = {
-        groupId: group.id,
-        sourceChannelIds: group.sourceChannelIds,
-        resultName,
-        enabled: true,
-      };
-
+      const selection = buildSelection(group);
       const preview = previewForGroup(group);
       if (preview?.validationIssues.some((i) => i.severity === 'error')) return;
 
@@ -227,9 +299,9 @@ export default function ChannelMergeCandidatesModal({
       applyMerges([selection], [group]);
       setMergedGroups((prev) => [...prev, group]);
       const lines = formatChannelMergeReportLines(report);
-      setLastMergeNote(lines.join(' · ') || `Merged into "${resultName}"`);
+      setLastMergeNote(lines.join(' · ') || `Merged into "${selection.resultName}"`);
     },
-    [applyMerges, codeplug, mergedIds, previewForGroup, resultNames],
+    [applyMerges, buildSelection, codeplug, mergedIds, previewForGroup],
   );
 
   const displayCodeplug = useMemo(
@@ -297,19 +369,26 @@ export default function ChannelMergeCandidatesModal({
         {displayGroups.length === 0 ? (
           <Alert color="blue">No merge candidates found with these settings.</Alert>
         ) : (
-          displayGroups.map((group) => (
-            <CandidateGroupCard
-              key={group.id}
-              group={group}
-              merged={mergedIds.has(group.id)}
-              snapshotChannels={snapshotChannels}
-              displayCodeplug={displayCodeplug}
-              resultName={resultNames[group.id] ?? group.suggestedName}
-              onResultNameChange={(name) => setResultName(group.id, name)}
-              preview={mergedIds.has(group.id) ? undefined : previewForGroup(group)}
-              onMerge={() => handleMergeOne(group)}
-            />
-          ))
+          displayGroups.map((group) => {
+            const { rx, tx } = freqMhzForGroup(group);
+            return (
+              <CandidateGroupCard
+                key={group.id}
+                group={group}
+                merged={mergedIds.has(group.id)}
+                snapshotChannels={snapshotChannels}
+                displayCodeplug={displayCodeplug}
+                resultName={resultNames[group.id] ?? group.suggestedName}
+                onResultNameChange={(name) => setResultName(group.id, name)}
+                rxMhz={rx}
+                txMhz={tx}
+                onRxMhzChange={(mhz) => setResultFreqMhzForGroup(group, { rx: mhz })}
+                onTxMhzChange={(mhz) => setResultFreqMhzForGroup(group, { tx: mhz })}
+                preview={mergedIds.has(group.id) ? undefined : previewForGroup(group)}
+                onMerge={() => handleMergeOne(group)}
+              />
+            );
+          })
         )}
 
         <Group justify="flex-end">
