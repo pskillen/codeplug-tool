@@ -7,18 +7,7 @@ import type { EtccListing } from './types.ts';
 
 export type QueryKind = 'callsign' | 'locator' | 'band' | 'town';
 
-const BAND_TOKENS = new Set([
-  '2m',
-  '4m',
-  '6m',
-  '10m',
-  '23cm',
-  '70cm',
-  '13cm',
-  '3cm',
-  '9cm',
-  '40m',
-]);
+const BAND_TOKENS = new Set(['2m', '4m', '6m', '10m', '23cm', '70cm', '13cm', '3cm', '9cm', '40m']);
 
 /** UK-style callsign — must include at least one digit (avoids town names like Derby). */
 const CALLSIGN_RE = /^[A-Z0-9][A-Z0-9/-]{1,11}$/i;

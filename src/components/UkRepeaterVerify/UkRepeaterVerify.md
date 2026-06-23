@@ -6,8 +6,8 @@ On channel detail, query ukrepeater.net by callsign (or stored listing id), show
 
 ## Props
 
-| Prop | Type | Notes |
-| --- | --- | --- |
+| Prop      | Type      | Notes                  |
+| --------- | --------- | ---------------------- |
 | `channel` | `Channel` | Channel being verified |
 
 ## Behaviour

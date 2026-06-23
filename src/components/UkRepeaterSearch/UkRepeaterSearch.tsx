@@ -283,10 +283,7 @@ export default function UkRepeaterSearch() {
             ) : null}
 
             <Group justify="space-between">
-              <Button
-                disabled={selected.size === 0}
-                onClick={handleAdd}
-              >
+              <Button disabled={selected.size === 0} onClick={handleAdd}>
                 Add selected ({selected.size})
               </Button>
             </Group>

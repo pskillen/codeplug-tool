@@ -28,18 +28,14 @@ describe('fetchByCallsign', () => {
   });
 
   it('fetches and parses listings', async () => {
-    vi.mocked(fetch).mockResolvedValue(
-      new Response(GB7DC_RESPONSE, { status: 200 }),
-    );
+    vi.mocked(fetch).mockResolvedValue(new Response(GB7DC_RESPONSE, { status: 200 }));
     const listings = await fetchByCallsign('GB7DC');
     expect(listings).toHaveLength(1);
     expect(listings[0].repeater).toBe('GB7DC');
   });
 
   it('uses session cache on second call', async () => {
-    vi.mocked(fetch).mockResolvedValue(
-      new Response(GB7DC_RESPONSE, { status: 200 }),
-    );
+    vi.mocked(fetch).mockResolvedValue(new Response(GB7DC_RESPONSE, { status: 200 }));
     await fetchByCallsign('GB7DC');
     await fetchByCallsign('GB7DC');
     expect(fetch).toHaveBeenCalledTimes(1);

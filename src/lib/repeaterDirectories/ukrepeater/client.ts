@@ -29,9 +29,7 @@ export async function fetchEtccListings(path: string): Promise<EtccListing[]> {
     response = await fetch(url);
   } catch {
     if (cached) return parseResponse(cached);
-    throw new EtccDirectoryError(
-      'Could not reach ukrepeater.net — check your network connection.',
-    );
+    throw new EtccDirectoryError('Could not reach ukrepeater.net — check your network connection.');
   }
 
   const body = await response.text();

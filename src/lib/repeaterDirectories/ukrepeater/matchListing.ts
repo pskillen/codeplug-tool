@@ -21,9 +21,7 @@ export function matchListingForChannel(
     if (byFreq) return byFreq;
   }
 
-  const byCall = listings.find(
-    (l) => l.repeater.toUpperCase() === channel.callsign.toUpperCase(),
-  );
+  const byCall = listings.find((l) => l.repeater.toUpperCase() === channel.callsign.toUpperCase());
   if (byCall) return byCall;
 
   return listings.length === 1 ? listings[0] : null;

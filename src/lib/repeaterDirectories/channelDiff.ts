@@ -73,31 +73,20 @@ function valuesEqual(a: unknown, b: unknown): boolean {
   return false;
 }
 
-function locationEqual(
-  a: Channel['location'],
-  b: ChannelInput['location'],
-): boolean {
+function locationEqual(a: Channel['location'], b: ChannelInput['location']): boolean {
   if (a == null && b == null) return true;
   if (a == null || b == null) return false;
   return Math.abs(a.lat - b.lat) < 0.0001 && Math.abs(a.lon - b.lon) < 0.0001;
 }
 
-export function diffChannelFromListing(
-  channel: Channel,
-  listing: EtccListing,
-): ChannelDiffRow[] {
+export function diffChannelFromListing(channel: Channel, listing: EtccListing): ChannelDiffRow[] {
   const mapped = mapListingToChannelInput(listing);
   if (isMapListingSkip(mapped)) return [];
 
   const remote = mapped.input;
   const rows: ChannelDiffRow[] = [];
 
-  const push = (
-    field: ChannelDiffField,
-    local: string,
-    remoteVal: string,
-    changed: boolean,
-  ) => {
+  const push = (field: ChannelDiffField, local: string, remoteVal: string, changed: boolean) => {
     rows.push({
       field,
       label: FIELD_LABELS[field],
@@ -152,7 +141,12 @@ export function diffChannelFromListing(
     !valuesEqual(localCc, remoteCc),
   );
 
-  push('mode', formatMode(channel), formatRemoteMode(remote), formatMode(channel) !== formatRemoteMode(remote));
+  push(
+    'mode',
+    formatMode(channel),
+    formatRemoteMode(remote),
+    formatMode(channel) !== formatRemoteMode(remote),
+  );
   push(
     'location',
     formatLocation(channel),
@@ -165,7 +159,12 @@ export function diffChannelFromListing(
     remote.useLocation ? 'Yes' : 'No',
     channel.useLocation !== remote.useLocation,
   );
-  push('comment', channel.comment || '—', remote.comment || '—', channel.comment !== remote.comment);
+  push(
+    'comment',
+    channel.comment || '—',
+    remote.comment || '—',
+    channel.comment !== remote.comment,
+  );
 
   return rows;
 }

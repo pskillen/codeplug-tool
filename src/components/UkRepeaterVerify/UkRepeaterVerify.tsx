@@ -1,14 +1,4 @@
-import {
-  Alert,
-  Button,
-  Checkbox,
-  Group,
-  Modal,
-  Radio,
-  Stack,
-  Table,
-  Text,
-} from '@mantine/core';
+import { Alert, Button, Checkbox, Group, Modal, Radio, Stack, Table, Text } from '@mantine/core';
 import { useMemo, useState } from 'react';
 import {
   buildPatchFromDiff,
@@ -232,8 +222,8 @@ export default function UkRepeaterVerify({ channel }: UkRepeaterVerifyProps) {
 
             {nameSelected ? (
               <Text size="xs" c="dimmed">
-                Applying a name change updates the CPS export label and import-merge identity.
-                Zone membership is unchanged.
+                Applying a name change updates the CPS export label and import-merge identity. Zone
+                membership is unchanged.
               </Text>
             ) : null}
 
