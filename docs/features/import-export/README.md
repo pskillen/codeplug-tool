@@ -74,6 +74,19 @@ flowchart TD
 
 All vendor formats convert through the radio-agnostic internal model. Import adapters parse vendor files into entities; export adapters serialise entities back to vendor columns. Feature code (map, CRUD, store) works on the internal model only.
 
+### Channel expansion (multi-mode / multi-talkgroup)
+
+Shared logic in [`src/lib/channelExpansion/`](../../../src/lib/channelExpansion/) — adapters call `expandAllChannelsForExport` before serialising wire rows:
+
+| Axis | When to enable | OpenGD77 |
+| --- | --- | --- |
+| Multi-mode | Format has no native dual-mode row | Always (separate Analogue/Digital rows) |
+| Multi-talkgroup | Format has **no native RX group lists** | **Never** — lean export with `TG List` |
+
+Pass `ExportOptions.expandRxGroupLists` and `expandRxGroupListMembers` through `expandOptionsFromExport()` ([`exportOptions.ts`](../../../src/lib/channelExpansion/exportOptions.ts)). Zone export uses `expandZoneMemberWireNames` with the same flags.
+
+Domain rules: [multi-talkgroup-expansion.md](../../reference/multi-talkgroup-expansion.md). DM32 ([#67](https://github.com/pskillen/codeplug-tool/issues/67)) will enable TG expansion on export.
+
 ## Import modes ([#58](https://github.com/pskillen/codeplug-tool/issues/58))
 
 Only entity types **present** in the import batch are touched.
