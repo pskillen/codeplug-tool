@@ -12,7 +12,7 @@ Operators hand-type repeater frequencies, tones, and locations. Authoritative UK
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| ukrepeater.net (ETCC API) | In progress | [#92](https://github.com/pskillen/codeplug-tool/issues/92) |
+| ukrepeater.net (ETCC API) | Shipped | [#92](https://github.com/pskillen/codeplug-tool/issues/92) — search/add + verify |
 | RepeaterBook / other directories | Deferred | Generic `RepeaterDirectorySource` interface for future sources |
 | Shared reference library target | Blocked | [#30](https://github.com/pskillen/codeplug-tool/issues/30) |
 

@@ -7,7 +7,7 @@
 
 ## Overall status
 
-**Status:** In progress
+**Status:** Complete (pending PR)
 
 ---
 
@@ -15,14 +15,8 @@
 
 | Slice | Commit | Notes |
 | --- | --- | --- |
-| Reference docs + provenance | — | `docs/reference/ukrepeater/`, feature hub, progress pair, `EntityMeta.repeaterDirectory` |
-
-## Verify
-
-- `npm run lint && npm run test && npm run build`
-
----
-
-## Next
-
-- Slice 2: ukrepeater client, cache, mapper, channelDiff
+| Reference docs + provenance | `docs`, `feat(provenance)` | API reference, feature hub, `meta.repeaterDirectory` |
+| Client + mapper | `feat(repeater-directories)` | ETCC client, cache, query router, mapToChannel, channelDiff |
+| Search & add UI | `feat(channels)` | `/channels/add-from-ukrepeater` |
+| Verify UI | `feat(channels)` | UkRepeaterVerify on channel detail |
+| Docs + tests | pending | CRUD cross-link, system test, external link |
