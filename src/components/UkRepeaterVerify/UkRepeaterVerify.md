@@ -2,7 +2,7 @@
 
 ## Purpose
 
-On channel detail, query ukrepeater.net by callsign (or stored listing id), show a field diff, and apply selected updates.
+On channel detail, query ukrepeater.net by callsign (or stored listing id), show a field diff, and apply selected updates. The **Check ukrepeater.net** button sits in the page header beside Edit and Delete.
 
 ## Props
 

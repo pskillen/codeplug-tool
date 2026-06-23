@@ -131,12 +131,12 @@ export default function UkRepeaterVerify({ channel }: UkRepeaterVerifyProps) {
 
   return (
     <>
-      <Stack gap="xs">
+      <Stack gap={4}>
         <Button variant="light" size="sm" loading={loading} onClick={() => void handleCheck()}>
           Check ukrepeater.net
         </Button>
         {error ? (
-          <Text size="xs" c="red">
+          <Text size="xs" c="red" maw={220}>
             {error}
           </Text>
         ) : null}

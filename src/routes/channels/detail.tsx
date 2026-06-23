@@ -333,7 +333,8 @@ export default function ChannelDetail() {
               Channels
             </Group>
           </Anchor>
-          <Group gap="sm">
+          <Group gap="sm" align="flex-start">
+            <UkRepeaterVerify channel={channel} />
             <Button
               component={Link}
               to={`/channels/${channel.id}/edit`}
@@ -358,11 +359,6 @@ export default function ChannelDetail() {
         <DetailSections sections={sections} />
 
         <DetailLinkList title="Zones" items={zoneLinks} />
-
-        <Stack gap="sm" id={channelSectionAnchorId('ukrepeater')}>
-          <Title order={3}>ukrepeater.net</Title>
-          <UkRepeaterVerify channel={channel} />
-        </Stack>
 
         <Stack gap="sm" id={channelSectionAnchorId('External links')}>
           <Title order={3}>External links</Title>
