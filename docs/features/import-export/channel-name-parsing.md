@@ -89,7 +89,7 @@ Phase-1 countries: UK, USA, Canada, Spain, Portugal, Italy, France, Poland, Germ
 
 ## Known gaps
 
-- Phase-2 ITU regions — follow-up GitHub issue (Benelux, Nordics, AU, JP, …).
+- Phase-2 ITU regions — [#136](https://github.com/pskillen/codeplug-tool/issues/136) (Benelux, Nordics, AU, JP, …).
 - Non-amateur labels (`145.7750 MHz`) remain name-only.
 
 ## Related

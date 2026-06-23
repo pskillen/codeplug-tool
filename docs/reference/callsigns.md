@@ -30,7 +30,7 @@ UK repeater beacons commonly match `^[A-Z]{2}\d[A-Z]{2,3}$` (e.g. `GB7GL`, `GB3D
 
 ## Phase 2 (deferred)
 
-Broader ITU coverage tracked in a follow-up issue — Benelux, Nordics, Australia (`VK`), Japan (`JA`), Brazil, and others. See [channel-naming-outstanding.md](../features/data-model/channel-naming-outstanding.md).
+Broader ITU coverage tracked in [#136](https://github.com/pskillen/codeplug-tool/issues/136) — Benelux, Nordics, Australia (`VK`), Japan (`JA`), Brazil, and others.
 
 ## Related
 

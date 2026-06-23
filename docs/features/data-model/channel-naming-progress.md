@@ -71,4 +71,5 @@
 
 ## Next
 
-- Open PR (`Closes #54`); publish follow-up issue for phase-2 ITU callsign patterns (manual if MCP blocked)
+- Merge [#137](https://github.com/pskillen/codeplug-tool/pull/137) to close #54
+- Phase-2 patterns: [#136](https://github.com/pskillen/codeplug-tool/issues/136)

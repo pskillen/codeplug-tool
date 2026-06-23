@@ -8,10 +8,10 @@ Items **skipped**, **incomplete**, or **discovered during execution** — not fu
 
 ## Callsign regions
 
-- [ ] Phase-2 ITU callsign patterns (Benelux, Nordics, AU, JP, BR, …) — open follow-up GitHub issue manually if MCP creation was blocked in Slice 0
+- [x] Phase-2 ITU callsign patterns — [#136](https://github.com/pskillen/codeplug-tool/issues/136) (Benelux, Nordics, AU, JP, BR, …)
 
 ---
 
 ## PR / release
 
-- [ ] Merge `54/paddy/first-class-callsign-naming` and close #54
+- [x] PR opened: [#137](https://github.com/pskillen/codeplug-tool/pull/137) (`54/paddy/first-class-callsign-naming`) — merge to close #54
