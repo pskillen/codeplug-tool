@@ -105,6 +105,7 @@ export function parseChannels(text: string, ctx?: ImportParseContext): Channel[]
       ...channelFieldDefaults(),
       id: newId(),
       name,
+      callsign: '',
       mode: typeParse.mode,
       multiMode: typeParse.multiMode,
       modeProfiles,

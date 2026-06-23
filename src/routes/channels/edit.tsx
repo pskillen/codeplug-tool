@@ -45,11 +45,13 @@ import { coordsToLocator, isValidLocator, locatorToCoords } from '../../lib/maid
 import { channelSectionAnchorId } from '../../lib/channelPageSections.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { hasValidationErrors, validateChannel } from '../../lib/validation/channel.ts';
+import { composeChannelWireName, EXPORT_NAME_MODE_OPTIONS } from '../../lib/channelNaming.ts';
 import {
-  composeChannelWireName,
-  EXPORT_NAME_MODE_OPTIONS,
-} from '../../lib/channelNaming.ts';
-import { channelFieldDefaults, type Channel, type ChannelExportNameMode, type ChannelMode } from '../../models/codeplug.ts';
+  channelFieldDefaults,
+  type Channel,
+  type ChannelExportNameMode,
+  type ChannelMode,
+} from '../../models/codeplug.ts';
 import { entityRefKey, parseEntityRefKey } from '../../lib/entityRefs.ts';
 import { findEntityById } from '../../lib/reportLookup.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
@@ -469,7 +471,9 @@ export default function ChannelEdit() {
 
   const pageTitle = isNew
     ? 'New channel'
-    : [existing?.callsign, existing?.name].filter(Boolean).join(' — ') || existing?.name || 'channel';
+    : [existing?.callsign, existing?.name].filter(Boolean).join(' — ') ||
+      existing?.name ||
+      'channel';
 
   return (
     <FormPage

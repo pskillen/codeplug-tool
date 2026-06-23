@@ -1,5 +1,9 @@
 import { buildNameToChannelId, resolveZoneMembers } from './codeplug.ts';
-import { incomingChannelMergeKey, channelImportMergeKeys, normalizeImportedChannelNaming } from './channelNaming.ts';
+import {
+  incomingChannelMergeKey,
+  channelImportMergeKeys,
+  normalizeImportedChannelNaming,
+} from './channelNaming.ts';
 import {
   channelsImportEqual,
   contactsImportEqual,

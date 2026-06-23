@@ -8,4 +8,10 @@ Items **skipped**, **incomplete**, or **discovered during execution** — not fu
 
 ## Callsign regions
 
-- [ ] Phase-2 ITU callsign patterns (Benelux, Nordics, AU, JP, BR, …) — follow-up issue
+- [ ] Phase-2 ITU callsign patterns (Benelux, Nordics, AU, JP, BR, …) — open follow-up GitHub issue manually if MCP creation was blocked in Slice 0
+
+---
+
+## PR / release
+
+- [ ] Merge `54/paddy/first-class-callsign-naming` and close #54

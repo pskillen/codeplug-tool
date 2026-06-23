@@ -18,7 +18,7 @@ The internal model is **format- and radio-agnostic**. Format specifics — colum
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| Internal models | Shipped | [`src/models/codeplug.ts`](../../../src/models/codeplug.ts) — schema v3 |
+| Internal models | Shipped | [`src/models/codeplug.ts`](../../../src/models/codeplug.ts) — schema v12 |
 | Adapter interface contracts | Shipped | [`src/lib/import-export/`](../../../src/lib/import-export/) — `ImportAdapter`, `ExportAdapter` |
 | Export format registry | Shipped | [`src/lib/export/`](../../../src/lib/export/) |
 | OpenGD77 import | Shipped | Channels, Zones, Contacts, TG_Lists ([#38](https://github.com/pskillen/codeplug-tool/issues/38)) |
@@ -37,6 +37,7 @@ The internal model is **format- and radio-agnostic**. Format specifics — colum
 | Baofeng DM32 CPS | Shipped | [#67](https://github.com/pskillen/codeplug-tool/issues/67) — [dm32/](dm32/README.md); `expandModes: false`, RX list fan-out |
 | Multi-talkgroup expansion (shared lib) | Shipped | [#36](https://github.com/pskillen/codeplug-tool/issues/36) — `channelExpansion/`; OpenGD77 export unchanged |
 | CHIRP CSV (analogue FM/AM) | Shipped | [#103](https://github.com/pskillen/codeplug-tool/issues/103) — [chirp/](chirp/README.md) |
+| Channel wire name split + export composition | Shipped | [#54](https://github.com/pskillen/codeplug-tool/issues/54) — [channel-name-parsing.md](channel-name-parsing.md) |
 
 ## Documentation map
 

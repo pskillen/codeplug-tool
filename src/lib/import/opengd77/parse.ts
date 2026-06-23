@@ -30,7 +30,7 @@ const OPENGD77_FORMAT = 'opengd77';
 
 function importStamp(
   sourceFile: string,
-    defaultExtra?: {
+  defaultExtra?: {
     memberWireNames?: string[];
     contactWireName?: string;
     rxGroupListWireName?: string;
@@ -103,6 +103,7 @@ export function parseChannels(text: string, ctx?: ImportParseContext): Channel[]
           id: newId(),
           ...channelFieldDefaults(),
           name,
+          callsign: '',
           mode: mapOpenGd77ChannelType(get(CHANNEL_COL.type)),
           rxFrequency: parseOpenGd77FrequencyWire(get(CHANNEL_COL.rx)),
           txFrequency: parseOpenGd77FrequencyWire(get(CHANNEL_COL.tx)),

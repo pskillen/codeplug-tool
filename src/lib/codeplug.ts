@@ -1,8 +1,5 @@
 import type { Channel, Codeplug } from '../models/codeplug.ts';
-import {
-  channelImportMergeKeys,
-  composeChannelWireName,
-} from './channelNaming.ts';
+import { channelImportMergeKeys, composeChannelWireName } from './channelNaming.ts';
 import {
   expandAllChannelsForExport,
   modeExportNameSuffix,

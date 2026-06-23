@@ -2,7 +2,6 @@ import {
   channelFieldDefaults,
   emptyCodeplug,
   type Channel,
-  type ChannelMode,
   type Codeplug,
   type Contact,
   type RxGroupList,

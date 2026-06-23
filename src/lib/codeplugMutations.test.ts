@@ -69,6 +69,7 @@ describe('codeplugMutations', () => {
     const cp = emptyCodeplug();
     const next = addChannel(cp, {
       ...channelFieldDefaults(),
+      callsign: '',
       name: 'GB7GL',
       mode: 'fm',
       multiMode: false,
@@ -82,7 +83,8 @@ describe('codeplugMutations', () => {
     const cp = emptyCodeplug();
     const next = addChannel(cp, {
       ...channelFieldDefaults(),
-      name: 'GB7GL',
+      callsign: 'GB7GL',
+      name: 'Glasgow',
       mode: 'dmr',
       multiMode: true,
       modeProfiles: [

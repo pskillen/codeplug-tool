@@ -24,10 +24,7 @@ export function isCallsignToken(token: string): boolean {
 }
 
 export function tokenizeChannelWire(wire: string): string[] {
-  return wire
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
+  return wire.trim().split(/\s+/).filter(Boolean);
 }
 
 export function prepareWireForCallsignParse(wire: string): string {
@@ -89,7 +86,8 @@ export function composeChannelWireName(
     case 'name_only':
       return name || callsign;
     case 'callsign_suffix': {
-      const suffix = callsign.length >= 2 ? callsign.slice(-2).toUpperCase() : callsign.toUpperCase();
+      const suffix =
+        callsign.length >= 2 ? callsign.slice(-2).toUpperCase() : callsign.toUpperCase();
       if (suffix && name) return `${suffix} ${name}`;
       return suffix || name;
     }
@@ -201,7 +199,10 @@ export function exportNameModeLabel(mode: ChannelExportNameMode): string {
 }
 
 /** Map popup / full-name label — qualifier parts only, not composed CPS wire string. */
-export function channelDisplayLabel(channel: Pick<Channel, 'callsign' | 'name'>, useFull: boolean): string {
+export function channelDisplayLabel(
+  channel: Pick<Channel, 'callsign' | 'name'>,
+  useFull: boolean,
+): string {
   if (!useFull) return channel.callsign.trim() || channel.name.trim();
   const callsign = channel.callsign.trim();
   const name = channel.name.trim();

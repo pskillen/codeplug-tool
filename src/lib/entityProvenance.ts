@@ -128,7 +128,9 @@ export function stampImported<T extends WithEntityMeta>(entity: T, input: StampI
           ? { multiModeProfileWire: input.multiModeProfileWire }
           : {}),
         ...(input.channelWireName !== undefined ? { channelWireName: input.channelWireName } : {}),
-        ...(input.channelWireNames !== undefined ? { channelWireNames: input.channelWireNames } : {}),
+        ...(input.channelWireNames !== undefined
+          ? { channelWireNames: input.channelWireNames }
+          : {}),
       },
     },
   };

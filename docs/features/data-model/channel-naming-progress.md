@@ -7,15 +7,13 @@
 
 ## Overall status
 
-**Status:** In progress
+**Status:** Complete — PR pending
 
 ---
 
 ## Slice 0 — Parsing documentation
 
-**Status:** In progress
-
-**Delivered**
+**Status:** Done (`d513156`)
 
 - [channel-name-parsing.md](../import-export/channel-name-parsing.md)
 - [callsigns.md](../../reference/callsigns.md)
@@ -23,6 +21,54 @@
 
 ---
 
+## Slice 1 — Model + naming library
+
+**Status:** Done (`862bbb2`)
+
+- `ChannelExportNameMode`, schema v12, `channelNaming.ts`, v11→v12 migration
+
+---
+
+## Slice 2 — Mutations + validation
+
+**Status:** Done (`aeb302a`)
+
+- Wire-name merge keys, validation, `buildNameToChannelId`
+
+---
+
+## Slice 3 — Import parsers
+
+**Status:** Done (`f6ff408`)
+
+- OpenGD77 / DM32 / CHIRP stamp `channelWireName`; post-collapse normalise; ukrepeater mapper
+
+---
+
+## Slice 4 — Export composition
+
+**Status:** Done (`7ae0bb7`)
+
+- `expandChannelForExport` uses `composeChannelWireName`; CHIRP comment not exported
+
+---
+
+## Slice 5 — CRUD + map UI
+
+**Status:** Done (`24349ff`)
+
+- Edit/detail forms, list callsign column, map label toggle
+
+---
+
+## Slice 6 — Documentation
+
+**Status:** Done
+
+- Tier 1/2/3 cross-links, progress/outstanding, data-model + persistence schema notes
+
+---
+
 ## Next
 
-- Slice 1: model + `channelNaming.ts` + schema v12
+- Open PR (`Closes #54`); publish follow-up issue for phase-2 ITU callsign patterns (manual if MCP blocked)

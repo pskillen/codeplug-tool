@@ -163,11 +163,7 @@ function migrateChannel(raw: Record<string, unknown>, projectImportedAt: string 
         callsign = legacyCallsign;
         name = splitLegacyCombinedName(legacyName, legacyCallsign);
         exportNameMode =
-          legacyCallsign && name
-            ? 'callsign_name'
-            : legacyCallsign
-              ? 'callsign_only'
-              : 'name_only';
+          legacyCallsign && name ? 'callsign_name' : legacyCallsign ? 'callsign_only' : 'name_only';
       }
     } else {
       exportNameMode = 'name_only';

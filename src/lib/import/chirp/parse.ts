@@ -76,6 +76,7 @@ export function parseChannels(text: string, ctx?: ImportParseContext): Channel[]
     const channel: Channel = {
       id: newId(),
       name,
+      callsign: '',
       mode,
       ...channelFieldDefaults(),
       rxFrequency,

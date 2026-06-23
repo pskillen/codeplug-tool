@@ -30,6 +30,7 @@ import { parseFrequencyHzFromMhzInput } from '../../lib/channelFields/frequencie
 import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { entityRefDisplayName } from '../../lib/entityRefs.ts';
 import { channelDisplayLabel } from '../../lib/channelNaming.ts';
+import type { Channel, Codeplug } from '../../models/codeplug.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 
 export interface ChannelMergeCandidatesModalProps {
