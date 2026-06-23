@@ -9,8 +9,8 @@ import {
 } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import CodeplugMap from '../CodeplugMap/CodeplugMap.tsx';
+import { Page, PageHeader } from '../ui/index.ts';
 import SummaryCard from '../report/SummaryCard.tsx';
-import ReportPage from '../report/ReportPage.tsx';
 import { applyFilters } from '../../lib/channels.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { sortByName } from '../../lib/reportLookup.ts';
@@ -52,7 +52,8 @@ export default function SummaryDashboard({ project, codeplug }: SummaryDashboard
       .map((i) => i.name);
 
   return (
-    <ReportPage title={project.name}>
+    <Page>
+      <PageHeader title={project.name} />
       <Stack gap="lg">
         <Group justify="space-between" align="flex-start" wrap="wrap">
           <Stack gap="xs" style={{ flex: 1, minWidth: 0 }}>
@@ -177,6 +178,6 @@ export default function SummaryDashboard({ project, codeplug }: SummaryDashboard
           />
         </SimpleGrid>
       </Stack>
-    </ReportPage>
+    </Page>
   );
 }

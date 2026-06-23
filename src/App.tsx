@@ -1,8 +1,9 @@
-import { AppShell, Box, Burger, Divider, Group, Text } from '@mantine/core';
+import { AppShell, Box, Divider, Group } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import AppNav from './components/AppNav/AppNav.tsx';
 import SectionNav from './components/SectionNav/SectionNav.tsx';
+import AppHeader from './components/ui/AppHeader.tsx';
 import RequireActiveProject from './components/RequireActiveProject/RequireActiveProject.tsx';
 import BuildFooter from './components/BuildFooter.tsx';
 import {
@@ -35,6 +36,7 @@ import Settings from './routes/Settings.tsx';
 import ReferenceIndex from './routes/reference/index.tsx';
 import BandPlan from './routes/reference/band-plan.tsx';
 import MaidenheadConverter from './routes/reference/maidenhead.tsx';
+import Styleguide from './routes/styleguide.tsx';
 import { useProjects } from './state/codeplugStore.tsx';
 
 export default function App() {
@@ -57,10 +59,7 @@ export default function App() {
       padding="md"
     >
       <AppShell.Header>
-        <Group h="100%" px="md">
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Text fw={600}>MM9PDY Codeplug Tool</Text>
-        </Group>
+        <AppHeader opened={opened} onToggle={toggle} />
       </AppShell.Header>
 
       <AppShell.Navbar p={0}>
@@ -92,6 +91,8 @@ export default function App() {
           <Route path="/reference/band-plan" element={<BandPlan />} />
           <Route path="/reference/maidenhead" element={<MaidenheadConverter />} />
           <Route path="/codeplug/new" element={<NewCodeplug />} />
+          {/* Intentionally unlinked dev page — UI kit reference */}
+          <Route path="/styleguide" element={<Styleguide />} />
           <Route element={<RequireActiveProject />}>
             <Route path="/summary" element={<Summary />} />
             <Route path="/summary/edit" element={<ProjectEdit />} />

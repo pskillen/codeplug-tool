@@ -31,4 +31,29 @@ export const theme = createTheme({
   primaryShade: 6,
   colors: { brand, dark },
   fontFamily: 'system-ui, sans-serif',
+  defaultRadius: 'md',
+  spacing: {
+    xs: '0.5rem',
+    sm: '0.75rem',
+    md: '1rem',
+    lg: '1.5rem',
+    xl: '2rem',
+  },
+  components: {
+    Paper: {
+      defaultProps: {
+        radius: 'md',
+      },
+    },
+    Container: {
+      defaultProps: {
+        sizes: {
+          sm: 540,
+          md: 720,
+          lg: 960,
+          xl: 1140,
+        },
+      },
+    },
+  },
 });

@@ -1,8 +1,9 @@
-import { Button, Container, Stack, Text, Title } from '@mantine/core';
+import { Button } from '@mantine/core';
 import { IconFilePlus } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import ImportNewProjectPanel from '../components/ImportNewProjectPanel/ImportNewProjectPanel.tsx';
 import ProjectList from '../components/ProjectList/ProjectList.tsx';
+import { Page, PageHeader, PageSection } from '../components/ui/index.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
 import { useProjects } from '../state/codeplugStore.tsx';
 
@@ -11,55 +12,49 @@ export default function Home() {
   const { projects, importNewProject, persistenceError, clearPersistenceError } = useProjects();
 
   return (
-    <Container size="sm" py="md">
-      <Stack gap="lg">
-        <Stack gap="xs">
-          <Title order={1}>MM9PDY Codeplug Tool</Title>
-          <Text c="dimmed">
-            Your codeplugs are stored in this browser. Import a CPS export, start a blank codeplug,
-            or open an existing one below.
-          </Text>
-        </Stack>
+    <Page width="narrow">
+      <PageHeader
+        title="MM9PDY Codeplug Tool"
+        description="Your codeplugs are stored in this browser. Import a CPS export, start a blank codeplug, or open an existing one below."
+      />
 
-        {projects.length > 0 ? (
-          <Stack gap="sm">
-            <Title order={3}>Your codeplugs</Title>
-            <ProjectList />
-          </Stack>
-        ) : null}
+      {projects.length > 0 ? (
+        <PageSection title="Your codeplugs">
+          <ProjectList />
+        </PageSection>
+      ) : null}
 
-        <Stack gap="sm">
-          <Title order={3}>{projects.length ? 'Start another codeplug' : 'Start fresh'}</Title>
-          <Text size="sm" c="dimmed">
-            Build a new layout from scratch — channels, zones, and contacts added after you save.
-          </Text>
-          <Button
-            variant="light"
-            leftSection={<IconFilePlus size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
-            onClick={() => navigate('/codeplug/new')}
-            style={{ alignSelf: 'flex-start' }}
-          >
-            Start fresh
-          </Button>
-        </Stack>
+      <PageSection
+        title={projects.length ? 'Start another codeplug' : 'Start fresh'}
+        description="Build a new layout from scratch — channels, zones, and contacts added after you save."
+      >
+        <Button
+          variant="light"
+          leftSection={<IconFilePlus size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+          onClick={() => navigate('/codeplug/new')}
+          style={{ alignSelf: 'flex-start' }}
+        >
+          Start fresh
+        </Button>
+      </PageSection>
 
-        <Stack gap="sm">
-          <Title order={3}>{projects.length ? 'Import another codeplug' : 'Import codeplug'}</Title>
-          <ImportNewProjectPanel
-            onImported={(result) => {
-              importNewProject(result);
-              navigate('/summary');
-            }}
-            persistenceError={persistenceError}
-            onDismissPersistenceError={clearPersistenceError}
-            introText={
-              projects.length === 0
-                ? 'Choose a vendor format, then drop CPS export files or a folder. Files stay on your machine.'
-                : 'Import creates a new codeplug and opens the summary.'
-            }
-          />
-        </Stack>
-      </Stack>
-    </Container>
+      <PageSection
+        title={projects.length ? 'Import another codeplug' : 'Import codeplug'}
+        description={
+          projects.length === 0
+            ? 'Choose a vendor format, then drop CPS export files or a folder. Files stay on your machine.'
+            : 'Import creates a new codeplug and opens the summary.'
+        }
+      >
+        <ImportNewProjectPanel
+          onImported={(result) => {
+            importNewProject(result);
+            navigate('/summary');
+          }}
+          persistenceError={persistenceError}
+          onDismissPersistenceError={clearPersistenceError}
+        />
+      </PageSection>
+    </Page>
   );
 }

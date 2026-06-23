@@ -4,7 +4,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import ProjectMetadataForm, {
   type ProjectMetadataFormValues,
 } from '../../components/ProjectMetadataForm/ProjectMetadataForm.tsx';
-import ReportPage from '../../components/report/ReportPage.tsx';
+import { Page, PageHeader } from '../../components/ui/index.ts';
 import type { CodeplugProject } from '../../models/codeplugProject.ts';
 import { useProjects } from '../../state/codeplugStore.tsx';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
@@ -28,7 +28,8 @@ export default function ProjectEdit() {
   }
 
   return (
-    <ReportPage title="Edit project">
+    <Page width="narrow">
+      <PageHeader title="Edit project" />
       <Stack gap="lg">
         <Button
           component={Link}
@@ -52,6 +53,6 @@ export default function ProjectEdit() {
           }}
         />
       </Stack>
-    </ReportPage>
+    </Page>
   );
 }

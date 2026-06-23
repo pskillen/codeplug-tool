@@ -1,8 +1,8 @@
-import { Button, Stack, Text } from '@mantine/core';
+import { Button, Stack } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { Link, useNavigate } from 'react-router-dom';
 import ProjectMetadataForm from '../../components/ProjectMetadataForm/ProjectMetadataForm.tsx';
-import ReportPage from '../../components/report/ReportPage.tsx';
+import { Page, PageHeader } from '../../components/ui/index.ts';
 import { blankProjectMetadataFormValues } from '../../models/codeplugProject.ts';
 import { useProjects } from '../../state/codeplugStore.tsx';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
@@ -12,7 +12,11 @@ export default function NewCodeplug() {
   const { commitNewProject } = useProjects();
 
   return (
-    <ReportPage title="New codeplug">
+    <Page width="narrow">
+      <PageHeader
+        title="New codeplug"
+        description="Create an empty codeplug layout. Add channels, zones, and contacts after you save."
+      />
       <Stack gap="lg">
         <Button
           component={Link}
@@ -24,10 +28,6 @@ export default function NewCodeplug() {
         >
           Back to home
         </Button>
-
-        <Text c="dimmed" size="sm">
-          Create an empty codeplug layout. Add channels, zones, and contacts after you save.
-        </Text>
 
         <ProjectMetadataForm
           initialValues={blankProjectMetadataFormValues()}
@@ -41,6 +41,6 @@ export default function NewCodeplug() {
           }}
         />
       </Stack>
-    </ReportPage>
+    </Page>
   );
 }
