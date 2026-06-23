@@ -15,6 +15,7 @@ Create, edit, and delete codeplug entities against the internal vendor-neutral m
 | Contact CRUD | Complete | `ContactEdit`, list/detail |
 | Store mutations | Complete | `codeplugMutations.ts`, `codeplugStore` |
 | Validation | Complete | `src/lib/validation/` |
+| Channel merge candidates | Complete | [#116](https://github.com/pskillen/codeplug-tool/issues/116) — post-hoc multi-mode merge detection and apply |
 
 ## Vendor boundaries
 
@@ -28,6 +29,8 @@ TG/RGL/contact CRUD follows the same rule: unlimited RGL members in the internal
 | --- | --- |
 | [crud-progress.md](crud-progress.md) | Shipped slices and verify steps |
 | [crud-outstanding.md](crud-outstanding.md) | Debt discovered during execution |
+| [channel-merge-candidates-progress.md](channel-merge-candidates-progress.md) | Channel merge candidates ([#116](https://github.com/pskillen/codeplug-tool/issues/116)) |
+| [channel-merge-candidates-outstanding.md](channel-merge-candidates-outstanding.md) | Merge candidates follow-ups |
 | [data-model](../data-model/README.md) | Entity shapes |
 | [bands reference](../../reference/bands.md) | UK band ranges and pill colours |
 | [maidenhead](../maidenhead.md) | Locator conversion behaviour |

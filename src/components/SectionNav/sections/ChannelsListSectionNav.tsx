@@ -1,7 +1,8 @@
 import { Button, MultiSelect, Select, Slider, Stack, Switch, Text, TextInput } from '@mantine/core';
-import { IconPlus, IconWorldSearch } from '@tabler/icons-react';
+import { IconGitMerge, IconPlus, IconWorldSearch } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import ChannelMergeCandidatesModal from '../../ChannelMergeCandidatesModal/ChannelMergeCandidatesModal.tsx';
 import UseMyLocationButton from '../../UseMyLocationButton/UseMyLocationButton.tsx';
 import { DISTANCE_FILTER_MARKS_KM } from '../../../lib/channels.ts';
 import { bandsFromFrequencies, UK_BANDS } from '../../../lib/bands.ts';
@@ -17,6 +18,8 @@ import { useOperatorPosition } from '../../../state/operatorPosition.tsx';
 
 export default function ChannelsListSectionNav({ variant }: SectionNavProps) {
   const isSidebar = variant === 'sidebar';
+  const [mergeModalOpen, setMergeModalOpen] = useState(false);
+  const [mergeSession, setMergeSession] = useState(0);
   const { codeplug } = useCodeplug();
   const { channels } = codeplug;
   const { position, setPosition, clearPosition } = useOperatorPosition();
@@ -68,6 +71,24 @@ export default function ChannelsListSectionNav({ variant }: SectionNavProps) {
       >
         Add from ukrepeater.net
       </Button>
+
+      <Button
+        variant="light"
+        leftSection={<IconGitMerge size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+        fullWidth={isSidebar}
+        onClick={() => {
+          setMergeSession((s) => s + 1);
+          setMergeModalOpen(true);
+        }}
+      >
+        Find merge candidates
+      </Button>
+
+      <ChannelMergeCandidatesModal
+        key={mergeSession}
+        opened={mergeModalOpen}
+        onClose={() => setMergeModalOpen(false)}
+      />
 
       <TextInput
         label="Search"

@@ -42,6 +42,11 @@ import { emptyCodeplug, type Codeplug } from '../models/codeplug.ts';
 import { defaultProjectName, newProject, type CodeplugProject } from '../models/codeplugProject.ts';
 import type { ProjectMetadataPatch } from '../lib/validation/project.ts';
 import {
+  applyChannelMerges,
+  type ChannelMergeCandidateGroup,
+  type ChannelMergeSelection,
+} from '../lib/channelMergeCandidates.ts';
+import {
   clearProjectsStorage,
   loadProjectsFromStorage,
   saveProjectsToStorage,
@@ -72,6 +77,11 @@ type ProjectsAction =
   | { type: 'UPDATE_RX_GROUP_LIST'; rglId: string; patch: Partial<RxGroupListInput> }
   | { type: 'DELETE_RX_GROUP_LIST'; rglId: string }
   | { type: 'SET_RX_GROUP_LIST_MEMBERS'; rglId: string; memberRefs: EntityRef[] }
+  | {
+      type: 'APPLY_CHANNEL_MERGES';
+      selections: ChannelMergeSelection[];
+      candidates: ChannelMergeCandidateGroup[];
+    }
   | { type: 'UPDATE_PROJECT'; id: string; patch: ProjectMetadataPatch }
   | { type: 'COMMIT_NEW_PROJECT'; metadata: ProjectMetadataPatch };
 
@@ -254,6 +264,12 @@ function projectsReducer(state: ProjectsState, action: ProjectsAction): Projects
         setRxGroupListMembersMutation(cp, action.rglId, action.memberRefs),
       );
 
+    case 'APPLY_CHANNEL_MERGES':
+      return updateActiveCodeplug(
+        state,
+        (cp) => applyChannelMerges(cp, action.selections, action.candidates).codeplug,
+      );
+
     case 'UPDATE_PROJECT': {
       const { id, patch } = action;
       return {
@@ -303,6 +319,10 @@ interface CodeplugContextValue {
   updateRxGroupList: (rglId: string, patch: Partial<RxGroupListInput>) => void;
   deleteRxGroupList: (rglId: string) => void;
   setRxGroupListMembers: (rglId: string, memberRefs: EntityRef[]) => void;
+  applyChannelMerges: (
+    selections: ChannelMergeSelection[],
+    candidates: ChannelMergeCandidateGroup[],
+  ) => void;
   persistenceError: string | null;
   clearPersistenceError: () => void;
 }
@@ -479,6 +499,14 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_RX_GROUP_LIST_MEMBERS', rglId, memberRefs });
   }, []);
 
+  const applyChannelMergesAction = useCallback(
+    (selections: ChannelMergeSelection[], candidates: ChannelMergeCandidateGroup[]) => {
+      setPersistenceError(null);
+      dispatch({ type: 'APPLY_CHANNEL_MERGES', selections, candidates });
+    },
+    [],
+  );
+
   const current = activeProject(projectsState);
   const codeplug = current?.codeplug ?? emptyCodeplug();
 
@@ -504,6 +532,7 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
       updateRxGroupList,
       deleteRxGroupList,
       setRxGroupListMembers,
+      applyChannelMerges: applyChannelMergesAction,
       persistenceError,
       clearPersistenceError,
     }),
@@ -528,6 +557,7 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
       updateRxGroupList,
       deleteRxGroupList,
       setRxGroupListMembers,
+      applyChannelMergesAction,
       persistenceError,
       clearPersistenceError,
     ],

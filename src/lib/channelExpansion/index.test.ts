@@ -1,9 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { buildChannel } from '../../test/builders/codeplug.ts';
 import {
+  channelMergeNameStem,
+  channelNameStem,
+  channelsAreMultiModeMergeCandidates,
   expandAllChannelsForExport,
   expandChannelForExport,
   expandZoneMemberWireNames,
+  levenshteinRatio,
+  mergeChannelsToMultiMode,
   mergeImportChannelsBestEffort,
   modeExportNameSuffix,
   resolveChannelModeProfiles,
@@ -62,6 +67,17 @@ describe('channelExpansion', () => {
     expect(stripModeExportSuffix('GB7GL-F')).toBe('GB7GL');
     expect(stripModeExportSuffix('GB7GL-D')).toBe('GB7GL');
     expect(stripModeExportSuffix('GB7GL')).toBe('GB7GL');
+  });
+
+  it('channelMergeNameStem strips trailing space + mode label', () => {
+    expect(channelMergeNameStem('GB7GL-F')).toBe('GB7GL');
+    expect(channelMergeNameStem('GB123 Meep FM')).toBe('GB123 Meep');
+    expect(channelMergeNameStem('GB123 Meep DMR')).toBe('GB123 Meep');
+    expect(channelMergeNameStem('GB7GL')).toBe('GB7GL');
+  });
+
+  it('channelNameStem does not strip trailing mode words (import-safe)', () => {
+    expect(channelNameStem('GB123 Meep DMR')).toBe('GB123 Meep DMR');
   });
 
   it('expandAllChannelsForExport avoids name collisions', () => {
@@ -123,5 +139,71 @@ describe('channelExpansion', () => {
     });
     const synced = syncChannelFromPrimaryProfile(ch);
     expect(synced.colourCode).toBe(7);
+  });
+
+  it('levenshteinRatio returns 0 for identical strings', () => {
+    expect(levenshteinRatio('GB7GL', 'GB7GL')).toBe(0);
+  });
+
+  it('channelsAreMultiModeMergeCandidates accepts fuzzy name near-miss', () => {
+    const a = buildChannel({
+      id: '1',
+      name: 'REPEATER01-F',
+      mode: 'fm',
+      rxFrequency: 430_000_000,
+      txFrequency: 430_000_000,
+    });
+    const b = buildChannel({
+      id: '2',
+      name: 'REPEATER02-D',
+      mode: 'dmr',
+      rxFrequency: 430_000_000,
+      txFrequency: 430_000_000,
+    });
+    expect(channelsAreMultiModeMergeCandidates(a, b, { nameFuzzyThreshold: 0 })).toBe(false);
+    expect(channelsAreMultiModeMergeCandidates(a, b, { nameFuzzyThreshold: 0.15 })).toBe(true);
+  });
+
+  it('channelsAreMultiModeMergeCandidates rejects same-mode pair', () => {
+    const a = buildChannel({ id: '1', name: 'GB7GL-F', mode: 'fm' });
+    const b = buildChannel({ id: '2', name: 'GB7GL-D', mode: 'fm' });
+    expect(channelsAreMultiModeMergeCandidates(a, b)).toBe(false);
+  });
+
+  it('mergeChannelsToMultiMode builds N-way FM+DMR+YSF with profile opengd77Extras', () => {
+    const fm = buildChannel({
+      id: '1',
+      name: 'GB7GL-F',
+      mode: 'fm',
+      rxFrequency: 430_000_000,
+      txFrequency: 430_000_000,
+      opengd77Extras: { 'Scan List': 'Z1' },
+    });
+    const dmr = buildChannel({
+      id: '2',
+      name: 'GB7GL-D',
+      mode: 'dmr',
+      rxFrequency: 430_000_000,
+      txFrequency: 430_000_000,
+      colourCode: 1,
+      opengd77Extras: { 'DMR ID': '123' },
+    });
+    const ysf = buildChannel({
+      id: '3',
+      name: 'GB7GL-D',
+      mode: 'ysf',
+      rxFrequency: 430_000_000,
+      txFrequency: 430_000_000,
+    });
+    const merged = mergeChannelsToMultiMode([fm, dmr, ysf], { survivorId: '1' });
+    expect(merged.multiMode).toBe(true);
+    expect(merged.id).toBe('1');
+    expect(merged.name).toBe('GB7GL');
+    expect(merged.modeProfiles).toHaveLength(3);
+    expect(merged.modeProfiles.find((p) => p.mode === 'fm')?.opengd77Extras).toEqual({
+      'Scan List': 'Z1',
+    });
+    expect(merged.modeProfiles.find((p) => p.mode === 'dmr')?.colourCode).toBe(1);
+    expect(merged.meta?.imported).toBeUndefined();
   });
 });

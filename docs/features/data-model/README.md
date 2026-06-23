@@ -117,6 +117,8 @@ Shared on `Channel`: `name`, `callsign`, `rxFrequency`, `txFrequency`, `location
 
 Export adapters expand multi-mode logical channels into vendor-specific rows at the boundary (OpenGD77: separate `Analogue` / `Digital` rows — [multi-mode.md](../../reference/opengd77/multi-mode.md)). DM32 native dual-mode mapping: [#67](https://github.com/pskillen/codeplug-tool/issues/67).
 
+**Merging split channels:** Import may collapse paired rows best-effort at the format boundary. Operators can also run **Find merge candidates** on an existing codeplug ([#116](https://github.com/pskillen/codeplug-tool/issues/116)) to detect same-frequency, similar-name single-mode channels and combine them into one `multiMode` channel with per-profile `contactRef` / `rxGroupListId` from model fields. Zone membership is rewired to the survivor channel id.
+
 ### `Zone`
 
 | Field | Type | Notes |
