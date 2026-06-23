@@ -168,3 +168,43 @@ export function channelImportMergeKeys(channel: Channel): string[] {
 export function incomingChannelMergeKey(channel: Channel): string {
   return channel.meta?.imported?.channelWireName ?? composeChannelWireName(channel);
 }
+
+export const EXPORT_NAME_MODE_OPTIONS: {
+  value: ChannelExportNameMode;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: 'callsign_name',
+    label: 'Callsign + name',
+    description: 'GB7GL Glasgow',
+  },
+  {
+    value: 'callsign_only',
+    label: 'Callsign only',
+    description: 'GB7GL',
+  },
+  {
+    value: 'name_only',
+    label: 'Name only',
+    description: 'Glasgow',
+  },
+  {
+    value: 'callsign_suffix',
+    label: 'Callsign suffix + name',
+    description: 'GL Glasgow',
+  },
+];
+
+export function exportNameModeLabel(mode: ChannelExportNameMode): string {
+  return EXPORT_NAME_MODE_OPTIONS.find((o) => o.value === mode)?.label ?? mode;
+}
+
+/** Map popup / full-name label — qualifier parts only, not composed CPS wire string. */
+export function channelDisplayLabel(channel: Pick<Channel, 'callsign' | 'name'>, useFull: boolean): string {
+  if (!useFull) return channel.callsign.trim() || channel.name.trim();
+  const callsign = channel.callsign.trim();
+  const name = channel.name.trim();
+  if (callsign && name) return `${callsign} — ${name}`;
+  return callsign || name;
+}

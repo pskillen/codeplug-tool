@@ -32,6 +32,13 @@ export default function ChannelsList() {
   const optionalColumnDefs = CHANNEL_OPTIONAL_COLUMNS.filter((c) =>
     visibleCols.includes(c.key),
   ).map((col) => {
+    if (col.key === 'callsign') {
+      return {
+        key: col.key,
+        header: col.header,
+        render: (ch: Channel) => ch.callsign || '—',
+      };
+    }
     if (col.key === 'contact') {
       return {
         key: col.key,

@@ -29,7 +29,7 @@ import {
 import { parseFrequencyHzFromMhzInput } from '../../lib/channelFields/frequencies.ts';
 import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { entityRefDisplayName } from '../../lib/entityRefs.ts';
-import type { Channel, Codeplug } from '../../models/codeplug.ts';
+import { channelDisplayLabel } from '../../lib/channelNaming.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 
 export interface ChannelMergeCandidatesModalProps {
@@ -52,7 +52,7 @@ function SourceChannelSummary({ channel, codeplug }: { channel: Channel; codeplu
     <Stack gap={4}>
       <Group gap="xs" wrap="wrap">
         <Text size="sm" fw={500}>
-          {channel.name}
+          {channelDisplayLabel(channel, true) || '—'}
         </Text>
         <ModePill mode={channel.mode} size="xs" />
       </Group>

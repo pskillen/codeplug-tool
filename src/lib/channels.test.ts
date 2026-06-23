@@ -82,7 +82,7 @@ describe('markerLabel', () => {
   it('uses callsign by default and full name when requested', () => {
     const group = [ch({ id: '1', name: 'DMR', callsign: 'GB3DA' })];
     expect(markerLabel(group, false)).toBe('GB3DA');
-    expect(markerLabel(group, true)).toBe('DMR');
+    expect(markerLabel(group, true)).toBe('GB3DA — DMR');
   });
 
   it('appends +N for merged groups', () => {
