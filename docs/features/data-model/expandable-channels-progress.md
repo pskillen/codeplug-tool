@@ -38,6 +38,17 @@
 
 ---
 
+## Slice 3: Validation + mutations
+
+**Status:** Complete
+
+**Delivered**
+
+- `validateChannel` multi-mode profile rules
+- `normalizeChannelForSave` in `codeplugMutations.ts`
+
+---
+
 ## Next
 
-- Slice 3: Validation + mutations
+- Slice 4: OpenGD77 export expansion
