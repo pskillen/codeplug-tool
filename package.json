@@ -14,9 +14,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "test:system": "vitest run src/test/system src/components/ImportIntoActivePanel",
-    "test:watch": "vitest"
+    "test:coverage": "npm run pretest && vitest run --coverage",
+    "test:system": "npm run pretest && vitest run src/test/system src/components/ImportIntoActivePanel",
+    "test:watch": "npm run pretest && vitest"
   },
   "dependencies": {
     "@mantine/core": "^9.3.2",
