@@ -35,10 +35,7 @@ export function uniqueWireName(base: string, reserved: ReadonlySet<string>): str
 }
 
 /** Length of the disambiguation suffix `uniqueWireName` would add for `base`. */
-export function disambiguationSuffixLength(
-  base: string,
-  reserved: ReadonlySet<string>,
-): number {
+export function disambiguationSuffixLength(base: string, reserved: ReadonlySet<string>): number {
   if (!reserved.has(base)) return 0;
   let n = 2;
   while (reserved.has(`${base} ${n}`)) n++;
