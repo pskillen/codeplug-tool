@@ -3,6 +3,7 @@ import { IconDownload, IconPackage } from '@tabler/icons-react';
 import { useState } from 'react';
 import ExportNameSettingsFields from '../ExportNameSettingsFields/ExportNameSettingsFields.tsx';
 import { useExportSettings } from '../../hooks/useExportSettings.ts';
+import CloudFileActions from '../CloudFileActions/CloudFileActions.tsx';
 import {
   chirpProfileSelectData,
   DEFAULT_CHIRP_PROFILE_ID,
@@ -167,6 +168,14 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
             those files if your radio needs them.
           </Text>
         ) : null}
+
+        <CloudFileActions
+          mode="export"
+          vendorFormatId={vendorFormat.id}
+          codeplug={codeplug}
+          project={activeProject}
+          exportOptions={exportOptions}
+        />
       </Stack>
     );
   }
@@ -241,6 +250,16 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
             Lossless interchange — import in another browser to restore identical project state.
           </Text>
         ) : null}
+
+        <CloudFileActions
+          mode="export"
+          vendorFormatId={vendorFormat.id}
+          codeplug={codeplug}
+          project={activeProject}
+          exportOptions={exportOptionsFromSettings(
+            vendorFormat.id === 'chirp' ? { profileId: chirpProfileId } : {},
+          )}
+        />
       </Stack>
     );
   }

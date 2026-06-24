@@ -53,7 +53,7 @@ function parseEnvelope(text: string): NativeYamlEnvelope {
     throw new NativeYamlParseError('Missing or invalid codeplug section');
   }
 
-  return envelope as NativeYamlEnvelope;
+  return envelope as unknown as NativeYamlEnvelope;
 }
 
 function projectFromEnvelope(projectRaw: Record<string, unknown>, codeplug: Codeplug): CodeplugProject {

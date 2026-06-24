@@ -13,8 +13,8 @@ describe('fileDelivery', () => {
       name: 'Test',
       callsign: 'GB3DA',
       mode: 'dmr',
-      exportNameMode: 'callsign_name',
       ...channelFieldDefaults(),
+      exportNameMode: 'callsign_name',
     };
     const project = newProject('Payload test', { ...emptyCodeplug(), channels: [channel] });
 

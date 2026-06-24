@@ -28,12 +28,12 @@ function sampleProject() {
   const zoneId = 'zn-1';
 
   const channel: Channel = {
-    id: channelId,
+    id: 'ch-1',
     name: 'Town',
     callsign: 'GB3DA',
     mode: 'dmr',
-    exportNameMode: 'callsign_name',
     ...channelFieldDefaults(),
+    exportNameMode: 'callsign_name',
     rxFrequency: 145_500_000,
     txFrequency: 145_500_000,
     contactRef: { kind: 'talkGroup', id: tgId },

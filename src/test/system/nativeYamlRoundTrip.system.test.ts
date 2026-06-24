@@ -17,8 +17,8 @@ function buildSampleProject() {
     name: 'Hull',
     callsign: 'GB3DA',
     mode: 'dmr',
-    exportNameMode: 'callsign_name',
     ...channelFieldDefaults(),
+    exportNameMode: 'callsign_name',
     rxFrequency: 145_500_000,
     txFrequency: 145_500_000,
   };
