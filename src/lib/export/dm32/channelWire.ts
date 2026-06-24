@@ -7,10 +7,7 @@ import {
 } from '../../channelExpansion/index.ts';
 import { contactRefWireNameForExport, rxGroupListWireNameForExport } from '../../entityRefs.ts';
 import type { Codeplug } from '../../../models/codeplug.ts';
-import {
-  dm32ContactRefWireNameForExport,
-  type Dm32TalkGroupWireNameMap,
-} from './talkGroupWire.ts';
+import { dm32ContactRefWireNameForExport, type Dm32TalkGroupWireNameMap } from './talkGroupWire.ts';
 import {
   formatDm32BandwidthWire,
   formatDm32ChannelTypeWire,

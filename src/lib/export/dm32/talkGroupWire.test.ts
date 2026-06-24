@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildTalkGroup } from '../../../test/builders/codeplug.ts';
-import {
-  buildDm32TalkGroupWireNameMap,
-  talkGroupWireNameForDm32Export,
-} from './talkGroupWire.ts';
+import { buildDm32TalkGroupWireNameMap, talkGroupWireNameForDm32Export } from './talkGroupWire.ts';
 import { DEFAULT_DM32_PROFILE_ID } from '../../dm32/profiles.ts';
 
 describe('export/dm32/talkGroupWire', () => {

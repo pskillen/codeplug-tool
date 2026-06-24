@@ -4,10 +4,7 @@ import {
   expandZoneMemberWireNames,
   type ExpandChannelOptions,
 } from '../../channelExpansion/index.ts';
-import {
-  dm32RxGroupListMemberWireName,
-  type Dm32TalkGroupWireNameMap,
-} from './talkGroupWire.ts';
+import { dm32RxGroupListMemberWireName, type Dm32TalkGroupWireNameMap } from './talkGroupWire.ts';
 
 export function rxGroupListExportMemberNames(
   list: RxGroupList,
