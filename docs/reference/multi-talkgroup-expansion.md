@@ -46,13 +46,30 @@ Enable TG expansion (`ExportOptions.expandRxGroupLists`) only when the **target 
 
 Each expanded row is one site × one member:
 
-- **Wire name:** `{baseWireName} {memberWireName}` — `baseWireName` = `composeChannelWireName(channel)` (already includes `-F`/`-D` when multi-mode expanded)
+- **Wire name:** composed by `multiTalkGroupExportNameMode` (default `callsign_tg_abbrev`) — see [Wire name modes](#wire-name-modes). Legacy `append` mode uses `{baseWireName} {memberWireName}`.
 - **Contact / TX ref:** the member (`contactRef` on the expanded row)
 - **RX group list:** `null` — single-TG row; no RGL on wire
 
-**Collisions:** if a derived name already exists, append ` 2`, ` 3`, … until unique (same rule as multi-mode).
+**Collisions:** if a derived name already exists, append ` 2`, ` 3`, … until unique (same rule as multi-mode). TG-first modes aim to keep talk-group identity in the name so disambiguation suffixes are not needed.
 
-**Length:** export may warn when a derived name exceeds the target profile display limit; truncation is not applied automatically.
+**Length:** when [name shortening](../features/import-export/name-shortening.md) is enabled, TG-first modes protect the trailing talk-group token(s) while shortening the leading site/callsign portion only. Modes auto-escalate (`callsign_tg_abbrev` → `suffix_tg_abbrev` → `suffix_tg_number`) when the composed name still exceeds `maxNameLength`.
+
+### Wire name modes
+
+Controlled by `ExportOptions.multiTalkGroupExportNameMode` (Settings / export panel). Default **`callsign_tg_abbrev`**.
+
+| Mode | Composed wire name (before length trim) | Example |
+| --- | --- | --- |
+| `callsign_tg_abbrev` | `{callsign} {tgAbbrevOrName}` | `GB7GL Sco TS2` |
+| `callsign_tg` | `{callsign} {tgLabel}` | `GB7GL Scotland TS2` |
+| `callsign_name_tg` | `{callsign} {name} {tgLabel}` | `GB7GL Glasgow Scotland TS2` |
+| `suffix_tg_abbrev` | `{callsign2} {tgAbbrevOrName}` | `GL Sco TS2` |
+| `suffix_tg_number` | `{callsign2} {number[/ts]}` — failsafe | `GL 950/2` |
+| `append` | **Legacy** — `{baseWireName} {memberLabel}` | `GL Glas Scotland TS2` |
+
+`callsign` includes multi-mode `-F`/`-D` suffix when present on the expanded row. `number[/ts]` uses `TalkGroup.number` and `timeslotOverride` (`Slot 1` → `1`). Implementation: `src/lib/channelExpansion/multiTalkGroupWireName.ts`.
+
+**Tracking:** [codeplug-tool#153](https://github.com/pskillen/codeplug-tool/issues/153) (follow-up to [#36](https://github.com/pskillen/codeplug-tool/issues/36)).
 
 ---
 

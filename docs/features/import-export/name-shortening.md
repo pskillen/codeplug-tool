@@ -12,9 +12,11 @@ Logical channels expand at export — multi-mode (`-F`/`-D`) and multi-talkgroup
 
 Shortening runs only when a composed name exceeds the effective `maxNameLength`. Before the strategies below, export may substitute operator-defined abbreviations into the composed base name (see [Channel.abbreviation](#channelabbreviation) and [TalkGroup.abbreviation](#talkgroupabbreviation)).
 
+**Multi-talkgroup rows** use TG-first composition (`multiTalkGroupExportNameMode`, default `callsign_tg_abbrev`) before generic shortening. The trailing talk-group token(s) are protected (`fixedSuffix` in `shortenWireName`); only the leading site/callsign portion is dictionary-squeezed or downgraded. Legacy `append` mode still appends the full member label to the channel wire name and may collapse siblings to `GL Glas 2` when shortening is enabled — use TG-first modes for LCD-distinct names. See [multi-talkgroup-expansion.md](../../reference/multi-talkgroup-expansion.md#wire-name-modes).
+
 When shortening is required, strategies apply in order; the first result that fits is kept:
 
-1. **Talk-group abbreviation** — if the channel row ends with a multi-TG member suffix and `TalkGroup.abbreviation` is set, substitute that label first.
+1. **Talk-group abbreviation** — legacy `append` mode only: if the channel row ends with a multi-TG member suffix and `TalkGroup.abbreviation` is set, substitute that label first. TG-first modes embed abbreviations at composition time.
 2. **Progressive dictionary** — word/phrase replacements from `data/dictionaries/abbreviations.yaml` (e.g. `Scotland` → `Scot` → `Sco`). Regenerate via `npm run generate:abbreviations`.
 3. **Vowel-squeeze** — remove lowercase vowels from the longest remaining words (callsigns, timeslot tokens, and `-F`/`-D` suffixes are protected).
 4. **Export-name-mode downgrade** — for `callsign_name` only, recompose once as `callsign_suffix` for this export row (e.g. `GB7GL Glasgow` → `GL Glasgow`). Never auto-applies `callsign_only` or `name_only`.
@@ -35,6 +37,7 @@ Persisted in browser `localStorage` (`mm9pdy-codeplug-tool.export.*`):
 | Export name mode | Respect per-channel, or force a global mode |
 | Use talk-group abbreviations | Apply `TalkGroup.abbreviation` at export |
 | Use channel abbreviations | Apply `Channel.abbreviation` for the name qualifier at export |
+| Multi-talkgroup export name style | TG-first wire name composition for RX-list fan-out (default `callsign_tg_abbrev`) |
 
 Surfaced on **Import & export** (download panel) and **Settings**. Values merge into `ExportOptions` at download time.
 

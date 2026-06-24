@@ -116,6 +116,7 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
 
         <ExportNameSettingsFields
           profileNameLimit={profileNameLimitForFormat(vendorFormat.id, profileId)}
+          showMultiTalkGroupOptions={vendorFormat.id !== 'opengd77'}
         />
 
         <Stack gap="xs">

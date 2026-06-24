@@ -5,13 +5,18 @@ import {
   type ExportNameModeOverride,
 } from '../../hooks/useExportSettings.ts';
 import { EXPORT_NAME_MODE_OPTIONS } from '../../lib/channelNaming.ts';
+import { MULTI_TG_EXPORT_NAME_MODE_OPTIONS } from '../../lib/channelExpansion/multiTalkGroupWireName.ts';
+import type { MultiTalkGroupExportNameMode } from '../../lib/import-export/types.ts';
 
 export interface ExportNameSettingsFieldsProps {
   profileNameLimit?: number;
+  /** RX-list fan-out formats only (e.g. DM32). Hidden on OpenGD77 lean export. */
+  showMultiTalkGroupOptions?: boolean;
 }
 
 export default function ExportNameSettingsFields({
   profileNameLimit,
+  showMultiTalkGroupOptions = true,
 }: ExportNameSettingsFieldsProps) {
   const {
     shortenNames,
@@ -24,12 +29,19 @@ export default function ExportNameSettingsFields({
     setUseTalkGroupAbbreviation,
     useChannelAbbreviation,
     setUseChannelAbbreviation,
+    multiTalkGroupExportNameMode,
+    setMultiTalkGroupExportNameMode,
   } = useExportSettings();
 
   const nameModeData = [
     { value: EXPORT_NAME_MODE_RESPECT_PER_CHANNEL, label: 'Respect per-channel setting' },
     ...EXPORT_NAME_MODE_OPTIONS.map((o) => ({ value: o.value, label: o.label })),
   ];
+
+  const multiTgNameModeData = MULTI_TG_EXPORT_NAME_MODE_OPTIONS.map((o) => ({
+    value: o.value,
+    label: `${o.label} (e.g. ${o.example})`,
+  }));
 
   return (
     <Stack gap="sm">
@@ -72,13 +84,15 @@ export default function ExportNameSettingsFields({
         allowDeselect={false}
         disabled={!shortenNames}
       />
-      <Switch
-        label="Use talk group abbreviations"
-        description="Prefer TalkGroup.abbreviation for multi-talkgroup channel suffixes"
-        checked={useTalkGroupAbbreviation}
-        onChange={(e) => setUseTalkGroupAbbreviation(e.currentTarget.checked)}
-        disabled={!shortenNames}
-      />
+      {showMultiTalkGroupOptions ? (
+        <Switch
+          label="Use talk group abbreviations"
+          description="Prefer TalkGroup.abbreviation for multi-talkgroup channel suffixes"
+          checked={useTalkGroupAbbreviation}
+          onChange={(e) => setUseTalkGroupAbbreviation(e.currentTarget.checked)}
+          disabled={!shortenNames}
+        />
+      ) : null}
       <Switch
         label="Use channel abbreviations"
         description="Prefer Channel.abbreviation for the name qualifier in export wire names"
@@ -86,6 +100,20 @@ export default function ExportNameSettingsFields({
         onChange={(e) => setUseChannelAbbreviation(e.currentTarget.checked)}
         disabled={!shortenNames}
       />
+      {showMultiTalkGroupOptions ? (
+        <Select
+          label="Multi-talkgroup export name style"
+          description="How expanded RX-list rows name channels on the radio LCD. Tightens automatically if still too long."
+          data={multiTgNameModeData}
+          value={multiTalkGroupExportNameMode}
+          onChange={(value) => {
+            if (value == null) return;
+            setMultiTalkGroupExportNameMode(value as MultiTalkGroupExportNameMode);
+          }}
+          allowDeselect={false}
+          disabled={!shortenNames}
+        />
+      ) : null}
       <Text size="xs" c="dimmed">
         Preferences are saved in browser localStorage.
       </Text>
