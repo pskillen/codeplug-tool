@@ -237,12 +237,7 @@ describe('channelExpansion', () => {
       location: loc,
     });
     expect(channelsAreRelaxedImportMergeCandidates(a, b)).toBe(true);
-    expect(
-      channelsAreRelaxedImportMergeCandidates(
-        { ...b, colourCode: 2 },
-        a,
-      ),
-    ).toBe(false);
+    expect(channelsAreRelaxedImportMergeCandidates({ ...b, colourCode: 2 }, a)).toBe(false);
   });
 
   it('mergeImportChannelsBestEffort pairs FM+DMR with ignoreNameMatch', () => {

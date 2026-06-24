@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { abbreviateWord, isStopword, matchPhraseAbbreviation, matchWordCasing } from './abbreviations.ts';
+import {
+  abbreviateWord,
+  isStopword,
+  matchPhraseAbbreviation,
+  matchWordCasing,
+} from './abbreviations.ts';
 
 describe('abbreviateWord', () => {
   it('returns progressive forms for a known term', () => {

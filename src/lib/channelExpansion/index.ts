@@ -424,8 +424,9 @@ function expandChannelRowsForExport(
   options: ExpandChannelOptions,
   reserved: Set<string>,
 ): ExpandedChannelRow[] {
-  const channelById =
-    options.channelById ?? channelByIdFromChannels(options.codeplug?.channels ?? []);
+  const channelById = new Map(
+    options.channelById ?? channelByIdFromChannels(options.codeplug?.channels ?? []),
+  );
   channelById.set(channel.id, channel);
   const withLookup = { ...options, channelById };
   const modeRows = expandChannelForExport(channel, { ...withLookup, reservedWireNames: reserved });
@@ -448,7 +449,7 @@ export function expandAllChannelsForExport(
   options: Omit<ExpandChannelOptions, 'reservedWireNames'> = {},
 ): ExpandedChannelRow[] {
   const reserved = new Set<string>();
-  const channelById = options.channelById ?? channelByIdFromChannels(channels);
+  const channelById = new Map(options.channelById ?? channelByIdFromChannels(channels));
   const withLookup = { ...options, channelById };
   const rows: ExpandedChannelRow[] = [];
   for (const ch of channels) {
@@ -472,7 +473,7 @@ export function expandZoneMemberWireNames(
   const reserved = new Set(options.reservedWireNames ?? []);
   const warnings: string[] = [];
   const names: string[] = [];
-  const channelById = options.channelById ?? byId;
+  const channelById = new Map(options.channelById ?? byId);
   const withLookup = { ...options, channelById, warnings: options.warnings ?? warnings };
 
   for (const memberId of zone.memberChannelIds) {
@@ -808,10 +809,7 @@ export function channelsAreMultiModeMergeCandidates(
   if (a.mode === b.mode) return false;
   const threshold = options.nameFuzzyThreshold ?? 0;
   const stripTrailingModeLabel = options.stripTrailingModeLabel ?? false;
-  if (
-    !options.ignoreNameMatch &&
-    !channelNameStemsMatch(a, b, threshold, stripTrailingModeLabel)
-  ) {
+  if (!options.ignoreNameMatch && !channelNameStemsMatch(a, b, threshold, stripTrailingModeLabel)) {
     return false;
   }
   if (!channelFrequenciesMatchWithOptions(a, b, options)) return false;

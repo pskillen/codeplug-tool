@@ -7,10 +7,10 @@ describe('talkGroupAbbreviationSuggestions', () => {
     expect(talkGroupAbbreviationSuggestions('   ')).toEqual([]);
   });
 
-  it('returns 6, 8 and 10 char targets', () => {
+  it('returns 6, 8, 10 and 12 char targets', () => {
     const suggestions = talkGroupAbbreviationSuggestions('Scotland TS1');
-    expect(suggestions).toHaveLength(3);
-    expect(suggestions.map((s) => s.maxLen)).toEqual([6, 8, 10]);
+    expect(suggestions).toHaveLength(4);
+    expect(suggestions.map((s) => s.maxLen)).toEqual([6, 8, 10, 12]);
     for (const { maxLen, text } of suggestions) {
       expect(text.length).toBeLessThanOrEqual(maxLen);
     }
