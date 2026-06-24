@@ -7,10 +7,26 @@
 
 ## Overall status
 
-**Status:** Not started (blocked on native YAML slices 1–5)
+**Status:** Complete (pending merge)
+
+---
+
+## Delivered
+
+- Build-time `GOOGLE_OAUTH_CLIENT_ID` via GH Actions secret + `.env.local`
+- `src/lib/cloud/googleDrive/` — OAuth, Drive API, tests
+- `CloudFileActions` + Settings connect UI
+- `src/lib/fileDelivery/` — shared export/import payloads for Drive upload
+
+---
+
+## Verify
+
+- Set `GOOGLE_OAUTH_CLIENT_ID` in `.env.local` → Settings → Connect → Open/Save
+- Before Pages release: add `GOOGLE_OAUTH_CLIENT_ID` repository secret
 
 ---
 
 ## Next
 
-- Slice 6: OAuth build-time client ID + docs
+- Dropbox #15 / OneDrive #16 (interface only today)

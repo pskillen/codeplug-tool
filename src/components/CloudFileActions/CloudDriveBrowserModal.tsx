@@ -1,18 +1,7 @@
-import {
-  Alert,
-  Button,
-  Group,
-  Modal,
-  Stack,
-  Text,
-  UnstyledButton,
-} from '@mantine/core';
+import { Alert, Button, Group, Modal, Stack, Text, UnstyledButton } from '@mantine/core';
 import { IconChevronLeft, IconFile, IconFolder } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
-import {
-  getGoogleDriveAccessToken,
-  listDriveFolder,
-} from '../../lib/cloud/googleDrive/index.ts';
+import { getGoogleDriveAccessToken, listDriveFolder } from '../../lib/cloud/googleDrive/index.ts';
 import type { RemoteDriveEntry } from '../../lib/cloud/types.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 

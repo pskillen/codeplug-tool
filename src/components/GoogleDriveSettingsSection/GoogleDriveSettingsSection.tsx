@@ -26,9 +26,7 @@ export default function GoogleDriveSettingsSection() {
       description="Connect to open and save codeplug files in Google Drive. OAuth tokens stay in this browser only."
     >
       <Stack gap="sm">
-        <Text size="sm">
-          Status: {connected ? 'Connected' : 'Not connected'}
-        </Text>
+        <Text size="sm">Status: {connected ? 'Connected' : 'Not connected'}</Text>
         {error ? <Alert color="red">{error}</Alert> : null}
         <Group>
           {connected ? (

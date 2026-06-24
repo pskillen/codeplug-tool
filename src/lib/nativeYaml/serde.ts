@@ -26,9 +26,7 @@ function parseEnvelope(text: string): NativeYamlEnvelope {
   try {
     parsed = parse(text);
   } catch (err) {
-    throw new NativeYamlParseError(
-      err instanceof Error ? err.message : 'Invalid YAML document',
-    );
+    throw new NativeYamlParseError(err instanceof Error ? err.message : 'Invalid YAML document');
   }
 
   if (!parsed || typeof parsed !== 'object') {
@@ -56,7 +54,10 @@ function parseEnvelope(text: string): NativeYamlEnvelope {
   return envelope as unknown as NativeYamlEnvelope;
 }
 
-function projectFromEnvelope(projectRaw: Record<string, unknown>, codeplug: Codeplug): CodeplugProject {
+function projectFromEnvelope(
+  projectRaw: Record<string, unknown>,
+  codeplug: Codeplug,
+): CodeplugProject {
   const id = projectRaw.id;
   const name = projectRaw.name;
   const createdAt = projectRaw.createdAt;

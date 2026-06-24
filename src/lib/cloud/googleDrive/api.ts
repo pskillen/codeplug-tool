@@ -17,11 +17,7 @@ interface DriveFileMetadata {
   mimeType?: string;
 }
 
-async function driveJson<T>(
-  url: string,
-  accessToken: string,
-  init?: RequestInit,
-): Promise<T> {
+async function driveJson<T>(url: string, accessToken: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
     ...init,
     headers: {
@@ -125,17 +121,14 @@ export async function updateDriveTextFile(
   content: string,
   mimeType: string,
 ): Promise<void> {
-  const response = await fetch(
-    `${DRIVE_UPLOAD_BASE}/files/${fileId}?uploadType=media`,
-    {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': mimeType,
-      },
-      body: content,
+  const response = await fetch(`${DRIVE_UPLOAD_BASE}/files/${fileId}?uploadType=media`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': mimeType,
     },
-  );
+    body: content,
+  });
   if (!response.ok) {
     const text = await response.text();
     throw new Error(`Google Drive update failed (${response.status}): ${text}`);

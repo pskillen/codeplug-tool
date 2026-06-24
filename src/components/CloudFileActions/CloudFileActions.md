@@ -6,15 +6,15 @@ Google Drive **open** (import) and **save** (export) actions for Home and Import
 
 ## Props
 
-| Prop | Type | Notes |
-| --- | --- | --- |
-| `mode` | `'import' \| 'export'` | Import opens a Drive browser modal; export uploads serialised payloads |
-| `vendorFormatId` | `VendorFormatId` | Active CPS or native YAML format |
-| `profileId` | `string` | Optional profile for CHIRP/OpenGD77/DM32 import |
-| `onImportResult` | `(result) => void` | Import mode — parent applies merge/new project |
-| `codeplug` / `project` | `Codeplug`, `CodeplugProject` | Export mode — passed to `buildExportPayload` |
-| `exportOptions` | `ExportOptions` | Export mode — profile and name settings |
-| `onComplete` | `(message) => void` | Export mode — optional status callback |
+| Prop                   | Type                          | Notes                                                                  |
+| ---------------------- | ----------------------------- | ---------------------------------------------------------------------- |
+| `mode`                 | `'import' \| 'export'`        | Import opens a Drive browser modal; export uploads serialised payloads |
+| `vendorFormatId`       | `VendorFormatId`              | Active CPS or native YAML format                                       |
+| `profileId`            | `string`                      | Optional profile for CHIRP/OpenGD77/DM32 import                        |
+| `onImportResult`       | `(result) => void`            | Import mode — parent applies merge/new project                         |
+| `codeplug` / `project` | `Codeplug`, `CodeplugProject` | Export mode — passed to `buildExportPayload`                           |
+| `exportOptions`        | `ExportOptions`               | Export mode — profile and name settings                                |
+| `onComplete`           | `(message) => void`           | Export mode — optional status callback                                 |
 
 ## Usage
 

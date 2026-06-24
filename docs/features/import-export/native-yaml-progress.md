@@ -7,21 +7,19 @@
 
 ## Overall status
 
-**Status:** In progress
+**Status:** Complete (pending merge)
 
 ---
 
-## Slice 1: Document native YAML schema
+## Delivered
 
-**Status:** In progress
-
-**Delivered**
-
-- `docs/reference/native-yaml/README.md`
-- `docs/features/import-export/native-yaml/README.md`
+- `docs/reference/native-yaml/README.md` — envelope schema
+- `src/lib/nativeYaml/serde.ts` — parse/serialise `CodeplugProject`
+- Import/export adapters registered; UI shipped
+- System round-trip: `src/test/system/nativeYamlRoundTrip.system.test.ts`
 
 ---
 
 ## Next
 
-- Slice 2: YAML serde core
+- None — tracked with Google Drive epic #17

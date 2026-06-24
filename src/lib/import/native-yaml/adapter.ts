@@ -21,13 +21,7 @@ export const nativeYamlAdapter = {
   capabilities: {
     delivery: 'single-file' as const,
     interchange: 'native-document' as const,
-    entityKinds: [
-      'channels',
-      'zones',
-      'contacts',
-      'talkGroups',
-      'rxGroupLists',
-    ] as const,
+    entityKinds: ['channels', 'zones', 'contacts', 'talkGroups', 'rxGroupLists'] as const,
   },
   detectKind,
   parseChannels() {

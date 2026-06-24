@@ -19,7 +19,7 @@ flowchart TD
   end
   subgraph interchange [3_Optional_interchange]
     YamlFile["Native YAML file\n(shipped #10)"]
-    Cloud["Cloud sync\n(planned)"]
+    Cloud["Cloud sync\n(Google Drive #17)"]
   end
   subgraph export [4_Export_to_radios]
     Pick["Format + radio profile picker"]
@@ -61,7 +61,7 @@ Edit channels, zones, contacts, and talk groups via map, CRUD, and report views.
 | --- | --- | --- |
 | **LocalStorage** | Shipped | Session-to-session recall in the same browser |
 | **Native YAML file** | Shipped ([#10](https://github.com/pskillen/codeplug-tool/issues/10)) | Portable source of truth; full internal model |
-| **Cloud provider** | Planned | Dropbox / OneDrive / Google Drive sync of YAML projects |
+| **Cloud provider** | Shipped (Google Drive [#17](https://github.com/pskillen/codeplug-tool/issues/17)) | Dropbox / OneDrive planned — sync YAML and CPS files |
 
 YAML and cloud are **interchange** layers — not a replacement for CPS export. Operators still export to vendor CSV (or similar) to flash a radio.
 

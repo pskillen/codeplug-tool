@@ -60,9 +60,7 @@ export function buildExportPayload(
         : (adapter.collectWarnings?.(ctx.codeplug, ctx.options) ?? []);
 
     return {
-      payloads: Object.entries(files).map(([fileName, content]) =>
-        csvPayload(fileName, content),
-      ),
+      payloads: Object.entries(files).map(([fileName, content]) => csvPayload(fileName, content)),
       warnings,
     };
   }

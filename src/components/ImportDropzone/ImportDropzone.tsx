@@ -171,7 +171,10 @@ export default function ImportDropzone({
           accept={accept}
           hidden
           multiple
-          {...({ webkitdirectory: '', directory: '' } as React.InputHTMLAttributes<HTMLInputElement>)}
+          {...({
+            webkitdirectory: '',
+            directory: '',
+          } as React.InputHTMLAttributes<HTMLInputElement>)}
           onChange={(e) => {
             const list = e.target.files ? [...e.target.files] : [];
             void handleFiles(list);
