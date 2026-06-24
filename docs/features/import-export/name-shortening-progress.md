@@ -90,8 +90,8 @@
 
 ## Slice 8 — Documentation
 
-**Status:** Complete (pending commit)
-**Commit:** `docs: document export name shortening and tg.abbreviation`
+**Status:** Complete (committed)
+**Commit:** `5347878` — `docs: document export name shortening and tg.abbreviation`
 
 **Delivered**
 
