@@ -42,6 +42,7 @@ export function serialiseChirpCsv(
     maxNameLength: effectiveMaxNameLength(options, profile.nameLimit),
     shortenNames: options?.shortenNames ?? true,
     nameModeOverride: options?.nameModeOverride,
+    useChannelAbbreviation: options?.useChannelAbbreviation,
     warnings,
   };
 

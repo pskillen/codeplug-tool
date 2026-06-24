@@ -100,3 +100,43 @@
 - Import-export README status → Shipped
 
 **Follow-up:** score-based matcher [#143](https://github.com/pskillen/codeplug-tool/issues/143)
+
+---
+
+## #150 — Channel.abbreviation
+
+**Tracking:** [codeplug-tool#150](https://github.com/pskillen/codeplug-tool/issues/150)
+**Branch:** `150/paddy/channel-abbreviation`
+
+### Overall status
+
+**Status:** Complete
+
+### Slice 1 — Model + schema v14
+
+**Status:** Complete
+**Commit:** `69c73b9` — `feat(model): add Channel.abbreviation`
+
+### Slice 2 — Expansion export path
+
+**Status:** Complete
+**Commit:** `7a4f3c6` — `feat(export): apply Channel.abbreviation in channel expansion`
+
+### Slice 3 — CHIRP path + shared helper
+
+**Status:** Complete
+**Commit:** `32cc8c3` — `feat(export): apply Channel.abbreviation in CHIRP serialise`
+
+### Slice 4 — Export-time toggle
+
+**Status:** Complete
+**Commit:** `ff0c3db` — `feat(export): channel abbreviation export-time toggle`
+
+### Slice 5 — CRUD UI
+
+**Status:** Complete
+**Commit:** `574f879` — `feat(ui): channel abbreviation CRUD and list column`
+
+### Slice 6 — Documentation
+
+**Status:** Complete (this slice)

@@ -92,6 +92,8 @@ export interface Channel {
   id: string;
   /** Human qualifier (town, TG label, etc.) — not the full CPS wire string. */
   name: string;
+  /** Shorter export label for the name qualifier — used at export when enabled. */
+  abbreviation?: string;
   /** Repeater/site id; map default label and directory search key. */
   callsign: string;
   /** How export composes the CPS Channel Name from callsign + name. */
@@ -201,7 +203,7 @@ export interface Codeplug {
   meta: CodeplugMeta;
 }
 
-export const CODEPLUG_SCHEMA_VERSION = 13;
+export const CODEPLUG_SCHEMA_VERSION = 14;
 
 let idGenerator: () => string = () => crypto.randomUUID();
 

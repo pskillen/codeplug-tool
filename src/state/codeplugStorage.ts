@@ -170,6 +170,11 @@ function migrateChannel(raw: Record<string, unknown>, projectImportedAt: string 
     }
   }
 
+  const abbreviation =
+    typeof partial.abbreviation === 'string' && partial.abbreviation.trim() !== ''
+      ? partial.abbreviation.trim()
+      : undefined;
+
   return {
     id: partial.id ?? '',
     ...defaults,
@@ -182,6 +187,7 @@ function migrateChannel(raw: Record<string, unknown>, projectImportedAt: string 
     opengd77Extras: migrated.opengd77Extras ?? {},
     multiMode: migrated.multiMode ?? false,
     modeProfiles: migrated.modeProfiles ?? [],
+    ...(abbreviation !== undefined ? { abbreviation } : {}),
     meta,
   };
 }

@@ -10,7 +10,9 @@ Logical channels expand at export — multi-mode (`-F`/`-D`) and multi-talkgroup
 
 ## Pipeline
 
-Shortening runs only when a composed name exceeds the effective `maxNameLength`. Strategies apply in order; the first result that fits is kept:
+Shortening runs only when a composed name exceeds the effective `maxNameLength`. Before the strategies below, export may substitute operator-defined abbreviations into the composed base name (see [Channel.abbreviation](#channelabbreviation) and [TalkGroup.abbreviation](#talkgroupabbreviation)).
+
+When shortening is required, strategies apply in order; the first result that fits is kept:
 
 1. **Talk-group abbreviation** — if the channel row ends with a multi-TG member suffix and `TalkGroup.abbreviation` is set, substitute that label first.
 2. **Progressive dictionary** — word/phrase replacements from `data/dictionaries/abbreviations.yaml` (e.g. `Scotland` → `Scot` → `Sco`). Regenerate via `npm run generate:abbreviations`.
@@ -32,6 +34,7 @@ Persisted in browser `localStorage` (`mm9pdy-codeplug-tool.export.*`):
 | Max name length | Override profile default; empty = use profile `nameLimit` |
 | Export name mode | Respect per-channel, or force a global mode |
 | Use talk-group abbreviations | Apply `TalkGroup.abbreviation` at export |
+| Use channel abbreviations | Apply `Channel.abbreviation` for the name qualifier at export |
 
 Surfaced on **Import & export** (download panel) and **Settings**. Values merge into `ExportOptions` at download time.
 
@@ -50,6 +53,10 @@ OpenGD77 also documents ~16 chars on the [Baofeng 1701 profile](../../reference/
 ## TalkGroup.abbreviation
 
 Optional vendor-neutral field on `TalkGroup` (schema v13). Edited in talk-group CRUD; used **only at export** when “Use talk-group abbreviations” is enabled. Does not affect internal FKs or import identity.
+
+## Channel.abbreviation
+
+Optional vendor-neutral field on `Channel` (schema v14). Applies to the **name qualifier only** — not `callsign`. Edited in channel CRUD; used **only at export** when “Use channel abbreviations” is enabled. Substitution happens in `channelPickForWireExport` before `composeChannelWireName` (OpenGD77/DM32 expansion path and CHIRP `channelWire.ts`). Callsign shortening remains automatic via the generic pipeline (dictionary, callsign-suffix downgrade, vowel-squeeze).
 
 ## Re-import and round-trip
 

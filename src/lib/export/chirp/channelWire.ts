@@ -1,5 +1,5 @@
 import type { Channel, ChannelExportNameMode } from '../../../models/codeplug.ts';
-import { composeChannelWireName } from '../../channelNaming.ts';
+import { channelPickForWireExport, composeChannelWireName } from '../../channelNaming.ts';
 import { finalizeWireName } from '../../channelExpansion/shortenName.ts';
 import {
   deriveChirpDuplexAndOffset,
@@ -28,13 +28,15 @@ export interface ChirpChannelWireOptions {
   maxNameLength: number;
   shortenNames: boolean;
   nameModeOverride?: ChannelExportNameMode;
+  useChannelAbbreviation?: boolean;
   warnings?: string[];
 }
 
 function channelWireName(channel: Channel, options: ChirpChannelWireOptions): string {
-  const ch = options.nameModeOverride
-    ? { ...channel, exportNameMode: options.nameModeOverride }
-    : channel;
+  const ch = channelPickForWireExport(channel, {
+    nameModeOverride: options.nameModeOverride,
+    useChannelAbbreviation: options.useChannelAbbreviation,
+  });
   const base = composeChannelWireName(ch);
   if (!options.shortenNames) {
     if (base.length > options.maxNameLength) {

@@ -22,6 +22,8 @@ export default function ExportNameSettingsFields({
     setNameModeOverride,
     useTalkGroupAbbreviation,
     setUseTalkGroupAbbreviation,
+    useChannelAbbreviation,
+    setUseChannelAbbreviation,
   } = useExportSettings();
 
   const nameModeData = [
@@ -75,6 +77,13 @@ export default function ExportNameSettingsFields({
         description="Prefer TalkGroup.abbreviation for multi-talkgroup channel suffixes"
         checked={useTalkGroupAbbreviation}
         onChange={(e) => setUseTalkGroupAbbreviation(e.currentTarget.checked)}
+        disabled={!shortenNames}
+      />
+      <Switch
+        label="Use channel abbreviations"
+        description="Prefer Channel.abbreviation for the name qualifier in export wire names"
+        checked={useChannelAbbreviation}
+        onChange={(e) => setUseChannelAbbreviation(e.currentTarget.checked)}
         disabled={!shortenNames}
       />
       <Text size="xs" c="dimmed">

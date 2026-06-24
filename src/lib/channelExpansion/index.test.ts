@@ -619,6 +619,106 @@ describe('channelExpansion', () => {
     expect(names).toEqual(channelRows.map((r) => r.wireName));
   });
 
+  it('uses channel abbreviation for name qualifier when enabled', () => {
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'Largs Scotland West',
+      abbreviation: 'Largs',
+      callsign: 'GB7AC',
+      exportNameMode: 'callsign_name',
+      mode: 'dmr',
+    });
+    const rows = expandChannelForExport(ch, {
+      useChannelAbbreviation: true,
+      shortenNames: false,
+      maxNameLength: 64,
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0].wireName).toBe('GB7AC Largs');
+  });
+
+  it('ignores channel abbreviation when useChannelAbbreviation is false', () => {
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'Largs Scotland West',
+      abbreviation: 'Largs',
+      callsign: 'GB7AC',
+      exportNameMode: 'callsign_name',
+      mode: 'dmr',
+    });
+    const rows = expandChannelForExport(ch, {
+      useChannelAbbreviation: false,
+      shortenNames: false,
+      maxNameLength: 64,
+    });
+    expect(rows[0].wireName).toBe('GB7AC Largs Scotland West');
+  });
+
+  it('appends multi-mode suffix after channel abbreviation base', () => {
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'Glasgow Scotland',
+      abbreviation: 'Glas',
+      callsign: 'GB7GL',
+      exportNameMode: 'callsign_name',
+      mode: 'fm',
+      multiMode: true,
+      modeProfiles: [
+        { ...channelModeProfileDefaults('fm'), rxTone: '88.5' },
+        { ...channelModeProfileDefaults('dmr'), colourCode: 1 },
+      ],
+    });
+    const rows = expandChannelForExport(ch, {
+      useChannelAbbreviation: true,
+      shortenNames: false,
+      maxNameLength: 64,
+    });
+    expect(rows.map((r) => r.wireName).sort()).toEqual(['GB7GL Glas-D', 'GB7GL Glas-F']);
+  });
+
+  it('stacks channel and talk group abbreviations on multi-TG fan-out', () => {
+    const tg1 = buildTalkGroup({
+      id: 'tg1',
+      name: 'Scotland TS1',
+      abbreviation: 'Sco TS1',
+    });
+    const rgl = buildRxGroupList({
+      id: 'rgl1',
+      name: 'GB7GL',
+      memberRefs: [{ kind: 'talkGroup', id: 'tg1' }],
+    });
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'Glasgow Scotland',
+      abbreviation: 'Glas',
+      callsign: 'GB7GL',
+      exportNameMode: 'callsign_name',
+      mode: 'dmr',
+      rxGroupListId: 'rgl1',
+    });
+    const codeplug = buildCodeplug({ channels: [ch], talkGroups: [tg1], rxGroupLists: [rgl] });
+    const rows = expandTalkGroupsForExport(
+      expandChannelForExport(ch, {
+        useChannelAbbreviation: true,
+        shortenNames: true,
+        maxNameLength: 16,
+      }),
+      {
+        expandTalkGroups: true,
+        codeplug,
+        channelById: new Map([[ch.id, ch]]),
+        shortenNames: true,
+        maxNameLength: 16,
+        useChannelAbbreviation: true,
+        useTalkGroupAbbreviation: true,
+      },
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0].wireName.length).toBeLessThanOrEqual(16);
+    expect(rows[0].wireName).not.toContain('Glasgow Scotland');
+    expect(rows[0].wireName).not.toContain('Scotland TS1');
+  });
+
   it('expandTalkGroupsForExport shortens TG member suffix with abbreviation', () => {
     const tg1 = buildTalkGroup({
       id: 'tg1',
