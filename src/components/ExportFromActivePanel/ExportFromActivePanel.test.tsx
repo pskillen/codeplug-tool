@@ -53,6 +53,18 @@ describe('ExportFromActivePanel', () => {
     expect(screen.getByRole('button', { name: /Download all/i })).toBeInTheDocument();
   });
 
+  it('hides multi-talkgroup export options on OpenGD77 export', () => {
+    renderPanel(vendorFormatById('opengd77'));
+    expect(screen.queryByText('Multi-talkgroup export name style')).not.toBeInTheDocument();
+    expect(screen.queryByText('Use talk group abbreviations')).not.toBeInTheDocument();
+  });
+
+  it('shows multi-talkgroup export options on DM32 export', () => {
+    renderPanel(vendorFormatById('dm32'));
+    expect(screen.getByText('Multi-talkgroup export name style')).toBeInTheDocument();
+    expect(screen.getByText('Use talk group abbreviations')).toBeInTheDocument();
+  });
+
   it('renders CHIRP profile picker and single download', () => {
     renderPanel(vendorFormatById('chirp'));
     expect(screen.getByRole('combobox', { name: 'Radio profile' })).toBeInTheDocument();
