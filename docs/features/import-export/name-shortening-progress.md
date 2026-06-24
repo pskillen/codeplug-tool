@@ -8,7 +8,7 @@
 
 ## Overall status
 
-**Status:** In progress (slices 4–6 complete; 7–8 outstanding)
+**Status:** In progress (slices 1–7 complete; slice 8 outstanding)
 
 ---
 
@@ -35,7 +35,7 @@
 
 ## Slice 4 — Wire shortening into expansion path
 
-**Status:** Complete (pending commit)
+**Status:** Complete (committed)
 **Commit:** `feat: shorten expanded channel and zone names at export`
 
 **Delivered**
@@ -49,7 +49,7 @@
 
 ## Slice 5 — Per-format wiring + ExportOptions
 
-**Status:** Complete (pending commit)
+**Status:** Complete (committed)
 **Commit:** `feat: apply name shortening across opengd77, dm32 and chirp exports`
 
 **Delivered**
@@ -63,7 +63,7 @@
 
 ## Slice 6 — Export-time controls + localStorage
 
-**Status:** Complete (pending commit)
+**Status:** Complete (committed)
 **Commit:** `feat: export-time name-shortening controls persisted to localStorage`
 
 **Delivered**
@@ -74,7 +74,20 @@
 
 ---
 
+## Slice 7 — Re-import matching easy win
+
+**Status:** Complete (pending commit)
+**Commit:** `feat: relaxed frequency/location channel matching on re-import`
+
+**Delivered**
+
+- `ChannelMergeCandidateOptions.ignoreNameMatch` on multi-mode / multi-TG merge candidates
+- `channelsAreRelaxedImportMergeCandidates` for active-import channel identity
+- `ImportMergeOptions.relaxedChannelMatch` on `applyImportToCodeplug` / `previewImportMerge`
+- Follow-up issue for score-based matcher (see outstanding)
+
+---
+
 ## Next
 
-- Slice 7 — Re-import matching easy win + follow-up ticket
 - Slice 8 — Documentation

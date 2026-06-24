@@ -9,6 +9,7 @@ import {
   channelMergeNameStem,
   channelNameStem,
   channelsAreMultiModeMergeCandidates,
+  channelsAreRelaxedImportMergeCandidates,
   expandAllChannelsForExport,
   expandChannelForExport,
   expandTalkGroupsForExport,
@@ -189,6 +190,84 @@ describe('channelExpansion', () => {
     const a = buildChannel({ id: '1', name: 'GB7GL-F', mode: 'fm' });
     const b = buildChannel({ id: '2', name: 'GB7GL-D', mode: 'fm' });
     expect(channelsAreMultiModeMergeCandidates(a, b)).toBe(false);
+  });
+
+  it('channelsAreMultiModeMergeCandidates ignores name when ignoreNameMatch is set', () => {
+    const loc = { lat: 55.86, lon: -4.25 };
+    const a = buildChannel({
+      id: '1',
+      name: 'GB7AC Largs Scot West',
+      mode: 'fm',
+      rxFrequency: 430_125_000,
+      txFrequency: 430_125_000,
+      location: loc,
+    });
+    const b = buildChannel({
+      id: '2',
+      name: 'GB7AC Largs Sc',
+      mode: 'dmr',
+      rxFrequency: 430_125_000,
+      txFrequency: 430_125_000,
+      location: loc,
+    });
+    expect(channelsAreMultiModeMergeCandidates(a, b)).toBe(false);
+    expect(channelsAreMultiModeMergeCandidates(a, b, { ignoreNameMatch: true })).toBe(true);
+  });
+
+  it('channelsAreRelaxedImportMergeCandidates matches frequency and location only', () => {
+    const loc = { lat: 55.86, lon: -4.25 };
+    const a = buildChannel({
+      id: '1',
+      name: 'GB7AC Largs Scot West',
+      mode: 'dmr',
+      rxFrequency: 430_125_000,
+      txFrequency: 430_125_000,
+      colourCode: 1,
+      timeslot: 1,
+      location: loc,
+    });
+    const b = buildChannel({
+      id: '2',
+      name: 'GB7AC Largs Sc',
+      mode: 'dmr',
+      rxFrequency: 430_125_000,
+      txFrequency: 430_125_000,
+      colourCode: 1,
+      timeslot: 1,
+      location: loc,
+    });
+    expect(channelsAreRelaxedImportMergeCandidates(a, b)).toBe(true);
+    expect(
+      channelsAreRelaxedImportMergeCandidates(
+        { ...b, colourCode: 2 },
+        a,
+      ),
+    ).toBe(false);
+  });
+
+  it('mergeImportChannelsBestEffort pairs FM+DMR with ignoreNameMatch', () => {
+    const loc = { lat: 55.86, lon: -4.25 };
+    const fm = buildChannel({
+      id: '1',
+      name: 'GB7AC Largs Scot West-F',
+      mode: 'fm',
+      rxFrequency: 430_125_000,
+      txFrequency: 430_125_000,
+      location: loc,
+    });
+    const dmr = buildChannel({
+      id: '2',
+      name: 'GB7AC Largs Sc-D',
+      mode: 'dmr',
+      rxFrequency: 430_125_000,
+      txFrequency: 430_125_000,
+      location: loc,
+    });
+    const strict = mergeImportChannelsBestEffort([fm, dmr]);
+    expect(strict.channels).toHaveLength(2);
+    const relaxed = mergeImportChannelsBestEffort([fm, dmr], { ignoreNameMatch: true });
+    expect(relaxed.channels).toHaveLength(1);
+    expect(relaxed.channels[0].multiMode).toBe(true);
   });
 
   it('mergeChannelsToMultiMode builds N-way FM+DMR+YSF with profile opengd77Extras', () => {

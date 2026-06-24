@@ -560,6 +560,8 @@ export function channelsAreMultiTalkgroupMergeCandidates(
   if (!refA || !refB || refA.kind !== 'talkGroup' || refB.kind !== 'talkGroup') return false;
   if (entityRefsEqual(refA, refB)) return false;
 
+  if (options.ignoreNameMatch) return true;
+
   const stem = stripTrailingModeLabel ? channelMergeNameStem : channelNameStem;
   const stemA = channelTalkGroupStem(stem(a.name), talkGroups, contacts);
   const stemB = channelTalkGroupStem(stem(b.name), talkGroups, contacts);
@@ -628,9 +630,11 @@ function canMergeMultiTalkgroupPair(
   b: Channel,
   talkGroups: TalkGroup[],
   contacts: Contact[],
+  options: ChannelMergeCandidateOptions = {},
 ): boolean {
   return channelsAreMultiTalkgroupMergeCandidates(a, b, talkGroups, contacts, {
     nameFuzzyThreshold: 0,
+    ...options,
   });
 }
 
@@ -654,6 +658,7 @@ export function mergeImportChannelsMultiTalkgroupBestEffort(
   talkGroups: TalkGroup[],
   contacts: Contact[],
   rxGroupLists: RxGroupList[],
+  mergeOptions: ChannelMergeCandidateOptions = {},
 ): MergeImportMultiTalkgroupResult {
   const merged: MergeImportChannelsResult['merged'] = [];
   const used = new Set<string>();
@@ -669,7 +674,7 @@ export function mergeImportChannelsMultiTalkgroupBestEffort(
     for (let j = i + 1; j < channels.length; j++) {
       if (used.has(channels[j].id)) continue;
       const matchesAll = group.every((member) =>
-        canMergeMultiTalkgroupPair(member, channels[j], talkGroups, contacts),
+        canMergeMultiTalkgroupPair(member, channels[j], talkGroups, contacts, mergeOptions),
       );
       if (matchesAll) {
         group.push(channels[j]);
@@ -751,6 +756,8 @@ export interface ChannelMergeCandidateOptions {
   matchRxFrequency?: boolean;
   /** Require equal TX frequency Hz. Default true. */
   matchTxFrequency?: boolean;
+  /** Skip name/stem comparison — match on RF context only (freq, location, DMR CC/TS). */
+  ignoreNameMatch?: boolean;
 }
 
 export function channelFrequenciesMatch(a: Channel, b: Channel): boolean {
@@ -801,9 +808,24 @@ export function channelsAreMultiModeMergeCandidates(
   if (a.mode === b.mode) return false;
   const threshold = options.nameFuzzyThreshold ?? 0;
   const stripTrailingModeLabel = options.stripTrailingModeLabel ?? false;
-  if (!channelNameStemsMatch(a, b, threshold, stripTrailingModeLabel)) return false;
+  if (
+    !options.ignoreNameMatch &&
+    !channelNameStemsMatch(a, b, threshold, stripTrailingModeLabel)
+  ) {
+    return false;
+  }
   if (!channelFrequenciesMatchWithOptions(a, b, options)) return false;
   if (!channelLocationsMatch(a, b)) return false;
+  return true;
+}
+
+/** Whether an incoming import row likely matches an existing channel when wire names differ (e.g. shortened export). */
+export function channelsAreRelaxedImportMergeCandidates(a: Channel, b: Channel): boolean {
+  if (a.multiMode !== b.multiMode) return false;
+  if (!a.multiMode && a.mode !== b.mode) return false;
+  if (!channelFrequenciesMatch(a, b)) return false;
+  if (!channelLocationsMatch(a, b)) return false;
+  if (isDmrMode(a.mode) && isDmrMode(b.mode) && !digitalRfContextMatch(a, b)) return false;
   return true;
 }
 
@@ -871,8 +893,8 @@ export function mergeChannelsToMultiMode(
   return syncChannelFromPrimaryProfile(withMergedChannelWireProvenance(base, sources));
 }
 
-function canMergePair(a: Channel, b: Channel): boolean {
-  return channelsAreMultiModeMergeCandidates(a, b, { nameFuzzyThreshold: 0 });
+function canMergePair(a: Channel, b: Channel, options: ChannelMergeCandidateOptions = {}): boolean {
+  return channelsAreMultiModeMergeCandidates(a, b, { nameFuzzyThreshold: 0, ...options });
 }
 
 function mergeTwoChannels(primary: Channel, secondary: Channel): Channel {
@@ -889,7 +911,10 @@ function mergeTwoChannels(primary: Channel, secondary: Channel): Channel {
 }
 
 /** Best-effort collapse of paired flat import rows into multi-mode channels. */
-export function mergeImportChannelsBestEffort(channels: Channel[]): MergeImportChannelsResult {
+export function mergeImportChannelsBestEffort(
+  channels: Channel[],
+  mergeOptions: ChannelMergeCandidateOptions = {},
+): MergeImportChannelsResult {
   const merged: MergeImportChannelsResult['merged'] = [];
   const used = new Set<string>();
   const result: Channel[] = [];
@@ -900,7 +925,7 @@ export function mergeImportChannelsBestEffort(channels: Channel[]): MergeImportC
 
     for (let j = i + 1; j < channels.length; j++) {
       if (used.has(channels[j].id)) continue;
-      if (canMergePair(channels[i], channels[j])) {
+      if (canMergePair(channels[i], channels[j], mergeOptions)) {
         combined = mergeTwoChannels(channels[i], channels[j]);
         used.add(channels[i].id);
         used.add(channels[j].id);
