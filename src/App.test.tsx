@@ -238,7 +238,9 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: 'Import', level: 2 })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Export', level: 2 })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Import & export' })).toBeInTheDocument();
-    expect(screen.getByText('Vendor format')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /OpenGD77 CPS CSV/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /CHIRP CSV/i })).toBeInTheDocument();
+    expect(screen.getByText('Coming soon')).toBeInTheDocument();
   });
 
   it('filters channels from secondary nav search', () => {
