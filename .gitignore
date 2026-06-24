@@ -28,3 +28,6 @@ dist/
 coverage/
 test-results/
 *.tsbuildinfo
+
+# Codegen output (see scripts/generate-abbreviations.mjs)
+*.generated.ts
