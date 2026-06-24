@@ -1,9 +1,12 @@
+import type { ChannelTimeslot } from '../channelFields/index.ts';
 import type { EntityRef } from '../entityRefs.ts';
 import {
   entityRefDisplayName,
   entityRefExportLabel,
   entityRefKey,
   entityRefsEqual,
+  findContactById,
+  findTalkGroupById,
   resolveContactRefByWireName,
   resolveRxGroupListIdByName,
 } from '../entityRefs.ts';
@@ -38,6 +41,7 @@ import {
   DEFAULT_MULTI_TG_EXPORT_NAME_MODE,
   escalateMultiTalkGroupExportNameMode,
   multiTalkGroupProtectedSuffix,
+  parseTimeslotOverrideWire,
   type MultiTalkGroupExportNameMode,
 } from './multiTalkGroupWireName.ts';
 
@@ -378,6 +382,19 @@ export function stripTalkGroupExportSuffix(
   return name;
 }
 
+/** Resolve timeslot for a TG-expanded export row from member override or lean channel fallback. */
+export function timeslotForExpandedMember(
+  member: EntityRef,
+  codeplug: Codeplug,
+  fallback: ChannelTimeslot | null,
+): ChannelTimeslot | null {
+  const override =
+    member.kind === 'talkGroup'
+      ? (findTalkGroupById(member.id, codeplug.talkGroups)?.timeslotOverride ?? '')
+      : (findContactById(member.id, codeplug.contacts)?.timeslotOverride ?? '');
+  return parseTimeslotOverrideWire(override) ?? fallback;
+}
+
 /** Second pass: expand digital rows with RX group lists into one row per member. */
 export function expandTalkGroupsForExport(
   rows: ExpandedChannelRow[],
@@ -498,6 +515,7 @@ export function expandTalkGroupsForExport(
         wireName: candidate,
         contactRef: member,
         rxGroupListId: null,
+        timeslot: timeslotForExpandedMember(member, codeplug, row.timeslot),
       });
     }
   }

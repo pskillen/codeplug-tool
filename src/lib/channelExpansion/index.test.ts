@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildChannel,
   buildCodeplug,
+  buildContact,
   buildRxGroupList,
   buildTalkGroup,
 } from '../../test/builders/codeplug.ts';
@@ -469,6 +470,116 @@ describe('channelExpansion', () => {
     expect(rows.map((r) => r.wireName).sort()).toEqual(['GB7GL Local 9', 'GB7GL Scotland TS1']);
     expect(rows.every((r) => r.rxGroupListId === null)).toBe(true);
     expect(rows.map((r) => r.contactRef?.id).sort()).toEqual(['tg1', 'tg2']);
+  });
+
+  it('expandTalkGroupsForExport applies member timeslotOverride to expanded rows', () => {
+    const tgTs2 = buildTalkGroup({
+      id: 'tg1',
+      name: 'Scotland TS2',
+      timeslotOverride: 'Slot 2',
+    });
+    const tgTs1 = buildTalkGroup({
+      id: 'tg2',
+      name: 'Scot West TS1',
+      timeslotOverride: 'Slot 1',
+    });
+    const rgl = buildRxGroupList({
+      id: 'rgl1',
+      name: 'GB7GL',
+      memberRefs: [
+        { kind: 'talkGroup', id: 'tg1' },
+        { kind: 'talkGroup', id: 'tg2' },
+      ],
+    });
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'Glasgow',
+      callsign: 'GB7GL',
+      mode: 'dmr',
+      rxGroupListId: 'rgl1',
+      timeslot: null,
+    });
+    const codeplug = buildCodeplug({
+      channels: [ch],
+      talkGroups: [tgTs2, tgTs1],
+      rxGroupLists: [rgl],
+    });
+    const rows = expandTalkGroupsForExport(expandChannelForExport(ch), {
+      expandTalkGroups: true,
+      codeplug,
+      channelById: new Map([[ch.id, ch]]),
+    });
+    expect(rows).toHaveLength(2);
+    const byTg = new Map(rows.map((r) => [r.contactRef?.id, r.timeslot]));
+    expect(byTg.get('tg1')).toBe(2);
+    expect(byTg.get('tg2')).toBe(1);
+  });
+
+  it('expandTalkGroupsForExport falls back to lean channel timeslot when override empty', () => {
+    const tg = buildTalkGroup({ id: 'tg1', name: 'Scotland TS1', timeslotOverride: '' });
+    const tgDisabled = buildTalkGroup({
+      id: 'tg2',
+      name: 'Local 9',
+      timeslotOverride: 'Disabled',
+    });
+    const rgl = buildRxGroupList({
+      id: 'rgl1',
+      name: 'GB7GL',
+      memberRefs: [
+        { kind: 'talkGroup', id: 'tg1' },
+        { kind: 'talkGroup', id: 'tg2' },
+      ],
+    });
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'GB7GL',
+      mode: 'dmr',
+      rxGroupListId: 'rgl1',
+      timeslot: 2,
+    });
+    const codeplug = buildCodeplug({
+      channels: [ch],
+      talkGroups: [tg, tgDisabled],
+      rxGroupLists: [rgl],
+    });
+    const rows = expandTalkGroupsForExport(expandChannelForExport(ch), {
+      expandTalkGroups: true,
+      codeplug,
+      channelById: new Map([[ch.id, ch]]),
+    });
+    expect(rows.every((r) => r.timeslot === 2)).toBe(true);
+  });
+
+  it('expandTalkGroupsForExport applies Contact.timeslotOverride for private RGL members', () => {
+    const contact = buildContact({
+      id: 'ct1',
+      name: 'Parrot',
+      timeslotOverride: 'Slot 1',
+    });
+    const rgl = buildRxGroupList({
+      id: 'rgl1',
+      name: 'List',
+      memberRefs: [{ kind: 'contact', id: 'ct1' }],
+    });
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'GB7GL',
+      mode: 'dmr',
+      rxGroupListId: 'rgl1',
+      timeslot: 2,
+    });
+    const codeplug = buildCodeplug({
+      channels: [ch],
+      contacts: [contact],
+      rxGroupLists: [rgl],
+    });
+    const rows = expandTalkGroupsForExport(expandChannelForExport(ch), {
+      expandTalkGroups: true,
+      codeplug,
+      channelById: new Map([[ch.id, ch]]),
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0].timeslot).toBe(1);
   });
 
   it('expandTalkGroupsForExport skips analog rows', () => {
