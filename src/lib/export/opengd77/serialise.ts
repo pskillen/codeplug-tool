@@ -4,6 +4,10 @@ import {
   expandAllChannelsForExport,
   type ExpandedChannelRow,
 } from '../../channelExpansion/index.ts';
+import {
+  effectiveMaxNameLength,
+  expandOptionsFromExport,
+} from '../../channelExpansion/exportOptions.ts';
 import { formatCsv } from '../csvWrite.ts';
 import type { ExportOptions } from '../../import-export/types.ts';
 import {
@@ -87,10 +91,12 @@ function channelRowValues(
   return values;
 }
 
-export function serialiseChannels(codeplug: Codeplug, profileId?: string): string {
-  const profile = getOpenGd77Profile(profileId ?? DEFAULT_OPENGD77_PROFILE_ID);
+export function serialiseChannels(codeplug: Codeplug, options?: ExportOptions): string {
+  const profile = getOpenGd77Profile(options?.profileId ?? DEFAULT_OPENGD77_PROFILE_ID);
+  const expandOpts = expandOptionsFromExport(codeplug, options);
   const expanded = expandAllChannelsForExport(codeplug.channels, {
-    maxNameLength: 16,
+    ...expandOpts,
+    maxNameLength: effectiveMaxNameLength(options, profile.nameLimit),
   });
   const rows = expanded.map((row, i) =>
     padRow(CHANNEL_HEADERS, channelRowValues(row, codeplug, profile, i + 1)),
@@ -98,12 +104,12 @@ export function serialiseChannels(codeplug: Codeplug, profileId?: string): strin
   return formatCsv(CHANNEL_HEADERS, rows);
 }
 
-export function serialiseZones(codeplug: Codeplug, profileId?: string): string {
-  const profile = getOpenGd77Profile(profileId ?? DEFAULT_OPENGD77_PROFILE_ID);
+export function serialiseZones(codeplug: Codeplug, options?: ExportOptions): string {
+  const profile = getOpenGd77Profile(options?.profileId ?? DEFAULT_OPENGD77_PROFILE_ID);
   const memberHeaders = zoneMemberHeaders(profile.zoneMembers);
   const rows = codeplug.zones.map((zone) => {
     const values: Record<string, string> = { 'Zone Name': zone.name };
-    zoneExportMemberNames(zone, codeplug.channels, profileId).forEach((name, i) => {
+    zoneExportMemberNames(zone, codeplug, options).forEach((name, i) => {
       if (i < memberHeaders.length) values[memberHeaders[i]] = name;
     });
     return padRow(ZONE_HEADERS, values);
@@ -177,8 +183,8 @@ export function serialiseOpenGd77Files(
 ): OpenGd77ExportFiles {
   const profileId = options?.profileId ?? DEFAULT_OPENGD77_PROFILE_ID;
   return {
-    'Channels.csv': serialiseChannels(codeplug, profileId),
-    'Zones.csv': serialiseZones(codeplug, profileId),
+    'Channels.csv': serialiseChannels(codeplug, options),
+    'Zones.csv': serialiseZones(codeplug, options),
     'Contacts.csv': serialiseContacts(codeplug),
     'TG_Lists.csv': serialiseRxGroupLists(codeplug, profileId),
     'DTMF.csv': serialiseDtmfHeaderOnly(),

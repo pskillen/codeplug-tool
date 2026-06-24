@@ -3,6 +3,7 @@ import { isAnalogMode } from '../../channelModes.ts';
 import { formatCsv } from '../csvWrite.ts';
 import { CHIRP_HEADERS } from '../../import/chirp/columns.ts';
 import type { ExportOptions } from '../../import-export/types.ts';
+import { effectiveMaxNameLength } from '../../channelExpansion/exportOptions.ts';
 import { channelToChirpRow } from './channelWire.ts';
 import { DEFAULT_CHIRP_PROFILE_ID, getChirpProfile } from './profiles.ts';
 
@@ -35,8 +36,17 @@ export function serialiseChirpCsv(
     analogueChannels = analogueChannels.slice(0, profile.maxMemorySlots);
   }
 
+  const reserved = new Set<string>();
+  const wireOpts = {
+    reserved,
+    maxNameLength: effectiveMaxNameLength(options, profile.nameLimit),
+    shortenNames: options?.shortenNames ?? true,
+    nameModeOverride: options?.nameModeOverride,
+    warnings,
+  };
+
   const rows = analogueChannels.map((channel, index) =>
-    channelToChirpRow(channel, index + 1, profileId),
+    channelToChirpRow(channel, index + 1, profileId, wireOpts),
   );
 
   return {

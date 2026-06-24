@@ -7,6 +7,8 @@ export interface Dm32RadioProfile {
   label: string;
   maxChannels: number;
   rxGroupListMembers: number;
+  /** Default max channel wire name length (LCD limit). */
+  nameLimit: number;
   powerLadder: readonly PowerLadderEntry[];
   squelchLadder: readonly PowerLadderEntry[];
   /** Lossy default for channel `DMR ID` column on export. */
@@ -30,6 +32,7 @@ export const DM32_PROFILES: readonly Dm32RadioProfile[] = [
     label: 'Baofeng DM-32UV',
     maxChannels: 1000,
     rxGroupListMembers: 32,
+    nameLimit: 16,
     powerLadder: DM32_POWER_LADDER,
     squelchLadder: DM32_SQUELCH_LADDER,
     defaultDmrIdLabel: 'Paddy MM7IGV',

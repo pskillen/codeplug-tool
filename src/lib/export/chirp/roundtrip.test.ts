@@ -63,7 +63,7 @@ describe('CHIRP round-trip', () => {
       meta: { schemaVersion: CODEPLUG_SCHEMA_VERSION, importedAt: null, sourceFiles: [] },
     };
 
-    const { csv } = serialiseChirpCsv(codeplug);
+    const { csv } = serialiseChirpCsv(codeplug, { shortenNames: false });
     const second = await importChirpCsv(csv);
 
     expect(stripChannels(second.channels!)).toEqual(stripChannels(first.channels!));
@@ -73,14 +73,17 @@ describe('CHIRP round-trip', () => {
     const channels = parseChannels(chirpMinimalBundle['chirp-minimal.csv']!, {
       profileId: DEFAULT_CHIRP_PROFILE_ID,
     });
-    const { csv } = serialiseChirpCsv({
-      channels,
-      zones: [],
-      talkGroups: [],
-      rxGroupLists: [],
-      contacts: [],
-      meta: { schemaVersion: CODEPLUG_SCHEMA_VERSION, importedAt: null, sourceFiles: [] },
-    });
+    const { csv } = serialiseChirpCsv(
+      {
+        channels,
+        zones: [],
+        talkGroups: [],
+        rxGroupLists: [],
+        contacts: [],
+        meta: { schemaVersion: CODEPLUG_SCHEMA_VERSION, importedAt: null, sourceFiles: [] },
+      },
+      { shortenNames: false },
+    );
     const rows = csv.trim().split('\n');
     expect(rows[1]?.startsWith('1,')).toBe(true);
     expect(rows[2]?.startsWith('2,')).toBe(true);

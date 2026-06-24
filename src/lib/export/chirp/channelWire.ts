@@ -1,5 +1,6 @@
-import type { Channel } from '../../../models/codeplug.ts';
+import type { Channel, ChannelExportNameMode } from '../../../models/codeplug.ts';
 import { composeChannelWireName } from '../../channelNaming.ts';
+import { finalizeWireName } from '../../channelExpansion/shortenName.ts';
 import {
   deriveChirpDuplexAndOffset,
   formatChirpFrequencyWire,
@@ -22,14 +23,50 @@ function chirpDuplexAndOffset(channel: Channel): { duplex: string; offsetMhz: nu
   return deriveChirpDuplexAndOffset(channel.rxFrequency, channel.txFrequency, channel.rxOnly);
 }
 
+export interface ChirpChannelWireOptions {
+  reserved: Set<string>;
+  maxNameLength: number;
+  shortenNames: boolean;
+  nameModeOverride?: ChannelExportNameMode;
+  warnings?: string[];
+}
+
+function channelWireName(channel: Channel, options: ChirpChannelWireOptions): string {
+  const ch = options.nameModeOverride
+    ? { ...channel, exportNameMode: options.nameModeOverride }
+    : channel;
+  const base = composeChannelWireName(ch);
+  if (!options.shortenNames) {
+    if (base.length > options.maxNameLength) {
+      options.warnings?.push(`Channel name "${base}" exceeds ${options.maxNameLength} characters`);
+    }
+    return base;
+  }
+  return finalizeWireName(
+    base,
+    options.reserved,
+    options.maxNameLength,
+    {
+      exportNameMode: ch.exportNameMode,
+      recomposeWithMode: (mode) => composeChannelWireName({ ...ch, exportNameMode: mode }),
+    },
+    options.warnings,
+  );
+}
+
 /** Map one internal channel to a CHIRP CSV row (header order). */
-export function channelToChirpRow(channel: Channel, location: number, profileId: string): string[] {
+export function channelToChirpRow(
+  channel: Channel,
+  location: number,
+  profileId: string,
+  wireOptions: ChirpChannelWireOptions,
+): string[] {
   const { duplex, offsetMhz } = chirpDuplexAndOffset(channel);
   const tones = formatChirpToneColumns(channel.rxTone, channel.txTone);
 
   return [
     String(location),
-    composeChannelWireName(channel),
+    channelWireName(channel, wireOptions),
     formatChirpFrequencyWire(channel.rxFrequency),
     duplex,
     offsetMhz.toFixed(6),

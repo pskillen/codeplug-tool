@@ -39,6 +39,7 @@ describe('CHIRP file-level round-trip (test-data)', () => {
 
       const { csv: exportedCsv } = serialiseChirpCsv(codeplug, {
         profileId: fixture.profileId,
+        shortenNames: false,
       });
 
       const comparison = compareCsvRecords(originalCsv, exportedCsv, {

@@ -1,4 +1,5 @@
 import type { Codeplug } from '../../models/codeplug.ts';
+import type { ChannelExportNameMode } from '../../models/codeplug.ts';
 
 /** Canonical format ids — shared by UI, import registry, and export registry. */
 export type VendorFormatId = 'opengd77' | 'chirp' | 'qdmr' | 'native-yaml' | 'dm32';
@@ -40,6 +41,14 @@ export interface ExportOptions {
   skipExpandWhenTxContactSet?: boolean;
   /** RGL names that must not fan out (e.g. DM32 `ALL`). */
   nonExpandableRxGroupListNames?: readonly string[];
+  /** Target max channel wire name length; defaults to profile `nameLimit`. */
+  maxNameLength?: number;
+  /** Shorten names that exceed `maxNameLength`. Default true. */
+  shortenNames?: boolean;
+  /** Force all channels to this export name mode for this export only. */
+  nameModeOverride?: ChannelExportNameMode;
+  /** Use `TalkGroup.abbreviation` for multi-talkgroup member suffixes. */
+  useTalkGroupAbbreviation?: boolean;
 }
 
 export interface ExportResult {

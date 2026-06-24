@@ -42,7 +42,7 @@ describe('CHIRP cross-format export', () => {
     const analogueCount = codeplug.channels.filter((ch) => isAnalogMode(ch.mode)).length;
     expect(analogueCount).toBe(1);
 
-    const { csv, warnings } = serialiseChirpCsv(codeplug);
+    const { csv, warnings } = serialiseChirpCsv(codeplug, { shortenNames: false });
     expect(warnings.some((w) => /Skipped 1 non-analogue/i.test(w))).toBe(true);
     expect(warnings.some((w) => /GB3DA DMR/.test(w))).toBe(true);
 
