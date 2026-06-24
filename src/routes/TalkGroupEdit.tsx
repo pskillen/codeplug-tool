@@ -1,9 +1,10 @@
-import { Button, Stack, Text, TextInput } from '@mantine/core';
+import { Button, Group, Stack, Text, TextInput } from '@mantine/core';
 import { IconArrowLeft, IconDeviceFloppy } from '@tabler/icons-react';
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FormPage, FormSection } from '../components/ui/index.ts';
 import { findEntityById } from '../lib/reportLookup.ts';
+import { talkGroupAbbreviationSuggestions } from '../lib/talkGroupAbbreviationSuggestions.ts';
 import { hasValidationErrors } from '../lib/validation/channel.ts';
 import { validateTalkGroup } from '../lib/validation/talkGroup.ts';
 import type { TalkGroup } from '../models/codeplug.ts';
@@ -36,6 +37,10 @@ export default function TalkGroupEdit() {
     existing ? talkGroupToForm(existing) : emptyForm(),
   );
   const [formError, setFormError] = useState<string | null>(null);
+  const abbreviationSuggestions = useMemo(
+    () => talkGroupAbbreviationSuggestions(values.name),
+    [values.name],
+  );
 
   if (!isNew && !existing) {
     return (
@@ -125,6 +130,32 @@ export default function TalkGroupEdit() {
             onChange={(e) => set('name', e.currentTarget.value)}
           />
           <TextInput
+            label="Abbreviation"
+            description="Optional shorter label used when export names are shortened"
+            value={values.abbreviation ?? ''}
+            onChange={(e) => set('abbreviation', e.currentTarget.value)}
+          />
+          {abbreviationSuggestions.length > 0 ? (
+            <Stack gap={4}>
+              <Text size="xs" c="dimmed">
+                Suggestions from name
+              </Text>
+              <Group gap="xs">
+                {abbreviationSuggestions.map(({ maxLen, text }) => (
+                  <Button
+                    key={maxLen}
+                    type="button"
+                    variant="light"
+                    size="compact-sm"
+                    onClick={() => set('abbreviation', text)}
+                  >
+                    {maxLen}: {text}
+                  </Button>
+                ))}
+              </Group>
+            </Stack>
+          ) : null}
+          <TextInput
             label="DMR ID"
             value={values.number}
             onChange={(e) => set('number', e.currentTarget.value)}
@@ -134,12 +165,6 @@ export default function TalkGroupEdit() {
             description="Optional slot hint for vendor export"
             value={values.timeslotOverride}
             onChange={(e) => set('timeslotOverride', e.currentTarget.value)}
-          />
-          <TextInput
-            label="Abbreviation"
-            description="Optional shorter label used when export names are shortened"
-            value={values.abbreviation ?? ''}
-            onChange={(e) => set('abbreviation', e.currentTarget.value)}
           />
         </FormSection>
       </Stack>

@@ -97,10 +97,19 @@ export default function TalkGroupDetail() {
             {
               title: 'Details',
               fields: [
-                { label: 'Name', value: talkGroup.name },
+                {
+                  label: 'Name',
+                  value: talkGroup.abbreviation?.trim() ? (
+                    <>
+                      {talkGroup.name}
+                      <br />({talkGroup.abbreviation.trim()})
+                    </>
+                  ) : (
+                    talkGroup.name
+                  ),
+                },
                 { label: 'DMR ID', value: talkGroup.number },
                 { label: 'Timeslot override', value: talkGroup.timeslotOverride },
-                { label: 'Abbreviation', value: talkGroup.abbreviation ?? '—' },
               ],
             },
           ]}
