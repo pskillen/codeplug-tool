@@ -8,6 +8,10 @@ import {
 import { contactRefWireNameForExport, rxGroupListWireNameForExport } from '../../entityRefs.ts';
 import type { Codeplug } from '../../../models/codeplug.ts';
 import {
+  dm32ContactRefWireNameForExport,
+  type Dm32TalkGroupWireNameMap,
+} from './talkGroupWire.ts';
+import {
   formatDm32BandwidthWire,
   formatDm32ChannelTypeWire,
   formatDm32FlagWire,
@@ -27,6 +31,7 @@ export function serialiseDm32ChannelRow(
   codeplug: Codeplug,
   profileId: string = DEFAULT_DM32_PROFILE_ID,
   rowNumber: number,
+  talkGroupWireNames?: Dm32TalkGroupWireNameMap,
 ): Record<string, string> {
   const profile = getDm32Profile(profileId);
   const profiles = resolveChannelModeProfiles(sourceChannel);
@@ -76,10 +81,14 @@ export function serialiseDm32ChannelRow(
     [CHANNEL_COL.analogAprsPtt]: '0',
     [CHANNEL_COL.digitalAprsPtt]: '0',
     [CHANNEL_COL.txContact]: (() => {
-      const wire = contactRefWireNameForExport(
-        { ...row, contactRef: row.contactRef ?? dmrSource.contactRef, mode: row.mode },
-        codeplug,
-      );
+      const contactSource = {
+        ...row,
+        contactRef: row.contactRef ?? dmrSource.contactRef,
+        mode: row.mode,
+      };
+      const wire = talkGroupWireNames
+        ? dm32ContactRefWireNameForExport(contactSource, codeplug, talkGroupWireNames)
+        : contactRefWireNameForExport(contactSource, codeplug);
       return wire || 'None';
     })(),
     [CHANNEL_COL.rxGroupList]: (() => {
