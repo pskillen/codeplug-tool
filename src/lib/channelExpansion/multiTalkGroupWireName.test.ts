@@ -4,6 +4,7 @@ import {
   composeMultiTalkGroupWireName,
   escalateMultiTalkGroupExportNameMode,
   normaliseTalkGroupTimeslotToken,
+  parseTimeslotOverrideWire,
   type MultiTalkGroupWireNameContext,
 } from './multiTalkGroupWireName.ts';
 
@@ -53,6 +54,21 @@ describe('normaliseTalkGroupTimeslotToken', () => {
   it('returns null for empty or disabled', () => {
     expect(normaliseTalkGroupTimeslotToken('')).toBeNull();
     expect(normaliseTalkGroupTimeslotToken('Disabled')).toBeNull();
+  });
+});
+
+describe('parseTimeslotOverrideWire', () => {
+  it('maps override wire to ChannelTimeslot', () => {
+    expect(parseTimeslotOverrideWire('Slot 2')).toBe(2);
+    expect(parseTimeslotOverrideWire('Slot 1')).toBe(1);
+    expect(parseTimeslotOverrideWire('TS2')).toBe(2);
+    expect(parseTimeslotOverrideWire('2')).toBe(2);
+  });
+
+  it('returns null for empty or disabled', () => {
+    expect(parseTimeslotOverrideWire('')).toBeNull();
+    expect(parseTimeslotOverrideWire('Disabled')).toBeNull();
+    expect(parseTimeslotOverrideWire('foo')).toBeNull();
   });
 });
 
