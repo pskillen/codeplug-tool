@@ -9,5 +9,5 @@
 | Shared list-prefs storage | Complete | `src/lib/listPrefs/` |
 | Query hook hydration | Complete | `useChannelListQuery`, `useListNameQuery` |
 | Column sort persistence | Complete | All entity list routes |
-| Per-project column visibility | Pending | Channel optional columns |
+| Per-project column visibility | Complete | Channel optional columns |
 | Registry + docs | Pending | Debug viewer, UI README |

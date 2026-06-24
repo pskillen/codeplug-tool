@@ -13,8 +13,9 @@ import { formatSquelchListCell, percentLabel } from '../../lib/channelFields/per
 import { haversineDistanceM } from '../../lib/geoDistance.ts';
 import { coordsToLocator } from '../../lib/maidenhead.ts';
 import {
-  CHANNEL_LIST_COLUMN_STORAGE_KEY,
   CHANNEL_OPTIONAL_COLUMNS,
+  channelListColumnsKey,
+  loadChannelVisibleColumns,
 } from '../../hooks/channelListQueryUtils.ts';
 import { useChannelListQuery } from '../../hooks/useChannelListQuery.ts';
 import { usePersistedChannelColumnSort } from '../../hooks/usePersistedChannelColumnSort.ts';
@@ -22,11 +23,12 @@ import { DATATABLE_CALLSIGN_SORT_KEY, DATATABLE_NAME_SORT_KEY } from '../../lib/
 import { distanceLabelForChannel, useFilteredChannels } from '../../hooks/useChannelListFilters.ts';
 import type { Channel } from '../../models/codeplug.ts';
 import { entityRefDisplayName } from '../../lib/entityRefs.ts';
-import { useCodeplug } from '../../state/codeplugStore.tsx';
+import { useCodeplug, useProjects } from '../../state/codeplugStore.tsx';
 import { useOperatorPosition } from '../../state/operatorPosition.tsx';
 
 export default function ChannelsList() {
   const { codeplug } = useCodeplug();
+  const { activeProjectId } = useProjects();
   const { channels, zones } = codeplug;
   const { position, setPosition, clearPosition } = useOperatorPosition();
   const query = useChannelListQuery();
@@ -210,6 +212,12 @@ export default function ChannelsList() {
 
   const distanceSortPending = query.sortMode === 'distance' && !position;
 
+  const columnStorageKey = activeProjectId ? channelListColumnsKey(activeProjectId) : undefined;
+  const loadVisibleColumns = useCallback(
+    () => (activeProjectId ? loadChannelVisibleColumns(activeProjectId) : []),
+    [activeProjectId],
+  );
+
   return (
     <ListPage title="Channels">
       <Stack gap="lg">
@@ -227,7 +235,8 @@ export default function ChannelsList() {
           rowKey={(ch) => ch.id}
           sort={effectiveSort}
           onSortChange={handleSortChange}
-          columnVisibilityStorageKey={CHANNEL_LIST_COLUMN_STORAGE_KEY}
+          columnVisibilityStorageKey={columnStorageKey}
+          columnVisibilityLoad={columnStorageKey ? loadVisibleColumns : undefined}
           callsignColumn={sortCtx.callsignColumn}
           nameColumn={sortCtx.nameColumn}
           columns={tableColumns}
