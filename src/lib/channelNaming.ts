@@ -96,6 +96,26 @@ export function composeChannelWireName(
   }
 }
 
+export interface ChannelWireExportPickOptions {
+  nameModeOverride?: ChannelExportNameMode;
+  useChannelAbbreviation?: boolean;
+}
+
+/** Channel fields used to compose an export wire name (name-mode override and abbreviation). */
+export function channelPickForWireExport(
+  channel: Channel,
+  options: ChannelWireExportPickOptions = {},
+): Pick<Channel, 'callsign' | 'name' | 'exportNameMode'> {
+  const base = options.nameModeOverride
+    ? { ...channel, exportNameMode: options.nameModeOverride }
+    : channel;
+  if (options.useChannelAbbreviation) {
+    const abbrev = channel.abbreviation?.trim();
+    if (abbrev) return { ...base, name: abbrev };
+  }
+  return base;
+}
+
 export function splitLegacyCombinedName(fullName: string, callsign: string): string {
   const trimmed = fullName.trim();
   const cs = callsign.trim();

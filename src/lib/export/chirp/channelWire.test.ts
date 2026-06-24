@@ -50,4 +50,25 @@ describe('export/chirp/channelWire', () => {
     expect(row[3]).toBe('off');
     expect(row[4]).toBe('0.000000');
   });
+
+  it('uses channel abbreviation for export wire name when enabled', () => {
+    const row = channelToChirpRow(
+      {
+        ...channelFieldDefaults(),
+        id: 'ch-3',
+        name: 'Largs Scotland West',
+        abbreviation: 'Largs',
+        callsign: 'GB7AC',
+        exportNameMode: 'callsign_name',
+        mode: 'fm',
+        rxFrequency: 145_500_000,
+        txFrequency: 145_500_000,
+        rxOnly: false,
+      },
+      3,
+      'baofeng-uv5r-mini',
+      { ...testWireOptions(), useChannelAbbreviation: true },
+    );
+    expect(row[1]).toBe('GB7AC Largs');
+  });
 });

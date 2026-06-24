@@ -20,6 +20,7 @@ import type {
 } from '../../models/codeplug.ts';
 import { channelModeProfileDefaults, newId } from '../../models/codeplug.ts';
 import {
+  channelPickForWireExport,
   composeChannelWireName,
   withMergedChannelWireProvenance,
   channelCallsignsMatch,
@@ -170,14 +171,10 @@ function channelForWireName(
   channel: Channel,
   options: ExpandChannelOptions,
 ): Pick<Channel, 'callsign' | 'name' | 'exportNameMode'> {
-  const base = options.nameModeOverride
-    ? { ...channel, exportNameMode: options.nameModeOverride }
-    : channel;
-  if (options.useChannelAbbreviation) {
-    const abbrev = channel.abbreviation?.trim();
-    if (abbrev) return { ...base, name: abbrev };
-  }
-  return base;
+  return channelPickForWireExport(channel, {
+    nameModeOverride: options.nameModeOverride,
+    useChannelAbbreviation: options.useChannelAbbreviation,
+  });
 }
 
 function shortenOptsForChannel(
