@@ -499,6 +499,28 @@ describe('codeplugStorage', () => {
     expect(cp?.meta.schemaVersion).toBe(CODEPLUG_SCHEMA_VERSION);
   });
 
+  it('migrates v15 string txAdmit to enum', () => {
+    const v15 = {
+      channels: [
+        {
+          id: 'ch-1',
+          name: 'Test',
+          callsign: 'GB3CS',
+          mode: 'fm',
+          txAdmit: 'Allow TX',
+        },
+      ],
+      zones: [],
+      talkGroups: [],
+      contacts: [],
+      rxGroupLists: [],
+      meta: { schemaVersion: 15, importedAt: null, sourceFiles: [] },
+    };
+    const cp = migrateCodeplug(v15);
+    expect(cp?.channels[0].txAdmit).toBe('allow_tx');
+    expect(cp?.meta.schemaVersion).toBe(CODEPLUG_SCHEMA_VERSION);
+  });
+
   it('migrates v14 rxOnly to forbidTransmit', () => {
     const v14 = {
       channels: [

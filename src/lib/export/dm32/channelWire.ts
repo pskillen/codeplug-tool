@@ -16,6 +16,7 @@ import {
   formatDm32SquelchWire,
   formatDm32TimeslotWire,
   formatDm32ToneWire,
+  formatDm32TxAdmitWire,
 } from '../../import/dm32/channelWire.ts';
 import { CHANNEL_COL } from '../../import/dm32/columns.ts';
 import { DEFAULT_DM32_PROFILE_ID, getDm32Profile } from '../../dm32/profiles.ts';
@@ -59,7 +60,7 @@ export function serialiseDm32ChannelRow(
       row.bandwidthKHz ?? sourceChannel.bandwidthKHz,
     ),
     [CHANNEL_COL.scanList]: 'None',
-    [CHANNEL_COL.txAdmit]: sourceChannel.txAdmit || 'Channel Idle',
+    [CHANNEL_COL.txAdmit]: formatDm32TxAdmitWire(sourceChannel.txAdmit),
     [CHANNEL_COL.emergencySystem]: 'None',
     [CHANNEL_COL.squelch]: formatDm32SquelchWire(
       row.squelch ?? sourceChannel.squelch,

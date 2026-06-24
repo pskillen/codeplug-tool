@@ -1,5 +1,6 @@
 import type { ChannelMode } from '../lib/channelModes.ts';
-import type { ChannelTimeslot, ChannelTone } from '../lib/channelFields/index.ts';
+import type { ChannelTimeslot, ChannelTone, ChannelTxAdmit } from '../lib/channelFields/index.ts';
+import { DEFAULT_TX_ADMIT } from '../lib/channelFields/index.ts';
 import type { EntityMeta } from '../lib/entityProvenance.ts';
 import type { EntityRef } from '../lib/entityRefs.ts';
 
@@ -72,7 +73,7 @@ export function channelFieldDefaults(): Omit<Channel, 'id' | 'name' | 'callsign'
     scanSkip: false,
     hideFromMap: false,
     comment: '',
-    txAdmit: 'Channel Idle',
+    txAdmit: DEFAULT_TX_ADMIT,
     aprsReportType: 'Off',
     forbidTransmit: false,
     aprsReceiveEnabled: true,
@@ -126,8 +127,8 @@ export interface Channel {
   hideFromMap: boolean;
   /** Operator notes — internal only; not exported to CPS wire columns. */
   comment: string;
-  /** CPS transmit admit policy wire label (DM32 and similar). */
-  txAdmit: string;
+  /** Transmit admit policy — carrier idle vs always allow TX. */
+  txAdmit: ChannelTxAdmit;
   /** APRS report type wire label — e.g. Off, Digital. */
   aprsReportType: string;
   /** Receive-only / TX forbidden — maps to DM-32 Forbid TX, OpenGD77 Rx Only, CHIRP Duplex off. */
@@ -202,7 +203,7 @@ export interface Codeplug {
   meta: CodeplugMeta;
 }
 
-export const CODEPLUG_SCHEMA_VERSION = 15;
+export const CODEPLUG_SCHEMA_VERSION = 16;
 
 let idGenerator: () => string = () => crypto.randomUUID();
 

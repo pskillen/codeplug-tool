@@ -28,6 +28,7 @@ import {
   parseDm32SquelchWire,
   parseDm32TimeslotWire,
   parseDm32ToneWire,
+  parseDm32TxAdmitWire,
 } from './channelWire.ts';
 
 const DM32_FORMAT = 'dm32';
@@ -118,7 +119,7 @@ export function parseChannels(text: string, ctx?: ImportParseContext): Channel[]
       txTone: typeParse.multiMode ? 'none' : txTone,
       squelch,
       power: parseDm32PowerWire(get(CHANNEL_COL.power), profileId),
-      txAdmit: get(CHANNEL_COL.txAdmit) || 'Channel Idle',
+      txAdmit: parseDm32TxAdmitWire(get(CHANNEL_COL.txAdmit)),
       aprsReportType: get(CHANNEL_COL.aprsReportType) || 'Off',
       forbidTransmit: parseDm32FlagWire(get(CHANNEL_COL.forbidTx)),
       aprsReceiveEnabled: parseDm32FlagWire(get(CHANNEL_COL.aprsReceive)),

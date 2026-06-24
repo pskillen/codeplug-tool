@@ -17,7 +17,7 @@ import {
   resolveRxGroupListMemberRefs,
 } from '../lib/entityRefs.ts';
 import { normalizeChannelMode } from '../lib/channelModes.ts';
-import { normalizeToneValue } from '../lib/channelFields/index.ts';
+import { normalizeToneValue, normalizeTxAdmit } from '../lib/channelFields/index.ts';
 import { coerceLegacyStringField } from '../lib/import/opengd77/channelWire.ts';
 import {
   isCallsignToken,
@@ -137,6 +137,8 @@ function migrateChannel(raw: Record<string, unknown>, projectImportedAt: string 
   if (typeof partial.txTone === 'string') {
     migrated.txTone = normalizeToneValue(partial.txTone);
   }
+
+  migrated.txAdmit = normalizeTxAdmit(partial.txAdmit);
 
   migrated.comment = typeof partial.comment === 'string' ? partial.comment : '';
   migrated.multiMode = partial.multiMode === true;
