@@ -1,5 +1,5 @@
 import { Button, Group, Stack, Text } from '@mantine/core';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import { BandPillForChannel } from '../../components/crud/BandPill.tsx';
 import { DataTable, ListPage } from '../../components/ui/index.ts';
@@ -17,6 +17,7 @@ import {
   CHANNEL_OPTIONAL_COLUMNS,
 } from '../../hooks/channelListQueryUtils.ts';
 import { useChannelListQuery } from '../../hooks/useChannelListQuery.ts';
+import { usePersistedChannelColumnSort } from '../../hooks/usePersistedChannelColumnSort.ts';
 import { DATATABLE_CALLSIGN_SORT_KEY, DATATABLE_NAME_SORT_KEY } from '../../lib/dataTable/sort.ts';
 import { distanceLabelForChannel, useFilteredChannels } from '../../hooks/useChannelListFilters.ts';
 import type { Channel } from '../../models/codeplug.ts';
@@ -30,7 +31,7 @@ export default function ChannelsList() {
   const { position, setPosition, clearPosition } = useOperatorPosition();
   const query = useChannelListQuery();
   const filtered = useFilteredChannels(channels, query, position, { skipSort: true });
-  const [columnSortOverride, setColumnSortOverride] = useState<DataTableSortState | null>(null);
+  const [columnSortOverride, setColumnSortOverride] = usePersistedChannelColumnSort();
 
   const mapChannels = query.distanceFilterEnabled ? filtered : channels;
   const { skipped } = applyFilters(channels, { requireUseLocation: true, skipZero: true });
@@ -66,7 +67,7 @@ export default function ChannelsList() {
         query.setSortMode('name');
       }
     },
-    [query],
+    [query, setColumnSortOverride],
   );
 
   const optionalColumnDefs = useMemo((): DataTableColumn<Channel>[] => {
