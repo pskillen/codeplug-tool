@@ -7,7 +7,15 @@ import {
 } from '../../hooks/channelListQueryUtils.ts';
 import type { ChannelListPrefs, EntityListPrefs } from './types.ts';
 
-const CHANNEL_LIST_PARAM_KEYS = ['q', 'sort', 'band', 'mode', 'duplex', 'distance', 'maxKm'] as const;
+const CHANNEL_LIST_PARAM_KEYS = [
+  'q',
+  'sort',
+  'band',
+  'mode',
+  'duplex',
+  'distance',
+  'maxKm',
+] as const;
 
 export function hasChannelListUrlParams(params: URLSearchParams): boolean {
   return CHANNEL_LIST_PARAM_KEYS.some((key) => params.has(key));

@@ -1,14 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import {
-  channelListColumnsKey,
-  channelListPrefsKey,
-  entityListPrefsKey,
-} from './keys.ts';
-import {
-  loadChannelListPrefs,
-  mergeChannelListPrefs,
-  saveChannelListPrefs,
-} from './storage.ts';
+import { channelListColumnsKey, channelListPrefsKey, entityListPrefsKey } from './keys.ts';
+import { loadChannelListPrefs, mergeChannelListPrefs, saveChannelListPrefs } from './storage.ts';
 import {
   channelListPrefsFromSearchParams,
   channelListPrefsToSearchParams,
@@ -19,9 +11,7 @@ import {
 describe('listPrefs keys', () => {
   it('builds per-project keys under app prefix', () => {
     expect(channelListPrefsKey('proj-1')).toBe('mm9pdy-codeplug-tool.list.channels.proj-1');
-    expect(entityListPrefsKey('zones', 'proj-1')).toBe(
-      'mm9pdy-codeplug-tool.list.zones.proj-1',
-    );
+    expect(entityListPrefsKey('zones', 'proj-1')).toBe('mm9pdy-codeplug-tool.list.zones.proj-1');
     expect(channelListColumnsKey('proj-1')).toBe(
       'mm9pdy-codeplug-tool.list.channels.proj-1.columns',
     );

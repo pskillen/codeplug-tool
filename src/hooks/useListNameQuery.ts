@@ -3,13 +3,12 @@ import { useSearchParams } from 'react-router-dom';
 import type { EntityListEntity } from '../lib/listPrefs/types.ts';
 import {
   debouncedMergeEntityListPrefs,
+  loadChannelListPrefs,
   loadEntityListPrefs,
+  mergeChannelListPrefs,
   mergeEntityListPrefs,
 } from '../lib/listPrefs/storage.ts';
-import {
-  entityListPrefsToSearchParams,
-  hasEntityListUrlParams,
-} from '../lib/listPrefs/urlSync.ts';
+import { entityListPrefsToSearchParams, hasEntityListUrlParams } from '../lib/listPrefs/urlSync.ts';
 import { useProjects } from '../state/codeplugStore.tsx';
 
 export function useListNameQuery(entity: EntityListEntity): {

@@ -2,10 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import type { DataTableSortState } from '../lib/dataTable/sort.ts';
 import type { EntityListEntity } from '../lib/listPrefs/types.ts';
 import { useProjects } from '../state/codeplugStore.tsx';
-import {
-  loadEntityListColumnSort,
-  persistEntityListColumnSort,
-} from './useListNameQuery.ts';
+import { loadEntityListColumnSort, persistEntityListColumnSort } from './useListNameQuery.ts';
 
 export function usePersistedEntityListSort(
   entity: EntityListEntity,

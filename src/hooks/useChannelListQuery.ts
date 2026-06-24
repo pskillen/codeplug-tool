@@ -133,7 +133,11 @@ export function useChannelListQuery(): ChannelListQuery {
   const setDuplexFilter = useCallback(
     (value: string | null) => {
       updateParams((p) => setOrDelete(p, 'duplex', value));
-      persistPrefs({ duplex: value });
+      const duplex =
+        value === 'simplex' || value === 'split' ? value : value === null ? null : undefined;
+      if (duplex !== undefined) {
+        persistPrefs({ duplex });
+      }
     },
     [updateParams, persistPrefs],
   );

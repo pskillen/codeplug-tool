@@ -198,7 +198,9 @@ describe('useListNameQuery', () => {
     await waitFor(() => expect(result.current.nameFilter).toBe('local'));
 
     await waitFor(() => {
-      const stored = JSON.parse(localStorage.getItem(entityListPrefsKey('talk-groups', projectId))!);
+      const stored = JSON.parse(
+        localStorage.getItem(entityListPrefsKey('talk-groups', projectId))!,
+      );
       expect(stored.q).toBe('local');
     });
   });

@@ -1,10 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { DataTableSortState } from '../lib/dataTable/sort.ts';
 import { useProjects } from '../state/codeplugStore.tsx';
-import {
-  loadChannelListColumnSort,
-  persistChannelListColumnSort,
-} from './useListNameQuery.ts';
+import { loadChannelListColumnSort, persistChannelListColumnSort } from './useListNameQuery.ts';
 
 export function usePersistedChannelColumnSort(): [
   DataTableSortState | null,
