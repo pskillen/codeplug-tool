@@ -222,8 +222,7 @@ function formToChannelInput(values: ChannelFormValues): Omit<Channel, 'id'> {
   const bandwidth = values.bandwidthKHz.trim() ? parseFloat(values.bandwidthKHz) : null;
   const modeProfiles = values.multiMode ? values.modeProfiles.map(formProfileToModel) : [];
   const abbrev = values.abbreviation.trim();
-  const abbreviationFields =
-    abbrev !== '' ? { abbreviation: abbrev } : { abbreviation: undefined };
+  const abbreviationFields = abbrev !== '' ? { abbreviation: abbrev } : { abbreviation: undefined };
 
   const base = {
     ...channelFieldDefaults(),

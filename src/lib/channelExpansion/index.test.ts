@@ -704,14 +704,15 @@ describe('channelExpansion', () => {
         maxNameLength: 16,
       }),
       {
-      expandTalkGroups: true,
-      codeplug,
-      channelById: new Map([[ch.id, ch]]),
-      shortenNames: true,
-      maxNameLength: 16,
-      useChannelAbbreviation: true,
-      useTalkGroupAbbreviation: true,
-    });
+        expandTalkGroups: true,
+        codeplug,
+        channelById: new Map([[ch.id, ch]]),
+        shortenNames: true,
+        maxNameLength: 16,
+        useChannelAbbreviation: true,
+        useTalkGroupAbbreviation: true,
+      },
+    );
     expect(rows).toHaveLength(1);
     expect(rows[0].wireName.length).toBeLessThanOrEqual(16);
     expect(rows[0].wireName).not.toContain('Glasgow Scotland');
