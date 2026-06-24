@@ -1,6 +1,6 @@
 import type { ChannelExportNameMode } from '../../models/codeplug.ts';
 import { isCallsignToken } from '../channelNaming.ts';
-import { abbreviateWord } from './abbreviations.ts';
+import { abbreviateWord, matchPhraseAbbreviation } from './abbreviations.ts';
 
 export interface TalkGroupMemberSuffixReplacement {
   /** Full talk-group member wire label (without leading space). */
@@ -70,7 +70,20 @@ function joinTokens(tokens: string[]): string {
 }
 
 function applyDictionaryAtLevel(tokens: string[], level: number): string[] {
-  return tokens.map((token) => (isProtectedToken(token) ? token : abbreviateWord(token, level)));
+  const result: string[] = [];
+  let i = 0;
+  while (i < tokens.length) {
+    const phrase = matchPhraseAbbreviation(tokens, i, level, isProtectedToken);
+    if (phrase) {
+      result.push(phrase.replacement);
+      i += phrase.span;
+      continue;
+    }
+    const token = tokens[i]!;
+    result.push(isProtectedToken(token) ? token : abbreviateWord(token, level));
+    i++;
+  }
+  return result;
 }
 
 function applyDictionaryProgressive(stem: string, maxLen: number): string {

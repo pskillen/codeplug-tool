@@ -23,6 +23,14 @@ geographic:
     'Northern Ireland': [N Ire, NIre, NI]
     'United Kingdom': [UK]
     'Great Britain': [GB]
+    'Middle East': [ME]
+    Europe: [Eur, EU]
+    'Asia': [Asia]
+    'Africa': [Afr, Af]
+    'Australia': [Aus, Oz]
+    'Antarctica': [Ant]
+    'North America': [NA]
+    'South America': [SA]
 
   scottish_cities:
     Glasgow: [Glas, Gla, GL]
@@ -192,6 +200,9 @@ radio:
   dmr:
     Talkgroup: [TGrp, TG]
     Timeslot: [TSlot, TS]
+    'Time slot': [TSlot, TS]
+    'TS1': ['T1']
+    'TS2': ['T2']
     BrandMeister: [BrndMst, BM]
     Phoenix: [Phnx, Phx, Px]
     Hotspot: [HotSpt, HSpt, HS]

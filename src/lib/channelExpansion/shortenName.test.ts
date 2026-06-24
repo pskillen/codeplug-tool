@@ -20,6 +20,12 @@ describe('shortenWireName', () => {
     expect(shortened).toContain('GB7AC');
   });
 
+  it('abbreviates multi-word dictionary phrases', () => {
+    expect(shortenWireName('GB7GL United Kingdom', 16)).toBe('GB7GL UK');
+    expect(shortenWireName('GB7GL Middle East', 16)).toBe('GB7GL ME');
+    expect(shortenWireName('GB7GL Northern Ireland', 16)).toBe('GB7GL N Ire');
+  });
+
   it('replaces a trailing talk-group member suffix before dictionary steps', () => {
     const name = 'GB7AC Largs Scot West TS1';
     const shortened = shortenWireName(name, 20, {
