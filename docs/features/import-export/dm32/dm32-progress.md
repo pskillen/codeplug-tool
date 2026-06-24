@@ -33,3 +33,17 @@
 - `npm run format:check && npm run lint && npm run test && npm run test:system && npm run build`
 - `dm32RoundTrip.system.test.ts` — 6 in-scope files vs `test-data/baofeng-dm32/v1.60/`
 - `src/lib/export/dm32/roundtrip.test.ts` — synthetic minimal bundle
+
+---
+
+## #157 channel wire mapping (2026-06-24)
+
+**Tracking:** [codeplug-tool#157](https://github.com/pskillen/codeplug-tool/issues/157)
+
+**Branch:** `157/paddy/dm32-channel-wire-mapping`
+
+| Slice | Status |
+| --- | --- |
+| 1: `rxOnly` → `forbidTransmit` (schema v15) | Done |
+| 2: Analog squelch radio default → wire `1` | Done |
+| 3: `ChannelTxAdmit` enum + DM-32 mappers (schema v16) | Done |

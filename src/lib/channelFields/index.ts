@@ -16,4 +16,6 @@ export {
 
 export type ChannelTimeslot = 1 | 2;
 
+export { DEFAULT_TX_ADMIT, normalizeTxAdmit, type ChannelTxAdmit } from './txAdmit.ts';
+
 export const BANDWIDTH_KHZ_OPTIONS: readonly number[] = [12.5, 25];

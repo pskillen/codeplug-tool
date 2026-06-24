@@ -7,6 +7,7 @@ import {
 } from '../../channelExpansion/index.ts';
 import { contactRefWireNameForExport, rxGroupListWireNameForExport } from '../../entityRefs.ts';
 import type { Codeplug } from '../../../models/codeplug.ts';
+import { dm32ContactRefWireNameForExport, type Dm32TalkGroupWireNameMap } from './talkGroupWire.ts';
 import {
   formatDm32BandwidthWire,
   formatDm32ChannelTypeWire,
@@ -16,6 +17,7 @@ import {
   formatDm32SquelchWire,
   formatDm32TimeslotWire,
   formatDm32ToneWire,
+  formatDm32TxAdmitWire,
 } from '../../import/dm32/channelWire.ts';
 import { CHANNEL_COL } from '../../import/dm32/columns.ts';
 import { DEFAULT_DM32_PROFILE_ID, getDm32Profile } from '../../dm32/profiles.ts';
@@ -26,6 +28,7 @@ export function serialiseDm32ChannelRow(
   codeplug: Codeplug,
   profileId: string = DEFAULT_DM32_PROFILE_ID,
   rowNumber: number,
+  talkGroupWireNames?: Dm32TalkGroupWireNameMap,
 ): Record<string, string> {
   const profile = getDm32Profile(profileId);
   const profiles = resolveChannelModeProfiles(sourceChannel);
@@ -59,9 +62,11 @@ export function serialiseDm32ChannelRow(
       row.bandwidthKHz ?? sourceChannel.bandwidthKHz,
     ),
     [CHANNEL_COL.scanList]: 'None',
-    [CHANNEL_COL.txAdmit]: sourceChannel.txAdmit || 'Channel Idle',
+    [CHANNEL_COL.txAdmit]: formatDm32TxAdmitWire(sourceChannel.txAdmit),
     [CHANNEL_COL.emergencySystem]: 'None',
-    [CHANNEL_COL.squelch]: formatDm32SquelchWire(row.squelch ?? sourceChannel.squelch, profileId),
+    [CHANNEL_COL.squelch]: formatDm32SquelchWire(row.squelch ?? sourceChannel.squelch, profileId, {
+      isAnalog: isAnalogMode(row.mode),
+    }),
     [CHANNEL_COL.aprsReportType]: sourceChannel.aprsReportType || 'Off',
     [CHANNEL_COL.forbidTx]: formatDm32FlagWire(sourceChannel.forbidTransmit),
     [CHANNEL_COL.aprsReceive]: formatDm32FlagWire(sourceChannel.aprsReceiveEnabled),
@@ -73,10 +78,14 @@ export function serialiseDm32ChannelRow(
     [CHANNEL_COL.analogAprsPtt]: '0',
     [CHANNEL_COL.digitalAprsPtt]: '0',
     [CHANNEL_COL.txContact]: (() => {
-      const wire = contactRefWireNameForExport(
-        { ...row, contactRef: row.contactRef ?? dmrSource.contactRef, mode: row.mode },
-        codeplug,
-      );
+      const contactSource = {
+        ...row,
+        contactRef: row.contactRef ?? dmrSource.contactRef,
+        mode: row.mode,
+      };
+      const wire = talkGroupWireNames
+        ? dm32ContactRefWireNameForExport(contactSource, codeplug, talkGroupWireNames)
+        : contactRefWireNameForExport(contactSource, codeplug);
       return wire || 'None';
     })(),
     [CHANNEL_COL.rxGroupList]: (() => {

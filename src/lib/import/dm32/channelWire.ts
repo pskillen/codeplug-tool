@@ -1,8 +1,10 @@
 import {
   normalizeToneValue,
+  normalizeTxAdmit,
   parseFrequencyHzFromMhzWire,
   type ChannelTone,
   type ChannelTimeslot,
+  type ChannelTxAdmit,
 } from '../../channelFields/index.ts';
 import { isAnalogMode, isDmrMode, type ChannelMode } from '../../channelModes.ts';
 import type { ChannelModeProfile } from '../../../models/codeplug.ts';
@@ -139,10 +141,22 @@ export function parseDm32SquelchWire(
   return dm32SquelchWireToPercent(profileId, wire);
 }
 
+export function parseDm32TxAdmitWire(wire: string): ChannelTxAdmit {
+  return normalizeTxAdmit(wire.trim() || undefined);
+}
+
+export function formatDm32TxAdmitWire(txAdmit: ChannelTxAdmit): string {
+  return txAdmit === 'allow_tx' ? 'Allow TX' : 'Channel Idle';
+}
+
 export function formatDm32SquelchWire(
   percent: number | null,
   profileId: string = DEFAULT_DM32_PROFILE_ID,
+  options: { isAnalog?: boolean } = {},
 ): string {
+  if (percent == null && options.isAnalog) {
+    return '1';
+  }
   return dm32PercentToSquelchWire(profileId, percent);
 }
 

@@ -4,9 +4,22 @@ import {
   expandZoneMemberWireNames,
   type ExpandChannelOptions,
 } from '../../channelExpansion/index.ts';
+import { dm32RxGroupListMemberWireName, type Dm32TalkGroupWireNameMap } from './talkGroupWire.ts';
 
-export function rxGroupListExportMemberNames(list: RxGroupList, codeplug: Codeplug): string[] {
-  return memberRefsToWireNames(list.memberRefs, codeplug.talkGroups, codeplug.contacts);
+export function rxGroupListExportMemberNames(
+  list: RxGroupList,
+  codeplug: Codeplug,
+  talkGroupWireNames?: Dm32TalkGroupWireNameMap,
+): string[] {
+  if (!talkGroupWireNames) {
+    return memberRefsToWireNames(list.memberRefs, codeplug.talkGroups, codeplug.contacts);
+  }
+  const names: string[] = [];
+  for (const ref of list.memberRefs) {
+    const name = dm32RxGroupListMemberWireName(ref, codeplug, talkGroupWireNames);
+    if (name) names.push(name);
+  }
+  return names;
 }
 
 export function zoneExportMemberNames(

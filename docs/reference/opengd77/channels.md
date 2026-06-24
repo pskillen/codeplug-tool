@@ -35,7 +35,7 @@ All other columns are optional at import — missing headers yield empty values.
 | `TX Tone` | `Channel.txTone` | No | Wire → tone enum | Mode-aware — see below | Lossless | |
 | `Squelch` | `Channel.squelch` | No | Wire → percent | Mode-aware — see below | Lossless | See [power-squelch.md](power-squelch.md) |
 | `Power` | `Channel.power` | No | Wire → percent | Percent → wire | Lossless | See [power-squelch.md](power-squelch.md) |
-| `Rx Only` | `Channel.rxOnly` | No | `Yes`/`No` → boolean | `wireYesNo` | Lossless boolean | |
+| `Rx Only` | `Channel.forbidTransmit` | No | `Yes`/`No` → boolean | `wireYesNo` | Lossless boolean | |
 | `Zone Skip` | `Channel.opengd77Extras['Zone Skip']` | No | Trim → opengd77Extras | From opengd77Extras | opengd77Extras | Not mapped to `scanSkip` |
 | `All Skip` | `Channel.scanSkip` | No | `Yes` → `true` | `wireYesNo(scanSkip)` | Lossless boolean | Global scan skip |
 | `TOT` | `Channel.transmitTimeout` | No | Parse seconds | As integer string | Lossless | `0` = off; CPS step 15 (0–495) |
@@ -43,6 +43,10 @@ All other columns are optional at import — missing headers yield empty values.
 | `No Beep` | `Channel.opengd77Extras['No Beep']` | No | Trim → opengd77Extras | From opengd77Extras | opengd77Extras | |
 | `No Eco` | `Channel.opengd77Extras['No Eco']` | No | Trim → opengd77Extras | From opengd77Extras | opengd77Extras | |
 | `APRS` | `Channel.aprsConfigName` | No | Trim | As stored | String pass-through | FK → APRS.csv |
+
+### TX Admit
+
+OpenGD77 `Channels.csv` has **no TX Admit column**. The internal `Channel.txAdmit` enum is retained for cross-format projects (e.g. imported from DM-32) but is **not serialised** on OpenGD77 export.
 | `Latitude` | `Channel.location.lat` | **Column required** | Parse float | String from location | Lossless when valid | Pair with longitude |
 | `Longitude` | `Channel.location.lon` | **Column required** | Parse float | String from location | Lossless when valid | |
 | `Use Location` | `Channel.useLocation` | No | `Yes` → `true` | `wireYesNo(useLocation)` | Lossless boolean | |

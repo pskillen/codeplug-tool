@@ -17,7 +17,7 @@ import {
   resolveRxGroupListMemberRefs,
 } from '../lib/entityRefs.ts';
 import { normalizeChannelMode } from '../lib/channelModes.ts';
-import { normalizeToneValue } from '../lib/channelFields/index.ts';
+import { normalizeToneValue, normalizeTxAdmit } from '../lib/channelFields/index.ts';
 import { coerceLegacyStringField } from '../lib/import/opengd77/channelWire.ts';
 import {
   isCallsignToken,
@@ -55,7 +55,7 @@ const TYPED_CHANNEL_FIELDS = [
   'transmitTimeout',
   'rxTone',
   'txTone',
-  'rxOnly',
+  'forbidTransmit',
 ] as const;
 
 function migrateChannel(raw: Record<string, unknown>, projectImportedAt: string | null): Channel {
@@ -63,6 +63,9 @@ function migrateChannel(raw: Record<string, unknown>, projectImportedAt: string 
   const rest = { ...raw };
   delete rest.number;
   delete rest.vendorExtras;
+
+  const legacyRxOnly = raw.rxOnly;
+  delete rest.rxOnly;
 
   const legacyContactName =
     typeof raw.contactName === 'string' ? normaliseWireName(raw.contactName) : '';
@@ -114,9 +117,17 @@ function migrateChannel(raw: Record<string, unknown>, projectImportedAt: string 
 
   for (const field of TYPED_CHANNEL_FIELDS) {
     const current = partial[field];
-    if (typeof current === 'string' || (current != null && field === 'rxOnly')) {
+    if (typeof current === 'string' || (current != null && field === 'forbidTransmit')) {
       const coerced = coerceLegacyStringField(field, current);
       (migrated as Record<string, unknown>)[field] = coerced;
+    }
+  }
+
+  if (legacyRxOnly !== undefined) {
+    if (typeof legacyRxOnly === 'string') {
+      migrated.forbidTransmit = coerceLegacyStringField('forbidTransmit', legacyRxOnly) as boolean;
+    } else {
+      migrated.forbidTransmit = Boolean(legacyRxOnly);
     }
   }
 
@@ -126,6 +137,8 @@ function migrateChannel(raw: Record<string, unknown>, projectImportedAt: string 
   if (typeof partial.txTone === 'string') {
     migrated.txTone = normalizeToneValue(partial.txTone);
   }
+
+  migrated.txAdmit = normalizeTxAdmit(partial.txAdmit);
 
   migrated.comment = typeof partial.comment === 'string' ? partial.comment : '';
   migrated.multiMode = partial.multiMode === true;

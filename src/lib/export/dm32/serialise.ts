@@ -28,6 +28,7 @@ import {
 } from '../../import/dm32/columns.ts';
 import { serialiseDm32ChannelRow } from './channelWire.ts';
 import { rxGroupListExportMemberNames } from './listWire.ts';
+import { buildDm32TalkGroupWireNameMap } from './talkGroupWire.ts';
 
 export type Dm32ExportFiles = Record<Dm32ExportFileName, string>;
 
@@ -61,17 +62,22 @@ function dm32MaxNameLength(options: ExportOptions | undefined, profileId: string
 }
 
 export function serialiseDm32Files(codeplug: Codeplug, options?: ExportOptions): Dm32ExportFiles {
+  const talkGroupWireNames = buildDm32TalkGroupWireNameMap(codeplug.talkGroups, options);
   return {
-    'Channels.csv': serialiseChannels(codeplug, options),
+    'Channels.csv': serialiseChannels(codeplug, options, talkGroupWireNames),
     'Zones.csv': serialiseZones(codeplug, options),
-    'Talkgroups.csv': serialiseTalkGroups(codeplug),
+    'Talkgroups.csv': serialiseTalkGroups(codeplug, talkGroupWireNames),
     'Contacts.csv': serialiseDmrContacts(codeplug),
-    'RXGroupLists.csv': serialiseRxGroupLists(codeplug),
+    'RXGroupLists.csv': serialiseRxGroupLists(codeplug, talkGroupWireNames),
     'DTMFContacts.csv': serialiseDtmfContacts(codeplug),
   };
 }
 
-export function serialiseChannels(codeplug: Codeplug, options?: ExportOptions): string {
+export function serialiseChannels(
+  codeplug: Codeplug,
+  options?: ExportOptions,
+  talkGroupWireNames?: ReturnType<typeof buildDm32TalkGroupWireNameMap>,
+): string {
   const profileId = options?.profileId ?? DEFAULT_DM32_PROFILE_ID;
   const expandOpts = dm32ExpandOptions(codeplug, options);
   const expanded = expandAllChannelsForExport(codeplug.channels, {
@@ -84,7 +90,7 @@ export function serialiseChannels(codeplug: Codeplug, options?: ExportOptions): 
     if (!source) throw new Error(`Missing source channel ${row.sourceChannelId}`);
     return padRow(
       CHANNEL_HEADERS,
-      serialiseDm32ChannelRow(row, source, codeplug, profileId, i + 1),
+      serialiseDm32ChannelRow(row, source, codeplug, profileId, i + 1, talkGroupWireNames),
     );
   });
   return formatCsv(CHANNEL_HEADERS, rows);
@@ -107,11 +113,14 @@ export function serialiseZones(codeplug: Codeplug, options?: ExportOptions): str
   return formatCsv(ZONE_HEADERS, rows);
 }
 
-export function serialiseTalkGroups(codeplug: Codeplug): string {
+export function serialiseTalkGroups(
+  codeplug: Codeplug,
+  talkGroupWireNames: ReturnType<typeof buildDm32TalkGroupWireNameMap>,
+): string {
   const rows = codeplug.talkGroups.map((tg, i) =>
     padRow(TALKGROUP_HEADERS, {
       [TALKGROUP_COL.number]: String(i + 1),
-      [TALKGROUP_COL.name]: tg.name,
+      [TALKGROUP_COL.name]: talkGroupWireNames.get(tg.id) ?? tg.name,
       [TALKGROUP_COL.id]: tg.number,
       [TALKGROUP_COL.type]: tg.callType === 'private' ? 'Private Call' : 'Group Call',
     }),
@@ -150,12 +159,19 @@ export function serialiseDtmfContacts(codeplug: Codeplug): string {
   return formatCsv(DTMF_CONTACT_HEADERS, rows);
 }
 
-export function serialiseRxGroupLists(codeplug: Codeplug): string {
+export function serialiseRxGroupLists(
+  codeplug: Codeplug,
+  talkGroupWireNames: ReturnType<typeof buildDm32TalkGroupWireNameMap>,
+): string {
   const rows = codeplug.rxGroupLists.map((list, i) =>
     padRow(RX_GROUP_LIST_HEADERS, {
       [RX_GROUP_LIST_COL.number]: String(i + 1),
       [RX_GROUP_LIST_COL.name]: list.name,
-      [RX_GROUP_LIST_COL.members]: rxGroupListExportMemberNames(list, codeplug).join('|'),
+      [RX_GROUP_LIST_COL.members]: rxGroupListExportMemberNames(
+        list,
+        codeplug,
+        talkGroupWireNames,
+      ).join('|'),
     }),
   );
   return formatCsv(RX_GROUP_LIST_HEADERS, rows);
