@@ -7,6 +7,7 @@ import {
   STORAGE_KEY_EXPORT_NAME_MODE_OVERRIDE,
   STORAGE_KEY_EXPORT_SHORTEN_NAMES,
   STORAGE_KEY_EXPORT_USE_TG_ABBREVIATION,
+  STORAGE_KEY_EXPORT_USE_CHANNEL_ABBREVIATION,
 } from '../../hooks/useExportSettings.ts';
 import { STORAGE_KEY_MAIDENHEAD_GRID, STORAGE_KEY_TILE, STORAGE_KEY_TOKEN } from '../mapTiles.ts';
 import { CODEPLUG_STORAGE_KEY } from '../../state/codeplugStorage.ts';
@@ -45,6 +46,11 @@ const KNOWN_STORAGE_KEYS: StorageKeyDescriptor[] = [
   {
     key: STORAGE_KEY_EXPORT_USE_TG_ABBREVIATION,
     label: 'Export use talk group abbreviations',
+    redact: false,
+  },
+  {
+    key: STORAGE_KEY_EXPORT_USE_CHANNEL_ABBREVIATION,
+    label: 'Export use channel abbreviations',
     redact: false,
   },
 ];
