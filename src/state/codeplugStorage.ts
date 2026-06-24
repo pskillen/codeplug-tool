@@ -289,12 +289,17 @@ function migrateContact(raw: Record<string, unknown>): Contact {
 }
 
 function migrateTalkGroup(raw: Partial<TalkGroup>): TalkGroup {
+  const abbreviation =
+    typeof raw.abbreviation === 'string' && raw.abbreviation.trim() !== ''
+      ? raw.abbreviation
+      : undefined;
   return {
     id: raw.id ?? '',
     name: raw.name ?? '',
     number: raw.number ?? '',
     timeslotOverride: raw.timeslotOverride ?? '',
     callType: raw.callType ?? 'group',
+    ...(abbreviation !== undefined ? { abbreviation } : {}),
     meta: raw.meta,
   };
 }
