@@ -25,6 +25,7 @@ export function expandOptionsFromExport(
     shortenNames: options?.shortenNames ?? true,
     nameModeOverride: options?.nameModeOverride,
     useTalkGroupAbbreviation: options?.useTalkGroupAbbreviation ?? false,
+    useChannelAbbreviation: options?.useChannelAbbreviation ?? false,
     codeplug,
     warnings,
   };

@@ -49,6 +49,8 @@ export interface ExportOptions {
   nameModeOverride?: ChannelExportNameMode;
   /** Use `TalkGroup.abbreviation` for multi-talkgroup member suffixes. */
   useTalkGroupAbbreviation?: boolean;
+  /** Use `Channel.abbreviation` for the name qualifier in composed wire names. */
+  useChannelAbbreviation?: boolean;
 }
 
 export interface ExportResult {

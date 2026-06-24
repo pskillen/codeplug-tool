@@ -82,6 +82,8 @@ export interface ExpandChannelOptions {
   nameModeOverride?: ChannelExportNameMode;
   /** Use `TalkGroup.abbreviation` for multi-talkgroup member suffixes. */
   useTalkGroupAbbreviation?: boolean;
+  /** Use `Channel.abbreviation` for the name qualifier in composed wire names. */
+  useChannelAbbreviation?: boolean;
   warnings?: string[];
   /** When false, keep multi-mode channels on one wire name (DM32 native dual-mode). Default true. */
   expandModes?: boolean;
@@ -168,9 +170,14 @@ function channelForWireName(
   channel: Channel,
   options: ExpandChannelOptions,
 ): Pick<Channel, 'callsign' | 'name' | 'exportNameMode'> {
-  return options.nameModeOverride
+  const base = options.nameModeOverride
     ? { ...channel, exportNameMode: options.nameModeOverride }
     : channel;
+  if (options.useChannelAbbreviation) {
+    const abbrev = channel.abbreviation?.trim();
+    if (abbrev) return { ...base, name: abbrev };
+  }
+  return base;
 }
 
 function shortenOptsForChannel(
