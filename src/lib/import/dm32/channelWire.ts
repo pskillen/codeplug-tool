@@ -142,7 +142,11 @@ export function parseDm32SquelchWire(
 export function formatDm32SquelchWire(
   percent: number | null,
   profileId: string = DEFAULT_DM32_PROFILE_ID,
+  options: { isAnalog?: boolean } = {},
 ): string {
+  if (percent == null && options.isAnalog) {
+    return '1';
+  }
   return dm32PercentToSquelchWire(profileId, percent);
 }
 

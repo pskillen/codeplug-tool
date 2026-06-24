@@ -36,7 +36,7 @@ Some CPS builds spell analogue `Anlaog` — accept on import; export uses fixtur
 | `Scan List` | — | **Ignored** | `None` | **Lossy** — [#125](https://github.com/pskillen/codeplug-tool/issues/125) | |
 | `TX Admit` | `txAdmit` | Trim | As stored | Yes | `Channel Idle` / `Allow TX` |
 | `Emergency System` | — | Ignored | `None` | Constant default | |
-| `Squelch Level` | `squelch` | 0–9 → % via ladder | % → 0–9 | Yes | |
+| `Squelch Level` | `squelch` | 0–9 → % via ladder | % → 0–9; `null` → `1` on analog rows only, else `0` | Yes | |
 | `APRS Report Type` | `aprsReportType` | Trim | As stored | Yes | `Off` / `Digital` |
 | `Forbid TX` | `forbidTransmit` | 0/1 | 0/1 | Yes | Receive-only when `1` |
 | `APRS Receive` | `aprsReceiveEnabled` | 0/1 | 0/1 | Yes | |
