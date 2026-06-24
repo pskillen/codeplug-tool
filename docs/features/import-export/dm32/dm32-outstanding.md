@@ -4,6 +4,14 @@
 
 ---
 
+## Closed via [#157](https://github.com/pskillen/codeplug-tool/issues/157)
+
+- [x] DM-32 `Forbid TX` / receive-only consolidated on `forbidTransmit`
+- [x] Analog squelch radio default exports as `Squelch Level` `1`
+- [x] `ChannelTxAdmit` enum with DM-32 wire mapping
+
+---
+
 ## Deferred (by design in #67)
 
 - [ ] **Scan lists** — [#125](https://github.com/pskillen/codeplug-tool/issues/125): generic `ScanList` entity + `Scan.csv` + channel `Scan List` column

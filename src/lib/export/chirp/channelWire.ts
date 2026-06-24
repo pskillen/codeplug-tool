@@ -20,7 +20,11 @@ const DEFAULT_CROSS_MODE = 'Tone->Tone';
  * Inverse of import parseChirpDuplex: rxFrequency, txFrequency, forbidTransmit → wire duplex + offset.
  */
 function chirpDuplexAndOffset(channel: Channel): { duplex: string; offsetMhz: number } {
-  return deriveChirpDuplexAndOffset(channel.rxFrequency, channel.txFrequency, channel.forbidTransmit);
+  return deriveChirpDuplexAndOffset(
+    channel.rxFrequency,
+    channel.txFrequency,
+    channel.forbidTransmit,
+  );
 }
 
 export interface ChirpChannelWireOptions {

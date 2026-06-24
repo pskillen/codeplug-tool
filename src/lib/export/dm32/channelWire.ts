@@ -62,11 +62,9 @@ export function serialiseDm32ChannelRow(
     [CHANNEL_COL.scanList]: 'None',
     [CHANNEL_COL.txAdmit]: formatDm32TxAdmitWire(sourceChannel.txAdmit),
     [CHANNEL_COL.emergencySystem]: 'None',
-    [CHANNEL_COL.squelch]: formatDm32SquelchWire(
-      row.squelch ?? sourceChannel.squelch,
-      profileId,
-      { isAnalog: isAnalogMode(row.mode) },
-    ),
+    [CHANNEL_COL.squelch]: formatDm32SquelchWire(row.squelch ?? sourceChannel.squelch, profileId, {
+      isAnalog: isAnalogMode(row.mode),
+    }),
     [CHANNEL_COL.aprsReportType]: sourceChannel.aprsReportType || 'Off',
     [CHANNEL_COL.forbidTx]: formatDm32FlagWire(sourceChannel.forbidTransmit),
     [CHANNEL_COL.aprsReceive]: formatDm32FlagWire(sourceChannel.aprsReceiveEnabled),
