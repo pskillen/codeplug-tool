@@ -67,6 +67,7 @@ Typed scalar fields use vendor-neutral semantics in the model; CPS wire strings 
 | --- | --- | --- |
 | `id` | `string` | Internal |
 | `name` | `string` | Human qualifier (town, TG label, etc.) — **not** the full CPS wire string after import |
+| `abbreviation` | `string` | Optional shorter export label for the name qualifier — used by name shortening at export |
 | `callsign` | `string` | Repeater/site identifier; map default label; edited independently of `name` |
 | `exportNameMode` | `ChannelExportNameMode` | How export composes CPS `Channel Name` from `callsign` + `name` — see [channel-name-parsing](../import-export/channel-name-parsing.md) |
 | `mode` | `ChannelMode` | Primary/display mode — see [channel-modes reference](../../reference/channel-modes.md) (`fm`, `dmr`, `ysf`, …) |

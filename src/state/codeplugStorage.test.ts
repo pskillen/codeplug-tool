@@ -499,6 +499,56 @@ describe('codeplugStorage', () => {
     expect(cp?.meta.schemaVersion).toBe(CODEPLUG_SCHEMA_VERSION);
   });
 
+  it('migrates v13 channel without abbreviation', () => {
+    const v13 = {
+      channels: [
+        {
+          id: 'ch-1',
+          name: 'Largs Scotland',
+          callsign: 'GB7AC',
+          exportNameMode: 'callsign_name',
+          mode: 'dmr',
+        },
+      ],
+      zones: [],
+      talkGroups: [],
+      contacts: [],
+      rxGroupLists: [],
+      meta: { schemaVersion: 13, importedAt: null, sourceFiles: [] },
+    };
+    const cp = migrateCodeplug(v13);
+    expect(cp?.channels[0]).toMatchObject({
+      id: 'ch-1',
+      name: 'Largs Scotland',
+      callsign: 'GB7AC',
+    });
+    expect(cp?.channels[0].abbreviation).toBeUndefined();
+    expect(cp?.meta.schemaVersion).toBe(CODEPLUG_SCHEMA_VERSION);
+  });
+
+  it('preserves channel abbreviation when present in v13 payload', () => {
+    const v13 = {
+      channels: [
+        {
+          id: 'ch-1',
+          name: 'Largs Scotland',
+          callsign: 'GB7AC',
+          abbreviation: 'Largs',
+          exportNameMode: 'callsign_name',
+          mode: 'dmr',
+        },
+      ],
+      zones: [],
+      talkGroups: [],
+      contacts: [],
+      rxGroupLists: [],
+      meta: { schemaVersion: 13, importedAt: null, sourceFiles: [] },
+    };
+    const cp = migrateCodeplug(v13);
+    expect(cp?.channels[0].abbreviation).toBe('Largs');
+    expect(cp?.meta.schemaVersion).toBe(CODEPLUG_SCHEMA_VERSION);
+  });
+
   it('preserves talk group abbreviation when present in v12 payload', () => {
     const v12 = {
       channels: [],
