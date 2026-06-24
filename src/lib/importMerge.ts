@@ -25,6 +25,8 @@ import {
 import {
   resolveMultiModeChannelProfiles,
   mergeImportChannelsMultiTalkgroupBestEffort,
+  channelsAreRelaxedImportMergeCandidates,
+  type ChannelMergeCandidateOptions,
 } from './channelExpansion/index.ts';
 import {
   newId,
@@ -37,6 +39,25 @@ import {
 } from '../models/codeplug.ts';
 
 export type ImportApplyMode = 'merge' | 'overwrite';
+
+export interface ImportMergeOptions {
+  /** Match channels by frequency + location when wire names differ (e.g. after export shortening). */
+  relaxedChannelMatch?: boolean;
+}
+
+const DEFAULT_IMPORT_MERGE_OPTIONS: ImportMergeOptions = {
+  relaxedChannelMatch: false,
+};
+
+function mergeCandidateOptions(options: ImportMergeOptions): ChannelMergeCandidateOptions {
+  return options.relaxedChannelMatch ? { ignoreNameMatch: true } : {};
+}
+
+function findRelaxedChannelMatch(incoming: Channel, existing: Channel[]): Channel | undefined {
+  const matches = existing.filter((ex) => channelsAreRelaxedImportMergeCandidates(incoming, ex));
+  if (matches.length === 1) return matches[0];
+  return undefined;
+}
 
 export interface EntityImportStats {
   added: number;
@@ -174,6 +195,7 @@ function mergeChannels(
   existing: Channel[],
   incoming: Channel[] | undefined,
   mode: ImportApplyMode,
+  options: ImportMergeOptions,
 ): { channels: Channel[]; stats: EntityImportStats } {
   if (!incoming) {
     return { channels: existing, stats: emptyEntityStats() };
@@ -199,7 +221,10 @@ function mergeChannels(
   for (const inc of deduped) {
     const key = incomingChannelMergeKey(inc);
     const incReady = normalizeImportedChannelNaming([inc])[0];
-    const ex = byKey.get(key);
+    let ex = byKey.get(key);
+    if (!ex && options.relaxedChannelMatch) {
+      ex = findRelaxedChannelMatch(incReady, result);
+    }
     if (ex) {
       if (channelsImportEqual(ex, incReady)) {
         stats.unchanged++;
@@ -391,10 +416,17 @@ function applyImportInternal(
   codeplug: Codeplug,
   result: ImportResult,
   mode: ImportApplyMode,
+  options: ImportMergeOptions = DEFAULT_IMPORT_MERGE_OPTIONS,
 ): { codeplug: Codeplug; report: ImportMergeReport } {
   const importedAt = new Date().toISOString();
   const formatId = result.formatId ?? 'opengd77';
-  const { channels, stats: channelStats } = mergeChannels(codeplug.channels, result.channels, mode);
+  const mergeOptions = mergeCandidateOptions(options);
+  const { channels, stats: channelStats } = mergeChannels(
+    codeplug.channels,
+    result.channels,
+    mode,
+    options,
+  );
   const { items: contacts, stats: contactStats } = mergeContacts(
     codeplug.contacts,
     result.contacts,
@@ -438,6 +470,7 @@ function applyImportInternal(
     talkGroups,
     contacts,
     resolvedRxGroupLists,
+    mergeOptions,
   );
   const resolvedChannels = normalizeImportedChannelNaming(tgCollapsed.channels);
   const finalRxGroupLists = tgCollapsed.rxGroupLists;
@@ -485,14 +518,16 @@ export function previewImportMerge(
   codeplug: Codeplug,
   result: ImportResult,
   mode: ImportApplyMode = 'merge',
+  options: ImportMergeOptions = DEFAULT_IMPORT_MERGE_OPTIONS,
 ): ImportMergeReport {
-  return applyImportInternal(codeplug, result, mode).report;
+  return applyImportInternal(codeplug, result, mode, options).report;
 }
 
 export function applyImportToCodeplug(
   codeplug: Codeplug,
   result: ImportResult,
   mode: ImportApplyMode = 'merge',
+  options: ImportMergeOptions = DEFAULT_IMPORT_MERGE_OPTIONS,
 ): { codeplug: Codeplug; report: ImportMergeReport } {
-  return applyImportInternal(codeplug, result, mode);
+  return applyImportInternal(codeplug, result, mode, options);
 }

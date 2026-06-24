@@ -56,6 +56,10 @@ Some CPS builds spell analogue `Anlaog` — accept on import; export uses fixtur
 
 `Channel Name` maps to split internal fields on import and is **composed on export**. Split rules: [channel-name-parsing](../../features/import-export/channel-name-parsing.md).
 
+## Export name length and shortening
+
+Default profile `nameLimit` is **16** (`src/lib/dm32/profiles.ts`). Expanded multi-talkgroup row names share the same shortening pipeline as OpenGD77; zone member wire names match shortened channel names. See [name-shortening](../../features/import-export/name-shortening.md).
+
 ## Export expansion (DM32 adapter)
 
 | Flag | Value | Reason |

@@ -8,6 +8,8 @@ export interface OpenGd77RadioProfile {
   maxChannels: number;
   zoneMembers: number;
   tgListMembers: number;
+  /** Default max channel wire name length (LCD limit). */
+  nameLimit: number;
   /** High/default first — P-index wire strings. */
   powerLadder: readonly PowerLadderEntry[];
 }
@@ -43,6 +45,7 @@ export const OPENGD77_PROFILES: readonly OpenGd77RadioProfile[] = [
     maxChannels: 1023,
     zoneMembers: 80,
     tgListMembers: 32,
+    nameLimit: 16,
     powerLadder: OPENGD77_1701_LADDER,
   },
   {
@@ -51,6 +54,7 @@ export const OPENGD77_PROFILES: readonly OpenGd77RadioProfile[] = [
     maxChannels: 1023,
     zoneMembers: 80,
     tgListMembers: 32,
+    nameLimit: 16,
     powerLadder: OPENGD77_MD9600_LADDER,
   },
 ] as const;

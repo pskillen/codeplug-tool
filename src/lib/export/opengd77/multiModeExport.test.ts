@@ -25,7 +25,9 @@ describe('OpenGD77 multi-mode export', () => {
         { ...channelModeProfileDefaults('dmr'), colourCode: 1 },
       ],
     });
-    const csv = serialiseChannels(buildCodeplug({ channels: [ch] }), DEFAULT_OPENGD77_PROFILE_ID);
+    const csv = serialiseChannels(buildCodeplug({ channels: [ch] }), {
+      profileId: DEFAULT_OPENGD77_PROFILE_ID,
+    });
     const rows = csvToRecords(csv);
     expect(rows).toHaveLength(2);
     const names = rows.map((r) => r['Channel Name']).sort();
@@ -46,10 +48,9 @@ describe('OpenGD77 multi-mode export', () => {
       modeProfiles: [channelModeProfileDefaults('fm'), channelModeProfileDefaults('dmr')],
     });
     const zone = buildZone({ id: 'z1', name: 'Test Zone', memberChannelIds: ['c1'] });
-    const csv = serialiseZones(
-      buildCodeplug({ channels: [ch], zones: [zone] }),
-      DEFAULT_OPENGD77_PROFILE_ID,
-    );
+    const csv = serialiseZones(buildCodeplug({ channels: [ch], zones: [zone] }), {
+      profileId: DEFAULT_OPENGD77_PROFILE_ID,
+    });
     const rows = csvToRecords(csv);
     expect(rows[0]['Channel1']).toBe('GB7GL-F');
     expect(rows[0]['Channel2']).toBe('GB7GL-D');

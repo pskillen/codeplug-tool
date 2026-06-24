@@ -1,6 +1,7 @@
 import type { EntityRef } from '../entityRefs.ts';
 import {
   entityRefDisplayName,
+  entityRefExportLabel,
   entityRefKey,
   entityRefsEqual,
   resolveContactRefByWireName,
@@ -9,6 +10,7 @@ import {
 import { CHANNEL_MODES, isAnalogMode, isDmrMode, type ChannelMode } from '../channelModes.ts';
 import type {
   Channel,
+  ChannelExportNameMode,
   ChannelModeProfile,
   Codeplug,
   Contact,
@@ -18,6 +20,21 @@ import type {
 } from '../../models/codeplug.ts';
 import { channelModeProfileDefaults, newId } from '../../models/codeplug.ts';
 import { composeChannelWireName, withMergedChannelWireProvenance } from '../channelNaming.ts';
+import {
+  finalizeWireName,
+  uniqueWireName,
+  type ShortenWireNameOptions,
+  type TalkGroupMemberSuffixReplacement,
+} from './shortenName.ts';
+
+export {
+  disambiguationSuffixLength,
+  finalizeWireName,
+  shortenWireName,
+  uniqueWireName,
+  type ShortenWireNameOptions,
+  type TalkGroupMemberSuffixReplacement,
+} from './shortenName.ts';
 
 /** Resolved export row — shared channel fields merged with one mode profile. */
 export interface ExpandedChannelRow {
@@ -53,6 +70,12 @@ export interface ExpandChannelOptions {
   reservedWireNames?: ReadonlySet<string>;
   /** Max display length before export warning (e.g. 1701 LCD). */
   maxNameLength?: number;
+  /** Apply shortening strategies when a name exceeds `maxNameLength`. Default false unless set by export. */
+  shortenNames?: boolean;
+  /** Force all channels to this export name mode for this export pass only. */
+  nameModeOverride?: ChannelExportNameMode;
+  /** Use `TalkGroup.abbreviation` for multi-talkgroup member suffixes. */
+  useTalkGroupAbbreviation?: boolean;
   warnings?: string[];
   /** When false, keep multi-mode channels on one wire name (DM32 native dual-mode). Default true. */
   expandModes?: boolean;
@@ -66,6 +89,8 @@ export interface ExpandChannelOptions {
   talkGroupMembers?: TalkGroupMemberFilter;
   /** Required when expandTalkGroups is true — resolves RGL member refs. */
   codeplug?: Codeplug;
+  /** Channel lookup for TG expansion shortening — defaults to `codeplug.channels`. */
+  channelById?: ReadonlyMap<string, Channel>;
 }
 
 /** Build a profile from top-level channel mode-specific fields (single-mode path). */
@@ -109,11 +134,50 @@ export function stripModeExportSuffix(name: string): string {
   return name;
 }
 
-function uniqueWireName(base: string, reserved: Set<string>): string {
-  if (!reserved.has(base)) return base;
-  let n = 2;
-  while (reserved.has(`${base} ${n}`)) n++;
-  return `${base} ${n}`;
+function channelForWireName(
+  channel: Channel,
+  options: ExpandChannelOptions,
+): Pick<Channel, 'callsign' | 'name' | 'exportNameMode'> {
+  return options.nameModeOverride
+    ? { ...channel, exportNameMode: options.nameModeOverride }
+    : channel;
+}
+
+function shortenOptsForChannel(
+  channel: Channel,
+  options: ExpandChannelOptions,
+  extra?: Partial<ShortenWireNameOptions>,
+): ShortenWireNameOptions {
+  const ch = channelForWireName(channel, options);
+  return {
+    exportNameMode: ch.exportNameMode,
+    recomposeWithMode: (mode) => composeChannelWireName({ ...ch, exportNameMode: mode }),
+    ...extra,
+  };
+}
+
+function assignExportWireName(
+  base: string,
+  channel: Channel,
+  reserved: Set<string>,
+  options: ExpandChannelOptions,
+  extraShortenOpts?: Partial<ShortenWireNameOptions>,
+): string {
+  if (options.shortenNames !== true || options.maxNameLength == null) {
+    const name = uniqueWireName(base, reserved);
+    reserved.add(name);
+    if (options.maxNameLength != null && name.length > options.maxNameLength) {
+      options.warnings?.push(`Channel name "${name}" exceeds ${options.maxNameLength} characters`);
+    }
+    return name;
+  }
+  return finalizeWireName(
+    base,
+    reserved,
+    options.maxNameLength,
+    { ...shortenOptsForChannel(channel, options), ...extraShortenOpts },
+    options.warnings,
+  );
 }
 
 function profileOpenGd77Extras(
@@ -168,26 +232,17 @@ export function expandChannelForExport(
   options: ExpandChannelOptions = {},
 ): ExpandedChannelRow[] {
   const reserved = new Set(options.reservedWireNames ?? []);
-  const warnings = options.warnings;
   const profiles = resolveChannelModeProfiles(channel);
   const expandModes = options.expandModes ?? true;
-  const baseWireName = composeChannelWireName(channel);
+  const baseWireName = composeChannelWireName(channelForWireName(channel, options));
 
   if (!channel.multiMode || profiles.length <= 1) {
-    const name = uniqueWireName(baseWireName, reserved);
-    reserved.add(name);
-    if (options.maxNameLength != null && name.length > options.maxNameLength) {
-      warnings?.push(`Channel name "${name}" exceeds ${options.maxNameLength} characters`);
-    }
+    const name = assignExportWireName(baseWireName, channel, reserved, options);
     return [rowFromProfile(channel, profiles[0], name)];
   }
 
   if (!expandModes) {
-    const name = uniqueWireName(baseWireName, reserved);
-    reserved.add(name);
-    if (options.maxNameLength != null && name.length > options.maxNameLength) {
-      warnings?.push(`Channel name "${name}" exceeds ${options.maxNameLength} characters`);
-    }
+    const name = assignExportWireName(baseWireName, channel, reserved, options);
 
     let tgFanOut = false;
     const dmrProfile = profiles.find((p) => isDmrMode(p.mode));
@@ -217,16 +272,24 @@ export function expandChannelForExport(
   const rows: ExpandedChannelRow[] = [];
   for (const profile of profiles) {
     const suffix = modeExportNameSuffix(profile.mode);
-    const candidate = uniqueWireName(`${baseWireName}${suffix}`, reserved);
-    reserved.add(candidate);
-    if (options.maxNameLength != null && candidate.length > options.maxNameLength) {
-      warnings?.push(
-        `Derived channel name "${candidate}" exceeds ${options.maxNameLength} characters`,
-      );
-    }
+    const candidate = assignExportWireName(`${baseWireName}${suffix}`, channel, reserved, options);
     rows.push(rowFromProfile(channel, profile, candidate));
   }
   return rows;
+}
+
+function resolveSourceChannel(
+  row: ExpandedChannelRow,
+  options: ExpandChannelOptions,
+): Channel | undefined {
+  return (
+    options.channelById?.get(row.sourceChannelId) ??
+    options.codeplug?.channels.find((ch) => ch.id === row.sourceChannelId)
+  );
+}
+
+function channelByIdFromChannels(channels: Channel[]): Map<string, Channel> {
+  return new Map(channels.map((ch) => [ch.id, ch]));
 }
 
 function filterRglMemberRefs(memberRefs: EntityRef[], filter: TalkGroupMemberFilter): EntityRef[] {
@@ -312,16 +375,38 @@ export function expandTalkGroupsForExport(
       continue;
     }
 
+    const sourceChannel = resolveSourceChannel(row, options);
+    if (!sourceChannel) {
+      result.push(row);
+      reserved.add(row.wireName);
+      continue;
+    }
+
     for (const member of members) {
-      const memberName = entityRefDisplayName(member, codeplug.talkGroups, codeplug.contacts);
-      if (!memberName) continue;
-      const candidate = uniqueWireName(`${row.wireName} ${memberName}`, reserved);
-      reserved.add(candidate);
-      if (options.maxNameLength != null && candidate.length > options.maxNameLength) {
-        warnings?.push(
-          `Derived channel name "${candidate}" exceeds ${options.maxNameLength} characters`,
-        );
-      }
+      const fullMemberName = entityRefDisplayName(member, codeplug.talkGroups, codeplug.contacts);
+      if (!fullMemberName) continue;
+      const exportMemberLabel = entityRefExportLabel(
+        member,
+        codeplug.talkGroups,
+        codeplug.contacts,
+        {
+          useAbbreviation: options.useTalkGroupAbbreviation,
+        },
+      );
+      const base = `${row.wireName} ${fullMemberName}`;
+      const tgSuffix: TalkGroupMemberSuffixReplacement | undefined =
+        options.useTalkGroupAbbreviation &&
+        exportMemberLabel &&
+        exportMemberLabel !== fullMemberName
+          ? { full: fullMemberName, abbreviated: exportMemberLabel }
+          : undefined;
+      const candidate = assignExportWireName(
+        base,
+        sourceChannel,
+        reserved,
+        options,
+        tgSuffix ? { talkGroupMemberSuffix: tgSuffix } : undefined,
+      );
       result.push({
         ...row,
         wireName: candidate,
@@ -339,11 +424,19 @@ function expandChannelRowsForExport(
   options: ExpandChannelOptions,
   reserved: Set<string>,
 ): ExpandedChannelRow[] {
-  const modeRows = expandChannelForExport(channel, { ...options, reservedWireNames: reserved });
+  const channelById = new Map(
+    options.channelById ?? channelByIdFromChannels(options.codeplug?.channels ?? []),
+  );
+  channelById.set(channel.id, channel);
+  const withLookup = { ...options, channelById };
+  const modeRows = expandChannelForExport(channel, { ...withLookup, reservedWireNames: reserved });
   for (const row of modeRows) {
     reserved.add(row.wireName);
   }
-  const tgRows = expandTalkGroupsForExport(modeRows, { ...options, reservedWireNames: reserved });
+  const tgRows = expandTalkGroupsForExport(modeRows, {
+    ...withLookup,
+    reservedWireNames: reserved,
+  });
   for (const row of tgRows) {
     reserved.add(row.wireName);
   }
@@ -356,9 +449,12 @@ export function expandAllChannelsForExport(
   options: Omit<ExpandChannelOptions, 'reservedWireNames'> = {},
 ): ExpandedChannelRow[] {
   const reserved = new Set<string>();
+  const channelById = new Map(options.channelById ?? channelByIdFromChannels(channels));
+  const withLookup = { ...options, channelById };
   const rows: ExpandedChannelRow[] = [];
   for (const ch of channels) {
-    rows.push(...expandChannelRowsForExport(ch, options, reserved));
+    channelById.set(ch.id, ch);
+    rows.push(...expandChannelRowsForExport(ch, withLookup, reserved));
   }
   return rows;
 }
@@ -377,11 +473,14 @@ export function expandZoneMemberWireNames(
   const reserved = new Set(options.reservedWireNames ?? []);
   const warnings: string[] = [];
   const names: string[] = [];
+  const channelById = new Map(options.channelById ?? byId);
+  const withLookup = { ...options, channelById, warnings: options.warnings ?? warnings };
 
   for (const memberId of zone.memberChannelIds) {
     const ch = byId.get(memberId);
     if (!ch) continue;
-    const expanded = expandChannelRowsForExport(ch, { ...options, warnings }, reserved);
+    channelById.set(ch.id, ch);
+    const expanded = expandChannelRowsForExport(ch, withLookup, reserved);
     for (const row of expanded) {
       if (options.maxMembers != null && names.length >= options.maxMembers) {
         warnings.push(
@@ -462,6 +561,8 @@ export function channelsAreMultiTalkgroupMergeCandidates(
   if (!refA || !refB || refA.kind !== 'talkGroup' || refB.kind !== 'talkGroup') return false;
   if (entityRefsEqual(refA, refB)) return false;
 
+  if (options.ignoreNameMatch) return true;
+
   const stem = stripTrailingModeLabel ? channelMergeNameStem : channelNameStem;
   const stemA = channelTalkGroupStem(stem(a.name), talkGroups, contacts);
   const stemB = channelTalkGroupStem(stem(b.name), talkGroups, contacts);
@@ -530,9 +631,11 @@ function canMergeMultiTalkgroupPair(
   b: Channel,
   talkGroups: TalkGroup[],
   contacts: Contact[],
+  options: ChannelMergeCandidateOptions = {},
 ): boolean {
   return channelsAreMultiTalkgroupMergeCandidates(a, b, talkGroups, contacts, {
     nameFuzzyThreshold: 0,
+    ...options,
   });
 }
 
@@ -556,6 +659,7 @@ export function mergeImportChannelsMultiTalkgroupBestEffort(
   talkGroups: TalkGroup[],
   contacts: Contact[],
   rxGroupLists: RxGroupList[],
+  mergeOptions: ChannelMergeCandidateOptions = {},
 ): MergeImportMultiTalkgroupResult {
   const merged: MergeImportChannelsResult['merged'] = [];
   const used = new Set<string>();
@@ -571,7 +675,7 @@ export function mergeImportChannelsMultiTalkgroupBestEffort(
     for (let j = i + 1; j < channels.length; j++) {
       if (used.has(channels[j].id)) continue;
       const matchesAll = group.every((member) =>
-        canMergeMultiTalkgroupPair(member, channels[j], talkGroups, contacts),
+        canMergeMultiTalkgroupPair(member, channels[j], talkGroups, contacts, mergeOptions),
       );
       if (matchesAll) {
         group.push(channels[j]);
@@ -653,6 +757,8 @@ export interface ChannelMergeCandidateOptions {
   matchRxFrequency?: boolean;
   /** Require equal TX frequency Hz. Default true. */
   matchTxFrequency?: boolean;
+  /** Skip name/stem comparison — match on RF context only (freq, location, DMR CC/TS). */
+  ignoreNameMatch?: boolean;
 }
 
 export function channelFrequenciesMatch(a: Channel, b: Channel): boolean {
@@ -703,9 +809,21 @@ export function channelsAreMultiModeMergeCandidates(
   if (a.mode === b.mode) return false;
   const threshold = options.nameFuzzyThreshold ?? 0;
   const stripTrailingModeLabel = options.stripTrailingModeLabel ?? false;
-  if (!channelNameStemsMatch(a, b, threshold, stripTrailingModeLabel)) return false;
+  if (!options.ignoreNameMatch && !channelNameStemsMatch(a, b, threshold, stripTrailingModeLabel)) {
+    return false;
+  }
   if (!channelFrequenciesMatchWithOptions(a, b, options)) return false;
   if (!channelLocationsMatch(a, b)) return false;
+  return true;
+}
+
+/** Whether an incoming import row likely matches an existing channel when wire names differ (e.g. shortened export). */
+export function channelsAreRelaxedImportMergeCandidates(a: Channel, b: Channel): boolean {
+  if (a.multiMode !== b.multiMode) return false;
+  if (!a.multiMode && a.mode !== b.mode) return false;
+  if (!channelFrequenciesMatch(a, b)) return false;
+  if (!channelLocationsMatch(a, b)) return false;
+  if (isDmrMode(a.mode) && isDmrMode(b.mode) && !digitalRfContextMatch(a, b)) return false;
   return true;
 }
 
@@ -773,8 +891,8 @@ export function mergeChannelsToMultiMode(
   return syncChannelFromPrimaryProfile(withMergedChannelWireProvenance(base, sources));
 }
 
-function canMergePair(a: Channel, b: Channel): boolean {
-  return channelsAreMultiModeMergeCandidates(a, b, { nameFuzzyThreshold: 0 });
+function canMergePair(a: Channel, b: Channel, options: ChannelMergeCandidateOptions = {}): boolean {
+  return channelsAreMultiModeMergeCandidates(a, b, { nameFuzzyThreshold: 0, ...options });
 }
 
 function mergeTwoChannels(primary: Channel, secondary: Channel): Channel {
@@ -791,7 +909,10 @@ function mergeTwoChannels(primary: Channel, secondary: Channel): Channel {
 }
 
 /** Best-effort collapse of paired flat import rows into multi-mode channels. */
-export function mergeImportChannelsBestEffort(channels: Channel[]): MergeImportChannelsResult {
+export function mergeImportChannelsBestEffort(
+  channels: Channel[],
+  mergeOptions: ChannelMergeCandidateOptions = {},
+): MergeImportChannelsResult {
   const merged: MergeImportChannelsResult['merged'] = [];
   const used = new Set<string>();
   const result: Channel[] = [];
@@ -802,7 +923,7 @@ export function mergeImportChannelsBestEffort(channels: Channel[]): MergeImportC
 
     for (let j = i + 1; j < channels.length; j++) {
       if (used.has(channels[j].id)) continue;
-      if (canMergePair(channels[i], channels[j])) {
+      if (canMergePair(channels[i], channels[j], mergeOptions)) {
         combined = mergeTwoChannels(channels[i], channels[j]);
         used.add(channels[i].id);
         used.add(channels[j].id);

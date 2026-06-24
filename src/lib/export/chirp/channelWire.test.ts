@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { channelFieldDefaults } from '../../../models/codeplug.ts';
-import { channelToChirpRow } from './channelWire.ts';
+import { channelToChirpRow, type ChirpChannelWireOptions } from './channelWire.ts';
+
+function testWireOptions(): ChirpChannelWireOptions {
+  return {
+    reserved: new Set<string>(),
+    maxNameLength: 128,
+    shortenNames: false,
+  };
+}
 
 describe('export/chirp/channelWire', () => {
   it('exports simplex when rx equals tx and rxOnly is false', () => {
@@ -17,6 +25,7 @@ describe('export/chirp/channelWire', () => {
       },
       1,
       'baofeng-uv5r-mini',
+      testWireOptions(),
     );
     expect(row[3]).toBe('');
     expect(row[4]).toBe('0.000000');
@@ -36,6 +45,7 @@ describe('export/chirp/channelWire', () => {
       },
       2,
       'baofeng-uv5r-mini',
+      testWireOptions(),
     );
     expect(row[3]).toBe('off');
     expect(row[4]).toBe('0.000000');

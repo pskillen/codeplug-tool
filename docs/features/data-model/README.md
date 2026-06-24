@@ -150,6 +150,7 @@ DMR group call.
 | Field | Type | Notes |
 | --- | --- | --- |
 | `id`, `name`, `number`, `timeslotOverride` | | (`number` is the DMR ID) |
+| `abbreviation` | `string` | Optional shorter export label for name shortening at export |
 | `meta` | `EntityMeta` | Optional import provenance |
 
 ### `Contact`
@@ -178,7 +179,7 @@ Named RX (receive) group list driving promiscuous receive. Members are ordered `
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `schemaVersion` | `number` | Must match `CODEPLUG_SCHEMA_VERSION` (12) after migration |
+| `schemaVersion` | `number` | Must match `CODEPLUG_SCHEMA_VERSION` (13) after migration |
 | `importedAt` | `string \| null` | |
 | `sourceFiles` | `string[]` | |
 

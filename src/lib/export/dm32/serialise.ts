@@ -3,10 +3,13 @@ import {
   expandAllChannelsForExport,
   expandZoneMemberWireNames,
 } from '../../channelExpansion/index.ts';
-import { expandOptionsFromExport } from '../../channelExpansion/exportOptions.ts';
+import {
+  expandOptionsFromExport,
+  effectiveMaxNameLength,
+} from '../../channelExpansion/exportOptions.ts';
 import { formatCsv } from '../csvWrite.ts';
 import type { ExportOptions } from '../../import-export/types.ts';
-import { DEFAULT_DM32_PROFILE_ID } from '../../dm32/profiles.ts';
+import { DEFAULT_DM32_PROFILE_ID, getDm32Profile } from '../../dm32/profiles.ts';
 import {
   CHANNEL_HEADERS,
   CONTACT_COL,
@@ -32,14 +35,27 @@ function padRow(headers: string[], values: Record<string, string>): string[] {
   return headers.map((h) => values[h] ?? '');
 }
 
-function dm32ExpandOptions(codeplug: Codeplug, options?: ExportOptions) {
-  return expandOptionsFromExport(codeplug, {
-    expandModes: false,
-    expandRxGroupLists: true,
-    skipExpandWhenTxContactSet: true,
-    nonExpandableRxGroupListNames: [...DM32_NON_EXPANDABLE_RX_GROUP_LISTS],
-    profileId: options?.profileId,
-  });
+function dm32ExpandOptions(codeplug: Codeplug, options?: ExportOptions, warnings?: string[]) {
+  return expandOptionsFromExport(
+    codeplug,
+    {
+      expandModes: false,
+      expandRxGroupLists: true,
+      skipExpandWhenTxContactSet: true,
+      nonExpandableRxGroupListNames: [...DM32_NON_EXPANDABLE_RX_GROUP_LISTS],
+      profileId: options?.profileId,
+      shortenNames: options?.shortenNames,
+      maxNameLength: options?.maxNameLength,
+      nameModeOverride: options?.nameModeOverride,
+      useTalkGroupAbbreviation: options?.useTalkGroupAbbreviation,
+    },
+    warnings,
+  );
+}
+
+function dm32MaxNameLength(options: ExportOptions | undefined, profileId: string): number {
+  const profile = getDm32Profile(profileId);
+  return effectiveMaxNameLength(options, profile.nameLimit);
 }
 
 export function serialiseDm32Files(codeplug: Codeplug, options?: ExportOptions): Dm32ExportFiles {
@@ -56,7 +72,10 @@ export function serialiseDm32Files(codeplug: Codeplug, options?: ExportOptions):
 export function serialiseChannels(codeplug: Codeplug, options?: ExportOptions): string {
   const profileId = options?.profileId ?? DEFAULT_DM32_PROFILE_ID;
   const expandOpts = dm32ExpandOptions(codeplug, options);
-  const expanded = expandAllChannelsForExport(codeplug.channels, expandOpts);
+  const expanded = expandAllChannelsForExport(codeplug.channels, {
+    ...expandOpts,
+    maxNameLength: dm32MaxNameLength(options, profileId),
+  });
   const byId = new Map(codeplug.channels.map((ch) => [ch.id, ch]));
   const rows = expanded.map((row, i) => {
     const source = byId.get(row.sourceChannelId);
@@ -70,9 +89,13 @@ export function serialiseChannels(codeplug: Codeplug, options?: ExportOptions): 
 }
 
 export function serialiseZones(codeplug: Codeplug, options?: ExportOptions): string {
+  const profileId = options?.profileId ?? DEFAULT_DM32_PROFILE_ID;
   const expandOpts = dm32ExpandOptions(codeplug, options);
   const rows = codeplug.zones.map((zone, i) => {
-    const { names } = expandZoneMemberWireNames(zone, codeplug.channels, expandOpts);
+    const { names } = expandZoneMemberWireNames(zone, codeplug.channels, {
+      ...expandOpts,
+      maxNameLength: dm32MaxNameLength(options, profileId),
+    });
     return padRow(ZONE_HEADERS, {
       [ZONE_COL.number]: String(i + 1),
       [ZONE_COL.name]: zone.name,

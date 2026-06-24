@@ -2,6 +2,12 @@ import {
   CHANNEL_LIST_COLUMNS_SCHEMA_KEY,
   CHANNEL_LIST_COLUMN_STORAGE_KEY,
 } from '../../hooks/channelListQueryUtils.ts';
+import {
+  STORAGE_KEY_EXPORT_MAX_NAME_LENGTH,
+  STORAGE_KEY_EXPORT_NAME_MODE_OVERRIDE,
+  STORAGE_KEY_EXPORT_SHORTEN_NAMES,
+  STORAGE_KEY_EXPORT_USE_TG_ABBREVIATION,
+} from '../../hooks/useExportSettings.ts';
 import { STORAGE_KEY_MAIDENHEAD_GRID, STORAGE_KEY_TILE, STORAGE_KEY_TOKEN } from '../mapTiles.ts';
 import { CODEPLUG_STORAGE_KEY } from '../../state/codeplugStorage.ts';
 import { parseStorageRaw, redactParsedValue } from './parseStorageValue.ts';
@@ -33,6 +39,14 @@ const KNOWN_STORAGE_KEYS: StorageKeyDescriptor[] = [
   { key: STORAGE_KEY_MAIDENHEAD_GRID, label: 'Maidenhead grid mode', redact: false },
   { key: CHANNEL_LIST_COLUMN_STORAGE_KEY, label: 'Channel list columns', redact: false },
   { key: CHANNEL_LIST_COLUMNS_SCHEMA_KEY, label: 'Channel list columns schema', redact: false },
+  { key: STORAGE_KEY_EXPORT_SHORTEN_NAMES, label: 'Export shorten names', redact: false },
+  { key: STORAGE_KEY_EXPORT_MAX_NAME_LENGTH, label: 'Export max name length', redact: false },
+  { key: STORAGE_KEY_EXPORT_NAME_MODE_OVERRIDE, label: 'Export name mode override', redact: false },
+  {
+    key: STORAGE_KEY_EXPORT_USE_TG_ABBREVIATION,
+    label: 'Export use talk group abbreviations',
+    redact: false,
+  },
 ];
 
 export function formatByteSize(bytes: number): string {

@@ -2,6 +2,14 @@ import type { ExportOptions } from '../import-export/types.ts';
 import type { ExpandChannelOptions } from './index.ts';
 import type { Codeplug } from '../../models/codeplug.ts';
 
+/** Effective max name length — export override or profile default. */
+export function effectiveMaxNameLength(
+  options: ExportOptions | undefined,
+  profileNameLimit: number,
+): number {
+  return options?.maxNameLength ?? profileNameLimit;
+}
+
 /** Map export UI options to channel expansion pass options. */
 export function expandOptionsFromExport(
   codeplug: Codeplug,
@@ -14,6 +22,9 @@ export function expandOptionsFromExport(
     talkGroupMembers: options?.expandRxGroupListMembers ?? 'all',
     skipExpandWhenTxContactSet: options?.skipExpandWhenTxContactSet === true,
     nonExpandableRxGroupListNames: options?.nonExpandableRxGroupListNames,
+    shortenNames: options?.shortenNames ?? true,
+    nameModeOverride: options?.nameModeOverride,
+    useTalkGroupAbbreviation: options?.useTalkGroupAbbreviation ?? false,
     codeplug,
     warnings,
   };

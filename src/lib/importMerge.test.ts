@@ -6,6 +6,7 @@ import type { ImportResult } from './import/types.ts';
 import { chirpMinimalBundle } from '../test/chirp/bundles.ts';
 import { parseChannels as parseChirpChannels } from './import/chirp/parse.ts';
 import { applyImportToCodeplug, emptyEntityStats, previewImportMerge } from './importMerge.ts';
+import { stampImported } from './entityProvenance.ts';
 
 function channelsResult(channels: Channel[]): ImportResult {
   return { channels, recognised: ['Channels.csv'], skipped: [], errors: [] };
@@ -109,6 +110,58 @@ describe('importMerge', () => {
 
       expect(report.channels.added).toBe(1);
       expect(codeplug.channels[0].rxFrequency).toBe(200_000_000);
+    });
+
+    it('relaxedChannelMatch merges shortened wire name onto existing channel by RF context', () => {
+      const loc = { lat: 55.86, lon: -4.25 };
+      const existing = buildChannel({
+        id: 'ch-1',
+        name: 'Largs Scot West',
+        callsign: 'GB7AC',
+        exportNameMode: 'callsign_name',
+        mode: 'dmr',
+        rxFrequency: 430_125_000,
+        txFrequency: 430_125_000,
+        colourCode: 1,
+        timeslot: 1,
+        location: loc,
+      });
+      const cp = { ...emptyCodeplug(), channels: [existing] };
+
+      const incoming = stampImported(
+        buildChannel({
+          id: 'new-id',
+          name: 'GB7AC Largs Sc',
+          mode: 'dmr',
+          rxFrequency: 430_125_000,
+          txFrequency: 430_125_000,
+          colourCode: 1,
+          timeslot: 1,
+          location: loc,
+        }),
+        {
+          formatId: 'opengd77',
+          sourceFile: 'Channels.csv',
+          importedAt: new Date().toISOString(),
+          channelWireName: 'GB7AC Largs Sc',
+        },
+      );
+
+      const withoutRelaxed = applyImportToCodeplug(cp, channelsResult([incoming]), 'merge');
+      expect(withoutRelaxed.report.channels.added).toBe(1);
+      expect(withoutRelaxed.codeplug.channels).toHaveLength(2);
+
+      const withRelaxed = applyImportToCodeplug(cp, channelsResult([incoming]), 'merge', {
+        relaxedChannelMatch: true,
+      });
+      expect(withRelaxed.report.channels).toEqual({
+        added: 0,
+        updated: 1,
+        unchanged: 0,
+        removed: 0,
+      });
+      expect(withRelaxed.codeplug.channels).toHaveLength(1);
+      expect(withRelaxed.codeplug.channels[0].id).toBe('ch-1');
     });
   });
 

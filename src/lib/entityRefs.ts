@@ -108,6 +108,29 @@ export function entityRefDisplayName(
   return findContactById(ref.id, contacts)?.name ?? null;
 }
 
+export interface EntityRefExportLabelOptions {
+  /** Use `TalkGroup.abbreviation` for talk-group refs at export. */
+  useAbbreviation?: boolean;
+}
+
+/** Export wire label for an entity ref — may use talk-group abbreviation. */
+export function entityRefExportLabel(
+  ref: EntityRef | null,
+  talkGroups: TalkGroup[],
+  contacts: Contact[],
+  options: EntityRefExportLabelOptions = {},
+): string | null {
+  if (!ref) return null;
+  if (ref.kind === 'talkGroup') {
+    const tg = findTalkGroupById(ref.id, talkGroups);
+    if (!tg) return null;
+    const abbrev = tg.abbreviation?.trim();
+    if (options.useAbbreviation && abbrev) return abbrev;
+    return tg.name;
+  }
+  return findContactById(ref.id, contacts)?.name ?? null;
+}
+
 export function memberRefsToWireNames(
   memberRefs: EntityRef[],
   talkGroups: TalkGroup[],

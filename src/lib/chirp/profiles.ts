@@ -7,6 +7,8 @@ export interface ChirpRadioProfile {
   label: string;
   defaultFileName: string;
   maxMemorySlots: number;
+  /** Default max channel wire name length (radio LCD limit). */
+  nameLimit: number;
   /** High/default first — used when power is null. */
   powerLadder: readonly PowerLadderEntry[];
 }
@@ -32,6 +34,7 @@ export const CHIRP_PROFILES: readonly ChirpRadioProfile[] = [
     label: 'Baofeng UV-5R Mini',
     defaultFileName: 'Baofeng_UV-5R Mini_export.csv',
     maxMemorySlots: 128,
+    nameLimit: 7,
     powerLadder: UV5R_LADDER,
   },
   {
@@ -39,6 +42,7 @@ export const CHIRP_PROFILES: readonly ChirpRadioProfile[] = [
     label: 'Baofeng UV-21Pro V2',
     defaultFileName: 'Baofeng_UV-21ProV2_export.csv',
     maxMemorySlots: 128,
+    nameLimit: 16,
     powerLadder: UV21_LADDER,
   },
   {
@@ -46,6 +50,7 @@ export const CHIRP_PROFILES: readonly ChirpRadioProfile[] = [
     label: 'Retevis RT95 VOX',
     defaultFileName: 'Retevis_RT95 VOX_export.csv',
     maxMemorySlots: 128,
+    nameLimit: 16,
     powerLadder: RT95_LADDER,
   },
 ] as const;

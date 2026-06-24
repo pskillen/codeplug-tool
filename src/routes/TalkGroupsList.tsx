@@ -3,7 +3,6 @@ import { DataTable, ListPage } from '../components/ui/index.ts';
 import { filterRowsByName, useListNameQuery } from '../hooks/useListNameQuery.ts';
 import {
   channelsReferencingTalkGroupId,
-  formatReferenceCount,
   rxGroupListsContainingMemberRef,
 } from '../lib/reportLookup.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
@@ -32,6 +31,12 @@ export default function TalkGroupsList() {
         }}
         columns={[
           {
+            key: 'abbreviation',
+            header: 'Abbreviation',
+            render: (tg) => tg.abbreviation?.trim() || '—',
+            sortValue: (tg) => tg.abbreviation?.trim() || '',
+          },
+          {
             key: 'number',
             header: 'DMR ID',
             render: (tg) => tg.number || '—',
@@ -44,23 +49,25 @@ export default function TalkGroupsList() {
             sortValue: (tg) => tg.timeslotOverride || '',
           },
           {
-            key: 'channels',
-            header: 'Channels using',
-            render: (tg) =>
-              formatReferenceCount(channelsReferencingTalkGroupId(tg.id, channels).length),
-            sortValue: (tg) => channelsReferencingTalkGroupId(tg.id, channels).length,
-          },
-          {
-            key: 'rgl',
-            header: 'RX groups using',
-            render: (tg) =>
-              formatReferenceCount(
-                rxGroupListsContainingMemberRef({ kind: 'talkGroup', id: tg.id }, rxGroupLists)
-                  .length,
-              ),
-            sortValue: (tg) =>
-              rxGroupListsContainingMemberRef({ kind: 'talkGroup', id: tg.id }, rxGroupLists)
-                .length,
+            key: 'usage',
+            header: 'Channels / Groups using',
+            render: (tg) => {
+              const channelCount = channelsReferencingTalkGroupId(tg.id, channels).length;
+              const groupCount = rxGroupListsContainingMemberRef(
+                { kind: 'talkGroup', id: tg.id },
+                rxGroupLists,
+              ).length;
+              if (channelCount === 0 && groupCount === 0) return '';
+              return `${channelCount} / ${groupCount}`;
+            },
+            sortValue: (tg) => {
+              const channelCount = channelsReferencingTalkGroupId(tg.id, channels).length;
+              const groupCount = rxGroupListsContainingMemberRef(
+                { kind: 'talkGroup', id: tg.id },
+                rxGroupLists,
+              ).length;
+              return channelCount * 10_000 + groupCount;
+            },
           },
         ]}
       />

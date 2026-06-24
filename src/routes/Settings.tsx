@@ -1,5 +1,6 @@
 import { Alert, Button, Group, PasswordInput, Select } from '@mantine/core';
 import { Page, PageHeader, PageSection } from '../components/ui/index.ts';
+import ExportNameSettingsFields from '../components/ExportNameSettingsFields/ExportNameSettingsFields.tsx';
 import { useMapSettings } from '../hooks/useMapSettings.ts';
 import type { MaidenheadGridMode } from '../lib/maidenheadGrid.ts';
 import type { TileProvider } from '../lib/mapTiles.ts';
@@ -76,6 +77,13 @@ export default function Settings() {
             if (value) setMaidenheadGrid(value as MaidenheadGridMode);
           }}
         />
+      </PageSection>
+
+      <PageSection
+        title="Export name shortening"
+        description="Controls for abbreviating channel names at CPS export. Applies to OpenGD77, DM32, and CHIRP exports."
+      >
+        <ExportNameSettingsFields />
       </PageSection>
     </Page>
   );

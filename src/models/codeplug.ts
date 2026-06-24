@@ -160,6 +160,8 @@ export interface TalkGroup {
   timeslotOverride: string;
   /** DMR call type on CPS wire — group vs private (DM32 Talkgroups.csv). */
   callType?: 'group' | 'private';
+  /** Shorter export label used by name shortening at the export boundary. */
+  abbreviation?: string;
   meta?: EntityMeta;
 }
 
@@ -199,7 +201,7 @@ export interface Codeplug {
   meta: CodeplugMeta;
 }
 
-export const CODEPLUG_SCHEMA_VERSION = 12;
+export const CODEPLUG_SCHEMA_VERSION = 13;
 
 let idGenerator: () => string = () => crypto.randomUUID();
 
