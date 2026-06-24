@@ -1,10 +1,21 @@
 import { Alert, Button, Select, Stack, Text } from '@mantine/core';
 import { IconDownload, IconPackage } from '@tabler/icons-react';
 import { useState } from 'react';
-import { chirpProfileSelectData, DEFAULT_CHIRP_PROFILE_ID } from '../../lib/chirp/profiles.ts';
-import { DEFAULT_DM32_PROFILE_ID, dm32ProfileSelectData } from '../../lib/dm32/profiles.ts';
+import ExportNameSettingsFields from '../ExportNameSettingsFields/ExportNameSettingsFields.tsx';
+import { useExportSettings } from '../../hooks/useExportSettings.ts';
+import {
+  chirpProfileSelectData,
+  DEFAULT_CHIRP_PROFILE_ID,
+  getChirpProfile,
+} from '../../lib/chirp/profiles.ts';
+import {
+  DEFAULT_DM32_PROFILE_ID,
+  dm32ProfileSelectData,
+  getDm32Profile,
+} from '../../lib/dm32/profiles.ts';
 import {
   DEFAULT_OPENGD77_PROFILE_ID,
+  getOpenGd77Profile,
   opengd77ProfileSelectData,
 } from '../../lib/opengd77/profiles.ts';
 import { getExportAdapter, getFormatProfiles } from '../../lib/import-export/registry.ts';
@@ -20,8 +31,24 @@ export interface ExportFromActivePanelProps {
   vendorFormat: VendorFormatOption;
 }
 
+function profileNameLimitForFormat(
+  formatId: string,
+  profileId: string | undefined,
+): number | undefined {
+  if (!profileId) return undefined;
+  try {
+    if (formatId === 'opengd77') return getOpenGd77Profile(profileId).nameLimit;
+    if (formatId === 'dm32') return getDm32Profile(profileId).nameLimit;
+    if (formatId === 'chirp') return getChirpProfile(profileId).nameLimit;
+  } catch {
+    return undefined;
+  }
+  return undefined;
+}
+
 export default function ExportFromActivePanel({ vendorFormat }: ExportFromActivePanelProps) {
   const { codeplug } = useCodeplug();
+  const { exportOptionsFromSettings } = useExportSettings();
   const hasData = codeplug.channels.length > 0;
   const [chirpProfileId, setChirpProfileId] = useState(DEFAULT_CHIRP_PROFILE_ID);
   const [opengd77ProfileId, setOpenGd77ProfileId] = useState(DEFAULT_OPENGD77_PROFILE_ID);
@@ -56,7 +83,7 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
         : vendorFormat.id === 'opengd77'
           ? opengd77ProfileId
           : formatProfiles?.defaultId;
-    const exportOptions = profileId ? { profileId } : undefined;
+    const exportOptions = exportOptionsFromSettings(profileId ? { profileId } : {});
     const profileSelectData =
       vendorFormat.id === 'dm32'
         ? dm32ProfileSelectData()
@@ -86,6 +113,10 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
             allowDeselect={false}
           />
         ) : null}
+
+        <ExportNameSettingsFields
+          profileNameLimit={profileNameLimitForFormat(vendorFormat.id, profileId)}
+        />
 
         <Stack gap="xs">
           {adapter.fileNames.map((fileName) => (
@@ -142,7 +173,7 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
     const handleDownload = () => {
       const result = adapter.download({
         codeplug,
-        options: { profileId: chirpProfileId },
+        options: exportOptionsFromSettings({ profileId: chirpProfileId }),
       });
       setExportWarnings(result.warnings);
     };
@@ -165,6 +196,10 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
             allowDeselect={false}
           />
         ) : null}
+
+        <ExportNameSettingsFields
+          profileNameLimit={profileNameLimitForFormat(vendorFormat.id, chirpProfileId)}
+        />
 
         <Button
           disabled={!hasData}
