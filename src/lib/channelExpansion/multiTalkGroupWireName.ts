@@ -1,3 +1,4 @@
+import type { ChannelTimeslot } from '../channelFields/index.ts';
 import type { Channel, ChannelExportNameMode, Contact, TalkGroup } from '../../models/codeplug.ts';
 import {
   channelPickForWireExport,
@@ -100,6 +101,14 @@ export function normaliseTalkGroupTimeslotToken(timeslotOverride: string): strin
   const tsMatch = /^TS(\d+)$/i.exec(trimmed);
   if (tsMatch) return tsMatch[1];
   return trimmed;
+}
+
+/** Parse vendor timeslot override wire to internal `1 | 2 | null`. */
+export function parseTimeslotOverrideWire(timeslotOverride: string): ChannelTimeslot | null {
+  const token = normaliseTalkGroupTimeslotToken(timeslotOverride);
+  if (token === '1') return 1;
+  if (token === '2') return 2;
+  return null;
 }
 
 function talkGroupNumberToken(tg: TalkGroup): string {
