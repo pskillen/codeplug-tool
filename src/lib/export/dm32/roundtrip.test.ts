@@ -101,8 +101,14 @@ describe('DM32 synthetic round-trip', () => {
     const csv = exported['Channels.csv'];
     expect(csv).toContain('Scotland TS2');
     expect(csv).toContain('Scot West TS1');
-    const lines = csv.split('\n').filter((line) => line.includes('Scotland TS2') || line.includes('Scot West TS1'));
-    expect(lines.some((line) => line.includes('Scotland TS2') && line.includes('Slot 2'))).toBe(true);
-    expect(lines.some((line) => line.includes('Scot West TS1') && line.includes('Slot 1'))).toBe(true);
+    const lines = csv
+      .split('\n')
+      .filter((line) => line.includes('Scotland TS2') || line.includes('Scot West TS1'));
+    expect(lines.some((line) => line.includes('Scotland TS2') && line.includes('Slot 2'))).toBe(
+      true,
+    );
+    expect(lines.some((line) => line.includes('Scot West TS1') && line.includes('Slot 1'))).toBe(
+      true,
+    );
   });
 });
