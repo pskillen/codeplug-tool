@@ -8,7 +8,7 @@ import { useCodeplug } from '../state/codeplugStore.tsx';
 export default function RxGroupListsList() {
   const { codeplug } = useCodeplug();
   const { channels, rxGroupLists } = codeplug;
-  const { nameFilter, setNameFilter } = useListNameQuery();
+  const { nameFilter, setNameFilter } = useListNameQuery('rx-group-lists');
   const filtered = useMemo(() => {
     return filterRowsByName(rxGroupLists, nameFilter, (r) => r.name);
   }, [rxGroupLists, nameFilter]);

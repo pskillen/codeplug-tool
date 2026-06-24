@@ -7,7 +7,7 @@
 | Slice | Status | Notes |
 | --- | --- | --- |
 | Shared list-prefs storage | Complete | `src/lib/listPrefs/` |
-| Query hook hydration | Pending | `useChannelListQuery`, `useListNameQuery` |
+| Query hook hydration | Complete | `useChannelListQuery`, `useListNameQuery` |
 | Column sort persistence | Pending | All entity list routes |
 | Per-project column visibility | Pending | Channel optional columns |
 | Registry + docs | Pending | Debug viewer, UI README |

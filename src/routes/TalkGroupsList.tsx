@@ -10,7 +10,7 @@ import { useCodeplug } from '../state/codeplugStore.tsx';
 export default function TalkGroupsList() {
   const { codeplug } = useCodeplug();
   const { channels, talkGroups, rxGroupLists } = codeplug;
-  const { nameFilter, setNameFilter } = useListNameQuery();
+  const { nameFilter, setNameFilter } = useListNameQuery('talk-groups');
   const filtered = useMemo(() => {
     return filterRowsByName(talkGroups, nameFilter, (tg) => tg.name);
   }, [talkGroups, nameFilter]);

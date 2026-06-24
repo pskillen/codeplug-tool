@@ -11,7 +11,7 @@ export default function ZonesList() {
   const { codeplug } = useCodeplug();
   const { channels, zones } = codeplug;
   const { position, setPosition, clearPosition } = useOperatorPosition();
-  const { nameFilter, setNameFilter } = useListNameQuery();
+  const { nameFilter, setNameFilter } = useListNameQuery('zones');
   const filtered = useMemo(() => {
     return filterRowsByName(zones, nameFilter, (z) => z.name);
   }, [zones, nameFilter]);

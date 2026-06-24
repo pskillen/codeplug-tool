@@ -11,7 +11,7 @@ import { useCodeplug } from '../state/codeplugStore.tsx';
 export default function ContactsList() {
   const { codeplug } = useCodeplug();
   const { channels, contacts, rxGroupLists } = codeplug;
-  const { nameFilter, setNameFilter } = useListNameQuery();
+  const { nameFilter, setNameFilter } = useListNameQuery('contacts');
   const filtered = useMemo(() => {
     return filterRowsByName(contacts, nameFilter, (c) => c.name);
   }, [contacts, nameFilter]);
