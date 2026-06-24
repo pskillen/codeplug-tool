@@ -239,10 +239,6 @@ describe('channelExpansion', () => {
         { kind: 'talkGroup', id: 'tg2' },
       ],
     });
-    const codeplug = buildCodeplug({
-      talkGroups: [tg1, tg2],
-      rxGroupLists: [rgl],
-    });
     const ch = buildChannel({
       id: 'c1',
       name: 'GB7GL',
@@ -250,10 +246,16 @@ describe('channelExpansion', () => {
       rxGroupListId: 'rgl1',
       contactRef: null,
     });
+    const codeplug = buildCodeplug({
+      channels: [ch],
+      talkGroups: [tg1, tg2],
+      rxGroupLists: [rgl],
+    });
     const modeRows = expandChannelForExport(ch);
     const rows = expandTalkGroupsForExport(modeRows, {
       expandTalkGroups: true,
       codeplug,
+      channelById: new Map([[ch.id, ch]]),
     });
     expect(rows).toHaveLength(2);
     expect(rows.map((r) => r.wireName).sort()).toEqual(['GB7GL Local 9', 'GB7GL Scotland TS1']);
@@ -308,6 +310,7 @@ describe('channelExpansion', () => {
       expandTalkGroups: true,
       talkGroupMembers: 'talkGroupsOnly',
       codeplug,
+      channelById: new Map([[ch.id, ch]]),
     });
     expect(rows).toHaveLength(1);
     expect(rows[0].wireName).toBe('GB7GL Scotland TS1');
@@ -377,6 +380,68 @@ describe('channelExpansion', () => {
       codeplug,
     });
     expect(names).toEqual(['GB7GL Scotland TS1', 'GB7GL Local 9']);
+  });
+
+  it('shortens long export names when shortenNames is enabled', () => {
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'Largs Scotland West TS1',
+      callsign: 'GB7AC',
+      exportNameMode: 'callsign_name',
+      mode: 'dmr',
+    });
+    const rows = expandChannelForExport(ch, { maxNameLength: 16, shortenNames: true });
+    expect(rows).toHaveLength(1);
+    expect(rows[0].wireName.length).toBeLessThanOrEqual(16);
+    expect(rows[0].wireName).toMatch(/^AC /);
+  });
+
+  it('zone member names match shortened channel export names', () => {
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'Largs Scotland West TS1',
+      callsign: 'GB7AC',
+      exportNameMode: 'callsign_name',
+      mode: 'dmr',
+    });
+    const zone = buildZone({ id: 'z1', name: 'Zone', memberChannelIds: ['c1'] });
+    const expandOpts = { maxNameLength: 16, shortenNames: true };
+    const channelRows = expandAllChannelsForExport([ch], expandOpts);
+    const { names } = expandZoneMemberWireNames(zone, [ch], expandOpts);
+    expect(names).toEqual(channelRows.map((r) => r.wireName));
+  });
+
+  it('expandTalkGroupsForExport shortens TG member suffix with abbreviation', () => {
+    const tg1 = buildTalkGroup({
+      id: 'tg1',
+      name: 'Scotland TS1',
+      abbreviation: 'Sco TS1',
+    });
+    const rgl = buildRxGroupList({
+      id: 'rgl1',
+      name: 'GB7GL',
+      memberRefs: [{ kind: 'talkGroup', id: 'tg1' }],
+    });
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'Glasgow',
+      callsign: 'GB7GL',
+      exportNameMode: 'callsign_name',
+      mode: 'dmr',
+      rxGroupListId: 'rgl1',
+    });
+    const codeplug = buildCodeplug({ channels: [ch], talkGroups: [tg1], rxGroupLists: [rgl] });
+    const rows = expandTalkGroupsForExport(expandChannelForExport(ch), {
+      expandTalkGroups: true,
+      codeplug,
+      channelById: new Map([[ch.id, ch]]),
+      maxNameLength: 16,
+      shortenNames: true,
+      useTalkGroupAbbreviation: true,
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0].wireName.length).toBeLessThanOrEqual(16);
+    expect(rows[0].wireName).not.toContain('Scotland TS1');
   });
 
   it('mergeImportChannelsMultiTalkgroupBestEffort collapses flat per-TG rows', () => {
