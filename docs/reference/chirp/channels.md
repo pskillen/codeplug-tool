@@ -37,6 +37,10 @@ Parse by **header name**, not column index.
 
 `txFrequency` is derived on import from `Frequency` + `Duplex` + `Offset`.
 
+## Export name length and shortening
+
+CHIRP `Name` is the composed wire name (`composeChannelWireName`). Profile `nameLimit` varies (e.g. **7** on UV-5R mini, **16** on UV-21 Pro V2). Shortening runs per export file with a shared reserved-name set. See [name-shortening](../../features/import-export/name-shortening.md).
+
 ## Duplex
 
 | `Duplex` | Meaning | Model |

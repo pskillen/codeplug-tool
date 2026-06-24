@@ -49,6 +49,14 @@ All other columns are optional at import — missing headers yield empty values.
 
 `Channel Name` maps to split internal fields on import and is **composed on export** from `callsign`, `name`, and `exportNameMode`. Split rules: [channel-name-parsing](../../features/import-export/channel-name-parsing.md).
 
+## Export name length and shortening
+
+Radio LCD limits are profile-specific (~16 chars on [Baofeng 1701](radios/baofeng-1701.md)). The app default `nameLimit` is **16** on OpenGD77 profiles (`src/lib/opengd77/profiles.ts`).
+
+When a composed or expanded wire name exceeds the effective limit, export runs the shortening pipeline (dictionary → vowel-squeeze → optional `callsign_suffix` downgrade → truncate). Zone `ChannelN` members and TG-list contact names receive the **same** shortened strings as `Channels.csv`.
+
+Operator controls and round-trip caveats: [name-shortening](../../features/import-export/name-shortening.md). Per-profile manual overrides: [#122](https://github.com/pskillen/codeplug-tool/issues/122).
+
 ## Tone wire forms
 
 | OpenGD77 wire | Internal `rxTone` / `txTone` |

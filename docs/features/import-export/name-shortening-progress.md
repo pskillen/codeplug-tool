@@ -8,7 +8,7 @@
 
 ## Overall status
 
-**Status:** In progress (slices 1–7 complete; slice 8 outstanding)
+**Status:** Complete (all slices shipped on branch `130/paddy/shorten-export-names`)
 
 ---
 
@@ -76,18 +76,27 @@
 
 ## Slice 7 — Re-import matching easy win
 
-**Status:** Complete (pending commit)
-**Commit:** `feat: relaxed frequency/location channel matching on re-import`
+**Status:** Complete (committed)
+**Commit:** `ef58680` — `feat: relaxed frequency/location channel matching on re-import`
 
 **Delivered**
 
 - `ChannelMergeCandidateOptions.ignoreNameMatch` on multi-mode / multi-TG merge candidates
 - `channelsAreRelaxedImportMergeCandidates` for active-import channel identity
 - `ImportMergeOptions.relaxedChannelMatch` on `applyImportToCodeplug` / `previewImportMerge`
-- Follow-up issue for score-based matcher (see outstanding)
+- Follow-up: [#143](https://github.com/pskillen/codeplug-tool/issues/143) (score-based matcher)
 
 ---
 
-## Next
+## Slice 8 — Documentation
 
-- Slice 8 — Documentation
+**Status:** Complete (pending commit)
+**Commit:** `docs: document export name shortening and tg.abbreviation`
+
+**Delivered**
+
+- [name-shortening.md](name-shortening.md) — pipeline, controls, round-trip caveat
+- Tier-3 wire notes in `docs/reference/opengd77|dm32|chirp/channels.md`
+- Import-export README status → Shipped
+
+**Follow-up:** score-based matcher [#143](https://github.com/pskillen/codeplug-tool/issues/143)

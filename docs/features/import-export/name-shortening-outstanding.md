@@ -6,6 +6,11 @@ Items **skipped**, **incomplete**, or **discovered during execution** — not th
 
 ---
 
+## Re-import matching
+
+- [x] Easy win: `relaxedChannelMatch` on active import ([#130](https://github.com/pskillen/codeplug-tool/issues/130))
+- [ ] Score-based weighted matcher — [#143](https://github.com/pskillen/codeplug-tool/issues/143)
+
 ## Dictionary / codegen
 
 - [ ] Fresh clones must run `npm run generate:abbreviations` (or any `predev` / `pretest` / `prebuild` hook) before `dictionary.generated.ts` exists — consider a CI drift check if YAML edits land without regen
