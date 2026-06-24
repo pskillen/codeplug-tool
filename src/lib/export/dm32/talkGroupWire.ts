@@ -7,7 +7,6 @@ import {
   entityRefDisplayName,
   type ChannelContactExportSource,
 } from '../../entityRefs.ts';
-import type { Codeplug } from '../../../models/codeplug.ts';
 import { DEFAULT_DM32_PROFILE_ID, getDm32Profile } from '../../dm32/profiles.ts';
 
 export type Dm32TalkGroupWireNameMap = ReadonlyMap<string, string>;
