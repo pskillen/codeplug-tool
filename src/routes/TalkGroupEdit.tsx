@@ -11,17 +11,16 @@ import type { TalkGroup } from '../models/codeplug.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
 
-type FormValues = Pick<TalkGroup, 'name' | 'number' | 'timeslotOverride' | 'abbreviation'>;
+type FormValues = Pick<TalkGroup, 'name' | 'number' | 'abbreviation'>;
 
 function emptyForm(): FormValues {
-  return { name: '', number: '', timeslotOverride: '', abbreviation: '' };
+  return { name: '', number: '', abbreviation: '' };
 }
 
 function talkGroupToForm(tg: TalkGroup): FormValues {
   return {
     name: tg.name,
     number: tg.number,
-    timeslotOverride: tg.timeslotOverride,
     abbreviation: tg.abbreviation ?? '',
   };
 }
@@ -67,7 +66,6 @@ export default function TalkGroupEdit() {
     const input = {
       name: values.name.trim(),
       number: values.number.trim(),
-      timeslotOverride: values.timeslotOverride.trim(),
       ...(abbrev !== '' ? { abbreviation: abbrev } : {}),
     };
 
@@ -159,12 +157,6 @@ export default function TalkGroupEdit() {
             label="DMR ID"
             value={values.number}
             onChange={(e) => set('number', e.currentTarget.value)}
-          />
-          <TextInput
-            label="Timeslot override"
-            description="Optional slot hint for vendor export"
-            value={values.timeslotOverride}
-            onChange={(e) => set('timeslotOverride', e.currentTarget.value)}
           />
         </FormSection>
       </Stack>

@@ -4,6 +4,7 @@ import {
   Checkbox,
   Group,
   ScrollArea,
+  Select,
   SimpleGrid,
   Stack,
   Text,
@@ -15,13 +16,14 @@ import { entityRefKey } from '../../lib/entityRefs.ts';
 import type { EntityRef } from '../../lib/entityRefs.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { sortByName } from '../../lib/reportLookup.ts';
-import type { Contact, TalkGroup } from '../../models/codeplug.ts';
+import type { ChannelTimeslot } from '../../lib/channelFields/index.ts';
+import type { Contact, RxGroupListMember, TalkGroup } from '../../models/codeplug.ts';
 
 export interface RxGroupListMemberPickerProps {
   talkGroups: TalkGroup[];
   contacts: Contact[];
-  selectedRefs: EntityRef[];
-  onChange: (refs: EntityRef[]) => void;
+  selectedRefs: RxGroupListMember[];
+  onChange: (refs: RxGroupListMember[]) => void;
 }
 
 interface MemberOption {
@@ -30,14 +32,19 @@ interface MemberOption {
   key: string;
 }
 
+function memberKey(member: RxGroupListMember): string {
+  const slot = member.timeslot ?? '';
+  return `${entityRefKey(member.ref)}:${slot}`;
+}
+
 function moveSelectedBlock(
-  refs: EntityRef[],
+  members: RxGroupListMember[],
   selected: Set<string>,
   direction: 'up' | 'down',
-): EntityRef[] {
-  const next = [...refs];
+): RxGroupListMember[] {
+  const next = [...members];
   const indices = next
-    .map((ref, index) => ({ key: entityRefKey(ref), index }))
+    .map((member, index) => ({ key: memberKey(member), index }))
     .filter(({ key }) => selected.has(key))
     .map(({ index }) => index);
 
@@ -45,14 +52,14 @@ function moveSelectedBlock(
     for (const index of indices.sort((a, b) => a - b)) {
       if (index === 0) continue;
       const above = index - 1;
-      if (selected.has(entityRefKey(next[above]))) continue;
+      if (selected.has(memberKey(next[above]))) continue;
       [next[above], next[index]] = [next[index], next[above]];
     }
   } else {
     for (const index of indices.sort((a, b) => b - a)) {
       if (index >= next.length - 1) continue;
       const below = index + 1;
-      if (selected.has(entityRefKey(next[below]))) continue;
+      if (selected.has(memberKey(next[below]))) continue;
       [next[below], next[index]] = [next[index], next[below]];
     }
   }
@@ -72,6 +79,24 @@ function memberOptions(talkGroups: TalkGroup[], contacts: Contact[]): MemberOpti
     key: entityRefKey({ kind: 'contact', id: c.id }),
   }));
   return [...tg, ...ct];
+}
+
+const TIMESLOT_OPTIONS = [
+  { value: '', label: '—' },
+  { value: '1', label: 'Slot 1' },
+  { value: '2', label: 'Slot 2' },
+];
+
+function parseTimeslotValue(value: string | null): ChannelTimeslot | null {
+  if (value === '1') return 1;
+  if (value === '2') return 2;
+  return null;
+}
+
+function timeslotToValue(timeslot: ChannelTimeslot | null | undefined): string {
+  if (timeslot === 1) return '1';
+  if (timeslot === 2) return '2';
+  return '';
 }
 
 function MemberList({
@@ -127,8 +152,8 @@ export default function RxGroupListMemberPicker({
   const [availableSelected, setAvailableSelected] = useState<string[]>([]);
   const [inListSelected, setInListSelected] = useState<string[]>([]);
 
-  const selectedKeys = useMemo(
-    () => new Set(selectedRefs.map((ref) => entityRefKey(ref))),
+  const selectedRefKeys = useMemo(
+    () => new Set(selectedRefs.map((member) => entityRefKey(member.ref))),
     [selectedRefs],
   );
   const allOptions = useMemo(() => memberOptions(talkGroups, contacts), [talkGroups, contacts]);
@@ -141,18 +166,24 @@ export default function RxGroupListMemberPicker({
     () =>
       allOptions.filter(
         (o) =>
-          !selectedKeys.has(o.key) &&
+          !selectedRefKeys.has(o.key) &&
           (!availableFilterLower || o.name.toLowerCase().includes(availableFilterLower)),
       ),
-    [allOptions, selectedKeys, availableFilterLower],
+    [allOptions, selectedRefKeys, availableFilterLower],
   );
 
   const inListMembers = useMemo(
     () =>
       selectedRefs
-        .map((ref) => {
-          const key = entityRefKey(ref);
-          return optionByKey.get(key) ?? { ref, name: key, key };
+        .map((member) => {
+          const key = entityRefKey(member.ref);
+          const option = optionByKey.get(key);
+          return {
+            member,
+            name: option?.name ?? key,
+            key: memberKey(member),
+            refKey: key,
+          };
         })
         .filter((o) => !inListFilterLower || o.name.toLowerCase().includes(inListFilterLower)),
     [selectedRefs, optionByKey, inListFilterLower],
@@ -173,7 +204,8 @@ export default function RxGroupListMemberPicker({
   const addSelected = () => {
     const toAdd = availableSelected
       .map((key) => optionByKey.get(key)?.ref)
-      .filter((ref): ref is EntityRef => ref != null && !selectedKeys.has(entityRefKey(ref)));
+      .filter((ref): ref is EntityRef => ref != null && !selectedRefKeys.has(entityRefKey(ref)))
+      .map((ref) => ({ ref }));
     if (!toAdd.length) return;
     onChange([...selectedRefs, ...toAdd]);
     setAvailableSelected([]);
@@ -182,7 +214,7 @@ export default function RxGroupListMemberPicker({
   const removeSelected = () => {
     if (!inListSelected.length) return;
     const remove = new Set(inListSelected);
-    onChange(selectedRefs.filter((ref) => !remove.has(entityRefKey(ref))));
+    onChange(selectedRefs.filter((member) => !remove.has(memberKey(member))));
     setInListSelected([]);
   };
 
@@ -191,12 +223,22 @@ export default function RxGroupListMemberPicker({
     onChange(moveSelectedBlock(selectedRefs, new Set(inListSelected), direction));
   };
 
+  const setMemberTimeslot = (memberKeyValue: string, value: string | null) => {
+    const timeslot = parseTimeslotValue(value);
+    onChange(
+      selectedRefs.map((member) => {
+        if (memberKey(member) !== memberKeyValue) return member;
+        return timeslot == null ? { ref: member.ref } : { ref: member.ref, timeslot };
+      }),
+    );
+  };
+
   const canMoveUp = inListSelected.some((key) => {
-    const index = selectedRefs.findIndex((ref) => entityRefKey(ref) === key);
+    const index = selectedRefs.findIndex((member) => memberKey(member) === key);
     return index > 0;
   });
   const canMoveDown = inListSelected.some((key) => {
-    const index = selectedRefs.findIndex((ref) => entityRefKey(ref) === key);
+    const index = selectedRefs.findIndex((member) => memberKey(member) === key);
     return index >= 0 && index < selectedRefs.length - 1;
   });
 
@@ -275,12 +317,34 @@ export default function RxGroupListMemberPicker({
               borderRadius: 'var(--mantine-radius-sm)',
             }}
           >
-            <MemberList
-              items={inListMembers}
-              checked={new Set(inListSelected)}
-              onToggle={toggleInList}
-              emptyLabel="No members in list"
-            />
+            {inListMembers.length === 0 ? (
+              <Text size="sm" c="dimmed" p="xs">
+                No members in list
+              </Text>
+            ) : (
+              <Stack gap={4} p="xs">
+                {inListMembers.map((item) => (
+                  <Group key={item.key} gap="xs" wrap="nowrap" align="flex-end">
+                    <Checkbox
+                      label={item.name}
+                      checked={inListSelected.includes(item.key)}
+                      onChange={() => toggleInList(item.key)}
+                      style={{ flex: 1 }}
+                    />
+                    {item.member.ref.kind === 'talkGroup' ? (
+                      <Select
+                        aria-label={`Timeslot for ${item.name}`}
+                        data={TIMESLOT_OPTIONS}
+                        value={timeslotToValue(item.member.timeslot)}
+                        onChange={(value) => setMemberTimeslot(item.key, value)}
+                        w={100}
+                        size="xs"
+                      />
+                    ) : null}
+                  </Group>
+                ))}
+              </Stack>
+            )}
           </ScrollArea>
           <Group gap="xs">
             <Button

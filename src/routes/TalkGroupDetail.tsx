@@ -109,7 +109,6 @@ export default function TalkGroupDetail() {
                   ),
                 },
                 { label: 'DMR ID', value: talkGroup.number },
-                { label: 'Timeslot override', value: talkGroup.timeslotOverride },
               ],
             },
           ]}
