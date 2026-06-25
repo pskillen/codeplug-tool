@@ -1,3 +1,4 @@
+import type { EntityRef } from '../../lib/entityRefs.ts';
 import {
   channelFieldDefaults,
   emptyCodeplug,
@@ -5,6 +6,7 @@ import {
   type Codeplug,
   type Contact,
   type RxGroupList,
+  type RxGroupListMember,
   type TalkGroup,
   type Zone,
 } from '../../models/codeplug.ts';
@@ -64,7 +66,6 @@ export function buildTalkGroup(
 ): TalkGroup {
   return {
     number: '',
-    timeslotOverride: '',
     ...overrides,
   };
 }
@@ -75,6 +76,13 @@ export function buildContact(overrides: Partial<Contact> & Pick<Contact, 'id' | 
     signalingMode: 'dmr',
     ...overrides,
   };
+}
+
+export function buildRglMember(
+  ref: EntityRef,
+  timeslot?: 1 | 2 | null,
+): RxGroupListMember {
+  return timeslot == null ? { ref } : { ref, timeslot };
 }
 
 export function buildRxGroupList(

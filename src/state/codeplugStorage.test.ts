@@ -387,8 +387,8 @@ describe('codeplugStorage', () => {
     const state = deserializeProjects(json);
     const rgl = state!.projects[0].codeplug.rxGroupLists[0];
     expect(rgl.memberRefs).toEqual([
-      { kind: 'talkGroup', id: 'tg-1' },
-      { kind: 'contact', id: 'ct-1' },
+      { ref: { kind: 'talkGroup', id: 'tg-1' } },
+      { ref: { kind: 'contact', id: 'ct-1' } },
     ]);
     expect(getMemberWireNames(rgl)).toEqual(['Scotland', 'MM9PDY', 'Missing']);
   });

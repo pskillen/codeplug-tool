@@ -90,7 +90,8 @@ export function resolveRxGroupListMembers(
   contacts: Contact[],
 ): ResolvedRxMember[] {
   if (rgl.memberRefs.length > 0) {
-    return rgl.memberRefs.map((ref) => {
+    return rgl.memberRefs.map((member) => {
+      const ref = member.ref;
       const name = entityRefDisplayName(ref, talkGroups, contacts);
       if (!name) {
         return { name: '', kind: 'unresolved' as const, entity: null };
@@ -147,7 +148,7 @@ export function rxGroupListsContainingMemberRef(
   ref: EntityRef,
   lists: RxGroupList[],
 ): RxGroupList[] {
-  return lists.filter((rgl) => rgl.memberRefs.some((member) => entityRefsEqual(member, ref)));
+  return lists.filter((rgl) => rgl.memberRefs.some((member) => entityRefsEqual(member.ref, ref)));
 }
 
 /** @deprecated use rxGroupListsContainingMemberRef */

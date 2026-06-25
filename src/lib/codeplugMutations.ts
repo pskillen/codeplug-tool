@@ -7,11 +7,12 @@ import {
   type Codeplug,
   type Contact,
   type RxGroupList,
+  type RxGroupListMember,
   type TalkGroup,
   type Zone,
 } from '../models/codeplug.ts';
 import { getMemberWireNames, setMemberWireNames } from './entityProvenance.ts';
-import type { EntityRef, EntityRefKind } from './entityRefs.ts';
+import type { EntityRefKind } from './entityRefs.ts';
 import { entityRefKey, memberRefsToWireNames } from './entityRefs.ts';
 
 export type ChannelInput = Omit<Channel, 'id'>;
@@ -22,7 +23,9 @@ export type TalkGroupInput = Omit<TalkGroup, 'id'>;
 
 export type ContactInput = Omit<Contact, 'id'>;
 
-export type RxGroupListInput = Pick<RxGroupList, 'name'> & { memberRefs?: EntityRef[] };
+export type RxGroupListInput = Pick<RxGroupList, 'name'> & {
+  memberRefs?: RxGroupListMember[];
+};
 
 function channelById(channels: Channel[], id: string): Channel | undefined {
   return channels.find((ch) => ch.id === id);
@@ -220,7 +223,9 @@ function removeMemberRefFromAllRgls(
   entityId: string,
 ): RxGroupList[] {
   return codeplug.rxGroupLists.map((rgl) => {
-    const nextRefs = rgl.memberRefs.filter((ref) => !(ref.kind === kind && ref.id === entityId));
+    const nextRefs = rgl.memberRefs.filter(
+      (member) => !(member.ref.kind === kind && member.ref.id === entityId),
+    );
     if (nextRefs.length === rgl.memberRefs.length) return rgl;
     return {
       ...rgl,
@@ -232,21 +237,21 @@ function removeMemberRefFromAllRgls(
 
 function syncRglMemberWireNames(
   rgl: RxGroupList,
-  memberRefs: EntityRef[],
+  memberRefs: RxGroupListMember[],
   codeplug: Codeplug,
 ): Pick<RxGroupList, 'meta'> {
   const names = memberRefsToWireNames(memberRefs, codeplug.talkGroups, codeplug.contacts);
   return { meta: setMemberWireNames(rgl, names).meta };
 }
 
-function dedupeMemberRefs(refs: EntityRef[]): EntityRef[] {
+function dedupeRxGroupListMembers(members: RxGroupListMember[]): RxGroupListMember[] {
   const seen = new Set<string>();
-  const out: EntityRef[] = [];
-  for (const ref of refs) {
-    const key = entityRefKey(ref);
+  const out: RxGroupListMember[] = [];
+  for (const member of members) {
+    const key = `${entityRefKey(member.ref)}:${member.timeslot ?? ''}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    out.push(ref);
+    out.push(member);
   }
   return out;
 }
@@ -382,7 +387,7 @@ export function deleteContact(codeplug: Codeplug, contactId: string): Codeplug {
 }
 
 export function addRxGroupList(codeplug: Codeplug, input: RxGroupListInput): Codeplug {
-  const memberRefs = dedupeMemberRefs(input.memberRefs ?? []);
+  const memberRefs = dedupeRxGroupListMembers(input.memberRefs ?? []);
   const base: RxGroupList = {
     id: newId(),
     name: input.name.trim(),
@@ -406,7 +411,9 @@ export function updateRxGroupList(
   const existing = codeplug.rxGroupLists[index];
   const name = patch.name !== undefined ? patch.name.trim() : existing.name;
   const memberRefs =
-    patch.memberRefs !== undefined ? dedupeMemberRefs(patch.memberRefs) : existing.memberRefs;
+    patch.memberRefs !== undefined
+      ? dedupeRxGroupListMembers(patch.memberRefs)
+      : existing.memberRefs;
   const updated: RxGroupList = {
     ...existing,
     name,
@@ -434,9 +441,9 @@ export function deleteRxGroupList(codeplug: Codeplug, rglId: string): Codeplug {
 export function setRxGroupListMembers(
   codeplug: Codeplug,
   rglId: string,
-  memberRefs: EntityRef[],
+  memberRefs: RxGroupListMember[],
 ): Codeplug {
-  const refs = dedupeMemberRefs(memberRefs);
+  const refs = dedupeRxGroupListMembers(memberRefs);
   const rxGroupLists = codeplug.rxGroupLists.map((rgl) => {
     if (rgl.id !== rglId) return rgl;
     return {

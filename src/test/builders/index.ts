@@ -5,6 +5,7 @@ export {
   buildGeolocatedChannel,
   buildImportedRxGroupList,
   buildImportedZone,
+  buildRglMember,
   buildRxGroupList,
   buildTalkGroup,
   buildZone,

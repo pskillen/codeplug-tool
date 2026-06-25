@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildContact, buildTalkGroup } from '../test/builders/index.ts';
+import { buildContact, buildRglMember, buildTalkGroup } from '../test/builders/index.ts';
 import {
   contactRefWireNameForExport,
   entityRefDisplayName,
@@ -51,8 +51,8 @@ describe('entityRefs', () => {
       contacts,
     );
     expect(memberRefs).toEqual([
-      { kind: 'talkGroup', id: 'tg-1' },
-      { kind: 'contact', id: 'ct-1' },
+      { ref: { kind: 'talkGroup', id: 'tg-1' } },
+      { ref: { kind: 'contact', id: 'ct-1' } },
     ]);
     expect(unresolved).toEqual(['Ghost']);
   });
@@ -78,8 +78,8 @@ describe('entityRefs', () => {
     expect(
       memberRefsToWireNames(
         [
-          { kind: 'contact', id: 'ct-1' },
-          { kind: 'talkGroup', id: 'tg-1' },
+          buildRglMember({ kind: 'contact', id: 'ct-1' }),
+          buildRglMember({ kind: 'talkGroup', id: 'tg-1' }),
         ],
         talkGroups,
         contacts,

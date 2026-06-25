@@ -94,7 +94,7 @@ export function contactsImportEqual(a: Contact, b: Contact): boolean {
 }
 
 export function talkGroupsImportEqual(a: TalkGroup, b: TalkGroup): boolean {
-  return a.name === b.name && a.number === b.number && a.timeslotOverride === b.timeslotOverride;
+  return a.name === b.name && a.number === b.number;
 }
 
 function rxGroupListMembersImportEqual(a: RxGroupList, b: RxGroupList): boolean {
@@ -104,7 +104,9 @@ function rxGroupListMembersImportEqual(a: RxGroupList, b: RxGroupList): boolean 
     return memberNamesEqual(wireA, wireB);
   }
   if (a.memberRefs.length !== b.memberRefs.length) return false;
-  return a.memberRefs.every((ref, i) => entityRefsEqual(ref, b.memberRefs[i]));
+  return a.memberRefs.every((member, i) =>
+    entityRefsEqual(member.ref, b.memberRefs[i]?.ref ?? null),
+  );
 }
 
 export function rxGroupListsImportEqual(a: RxGroupList, b: RxGroupList): boolean {

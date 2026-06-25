@@ -1,6 +1,15 @@
+import type { ChannelTimeslot } from './channelFields/index.ts';
 import type { ChannelMode } from './channelModes.ts';
 import { isDigitalMode } from './channelModes.ts';
-import type { Channel, Codeplug, Contact, RxGroupList, TalkGroup } from '../models/codeplug.ts';
+import { parseTalkGroupSlotWireName } from './import/opengd77/collapseTalkGroupTimeslotDuplicates.ts';
+import type {
+  Channel,
+  Codeplug,
+  Contact,
+  RxGroupList,
+  RxGroupListMember,
+  TalkGroup,
+} from '../models/codeplug.ts';
 
 export type EntityRefKind = 'talkGroup' | 'contact';
 
@@ -32,6 +41,65 @@ export function entityRefsEqual(a: EntityRef | null, b: EntityRef | null): boole
   return a.kind === b.kind && a.id === b.id;
 }
 
+function parseMemberTimeslot(value: unknown): ChannelTimeslot | null {
+  if (value === 1 || value === 2) return value;
+  return null;
+}
+
+/** Build an RX group list member entry. */
+export function rglMember(
+  ref: EntityRef,
+  timeslot: ChannelTimeslot | null = null,
+): RxGroupListMember {
+  return timeslot == null ? { ref } : { ref, timeslot };
+}
+
+/** Extract the entity ref from an RGL membership entry (or pass through legacy EntityRef). */
+export function memberRefOnly(member: RxGroupListMember | EntityRef): EntityRef {
+  if ('ref' in member && member.ref) return member.ref;
+  return member as EntityRef;
+}
+
+/** Normalise persisted or legacy membership rows to RxGroupListMember. */
+export function normalizeRxGroupListMember(raw: unknown): RxGroupListMember | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const obj = raw as Record<string, unknown>;
+  if (obj.ref && typeof obj.ref === 'object') {
+    const ref = obj.ref as EntityRef;
+    if (ref.kind && ref.id) {
+      const timeslot = parseMemberTimeslot(obj.timeslot);
+      return timeslot == null ? { ref } : { ref, timeslot };
+    }
+  }
+  if (obj.kind && obj.id) {
+    return { ref: { kind: obj.kind as EntityRefKind, id: String(obj.id) } };
+  }
+  return null;
+}
+
+export function normalizeRxGroupListMembers(raw: unknown): RxGroupListMember[] {
+  if (!Array.isArray(raw)) return [];
+  const members: RxGroupListMember[] = [];
+  for (const item of raw) {
+    const member = normalizeRxGroupListMember(item);
+    if (member) members.push(member);
+  }
+  return members;
+}
+
+export function rxGroupListMembersEqual(
+  a: RxGroupListMember[],
+  b: RxGroupListMember[],
+): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((member, i) => {
+    const other = b[i];
+    if (!other) return false;
+    if (!entityRefsEqual(member.ref, other.ref)) return false;
+    return (member.timeslot ?? null) === (other.timeslot ?? null);
+  });
+}
+
 export function resolveContactRefByWireName(
   name: string,
   talkGroups: TalkGroup[],
@@ -45,6 +113,19 @@ export function resolveContactRefByWireName(
 
   const contact = contacts.find((c) => c.name === wire);
   if (contact) return { kind: 'contact', id: contact.id };
+
+  const parsed = parseTalkGroupSlotWireName(wire);
+  if (parsed.stem && parsed.stem !== wire) {
+    const byStem = resolveContactRefByWireName(parsed.stem, talkGroups, contacts);
+    if (byStem) return byStem;
+  }
+
+  const stemMatches = talkGroups.filter(
+    (t) => parseTalkGroupSlotWireName(t.name).stem === wire,
+  );
+  if (stemMatches.length === 1) {
+    return { kind: 'talkGroup', id: stemMatches[0].id };
+  }
 
   return null;
 }
@@ -63,10 +144,15 @@ export function resolveMemberRefsByWireNames(
   names: string[],
   talkGroups: TalkGroup[],
   contacts: Contact[],
-): { memberRefs: EntityRef[]; unresolved: string[] } {
-  const memberRefs: EntityRef[] = [];
+): { memberRefs: RxGroupListMember[]; unresolved: string[] } {
+  const memberRefs: RxGroupListMember[] = [];
   const unresolved: string[] = [];
   const seen = new Set<string>();
+
+  const memberKey = (member: RxGroupListMember) =>
+    member.timeslot != null
+      ? `${entityRefKey(member.ref)}:${member.timeslot}`
+      : entityRefKey(member.ref);
 
   for (const rawName of names) {
     const wire = normaliseWireName(rawName);
@@ -74,11 +160,19 @@ export function resolveMemberRefsByWireNames(
     if (seen.has(wire)) continue;
     seen.add(wire);
 
-    const ref = resolveContactRefByWireName(wire, talkGroups, contacts);
+    const parsed = parseTalkGroupSlotWireName(wire);
+    let ref = resolveContactRefByWireName(wire, talkGroups, contacts);
+    if (!ref && parsed.stem) {
+      ref = resolveContactRefByWireName(parsed.stem, talkGroups, contacts);
+    }
     if (ref) {
-      const key = entityRefKey(ref);
-      if (!memberRefs.some((r) => entityRefKey(r) === key)) {
-        memberRefs.push(ref);
+      const member =
+        parsed.slot != null && ref.kind === 'talkGroup'
+          ? rglMember(ref, parsed.slot)
+          : { ref };
+      const key = memberKey(member);
+      if (!memberRefs.some((m) => memberKey(m) === key)) {
+        memberRefs.push(member);
       }
     } else {
       unresolved.push(wire);
@@ -132,13 +226,13 @@ export function entityRefExportLabel(
 }
 
 export function memberRefsToWireNames(
-  memberRefs: EntityRef[],
+  memberRefs: RxGroupListMember[],
   talkGroups: TalkGroup[],
   contacts: Contact[],
 ): string[] {
   const names: string[] = [];
-  for (const ref of memberRefs) {
-    const name = entityRefDisplayName(ref, talkGroups, contacts);
+  for (const member of memberRefs) {
+    const name = entityRefDisplayName(member.ref, talkGroups, contacts);
     if (name) names.push(name);
   }
   return names;
@@ -153,10 +247,7 @@ export function resolveRxGroupListMemberRefs(
     const wireNames = rgl.meta?.imported?.memberWireNames;
     if (wireNames === undefined) return rgl;
     const { memberRefs } = resolveMemberRefsByWireNames(wireNames, talkGroups, contacts);
-    if (
-      rgl.memberRefs.length === memberRefs.length &&
-      rgl.memberRefs.every((ref, i) => entityRefsEqual(ref, memberRefs[i]))
-    ) {
+    if (rxGroupListMembersEqual(rgl.memberRefs, memberRefs)) {
       return rgl;
     }
     return { ...rgl, memberRefs };

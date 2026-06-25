@@ -33,7 +33,7 @@ export function importResultFromNativeProject(
     rxGroupLists: cp.rxGroupLists.map((rgl) => ({
       name: rgl.name,
       memberWireNames: rgl.memberRefs
-        .map((ref) => refToWireName(ref))
+        .map((member) => refToWireName(member.ref))
         .filter((name) => name.length > 0),
     })),
     recognised: [fileName],

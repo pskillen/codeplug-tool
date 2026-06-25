@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { EntityRef } from '../lib/entityRefs.ts';
+import type { RxGroupListMember } from '../models/codeplug.ts';
 import {
   applyImportToCodeplug as mergeImportIntoCodeplug,
   type ImportApplyMode,
@@ -76,7 +76,7 @@ type ProjectsAction =
   | { type: 'ADD_RX_GROUP_LIST'; input: RxGroupListInput }
   | { type: 'UPDATE_RX_GROUP_LIST'; rglId: string; patch: Partial<RxGroupListInput> }
   | { type: 'DELETE_RX_GROUP_LIST'; rglId: string }
-  | { type: 'SET_RX_GROUP_LIST_MEMBERS'; rglId: string; memberRefs: EntityRef[] }
+  | { type: 'SET_RX_GROUP_LIST_MEMBERS'; rglId: string; memberRefs: RxGroupListMember[] }
   | {
       type: 'APPLY_CHANNEL_MERGES';
       selections: ChannelMergeSelection[];
@@ -341,7 +341,7 @@ interface CodeplugContextValue {
   addRxGroupList: (input: RxGroupListInput) => void;
   updateRxGroupList: (rglId: string, patch: Partial<RxGroupListInput>) => void;
   deleteRxGroupList: (rglId: string) => void;
-  setRxGroupListMembers: (rglId: string, memberRefs: EntityRef[]) => void;
+  setRxGroupListMembers: (rglId: string, memberRefs: RxGroupListMember[]) => void;
   applyChannelMerges: (
     selections: ChannelMergeSelection[],
     candidates: ChannelMergeCandidateGroup[],
@@ -517,7 +517,7 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'DELETE_RX_GROUP_LIST', rglId });
   }, []);
 
-  const setRxGroupListMembers = useCallback((rglId: string, memberRefs: EntityRef[]) => {
+  const setRxGroupListMembers = useCallback((rglId: string, memberRefs: RxGroupListMember[]) => {
     setPersistenceError(null);
     dispatch({ type: 'SET_RX_GROUP_LIST_MEMBERS', rglId, memberRefs });
   }, []);

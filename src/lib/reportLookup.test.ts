@@ -17,6 +17,7 @@ import {
   buildContact,
   buildImportedRxGroupList,
   buildRxGroupList,
+  buildRglMember,
   buildTalkGroup,
   buildZone,
 } from '../test/builders/index.ts';
@@ -69,9 +70,9 @@ describe('reportLookup', () => {
       id: 'r1',
       name: 'Scotland',
       memberRefs: [
-        { kind: 'talkGroup', id: 'tg1' },
-        { kind: 'contact', id: 'ct1' },
-        { kind: 'talkGroup', id: 'missing' },
+        buildRglMember({ kind: 'talkGroup', id: 'tg1' }),
+        buildRglMember({ kind: 'contact', id: 'ct1' }),
+        buildRglMember({ kind: 'talkGroup', id: 'missing' }),
       ],
     });
     const talkGroups = [buildTalkGroup({ id: 'tg1', name: 'Scotland', number: '950' })];
@@ -102,19 +103,19 @@ describe('reportLookup', () => {
       buildRxGroupList({
         id: 'r1',
         name: 'A',
-        memberRefs: [{ kind: 'talkGroup', id: 'tg1' }],
+        memberRefs: [buildRglMember({ kind: 'talkGroup', id: 'tg1' })],
       }),
       buildRxGroupList({
         id: 'r2',
         name: 'B',
-        memberRefs: [{ kind: 'contact', id: 'ct1' }],
+        memberRefs: [buildRglMember({ kind: 'contact', id: 'ct1' })],
       }),
       buildRxGroupList({
         id: 'r3',
         name: 'C',
         memberRefs: [
-          { kind: 'talkGroup', id: 'tg1' },
-          { kind: 'contact', id: 'ct1' },
+          buildRglMember({ kind: 'talkGroup', id: 'tg1' }),
+          buildRglMember({ kind: 'contact', id: 'ct1' }),
         ],
       }),
     ];
