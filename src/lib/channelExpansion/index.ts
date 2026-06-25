@@ -6,9 +6,10 @@ import {
   entityRefKey,
   entityRefsEqual,
   findContactById,
-  findTalkGroupById,
+  memberRefOnly,
   resolveContactRefByWireName,
   resolveRxGroupListIdByName,
+  rxGroupListMembersEqual,
 } from '../entityRefs.ts';
 import { CHANNEL_MODES, isAnalogMode, isDmrMode, type ChannelMode } from '../channelModes.ts';
 import type {
@@ -18,6 +19,7 @@ import type {
   Codeplug,
   Contact,
   RxGroupList,
+  RxGroupListMember,
   TalkGroup,
   Zone,
 } from '../../models/codeplug.ts';
@@ -344,9 +346,12 @@ function channelByIdFromChannels(channels: Channel[]): Map<string, Channel> {
   return new Map(channels.map((ch) => [ch.id, ch]));
 }
 
-function filterRglMemberRefs(memberRefs: EntityRef[], filter: TalkGroupMemberFilter): EntityRef[] {
+function filterRglMemberRefs(
+  memberRefs: RxGroupListMember[],
+  filter: TalkGroupMemberFilter,
+): RxGroupListMember[] {
   if (filter === 'all') return memberRefs;
-  return memberRefs.filter((ref) => ref.kind === 'talkGroup');
+  return memberRefs.filter((member) => member.ref.kind === 'talkGroup');
 }
 
 function expandableRglMembers(
@@ -354,7 +359,7 @@ function expandableRglMembers(
   codeplug: Codeplug,
   filter: TalkGroupMemberFilter,
   warnings?: string[],
-): EntityRef[] {
+): RxGroupListMember[] {
   if (!row.rxGroupListId) return [];
   const rgl = codeplug.rxGroupLists.find((r) => r.id === row.rxGroupListId);
   if (!rgl) return [];
@@ -382,17 +387,21 @@ export function stripTalkGroupExportSuffix(
   return name;
 }
 
-/** Resolve timeslot for a TG-expanded export row from member override or lean channel fallback. */
+/** Resolve timeslot for a TG-expanded export row from RGL member slot or contact override. */
 export function timeslotForExpandedMember(
-  member: EntityRef,
+  member: RxGroupListMember | EntityRef,
   codeplug: Codeplug,
   fallback: ChannelTimeslot | null,
 ): ChannelTimeslot | null {
-  const override =
-    member.kind === 'talkGroup'
-      ? (findTalkGroupById(member.id, codeplug.talkGroups)?.timeslotOverride ?? '')
-      : (findContactById(member.id, codeplug.contacts)?.timeslotOverride ?? '');
-  return parseTimeslotOverrideWire(override) ?? fallback;
+  if ('timeslot' in member && member.timeslot != null) {
+    return member.timeslot;
+  }
+  const ref = memberRefOnly(member);
+  if (ref.kind === 'contact') {
+    const override = findContactById(ref.id, codeplug.contacts)?.timeslotOverride ?? '';
+    return parseTimeslotOverrideWire(override) ?? fallback;
+  }
+  return fallback;
 }
 
 /** Second pass: expand digital rows with RX group lists into one row per member. */
@@ -448,7 +457,8 @@ export function expandTalkGroupsForExport(
     }
 
     for (const member of members) {
-      const fullMemberName = entityRefDisplayName(member, codeplug.talkGroups, codeplug.contacts);
+      const ref = member.ref;
+      const fullMemberName = entityRefDisplayName(ref, codeplug.talkGroups, codeplug.contacts);
       if (!fullMemberName) continue;
 
       const tgMode = options.multiTalkGroupExportNameMode ?? DEFAULT_MULTI_TG_EXPORT_NAME_MODE;
@@ -468,17 +478,17 @@ export function expandTalkGroupsForExport(
       if (tgMode === 'append') {
         base = `${row.wireName} ${fullMemberName}`;
       } else {
-        base = composeMultiTalkGroupWireName(sourceChannel, member, effectiveMode, wireCtx);
-        fixedSuffix = multiTalkGroupProtectedSuffix(sourceChannel, member, effectiveMode, wireCtx);
+        base = composeMultiTalkGroupWireName(sourceChannel, ref, effectiveMode, wireCtx);
+        fixedSuffix = multiTalkGroupProtectedSuffix(sourceChannel, ref, effectiveMode, wireCtx);
         const maxLen = options.maxNameLength;
         while (maxLen != null && base.length > maxLen) {
           const next = escalateMultiTalkGroupExportNameMode(effectiveMode);
           if (!next) break;
           effectiveMode = next;
-          base = composeMultiTalkGroupWireName(sourceChannel, member, effectiveMode, wireCtx);
+          base = composeMultiTalkGroupWireName(sourceChannel, ref, effectiveMode, wireCtx);
           fixedSuffix = multiTalkGroupProtectedSuffix(
             sourceChannel,
-            member,
+            ref,
             effectiveMode,
             wireCtx,
           );
@@ -486,7 +496,7 @@ export function expandTalkGroupsForExport(
       }
 
       const exportMemberLabel = entityRefExportLabel(
-        member,
+        ref,
         codeplug.talkGroups,
         codeplug.contacts,
         {
@@ -513,7 +523,7 @@ export function expandTalkGroupsForExport(
       result.push({
         ...row,
         wireName: candidate,
-        contactRef: member,
+        contactRef: ref,
         rxGroupListId: null,
         timeslot: timeslotForExpandedMember(member, codeplug, row.timeslot),
       });
@@ -624,18 +634,11 @@ export function channelTalkGroupStem(
   );
 }
 
-function memberRefsSetEqual(a: EntityRef[], b: EntityRef[]): boolean {
-  if (a.length !== b.length) return false;
-  const keysA = a.map(entityRefKey).sort();
-  const keysB = b.map(entityRefKey).sort();
-  return keysA.every((k, i) => k === keysB[i]);
-}
-
 function findRxGroupListByMembers(
-  memberRefs: EntityRef[],
+  memberRefs: RxGroupListMember[],
   rxGroupLists: RxGroupList[],
 ): RxGroupList | null {
-  return rxGroupLists.find((rgl) => memberRefsSetEqual(rgl.memberRefs, memberRefs)) ?? null;
+  return rxGroupLists.find((rgl) => rxGroupListMembersEqual(rgl.memberRefs, memberRefs)) ?? null;
 }
 
 function digitalRfContextMatch(a: Channel, b: Channel): boolean {
@@ -692,7 +695,7 @@ export function mergeChannelsToMultiTalkgroup(
   }
 
   const primary = sources[0];
-  const memberRefs: EntityRef[] = [];
+  const memberRefs: RxGroupListMember[] = [];
   const seen = new Set<string>();
   for (const ch of sources) {
     const ref = ch.contactRef;
@@ -700,7 +703,7 @@ export function mergeChannelsToMultiTalkgroup(
       const key = entityRefKey(ref);
       if (!seen.has(key)) {
         seen.add(key);
-        memberRefs.push(ref);
+        memberRefs.push({ ref });
       }
     }
   }

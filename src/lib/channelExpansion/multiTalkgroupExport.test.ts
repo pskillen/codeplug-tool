@@ -4,6 +4,7 @@ import {
   buildChannel,
   buildCodeplug,
   buildRxGroupList,
+  buildRglMember,
   buildTalkGroup,
   buildZone,
 } from '../../test/builders/codeplug.ts';
@@ -17,8 +18,8 @@ describe('multiTalkgroupExport integration', () => {
       id: 'rgl1',
       name: 'GB7GL',
       memberRefs: [
-        { kind: 'talkGroup', id: 'tg1' },
-        { kind: 'talkGroup', id: 'tg2' },
+        buildRglMember({ kind: 'talkGroup', id: 'tg1' }),
+        buildRglMember({ kind: 'talkGroup', id: 'tg2' }),
       ],
     });
     const codeplug = buildCodeplug({
@@ -75,7 +76,7 @@ describe('multiTalkgroupExport integration', () => {
     const rgl = buildRxGroupList({
       id: 'rgl1',
       name: 'GB7GL',
-      memberRefs: [{ kind: 'talkGroup', id: 'tg1' }],
+      memberRefs: [buildRglMember({ kind: 'talkGroup', id: 'tg1' })],
     });
     const ch = buildChannel({
       id: 'c1',
@@ -104,8 +105,8 @@ describe('multiTalkgroupExport integration', () => {
       id: 'rgl1',
       name: 'List',
       memberRefs: [
-        { kind: 'talkGroup', id: 'tg1' },
-        { kind: 'talkGroup', id: 'tg2' },
+        buildRglMember({ kind: 'talkGroup', id: 'tg1' }),
+        buildRglMember({ kind: 'talkGroup', id: 'tg2' }),
       ],
     });
     const ch = buildChannel({
