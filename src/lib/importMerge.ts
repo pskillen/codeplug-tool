@@ -22,6 +22,7 @@ import {
   resolveChannelRxGroupListIds,
   resolveRxGroupListMemberRefs,
 } from './entityRefs.ts';
+import { collapseTalkGroupTimeslotDuplicates, parseTalkGroupSlotWireName } from './import/opengd77/collapseTalkGroupTimeslotDuplicates.ts';
 import {
   resolveMultiModeChannelProfiles,
   mergeImportChannelsMultiTalkgroupBestEffort,
@@ -262,14 +263,32 @@ function mergeContacts(
   );
 }
 
+function reconcileIncomingTalkGroups(
+  incoming: TalkGroup[],
+  existing: TalkGroup[],
+): TalkGroup[] {
+  return incoming.map((tg) => {
+    const number = tg.number.trim();
+    if (!number) return tg;
+    const stem = parseTalkGroupSlotWireName(tg.name).stem;
+    if (!stem) return tg;
+    const match = existing.find(
+      (e) => e.number.trim() === number && parseTalkGroupSlotWireName(e.name).stem === stem,
+    );
+    if (!match) return tg;
+    return { ...tg, name: match.name };
+  });
+}
+
 function mergeTalkGroups(
   existing: TalkGroup[],
   incoming: TalkGroup[] | undefined,
   mode: ImportApplyMode,
 ): { items: TalkGroup[]; stats: EntityImportStats } {
+  const normalized = incoming ? reconcileIncomingTalkGroups(incoming, existing) : undefined;
   return mergeNamedEntities(
     existing,
-    incoming,
+    normalized,
     mode,
     talkGroupsImportEqual,
     mergeTalkGroupOntoExisting,
@@ -500,16 +519,40 @@ function applyImportInternal(
     unresolvedZoneMembers: unresolved,
   };
 
+  let merged: Codeplug = {
+    ...codeplug,
+    channels: resolvedChannels,
+    zones,
+    contacts,
+    talkGroups,
+    rxGroupLists: finalRxGroupLists,
+    meta: updateMeta(codeplug, result),
+  };
+
+  if (formatId === 'opengd77') {
+    merged = collapseTalkGroupTimeslotDuplicates(merged);
+    merged = {
+      ...merged,
+      channels: resolveChannelContactRefs(
+        resolveMultiModeChannelProfiles(
+          merged.channels,
+          merged.talkGroups,
+          merged.contacts,
+          merged.rxGroupLists,
+        ),
+        merged.talkGroups,
+        merged.contacts,
+      ),
+      rxGroupLists: resolveRxGroupListMemberRefs(
+        merged.rxGroupLists,
+        merged.talkGroups,
+        merged.contacts,
+      ),
+    };
+  }
+
   return {
-    codeplug: {
-      ...codeplug,
-      channels: resolvedChannels,
-      zones,
-      contacts,
-      talkGroups,
-      rxGroupLists: finalRxGroupLists,
-      meta: updateMeta(codeplug, result),
-    },
+    codeplug: merged,
     report: {
       ...reportBase,
       hasChanges: computeHasChanges(reportBase),
