@@ -7,7 +7,7 @@
 
 ## Overall status
 
-**Status:** In progress
+**Status:** In progress (slices 7–9 outstanding)
 
 **Branch:** `142/pskillen/talk-group-timeslot-expansion`
 
@@ -21,31 +21,39 @@
 
 ## Slice 2: Model + migration
 
-**Status:** Pending
+**Status:** Complete — `feat(model): store talk-group timeslots on RGL members (#142)`
 
 ---
 
 ## Slice 3: TG×TS export expansion lib
 
-**Status:** Pending
+**Status:** Complete — `feat(channelExpansion): expand talk groups by RGL slot demand (#142)`
 
 ---
 
 ## Slice 4: OpenGD77 export + DM32 follow-through
 
-**Status:** Pending
+**Status:** Complete — `feat(export): emit expanded talk-group contacts from RGL slots (#142)`
 
 ---
 
 ## Slice 5: CRUD + validation
 
-**Status:** Pending
+**Status:** Complete — `feat(crud): edit talk-group timeslots on RX group list members (#142)`
 
 ---
 
 ## Slice 6: Import collapse (OpenGD77 boundary)
 
-**Status:** Pending
+**Status:** Complete — `feat(import): collapse slot-suffixed talk groups on OpenGD77 import (#142)`
+
+---
+
+## Semantic round-trip tests
+
+**Status:** Complete — `test: assert OpenGD77 semantic round-trip on test-data (#142)`
+
+Fidelity contract wired in `docs: add import/export fidelity contract and wire into guides`.
 
 ---
 
