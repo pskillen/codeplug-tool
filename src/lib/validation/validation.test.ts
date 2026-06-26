@@ -4,7 +4,7 @@ import {
   channelModeProfileDefaults,
   emptyCodeplug,
 } from '../../models/codeplug.ts';
-import { buildChannel } from '../../test/builders/index.ts';
+import { buildChannel, buildRglMember } from '../../test/builders/index.ts';
 import { hasValidationErrors, isSimplex, validateChannel } from './channel.ts';
 import { validateContact } from './contact.ts';
 import { validateRxGroupList } from './rxGroupList.ts';
@@ -95,7 +95,7 @@ describe('validateContact', () => {
   it('rejects cross-name collision with talk group', () => {
     const cp = {
       ...emptyCodeplug(),
-      talkGroups: [{ id: 'tg1', name: 'Shared', number: '9', timeslotOverride: '' }],
+      talkGroups: [{ id: 'tg1', name: 'Shared', number: '9' }],
     };
     const issues = validateContact({ name: 'Shared' }, cp);
     expect(hasValidationErrors(issues)).toBe(true);
@@ -105,7 +105,7 @@ describe('validateContact', () => {
 describe('validateRxGroupList', () => {
   it('warns on unresolved member refs', () => {
     const issues = validateRxGroupList(
-      { name: 'List', memberRefs: [{ kind: 'talkGroup', id: 'missing' }] },
+      { name: 'List', memberRefs: [buildRglMember({ kind: 'talkGroup', id: 'missing' })] },
       emptyCodeplug(),
     );
     expect(issues.some((i) => i.severity === 'warning')).toBe(true);
@@ -120,10 +120,9 @@ describe('validateRxGroupList', () => {
         id: `tg-${i}`,
         name,
         number: String(i),
-        timeslotOverride: '',
       })),
     };
-    const memberRefs = members.map((_, i) => ({ kind: 'talkGroup' as const, id: `tg-${i}` }));
+    const memberRefs = members.map((_, i) => buildRglMember({ kind: 'talkGroup', id: `tg-${i}` }));
     const issues = validateRxGroupList({ name: 'Big', memberRefs }, cp);
     expect(hasValidationErrors(issues)).toBe(false);
   });

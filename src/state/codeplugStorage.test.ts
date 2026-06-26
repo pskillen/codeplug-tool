@@ -387,10 +387,52 @@ describe('codeplugStorage', () => {
     const state = deserializeProjects(json);
     const rgl = state!.projects[0].codeplug.rxGroupLists[0];
     expect(rgl.memberRefs).toEqual([
-      { kind: 'talkGroup', id: 'tg-1' },
-      { kind: 'contact', id: 'ct-1' },
+      { ref: { kind: 'talkGroup', id: 'tg-1' } },
+      { ref: { kind: 'contact', id: 'ct-1' } },
     ]);
     expect(getMemberWireNames(rgl)).toEqual(['Scotland', 'MM9PDY', 'Missing']);
+  });
+
+  it('preserves RGL member timeslots across storage round-trip', () => {
+    const codeplug = {
+      channels: [],
+      zones: [],
+      talkGroups: [{ id: 'tg-1', name: 'Scotland', number: '950' }],
+      contacts: [],
+      rxGroupLists: [
+        {
+          id: 'rgl-1',
+          name: 'Scotland',
+          memberRefs: [{ ref: { kind: 'talkGroup', id: 'tg-1' }, timeslot: 1 }],
+          meta: {
+            imported: {
+              formatId: 'opengd77',
+              sourceFile: 'TG_Lists.csv',
+              importedAt: '2026-01-01T00:00:00.000Z',
+              memberWireNames: ['Scotland'],
+            },
+          },
+        },
+      ],
+      meta: { schemaVersion: CODEPLUG_SCHEMA_VERSION, importedAt: null, sourceFiles: [] },
+    };
+    const json = JSON.stringify({
+      version: CODEPLUG_STORAGE_VERSION,
+      activeProjectId: null,
+      projects: [
+        {
+          id: 'p1',
+          name: 'Timeslot test',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+          codeplug,
+        },
+      ],
+    });
+
+    const state = deserializeProjects(json);
+    const rgl = state!.projects[0].codeplug.rxGroupLists[0];
+    expect(rgl.memberRefs).toEqual([{ ref: { kind: 'talkGroup', id: 'tg-1' }, timeslot: 1 }]);
   });
 
   it('isPersistableProjects is false for an empty set', () => {

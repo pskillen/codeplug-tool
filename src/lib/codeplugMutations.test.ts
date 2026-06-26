@@ -32,6 +32,7 @@ import {
   buildChannel,
   buildImportedRxGroupList,
   buildImportedZone,
+  buildRglMember,
   buildRxGroupList,
   buildZone,
 } from '../test/builders/index.ts';
@@ -212,7 +213,6 @@ describe('codeplugMutations', () => {
       const cp = addTalkGroup(emptyCodeplug(), {
         name: 'Scotland',
         number: '950',
-        timeslotOverride: '',
       });
       expect(cp.talkGroups).toHaveLength(1);
       expect(cp.talkGroups[0].id).toBe('gen-1');
@@ -222,7 +222,7 @@ describe('codeplugMutations', () => {
     it('updateTalkGroup rename propagates RGL member wire names; channel refs stay id-based', () => {
       const cp = {
         ...emptyCodeplug(),
-        talkGroups: [{ id: 'tg-1', name: 'Old TG', number: '9', timeslotOverride: '' }],
+        talkGroups: [{ id: 'tg-1', name: 'Old TG', number: '9' }],
         channels: [
           makeChannel('ch-1', 'GB3DA', {
             contactRef: { kind: 'talkGroup', id: 'tg-1' },
@@ -241,7 +241,7 @@ describe('codeplugMutations', () => {
     it('deleteTalkGroup clears channel contactRef and removes from RGL members', () => {
       const cp = {
         ...emptyCodeplug(),
-        talkGroups: [{ id: 'tg-1', name: 'Scotland', number: '950', timeslotOverride: '' }],
+        talkGroups: [{ id: 'tg-1', name: 'Scotland', number: '950' }],
         channels: [
           makeChannel('ch-1', 'GB3DA', {
             contactRef: { kind: 'talkGroup', id: 'tg-1' },
@@ -323,11 +323,10 @@ describe('codeplugMutations', () => {
         id: `tg-${i}`,
         name: `TG${i}`,
         number: String(i),
-        timeslotOverride: '',
       }));
       const memberRefs = [
-        ...talkGroups.map((tg) => ({ kind: 'talkGroup' as const, id: tg.id })),
-        { kind: 'talkGroup' as const, id: 'tg-0' },
+        ...talkGroups.map((tg) => buildRglMember({ kind: 'talkGroup', id: tg.id })),
+        buildRglMember({ kind: 'talkGroup', id: 'tg-0' }),
       ];
       const cp = {
         ...emptyCodeplug(),
@@ -336,7 +335,7 @@ describe('codeplugMutations', () => {
       };
       const next = setRxGroupListMembers(cp, 'rgl-1', memberRefs);
       expect(next.rxGroupLists[0].memberRefs).toHaveLength(40);
-      expect(next.rxGroupLists[0].memberRefs[0].id).toBe('tg-0');
+      expect(next.rxGroupLists[0].memberRefs[0].ref.id).toBe('tg-0');
     });
   });
 

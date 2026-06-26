@@ -159,7 +159,6 @@ export interface TalkGroup {
   id: string;
   name: string;
   number: string;
-  timeslotOverride: string;
   /** DMR call type on CPS wire — group vs private (DM32 Talkgroups.csv). */
   callType?: 'group' | 'private';
   /** Shorter export label used by name shortening at the export boundary. */
@@ -167,11 +166,17 @@ export interface TalkGroup {
   meta?: EntityMeta;
 }
 
+/** One RX group list membership — entity ref plus optional per-member time slot. */
+export interface RxGroupListMember {
+  ref: EntityRef;
+  timeslot?: ChannelTimeslot | null;
+}
+
 /** RX group list — members resolved by internal EntityRef ids. */
 export interface RxGroupList {
   id: string;
   name: string;
-  memberRefs: EntityRef[];
+  memberRefs: RxGroupListMember[];
   meta?: EntityMeta;
 }
 
@@ -203,7 +208,7 @@ export interface Codeplug {
   meta: CodeplugMeta;
 }
 
-export const CODEPLUG_SCHEMA_VERSION = 16;
+export const CODEPLUG_SCHEMA_VERSION = 17;
 
 let idGenerator: () => string = () => crypto.randomUUID();
 

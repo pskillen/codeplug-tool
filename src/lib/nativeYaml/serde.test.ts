@@ -44,7 +44,6 @@ function sampleProject() {
     id: tgId,
     name: 'Worldwide',
     number: '91',
-    timeslotOverride: '',
     callType: 'group',
   };
 
@@ -59,8 +58,8 @@ function sampleProject() {
     id: rglId,
     name: 'All',
     memberRefs: [
-      { kind: 'talkGroup', id: tgId },
-      { kind: 'contact', id: contactId },
+      { ref: { kind: 'talkGroup', id: tgId } },
+      { ref: { kind: 'contact', id: contactId } },
     ],
   };
 

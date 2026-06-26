@@ -1,4 +1,5 @@
 import type { Channel, Contact, RxGroupList, TalkGroup, Zone } from '../models/codeplug.ts';
+import type { ChannelTimeslot } from './channelFields/index.ts';
 import { buildNameToChannelId } from './codeplug.ts';
 import { getMemberWireNames } from './entityProvenance.ts';
 import {
@@ -82,6 +83,34 @@ export interface ResolvedRxMember {
   name: string;
   kind: 'talkGroup' | 'contact' | 'unresolved';
   entity: TalkGroup | Contact | null;
+  /** Per-member RGL timeslot for talk groups; null when unset or not applicable. */
+  timeslot: ChannelTimeslot | null;
+}
+
+/** Display label for an RGL member timeslot. */
+export function formatRglMemberTimeslot(timeslot: ChannelTimeslot | null | undefined): string {
+  if (timeslot === 1) return '1';
+  if (timeslot === 2) return '2';
+  return '—';
+}
+
+/** Distinct timeslots a talk group uses within one RX group list. */
+export function talkGroupMemberTimeslotsInList(
+  rgl: RxGroupList,
+  talkGroupId: string,
+): ChannelTimeslot[] {
+  const slots = new Set<ChannelTimeslot>();
+  for (const member of rgl.memberRefs) {
+    if (member.ref.kind !== 'talkGroup' || member.ref.id !== talkGroupId) continue;
+    if (member.timeslot === 1 || member.timeslot === 2) slots.add(member.timeslot);
+  }
+  return [...slots].sort();
+}
+
+/** Compact timeslot summary for talk-group detail tables (e.g. `1`, `2`, `1 & 2`). */
+export function formatTalkGroupTimeslotsInList(slots: ChannelTimeslot[]): string {
+  if (slots.length === 0) return '—';
+  return slots.map((slot) => String(slot)).join(' & ');
 }
 
 export function resolveRxGroupListMembers(
@@ -90,17 +119,22 @@ export function resolveRxGroupListMembers(
   contacts: Contact[],
 ): ResolvedRxMember[] {
   if (rgl.memberRefs.length > 0) {
-    return rgl.memberRefs.map((ref) => {
+    return rgl.memberRefs.map((member) => {
+      const ref = member.ref;
       const name = entityRefDisplayName(ref, talkGroups, contacts);
+      const timeslot =
+        ref.kind === 'talkGroup' && (member.timeslot === 1 || member.timeslot === 2)
+          ? member.timeslot
+          : null;
       if (!name) {
-        return { name: '', kind: 'unresolved' as const, entity: null };
+        return { name: '', kind: 'unresolved' as const, entity: null, timeslot };
       }
       if (ref.kind === 'talkGroup') {
         const tg = talkGroups.find((t) => t.id === ref.id) ?? null;
-        return { name, kind: 'talkGroup' as const, entity: tg };
+        return { name, kind: 'talkGroup' as const, entity: tg, timeslot };
       }
       const contact = contacts.find((c) => c.id === ref.id) ?? null;
-      return { name, kind: 'contact' as const, entity: contact };
+      return { name, kind: 'contact' as const, entity: contact, timeslot: null };
     });
   }
 
@@ -109,10 +143,10 @@ export function resolveRxGroupListMembers(
 
   return getMemberWireNames(rgl).map((name) => {
     const tg = tgByName.get(name);
-    if (tg) return { name, kind: 'talkGroup' as const, entity: tg };
+    if (tg) return { name, kind: 'talkGroup' as const, entity: tg, timeslot: null };
     const contact = contactByName.get(name);
-    if (contact) return { name, kind: 'contact' as const, entity: contact };
-    return { name, kind: 'unresolved' as const, entity: null };
+    if (contact) return { name, kind: 'contact' as const, entity: contact, timeslot: null };
+    return { name, kind: 'unresolved' as const, entity: null, timeslot: null };
   });
 }
 
@@ -147,7 +181,7 @@ export function rxGroupListsContainingMemberRef(
   ref: EntityRef,
   lists: RxGroupList[],
 ): RxGroupList[] {
-  return lists.filter((rgl) => rgl.memberRefs.some((member) => entityRefsEqual(member, ref)));
+  return lists.filter((rgl) => rgl.memberRefs.some((member) => entityRefsEqual(member.ref, ref)));
 }
 
 /** @deprecated use rxGroupListsContainingMemberRef */

@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import RxGroupListMemberPicker from '../components/crud/RxGroupListMemberPicker.tsx';
 import { FormPage, FormSection } from '../components/ui/index.ts';
-import type { EntityRef } from '../models/codeplug.ts';
+import type { RxGroupListMember } from '../models/codeplug.ts';
 import { findEntityById } from '../lib/reportLookup.ts';
 import { hasValidationErrors } from '../lib/validation/channel.ts';
 import { validateRxGroupList } from '../lib/validation/rxGroupList.ts';
@@ -19,7 +19,7 @@ export default function RxGroupListEdit() {
   const existing = !isNew && id ? findEntityById(codeplug.rxGroupLists, id) : null;
 
   const [name, setName] = useState(existing?.name ?? '');
-  const [memberRefs, setMemberRefs] = useState<EntityRef[]>(existing?.memberRefs ?? []);
+  const [memberRefs, setMemberRefs] = useState<RxGroupListMember[]>(existing?.memberRefs ?? []);
   const [formError, setFormError] = useState<string | null>(null);
 
   if (!isNew && !existing) {

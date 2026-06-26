@@ -1,9 +1,9 @@
 import type { Codeplug } from '../../models/codeplug.ts';
-import type { EntityRef } from '../../lib/entityRefs.ts';
+import type { RxGroupListMember } from '../../models/codeplug.ts';
 import type { ValidationIssue } from './channel.ts';
 
 export function validateRxGroupList(
-  input: { name: string; memberRefs?: EntityRef[] },
+  input: { name: string; memberRefs?: RxGroupListMember[] },
   codeplug: Codeplug,
   rglId?: string,
 ): ValidationIssue[] {
@@ -24,11 +24,11 @@ export function validateRxGroupList(
 
   const members = input.memberRefs;
   if (members) {
-    const unresolved = members.filter((ref) => {
-      if (ref.kind === 'talkGroup') {
-        return !codeplug.talkGroups.some((tg) => tg.id === ref.id);
+    const unresolved = members.filter((member) => {
+      if (member.ref.kind === 'talkGroup') {
+        return !codeplug.talkGroups.some((tg) => tg.id === member.ref.id);
       }
-      return !codeplug.contacts.some((c) => c.id === ref.id);
+      return !codeplug.contacts.some((c) => c.id === member.ref.id);
     });
     if (unresolved.length > 0) {
       issues.push({

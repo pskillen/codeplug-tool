@@ -7,9 +7,12 @@ import {
   channelsWithRxGroupListId,
   findEntityById,
   formatReferenceCount,
+  formatRglMemberTimeslot,
+  formatTalkGroupTimeslotsInList,
   resolveRxGroupListMembers,
   rxGroupListsContainingMemberRef,
   sortByName,
+  talkGroupMemberTimeslotsInList,
   zonesContainingChannel,
 } from './reportLookup.ts';
 import {
@@ -17,6 +20,7 @@ import {
   buildContact,
   buildImportedRxGroupList,
   buildRxGroupList,
+  buildRglMember,
   buildTalkGroup,
   buildZone,
 } from '../test/builders/index.ts';
@@ -69,15 +73,18 @@ describe('reportLookup', () => {
       id: 'r1',
       name: 'Scotland',
       memberRefs: [
-        { kind: 'talkGroup', id: 'tg1' },
-        { kind: 'contact', id: 'ct1' },
-        { kind: 'talkGroup', id: 'missing' },
+        buildRglMember({ kind: 'talkGroup', id: 'tg1' }, 1),
+        buildRglMember({ kind: 'contact', id: 'ct1' }),
+        buildRglMember({ kind: 'talkGroup', id: 'missing' }, 2),
       ],
     });
     const talkGroups = [buildTalkGroup({ id: 'tg1', name: 'Scotland', number: '950' })];
     const contacts = [buildContact({ id: 'ct1', name: 'MM9PDY', identifier: '123' })];
     const resolved = resolveRxGroupListMembers(rgl, talkGroups, contacts);
     expect(resolved.map((m) => m.kind)).toEqual(['talkGroup', 'contact', 'unresolved']);
+    expect(resolved[0].timeslot).toBe(1);
+    expect(resolved[1].timeslot).toBeNull();
+    expect(resolved[2].timeslot).toBe(2);
   });
 
   it('resolveRxGroupListMembers falls back to provenance wire names', () => {
@@ -102,19 +109,19 @@ describe('reportLookup', () => {
       buildRxGroupList({
         id: 'r1',
         name: 'A',
-        memberRefs: [{ kind: 'talkGroup', id: 'tg1' }],
+        memberRefs: [buildRglMember({ kind: 'talkGroup', id: 'tg1' })],
       }),
       buildRxGroupList({
         id: 'r2',
         name: 'B',
-        memberRefs: [{ kind: 'contact', id: 'ct1' }],
+        memberRefs: [buildRglMember({ kind: 'contact', id: 'ct1' })],
       }),
       buildRxGroupList({
         id: 'r3',
         name: 'C',
         memberRefs: [
-          { kind: 'talkGroup', id: 'tg1' },
-          { kind: 'contact', id: 'ct1' },
+          buildRglMember({ kind: 'talkGroup', id: 'tg1' }),
+          buildRglMember({ kind: 'contact', id: 'ct1' }),
         ],
       }),
     ];
@@ -126,5 +133,21 @@ describe('reportLookup', () => {
   it('formatReferenceCount renders empty for zero', () => {
     expect(formatReferenceCount(0)).toBe('');
     expect(formatReferenceCount(3)).toBe('3');
+  });
+
+  it('talkGroupMemberTimeslotsInList collects distinct slots', () => {
+    const rgl = buildRxGroupList({
+      id: 'r1',
+      name: 'Scotland',
+      memberRefs: [
+        buildRglMember({ kind: 'talkGroup', id: 'tg1' }, 1),
+        buildRglMember({ kind: 'talkGroup', id: 'tg1' }, 2),
+        buildRglMember({ kind: 'talkGroup', id: 'tg2' }, 1),
+      ],
+    });
+    expect(talkGroupMemberTimeslotsInList(rgl, 'tg1')).toEqual([1, 2]);
+    expect(formatTalkGroupTimeslotsInList([1, 2])).toBe('1 & 2');
+    expect(formatRglMemberTimeslot(1)).toBe('1');
+    expect(formatRglMemberTimeslot(null)).toBe('—');
   });
 });

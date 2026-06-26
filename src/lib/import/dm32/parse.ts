@@ -196,7 +196,6 @@ export function parseTalkGroups(text: string): TalkGroup[] {
         id: newId(),
         name,
         number: (cells[idx[TALKGROUP_COL.id]] ?? '').trim(),
-        timeslotOverride: '',
         callType: typeWire === 'Private Call' ? 'private' : 'group',
       }),
     );

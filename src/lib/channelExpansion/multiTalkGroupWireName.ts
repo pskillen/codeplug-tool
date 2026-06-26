@@ -111,9 +111,9 @@ export function parseTimeslotOverrideWire(timeslotOverride: string): ChannelTime
   return null;
 }
 
-function talkGroupNumberToken(tg: TalkGroup): string {
+function talkGroupNumberToken(tg: TalkGroup, timeslot?: ChannelTimeslot | null): string {
   const number = tg.number.trim();
-  const ts = normaliseTalkGroupTimeslotToken(tg.timeslotOverride);
+  const ts = timeslot != null ? String(timeslot) : '';
   if (number && ts) return `${number}/${ts}`;
   return number;
 }

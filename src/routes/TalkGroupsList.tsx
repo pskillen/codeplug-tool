@@ -51,12 +51,6 @@ export default function TalkGroupsList() {
             sortValue: (tg) => tg.number || '',
           },
           {
-            key: 'ts',
-            header: 'Timeslot',
-            render: (tg) => tg.timeslotOverride || '—',
-            sortValue: (tg) => tg.timeslotOverride || '',
-          },
-          {
             key: 'usage',
             header: 'Channels / Groups using',
             render: (tg) => {

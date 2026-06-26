@@ -12,10 +12,12 @@ import {
 import type { EntityMeta } from '../lib/entityProvenance.ts';
 import {
   normaliseWireName,
+  normalizeRxGroupListMembers,
   resolveChannelContactRefs,
   resolveChannelRxGroupListIds,
   resolveRxGroupListMemberRefs,
 } from '../lib/entityRefs.ts';
+import { parseTimeslotOverrideWire } from '../lib/channelExpansion/multiTalkGroupWireName.ts';
 import { normalizeChannelMode } from '../lib/channelModes.ts';
 import { normalizeToneValue, normalizeTxAdmit } from '../lib/channelFields/index.ts';
 import { coerceLegacyStringField } from '../lib/import/opengd77/channelWire.ts';
@@ -249,7 +251,7 @@ function migrateRxGroupList(
   const rgl: RxGroupList = {
     id: String(raw.id ?? ''),
     name: String(raw.name ?? ''),
-    memberRefs: Array.isArray(raw.memberRefs) ? (raw.memberRefs as RxGroupList['memberRefs']) : [],
+    memberRefs: normalizeRxGroupListMembers(raw.memberRefs),
     meta: existingMeta,
   };
 
@@ -307,20 +309,55 @@ function migrateContact(raw: Record<string, unknown>): Contact {
   };
 }
 
-function migrateTalkGroup(raw: Partial<TalkGroup>): TalkGroup {
+function migrateTalkGroup(raw: Partial<TalkGroup> & { timeslotOverride?: string }): TalkGroup & {
+  timeslotOverride?: string;
+} {
   const abbreviation =
     typeof raw.abbreviation === 'string' && raw.abbreviation.trim() !== ''
       ? raw.abbreviation
+      : undefined;
+  const timeslotOverride =
+    typeof raw.timeslotOverride === 'string' && raw.timeslotOverride.trim() !== ''
+      ? raw.timeslotOverride
       : undefined;
   return {
     id: raw.id ?? '',
     name: raw.name ?? '',
     number: raw.number ?? '',
-    timeslotOverride: raw.timeslotOverride ?? '',
     callType: raw.callType ?? 'group',
     ...(abbreviation !== undefined ? { abbreviation } : {}),
+    ...(timeslotOverride !== undefined ? { timeslotOverride } : {}),
     meta: raw.meta,
   };
+}
+
+function applySchemaV17Migration(
+  talkGroups: Array<TalkGroup & { timeslotOverride?: string }>,
+  rxGroupLists: RxGroupList[],
+): { talkGroups: TalkGroup[]; rxGroupLists: RxGroupList[] } {
+  const slotByTalkGroupId = new Map<string, 1 | 2>();
+  for (const tg of talkGroups) {
+    if (!tg.timeslotOverride) continue;
+    const slot = parseTimeslotOverrideWire(tg.timeslotOverride);
+    if (slot) slotByTalkGroupId.set(tg.id, slot);
+  }
+
+  const migratedLists = rxGroupLists.map((rgl) => ({
+    ...rgl,
+    memberRefs: rgl.memberRefs.map((member) => {
+      if (member.ref.kind !== 'talkGroup' || member.timeslot != null) return member;
+      const slot = slotByTalkGroupId.get(member.ref.id);
+      return slot != null ? { ...member, timeslot: slot } : member;
+    }),
+  }));
+
+  const migratedTalkGroups: TalkGroup[] = talkGroups.map((tg) => {
+    const { timeslotOverride, ...rest } = tg;
+    void timeslotOverride;
+    return rest;
+  });
+
+  return { talkGroups: migratedTalkGroups, rxGroupLists: migratedLists };
 }
 
 /** Normalise a persisted codeplug (v1–v6) to the current schema. */
@@ -340,26 +377,35 @@ export function migrateCodeplug(value: unknown): Codeplug | null {
     ? (raw.zones as Record<string, unknown>[]).map((z) => migrateZone(z, projectImportedAt))
     : [];
   const talkGroups = Array.isArray(raw.talkGroups)
-    ? (raw.talkGroups as Partial<TalkGroup>[]).map(migrateTalkGroup)
+    ? (raw.talkGroups as Array<Partial<TalkGroup> & { timeslotOverride?: string }>).map(
+        migrateTalkGroup,
+      )
     : [];
   const contacts = Array.isArray(raw.contacts)
     ? (raw.contacts as Record<string, unknown>[]).map(migrateContact)
     : [];
 
-  const rxGroupLists = resolveRxGroupListMemberRefs(
+  let rxGroupLists = resolveRxGroupListMemberRefs(
     migrateRxGroupLists(raw, projectImportedAt),
     talkGroups,
     contacts,
   );
 
+  let migratedTalkGroups = talkGroups;
+  if (meta.schemaVersion < 17) {
+    const v17 = applySchemaV17Migration(talkGroups, rxGroupLists);
+    migratedTalkGroups = v17.talkGroups;
+    rxGroupLists = v17.rxGroupLists;
+  }
+
   return {
     channels: resolveChannelContactRefs(
       resolveChannelRxGroupListIds(channels, rxGroupLists),
-      talkGroups,
+      migratedTalkGroups,
       contacts,
     ),
     zones,
-    talkGroups,
+    talkGroups: migratedTalkGroups,
     rxGroupLists,
     contacts,
     meta: {

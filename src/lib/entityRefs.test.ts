@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildContact, buildTalkGroup } from '../test/builders/index.ts';
+import { buildContact, buildRglMember, buildTalkGroup } from '../test/builders/index.ts';
 import {
   contactRefWireNameForExport,
   entityRefDisplayName,
@@ -9,6 +9,7 @@ import {
   parseEntityRefKey,
   resolveContactRefByWireName,
   resolveMemberRefsByWireNames,
+  resolveRxGroupListMemberRefs,
   resolveRxGroupListIdByName,
   rxGroupListWireNameForExport,
 } from './entityRefs.ts';
@@ -51,8 +52,8 @@ describe('entityRefs', () => {
       contacts,
     );
     expect(memberRefs).toEqual([
-      { kind: 'talkGroup', id: 'tg-1' },
-      { kind: 'contact', id: 'ct-1' },
+      { ref: { kind: 'talkGroup', id: 'tg-1' } },
+      { ref: { kind: 'contact', id: 'ct-1' } },
     ]);
     expect(unresolved).toEqual(['Ghost']);
   });
@@ -78,13 +79,58 @@ describe('entityRefs', () => {
     expect(
       memberRefsToWireNames(
         [
-          { kind: 'contact', id: 'ct-1' },
-          { kind: 'talkGroup', id: 'tg-1' },
+          buildRglMember({ kind: 'contact', id: 'ct-1' }),
+          buildRglMember({ kind: 'talkGroup', id: 'tg-1' }),
         ],
         talkGroups,
         contacts,
       ),
     ).toEqual(['MM9PDY', 'Scotland']);
+  });
+
+  it('resolveRxGroupListMemberRefs preserves persisted member timeslots', () => {
+    const rxGroupLists = [
+      {
+        id: 'rgl-1',
+        name: 'Scotland',
+        memberRefs: [buildRglMember({ kind: 'talkGroup', id: 'tg-1' }, 1)],
+        meta: {
+          imported: {
+            formatId: 'opengd77',
+            sourceFile: 'TG_Lists.csv',
+            importedAt: '2026-01-01T00:00:00.000Z',
+            memberWireNames: ['Scotland'],
+          },
+        },
+      },
+    ];
+    const resolved = resolveRxGroupListMemberRefs(rxGroupLists, talkGroups, contacts);
+    expect(resolved[0].memberRefs).toEqual([
+      { ref: { kind: 'talkGroup', id: 'tg-1' }, timeslot: 1 },
+    ]);
+  });
+
+  it('resolveRxGroupListMemberRefs fills empty memberRefs from wire names', () => {
+    const rxGroupLists = [
+      {
+        id: 'rgl-1',
+        name: 'Scotland',
+        memberRefs: [],
+        meta: {
+          imported: {
+            formatId: 'opengd77',
+            sourceFile: 'TG_Lists.csv',
+            importedAt: '2026-01-01T00:00:00.000Z',
+            memberWireNames: ['Scotland', 'MM9PDY'],
+          },
+        },
+      },
+    ];
+    const resolved = resolveRxGroupListMemberRefs(rxGroupLists, talkGroups, contacts);
+    expect(resolved[0].memberRefs).toEqual([
+      { ref: { kind: 'talkGroup', id: 'tg-1' } },
+      { ref: { kind: 'contact', id: 'ct-1' } },
+    ]);
   });
 
   it('resolveRxGroupListIdByName resolves list id', () => {

@@ -171,7 +171,7 @@ export function parseContacts(text: string): ParsedContacts {
     const timeslotOverride = get(CONTACT_COL.tsOverride);
 
     if (idType.toLowerCase() === 'group') {
-      const base: TalkGroup = { id: newId(), name, number, timeslotOverride };
+      const base: TalkGroup = { id: newId(), name, number };
       talkGroups.push(stamp(base));
     } else {
       const base: Contact = {

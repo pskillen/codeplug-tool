@@ -218,7 +218,6 @@ Scotland TS1,2355,Group,1`;
       id: 'c-1',
       name: 'Local 9',
       number: '9',
-      timeslotOverride: 'Disabled',
     });
     expect(contacts[0]).toMatchObject({
       id: 'c-2',

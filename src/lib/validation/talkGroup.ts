@@ -2,7 +2,7 @@ import type { Codeplug } from '../../models/codeplug.ts';
 import type { ValidationIssue } from './channel.ts';
 
 export function validateTalkGroup(
-  input: { name: string; number?: string; timeslotOverride?: string },
+  input: { name: string; number?: string },
   codeplug: Codeplug,
   talkGroupId?: string,
 ): ValidationIssue[] {

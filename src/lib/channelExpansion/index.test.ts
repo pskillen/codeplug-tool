@@ -4,6 +4,7 @@ import {
   buildCodeplug,
   buildContact,
   buildRxGroupList,
+  buildRglMember,
   buildTalkGroup,
 } from '../../test/builders/codeplug.ts';
 import {
@@ -444,8 +445,8 @@ describe('channelExpansion', () => {
       id: 'rgl1',
       name: 'GB7GL',
       memberRefs: [
-        { kind: 'talkGroup', id: 'tg1' },
-        { kind: 'talkGroup', id: 'tg2' },
+        buildRglMember({ kind: 'talkGroup', id: 'tg1' }),
+        buildRglMember({ kind: 'talkGroup', id: 'tg2' }),
       ],
     });
     const ch = buildChannel({
@@ -472,23 +473,21 @@ describe('channelExpansion', () => {
     expect(rows.map((r) => r.contactRef?.id).sort()).toEqual(['tg1', 'tg2']);
   });
 
-  it('expandTalkGroupsForExport applies member timeslotOverride to expanded rows', () => {
+  it('expandTalkGroupsForExport applies member timeslot to expanded rows', () => {
     const tgTs2 = buildTalkGroup({
       id: 'tg1',
       name: 'Scotland TS2',
-      timeslotOverride: 'Slot 2',
     });
     const tgTs1 = buildTalkGroup({
       id: 'tg2',
       name: 'Scot West TS1',
-      timeslotOverride: 'Slot 1',
     });
     const rgl = buildRxGroupList({
       id: 'rgl1',
       name: 'GB7GL',
       memberRefs: [
-        { kind: 'talkGroup', id: 'tg1' },
-        { kind: 'talkGroup', id: 'tg2' },
+        buildRglMember({ kind: 'talkGroup', id: 'tg1' }, 2),
+        buildRglMember({ kind: 'talkGroup', id: 'tg2' }, 1),
       ],
     });
     const ch = buildChannel({
@@ -515,19 +514,18 @@ describe('channelExpansion', () => {
     expect(byTg.get('tg2')).toBe(1);
   });
 
-  it('expandTalkGroupsForExport falls back to lean channel timeslot when override empty', () => {
-    const tg = buildTalkGroup({ id: 'tg1', name: 'Scotland TS1', timeslotOverride: '' });
+  it('expandTalkGroupsForExport falls back to lean channel timeslot when member slot unset', () => {
+    const tg = buildTalkGroup({ id: 'tg1', name: 'Scotland TS1' });
     const tgDisabled = buildTalkGroup({
       id: 'tg2',
       name: 'Local 9',
-      timeslotOverride: 'Disabled',
     });
     const rgl = buildRxGroupList({
       id: 'rgl1',
       name: 'GB7GL',
       memberRefs: [
-        { kind: 'talkGroup', id: 'tg1' },
-        { kind: 'talkGroup', id: 'tg2' },
+        buildRglMember({ kind: 'talkGroup', id: 'tg1' }),
+        buildRglMember({ kind: 'talkGroup', id: 'tg2' }),
       ],
     });
     const ch = buildChannel({
@@ -559,7 +557,7 @@ describe('channelExpansion', () => {
     const rgl = buildRxGroupList({
       id: 'rgl1',
       name: 'List',
-      memberRefs: [{ kind: 'contact', id: 'ct1' }],
+      memberRefs: [buildRglMember({ kind: 'contact', id: 'ct1' })],
     });
     const ch = buildChannel({
       id: 'c1',
@@ -587,7 +585,7 @@ describe('channelExpansion', () => {
     const rgl = buildRxGroupList({
       id: 'rgl1',
       name: 'List',
-      memberRefs: [{ kind: 'talkGroup', id: 'tg1' }],
+      memberRefs: [buildRglMember({ kind: 'talkGroup', id: 'tg1' })],
     });
     const codeplug = buildCodeplug({ talkGroups: [tg1], rxGroupLists: [rgl] });
     const ch = buildChannel({
@@ -610,8 +608,8 @@ describe('channelExpansion', () => {
       id: 'rgl1',
       name: 'List',
       memberRefs: [
-        { kind: 'talkGroup', id: 'tg1' },
-        { kind: 'contact', id: 'ct1' },
+        buildRglMember({ kind: 'talkGroup', id: 'tg1' }),
+        buildRglMember({ kind: 'contact', id: 'ct1' }),
       ],
     });
     const codeplug = buildCodeplug({
@@ -642,8 +640,8 @@ describe('channelExpansion', () => {
       id: 'rgl1',
       name: 'GB7GL',
       memberRefs: [
-        { kind: 'talkGroup', id: 'tg1' },
-        { kind: 'talkGroup', id: 'tg2' },
+        buildRglMember({ kind: 'talkGroup', id: 'tg1' }),
+        buildRglMember({ kind: 'talkGroup', id: 'tg2' }),
       ],
     });
     const codeplug = buildCodeplug({ talkGroups: [tg1, tg2], rxGroupLists: [rgl] });
@@ -682,8 +680,8 @@ describe('channelExpansion', () => {
       id: 'rgl1',
       name: 'GB7GL',
       memberRefs: [
-        { kind: 'talkGroup', id: 'tg1' },
-        { kind: 'talkGroup', id: 'tg2' },
+        buildRglMember({ kind: 'talkGroup', id: 'tg1' }),
+        buildRglMember({ kind: 'talkGroup', id: 'tg2' }),
       ],
     });
     const codeplug = buildCodeplug({ talkGroups: [tg1, tg2], rxGroupLists: [rgl] });
@@ -796,7 +794,7 @@ describe('channelExpansion', () => {
     const rgl = buildRxGroupList({
       id: 'rgl1',
       name: 'GB7GL',
-      memberRefs: [{ kind: 'talkGroup', id: 'tg1' }],
+      memberRefs: [buildRglMember({ kind: 'talkGroup', id: 'tg1' })],
     });
     const ch = buildChannel({
       id: 'c1',
@@ -836,37 +834,33 @@ describe('channelExpansion', () => {
       name: 'Scotland TS2',
       abbreviation: 'Sco TS2',
       number: '950',
-      timeslotOverride: 'Slot 2',
     });
     const tgWest = buildTalkGroup({
       id: 'tg2',
       name: 'Scot West TS1',
       abbreviation: 'Sco W TS1',
       number: '2355',
-      timeslotOverride: 'Slot 1',
     });
     const tgEast = buildTalkGroup({
       id: 'tg3',
       name: 'Scot East TS1',
       abbreviation: 'Sco E TS1',
       number: '2356',
-      timeslotOverride: 'Slot 1',
     });
     const tgNorth = buildTalkGroup({
       id: 'tg4',
       name: 'Scot North TS1',
       abbreviation: 'Sco N TS1',
       number: '2357',
-      timeslotOverride: 'Slot 1',
     });
     const rgl = buildRxGroupList({
       id: 'rgl1',
       name: 'GB7GL',
       memberRefs: [
-        { kind: 'talkGroup', id: 'tg1' },
-        { kind: 'talkGroup', id: 'tg2' },
-        { kind: 'talkGroup', id: 'tg3' },
-        { kind: 'talkGroup', id: 'tg4' },
+        buildRglMember({ kind: 'talkGroup', id: 'tg1' }, 2),
+        buildRglMember({ kind: 'talkGroup', id: 'tg2' }, 1),
+        buildRglMember({ kind: 'talkGroup', id: 'tg3' }, 1),
+        buildRglMember({ kind: 'talkGroup', id: 'tg4' }, 1),
       ],
     });
     const ch = buildChannel({
@@ -924,7 +918,7 @@ describe('channelExpansion', () => {
     const rgl = buildRxGroupList({
       id: 'rgl1',
       name: 'GB7GL',
-      memberRefs: [{ kind: 'talkGroup', id: 'tg1' }],
+      memberRefs: [buildRglMember({ kind: 'talkGroup', id: 'tg1' })],
     });
     const ch = buildChannel({
       id: 'c1',

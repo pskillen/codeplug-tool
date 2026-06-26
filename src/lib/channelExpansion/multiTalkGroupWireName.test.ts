@@ -12,7 +12,6 @@ const tgScotland = buildTalkGroup({
   id: 'tg1',
   name: 'Scotland TS2',
   number: '950',
-  timeslotOverride: 'Slot 2',
   abbreviation: 'Sco TS2',
 });
 
@@ -20,7 +19,6 @@ const tgWest = buildTalkGroup({
   id: 'tg2',
   name: 'Scot West TS1',
   number: '2355',
-  timeslotOverride: 'Slot 1',
   abbreviation: 'Sco W TS1',
 });
 
@@ -110,16 +108,16 @@ describe('composeMultiTalkGroupWireName', () => {
     );
   });
 
-  it('suffix_tg_number uses number/ts token', () => {
+  it('suffix_tg_number uses number token', () => {
     expect(composeMultiTalkGroupWireName(channel, member, 'suffix_tg_number', ctx())).toBe(
-      'GL 950/2',
+      'GL 950',
     );
   });
 
-  it('suffix_tg_number for second TG uses its number/ts', () => {
+  it('suffix_tg_number for second TG uses its number', () => {
     const member2 = { kind: 'talkGroup' as const, id: 'tg2' };
     expect(composeMultiTalkGroupWireName(channel, member2, 'suffix_tg_number', ctx())).toBe(
-      'GL 2355/1',
+      'GL 2355',
     );
   });
 });
