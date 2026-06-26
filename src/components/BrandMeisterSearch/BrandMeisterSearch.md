@@ -20,5 +20,6 @@ import BrandMeisterSearch from '../components/BrandMeisterSearch/BrandMeisterSea
 
 ## Related
 
+- [brandmeister.md](../../../docs/features/repeater-directories/brandmeister.md) — contributor guide
 - [BrandMeister reference](../../../docs/reference/brandmeister/README.md)
 - [repeater-directories feature](../../../docs/features/repeater-directories/README.md)

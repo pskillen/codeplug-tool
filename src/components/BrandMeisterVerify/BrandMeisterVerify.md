@@ -30,5 +30,6 @@ When BrandMeister static talk groups differ from the channel's linked RX list:
 
 ## Related
 
+- [brandmeister.md](../../../docs/features/repeater-directories/brandmeister.md) — contributor guide (flows, TG/RX matching)
 - [BrandMeisterSearch](../BrandMeisterSearch/BrandMeisterSearch.md)
 - [BrandMeister reference](../../../docs/reference/brandmeister/README.md)

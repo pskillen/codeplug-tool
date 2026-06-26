@@ -27,7 +27,7 @@ Agent skills for documentation and execution tracking:
 | UI (component kit) | `src/components/ui/` | [ui/component-kit-progress.md](ui/component-kit-progress.md) | Shipped ([#105](https://github.com/pskillen/codeplug-tool/issues/105)) |
 | UI (datatables) | `src/components/ui/DataTable.tsx`, `src/lib/dataTable/` | [ui/datatable-progress.md](ui/datatable-progress.md) | Shipped ([#138](https://github.com/pskillen/codeplug-tool/issues/138)) |
 | Operator distance | `src/lib/geoDistance.ts`, `src/state/operatorPosition.tsx` | [operator-distance/](operator-distance/) | Shipped ([#70](https://github.com/pskillen/codeplug-tool/issues/70)) |
-| Repeater directories | `src/lib/repeaterDirectories/` | [repeater-directories/](repeater-directories/) | In progress ([#92](https://github.com/pskillen/codeplug-tool/issues/92) ukrepeater, [#167](https://github.com/pskillen/codeplug-tool/issues/167) BrandMeister) |
+| Repeater directories | `src/lib/repeaterDirectories/` | [repeater-directories/](repeater-directories/) | BrandMeister [#167](https://github.com/pskillen/codeplug-tool/issues/167) PR [#174](https://github.com/pskillen/codeplug-tool/pull/174); ukrepeater [#92](https://github.com/pskillen/codeplug-tool/issues/92) shipped |
 
 ## Reference
 

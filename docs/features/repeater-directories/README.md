@@ -13,7 +13,7 @@ Operators hand-type repeater frequencies, tones, talk groups, and locations. Aut
 | Area | Status | Notes |
 | --- | --- | --- |
 | ukrepeater.net (ETCC API) | Shipped | [#92](https://github.com/pskillen/codeplug-tool/issues/92) — search/add + verify |
-| BrandMeister (Halligan API v2) | Shipped | [#167](https://github.com/pskillen/codeplug-tool/issues/167) — DMR search/add, TG/RX auto-create, verify |
+| BrandMeister (Halligan API v2) | Shipped (PR [#174](https://github.com/pskillen/codeplug-tool/pull/174)) | [#167](https://github.com/pskillen/codeplug-tool/issues/167) — search/add, verify, RX correction |
 | RepeaterBook / other directories | Deferred | Generic `RepeaterDirectorySource` interface for future sources |
 | Shared reference library target | Blocked | [#30](https://github.com/pskillen/codeplug-tool/issues/30) |
 
@@ -23,6 +23,7 @@ Operators hand-type repeater frequencies, tones, talk groups, and locations. Aut
 | --- | --- |
 | [ukrepeater-progress.md](ukrepeater-progress.md) | ukrepeater execution log |
 | [ukrepeater-outstanding.md](ukrepeater-outstanding.md) | ukrepeater debt |
+| [brandmeister.md](brandmeister.md) | BrandMeister flows, TG/RX matching, verify behaviour |
 | [brandmeister-progress.md](brandmeister-progress.md) | BrandMeister execution log |
 | [brandmeister-outstanding.md](brandmeister-outstanding.md) | BrandMeister debt |
 | [reference/ukrepeater/](../../reference/ukrepeater/README.md) | ETCC API field mapping |
@@ -49,13 +50,16 @@ Operators hand-type repeater frequencies, tones, talk groups, and locations. Aut
 
 ### BrandMeister ([#167](https://github.com/pskillen/codeplug-tool/issues/167))
 
+See [brandmeister.md](brandmeister.md) for full behaviour.
+
 | Flow | Route / UI |
 | --- | --- |
 | Search and add DMR channel | `/channels/add-from-brandmeister` — optional talk groups + RX list |
 | Pre-fill on edit | DMR channel editor → **Look up** |
-| Verify channel | DMR channel detail → **Check BrandMeister** |
+| Verify channel | DMR channel detail or edit → **Check BrandMeister** (channel fields + optional RX list correction) |
 | Verify talk group | Talk group detail → **Check BrandMeister** (catalogue name) |
 | Verify RX list | RX list detail → **Check BrandMeister** (static TG membership vs linked repeater) |
+| RX list preview | Channel detail → DMR → RX group list (members + timeslot overrides) |
 
 ## Related
 
