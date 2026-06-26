@@ -1,5 +1,5 @@
 import { MantineProvider } from '@mantine/core';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App.tsx';
@@ -243,7 +243,7 @@ describe('App', () => {
     expect(screen.getByText('Coming soon')).toBeInTheDocument();
   });
 
-  it('filters channels from secondary nav search', () => {
+  it('filters channels from secondary nav search', async () => {
     seedActiveProjectWithChannels();
 
     renderApp('/channels');
@@ -254,8 +254,10 @@ describe('App', () => {
     const searchFields = screen.getAllByLabelText('Search');
     fireEvent.change(searchFields[0], { target: { value: 'GB3SE' } });
 
-    expect(screen.getByRole('link', { name: 'Edinburgh' })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Inverness' })).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: 'Edinburgh' })).toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Inverness' })).not.toBeInTheDocument();
+    });
   });
 
   it('shows New entity actions in secondary nav on list routes', () => {

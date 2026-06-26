@@ -1,7 +1,8 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { LIST_NAME_FILTER_DEBOUNCE_MS } from './useDebouncedNameFilter.ts';
 import { channelListPrefsKey, entityListPrefsKey } from '../lib/listPrefs/keys.ts';
 import { saveChannelListPrefs, saveEntityListPrefs } from '../lib/listPrefs/storage.ts';
 import { newProject } from '../models/codeplugProject.ts';
@@ -65,6 +66,7 @@ describe('useChannelListQuery', () => {
   });
 
   it('writes search params when filters change', async () => {
+    vi.useFakeTimers();
     const { result } = renderHook(() => useChannelListQuery(), {
       wrapper: makeWrapper(['/channels']),
     });
@@ -72,7 +74,14 @@ describe('useChannelListQuery', () => {
     act(() => {
       result.current.setNameFilter('repeater');
     });
-    await waitFor(() => expect(result.current.nameFilter).toBe('repeater'));
+    expect(result.current.nameFilterInput).toBe('repeater');
+    expect(result.current.nameFilter).toBe('');
+
+    act(() => {
+      vi.advanceTimersByTime(LIST_NAME_FILTER_DEBOUNCE_MS);
+    });
+    expect(result.current.nameFilter).toBe('repeater');
+    vi.useRealTimers();
 
     act(() => {
       result.current.setSortMode('distance');
@@ -135,22 +144,33 @@ describe('useChannelListQuery', () => {
     expect(stored.band).toEqual(['70cm']);
   });
 
-  it('does not restore stale localStorage q when clearing the name filter', async () => {
+  it('does not restore stale localStorage q when clearing the name filter', () => {
+    vi.useFakeTimers();
     saveChannelListPrefs(projectId, { q: 'stored' });
 
     const { result } = renderHook(() => useChannelListQuery(), {
       wrapper: makeWrapper(['/channels']),
     });
 
-    await waitFor(() => expect(result.current.nameFilter).toBe('stored'));
+    act(() => {
+      vi.runAllTimers();
+    });
+    expect(result.current.nameFilter).toBe('stored');
 
     act(() => {
       result.current.setNameFilter('');
     });
-    await waitFor(() => expect(result.current.nameFilter).toBe(''));
+    expect(result.current.nameFilterInput).toBe('');
+    expect(result.current.nameFilter).toBe('stored');
+
+    act(() => {
+      vi.advanceTimersByTime(LIST_NAME_FILTER_DEBOUNCE_MS);
+    });
+    expect(result.current.nameFilter).toBe('');
 
     const stored = JSON.parse(localStorage.getItem(channelListPrefsKey(projectId))!);
     expect(stored.q).toBe('');
+    vi.useRealTimers();
   });
 });
 
@@ -206,6 +226,7 @@ describe('useListNameQuery', () => {
   });
 
   it('persists name filter to localStorage', async () => {
+    vi.useFakeTimers();
     const { result } = renderHook(() => useListNameQuery('talk-groups'), {
       wrapper: makeWrapper(['/talk-groups']),
     });
@@ -213,31 +234,39 @@ describe('useListNameQuery', () => {
     act(() => {
       result.current.setNameFilter('local');
     });
-    await waitFor(() => expect(result.current.nameFilter).toBe('local'));
-
-    await waitFor(() => {
-      const stored = JSON.parse(
-        localStorage.getItem(entityListPrefsKey('talk-groups', projectId))!,
-      );
-      expect(stored.q).toBe('local');
+    act(() => {
+      vi.advanceTimersByTime(LIST_NAME_FILTER_DEBOUNCE_MS);
     });
+    expect(result.current.nameFilter).toBe('local');
+
+    const stored = JSON.parse(localStorage.getItem(entityListPrefsKey('talk-groups', projectId))!);
+    expect(stored.q).toBe('local');
+    vi.useRealTimers();
   });
 
-  it('does not restore stale localStorage q when clearing the name filter', async () => {
+  it('does not restore stale localStorage q when clearing the name filter', () => {
+    vi.useFakeTimers();
     saveEntityListPrefs('zones', projectId, { q: 'north' });
 
     const { result } = renderHook(() => useListNameQuery('zones'), {
       wrapper: makeWrapper(['/zones']),
     });
 
-    await waitFor(() => expect(result.current.nameFilter).toBe('north'));
+    act(() => {
+      vi.runAllTimers();
+    });
+    expect(result.current.nameFilter).toBe('north');
 
     act(() => {
       result.current.setNameFilter('');
     });
-    await waitFor(() => expect(result.current.nameFilter).toBe(''));
+    act(() => {
+      vi.advanceTimersByTime(LIST_NAME_FILTER_DEBOUNCE_MS);
+    });
+    expect(result.current.nameFilter).toBe('');
 
     const stored = JSON.parse(localStorage.getItem(entityListPrefsKey('zones', projectId))!);
     expect(stored.q).toBe('');
+    vi.useRealTimers();
   });
 });

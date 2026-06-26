@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
+import { useDebouncedNameFilter } from './useDebouncedNameFilter.ts';
 import { useHydrateListPrefsOnce } from '../lib/listPrefs/hydration.ts';
 import type { EntityListEntity } from '../lib/listPrefs/types.ts';
 import {
-  debouncedMergeEntityListPrefs,
   loadChannelListPrefs,
   loadEntityListPrefs,
   mergeChannelListPrefs,
@@ -14,6 +14,8 @@ import { useProjects } from '../state/codeplugStore.tsx';
 
 export function useListNameQuery(entity: EntityListEntity): {
   nameFilter: string;
+  nameFilterInput: string;
+  nameFilterPending: boolean;
   setNameFilter: (value: string) => void;
 } {
   const { activeProjectId } = useProjects();
@@ -40,7 +42,7 @@ export function useListNameQuery(entity: EntityListEntity): {
 
   const nameFilter = searchParams.get('q') ?? '';
 
-  const setNameFilter = useCallback(
+  const commitNameFilter = useCallback(
     (value: string) => {
       setSearchParams(
         (prev) => {
@@ -52,13 +54,17 @@ export function useListNameQuery(entity: EntityListEntity): {
         { replace: true },
       );
       if (!activeProjectId) return;
-      if (value) debouncedMergeEntityListPrefs(entity, activeProjectId, { q: value });
-      else mergeEntityListPrefs(entity, activeProjectId, { q: value });
+      mergeEntityListPrefs(entity, activeProjectId, { q: value });
     },
     [activeProjectId, entity, setSearchParams],
   );
 
-  return { nameFilter, setNameFilter };
+  const { nameFilterInput, setNameFilter, nameFilterPending } = useDebouncedNameFilter(
+    nameFilter,
+    commitNameFilter,
+  );
+
+  return { nameFilter, nameFilterInput, nameFilterPending, setNameFilter };
 }
 
 export function filterRowsByName<T>(
