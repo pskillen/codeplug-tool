@@ -78,10 +78,7 @@ export function buildContact(overrides: Partial<Contact> & Pick<Contact, 'id' | 
   };
 }
 
-export function buildRglMember(
-  ref: EntityRef,
-  timeslot?: 1 | 2 | null,
-): RxGroupListMember {
+export function buildRglMember(ref: EntityRef, timeslot?: 1 | 2 | null): RxGroupListMember {
   return timeslot == null ? { ref } : { ref, timeslot };
 }
 

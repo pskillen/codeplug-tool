@@ -74,7 +74,8 @@ function channelRowValues(
     [CHANNEL_COL.bandwidth]: formatOpenGd77BandwidthWire(row.bandwidthKHz),
     [CHANNEL_COL.colourCode]: formatOpenGd77ColourCodeWire(row.colourCode),
     [CHANNEL_COL.timeslot]: formatOpenGd77TimeslotWire(row.timeslot),
-    [CHANNEL_COL.contact]: channelContactWireNameForOpenGd77Export(row, codeplug) ||
+    [CHANNEL_COL.contact]:
+      channelContactWireNameForOpenGd77Export(row, codeplug) ||
       contactRefWireNameForExport(row, codeplug),
     [CHANNEL_COL.tgList]: rxGroupListWireNameForExport(row, codeplug),
     [CHANNEL_COL.dmrId]: formatOpenGd77DmrIdWire(row.mode, row.dmrId),

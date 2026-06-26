@@ -22,7 +22,10 @@ import {
   resolveChannelRxGroupListIds,
   resolveRxGroupListMemberRefs,
 } from './entityRefs.ts';
-import { collapseTalkGroupTimeslotDuplicates, parseTalkGroupSlotWireName } from './import/opengd77/collapseTalkGroupTimeslotDuplicates.ts';
+import {
+  collapseTalkGroupTimeslotDuplicates,
+  parseTalkGroupSlotWireName,
+} from './import/opengd77/collapseTalkGroupTimeslotDuplicates.ts';
 import {
   resolveMultiModeChannelProfiles,
   mergeImportChannelsMultiTalkgroupBestEffort,
@@ -263,10 +266,7 @@ function mergeContacts(
   );
 }
 
-function reconcileIncomingTalkGroups(
-  incoming: TalkGroup[],
-  existing: TalkGroup[],
-): TalkGroup[] {
+function reconcileIncomingTalkGroups(incoming: TalkGroup[], existing: TalkGroup[]): TalkGroup[] {
   return incoming.map((tg) => {
     const number = tg.number.trim();
     if (!number) return tg;

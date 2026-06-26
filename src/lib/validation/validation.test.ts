@@ -122,9 +122,7 @@ describe('validateRxGroupList', () => {
         number: String(i),
       })),
     };
-    const memberRefs = members.map((_, i) =>
-      buildRglMember({ kind: 'talkGroup', id: `tg-${i}` }),
-    );
+    const memberRefs = members.map((_, i) => buildRglMember({ kind: 'talkGroup', id: `tg-${i}` }));
     const issues = validateRxGroupList({ name: 'Big', memberRefs }, cp);
     expect(hasValidationErrors(issues)).toBe(false);
   });

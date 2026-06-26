@@ -98,7 +98,9 @@ function rewireMemberRefs(
       const mapping = absorb.get(member.ref.id);
       const survivorId = mapping?.survivorId ?? member.ref.id;
       const slot = parsed.slot ?? mapping?.slot ?? member.timeslot ?? null;
-      return slot != null ? { ref: { kind: 'talkGroup', id: survivorId }, timeslot: slot } : { ref: { kind: 'talkGroup', id: survivorId } };
+      return slot != null
+        ? { ref: { kind: 'talkGroup', id: survivorId }, timeslot: slot }
+        : { ref: { kind: 'talkGroup', id: survivorId } };
     });
   }
 
@@ -122,9 +124,7 @@ export function collapseTalkGroupTimeslotDuplicates(codeplug: Codeplug): Codeplu
   if (absorb.size === 0) return codeplug;
 
   const absorbedIds = new Set(
-    [...absorb.entries()]
-      .filter(([id, entry]) => id !== entry.survivorId)
-      .map(([id]) => id),
+    [...absorb.entries()].filter(([id, entry]) => id !== entry.survivorId).map(([id]) => id),
   );
 
   const talkGroups = codeplug.talkGroups
@@ -141,7 +141,9 @@ export function collapseTalkGroupTimeslotDuplicates(codeplug: Codeplug): Codeplu
       return tg;
     });
 
-  const rewireTalkGroupRef = (ref: { kind: 'talkGroup'; id: string } | { kind: 'contact'; id: string } | null) => {
+  const rewireTalkGroupRef = (
+    ref: { kind: 'talkGroup'; id: string } | { kind: 'contact'; id: string } | null,
+  ) => {
     if (!ref || ref.kind !== 'talkGroup') return ref;
     const mapping = absorb.get(ref.id);
     if (!mapping) return ref;

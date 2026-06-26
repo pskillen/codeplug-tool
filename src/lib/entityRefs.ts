@@ -87,10 +87,7 @@ export function normalizeRxGroupListMembers(raw: unknown): RxGroupListMember[] {
   return members;
 }
 
-export function rxGroupListMembersEqual(
-  a: RxGroupListMember[],
-  b: RxGroupListMember[],
-): boolean {
+export function rxGroupListMembersEqual(a: RxGroupListMember[], b: RxGroupListMember[]): boolean {
   if (a.length !== b.length) return false;
   return a.every((member, i) => {
     const other = b[i];
@@ -120,9 +117,7 @@ export function resolveContactRefByWireName(
     if (byStem) return byStem;
   }
 
-  const stemMatches = talkGroups.filter(
-    (t) => parseTalkGroupSlotWireName(t.name).stem === wire,
-  );
+  const stemMatches = talkGroups.filter((t) => parseTalkGroupSlotWireName(t.name).stem === wire);
   if (stemMatches.length === 1) {
     return { kind: 'talkGroup', id: stemMatches[0].id };
   }
@@ -167,9 +162,7 @@ export function resolveMemberRefsByWireNames(
     }
     if (ref) {
       const member =
-        parsed.slot != null && ref.kind === 'talkGroup'
-          ? rglMember(ref, parsed.slot)
-          : { ref };
+        parsed.slot != null && ref.kind === 'talkGroup' ? rglMember(ref, parsed.slot) : { ref };
       const key = memberKey(member);
       if (!memberRefs.some((m) => memberKey(m) === key)) {
         memberRefs.push(member);

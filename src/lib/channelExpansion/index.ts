@@ -486,23 +486,13 @@ export function expandTalkGroupsForExport(
           if (!next) break;
           effectiveMode = next;
           base = composeMultiTalkGroupWireName(sourceChannel, ref, effectiveMode, wireCtx);
-          fixedSuffix = multiTalkGroupProtectedSuffix(
-            sourceChannel,
-            ref,
-            effectiveMode,
-            wireCtx,
-          );
+          fixedSuffix = multiTalkGroupProtectedSuffix(sourceChannel, ref, effectiveMode, wireCtx);
         }
       }
 
-      const exportMemberLabel = entityRefExportLabel(
-        ref,
-        codeplug.talkGroups,
-        codeplug.contacts,
-        {
-          useAbbreviation: options.useTalkGroupAbbreviation,
-        },
-      );
+      const exportMemberLabel = entityRefExportLabel(ref, codeplug.talkGroups, codeplug.contacts, {
+        useAbbreviation: options.useTalkGroupAbbreviation,
+      });
       const tgSuffix: TalkGroupMemberSuffixReplacement | undefined =
         tgMode === 'append' &&
         options.useTalkGroupAbbreviation &&
