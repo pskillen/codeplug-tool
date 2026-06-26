@@ -1,4 +1,15 @@
-import { Alert, Button, Checkbox, Group, Modal, Radio, Stack, Table, Text, TextInput } from '@mantine/core';
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Group,
+  Modal,
+  Radio,
+  Stack,
+  Table,
+  Text,
+  TextInput,
+} from '@mantine/core';
 import { useMemo, useState } from 'react';
 import {
   BrandMeisterDirectoryError,
@@ -58,10 +69,7 @@ function formatDeviceLabel(device: BrandMeisterDevice, titleCaseNames: boolean):
   return `${device.callsign} — id ${device.id} — ${city} (${status})`;
 }
 
-export default function BrandMeisterVerify({
-  channel,
-  editBindings,
-}: BrandMeisterVerifyProps) {
+export default function BrandMeisterVerify({ channel, editBindings }: BrandMeisterVerifyProps) {
   const { codeplug, updateChannel, applyBrandMeisterRxListCorrection } = useCodeplug();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,16 +82,12 @@ export default function BrandMeisterVerify({
   const [rxListApplyMode, setRxListApplyMode] = useState<RxListApplyMode>('update');
   const [newRxListName, setNewRxListName] = useState('');
   const [rxListPlan, setRxListPlan] = useState<RxListCorrectionPlan | null>(null);
-  const [staticSlots, setStaticSlots] = useState<
-    ReturnType<typeof staticTalkgroupSlots>
-  >([]);
+  const [staticSlots, setStaticSlots] = useState<ReturnType<typeof staticTalkgroupSlots>>([]);
   const [applyError, setApplyError] = useState<string | null>(null);
   const [titleCaseNames, setTitleCaseNames] = useState(true);
 
   const rxGroupListId = editBindings?.rxGroupListId ?? channel.rxGroupListId;
-  const rxGroupList = rxGroupListId
-    ? findEntityById(codeplug.rxGroupLists, rxGroupListId)
-    : null;
+  const rxGroupList = rxGroupListId ? findEntityById(codeplug.rxGroupLists, rxGroupListId) : null;
 
   const mapOptions = useMemo(() => ({ titleCaseText: titleCaseNames }), [titleCaseNames]);
 
@@ -204,7 +208,9 @@ export default function BrandMeisterVerify({
 
     if (applyRxList && rxListPlan?.hasRxListChanges) {
       if (rxListPlan.memberRefs.length === 0 && rxListPlan.newTalkGroups.length === 0) {
-        setApplyError(rxListPlan.warnings[0] ?? 'Cannot apply RX list — missing local talk groups.');
+        setApplyError(
+          rxListPlan.warnings[0] ?? 'Cannot apply RX list — missing local talk groups.',
+        );
         return;
       }
 

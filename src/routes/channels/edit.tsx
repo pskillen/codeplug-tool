@@ -362,6 +362,15 @@ export default function ChannelEdit() {
     existing,
   ]);
 
+  const verifyChannel = useMemo((): Channel => {
+    const input = formToChannelInput(values);
+    return {
+      ...input,
+      id: existing?.id ?? '__draft__',
+      meta: { ...existing?.meta, ...pendingMeta },
+    };
+  }, [values, existing, pendingMeta]);
+
   if (!isNew && !existing) {
     return (
       <FormPage title="Edit channel">
@@ -494,15 +503,6 @@ export default function ChannelEdit() {
     : [existing?.callsign, existing?.name].filter(Boolean).join(' — ') ||
       existing?.name ||
       'channel';
-
-  const verifyChannel = useMemo((): Channel => {
-    const input = formToChannelInput(values);
-    return {
-      ...input,
-      id: existing?.id ?? '__draft__',
-      meta: { ...existing?.meta, ...pendingMeta },
-    };
-  }, [values, existing, pendingMeta]);
 
   const applyVerifyChannelPatch = (patch: Partial<ChannelInput>, meta?: EntityMeta) => {
     setValues((prev) => ({

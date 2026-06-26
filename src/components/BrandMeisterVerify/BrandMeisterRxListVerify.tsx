@@ -24,12 +24,9 @@ export default function BrandMeisterRxListVerify({ rxGroupList }: BrandMeisterRx
   const [error, setError] = useState<string | null>(null);
   const [diffOpen, setDiffOpen] = useState(false);
   const [diffRows, setDiffRows] = useState<ReturnType<typeof diffRxGroupListFromBrandMeister>>([]);
-  const [correctionPlan, setCorrectionPlan] = useState<
-    Awaited<ReturnType<typeof prepareRxListCorrection>>
-  >(null);
-  const [staticSlots, setStaticSlots] = useState<
-    ReturnType<typeof staticTalkgroupSlots>
-  >([]);
+  const [correctionPlan, setCorrectionPlan] =
+    useState<Awaited<ReturnType<typeof prepareRxListCorrection>>>(null);
+  const [staticSlots, setStaticSlots] = useState<ReturnType<typeof staticTalkgroupSlots>>([]);
 
   const deviceId = useMemo(
     () => findBrandMeisterDeviceIdForRxList(rxGroupList, codeplug),

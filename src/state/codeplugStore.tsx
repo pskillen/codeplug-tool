@@ -300,11 +300,7 @@ function projectsReducer(state: ProjectsState, action: ProjectsAction): Projects
     case 'APPLY_BRANDMEISTER_RXLIST_CORRECTION':
       return updateActiveCodeplug(state, (cp) => {
         const result = applyBrandMeisterRxListCorrection(cp, action.input);
-        if (
-          action.channelId &&
-          result.rxGroupListId &&
-          action.input.action === 'create'
-        ) {
+        if (action.channelId && result.rxGroupListId && action.input.action === 'create') {
           return updateChannelMutation(result.codeplug, action.channelId, {
             rxGroupListId: result.rxGroupListId,
           });

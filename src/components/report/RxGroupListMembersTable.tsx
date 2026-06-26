@@ -1,10 +1,7 @@
 import { Anchor, Badge, Stack } from '@mantine/core';
 import { Link } from 'react-router-dom';
 import { DataTable } from '../ui/index.ts';
-import {
-  formatRglMemberTimeslot,
-  resolveRxGroupListMembers,
-} from '../../lib/reportLookup.ts';
+import { formatRglMemberTimeslot, resolveRxGroupListMembers } from '../../lib/reportLookup.ts';
 import type { Contact, RxGroupList, TalkGroup } from '../../models/codeplug.ts';
 
 export interface RxGroupListMembersTableProps {
@@ -51,11 +48,7 @@ export default function RxGroupListMembersTable({
           header: 'Type',
           render: (m) => {
             if (m.kind === 'talkGroup') {
-              return (
-                <Badge size={compact ? 'xs' : 'sm'}>
-                  Talk group
-                </Badge>
-              );
+              return <Badge size={compact ? 'xs' : 'sm'}>Talk group</Badge>;
             }
             if (m.kind === 'contact') {
               return (
