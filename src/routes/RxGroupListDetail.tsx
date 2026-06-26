@@ -8,6 +8,7 @@ import ModePill from '../components/crud/ModePill.tsx';
 import { DataTable, Page, PageHeader } from '../components/ui/index.ts';
 import DetailSections from '../components/report/DetailSections.tsx';
 import NotFoundEntity from '../components/report/NotFoundEntity.tsx';
+import BrandMeisterRxListVerify from '../components/BrandMeisterVerify/BrandMeisterRxListVerify.tsx';
 
 import {
   channelsReferencingRxGroupListId,
@@ -55,7 +56,8 @@ export default function RxGroupListDetail() {
               RX Group Lists
             </Group>
           </Anchor>
-          <Group gap="sm">
+          <Group gap="sm" align="flex-start">
+            <BrandMeisterRxListVerify rxGroupList={rgl} />
             <Button
               component={Link}
               to={`/rx-group-lists/${rgl.id}/edit`}

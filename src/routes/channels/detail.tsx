@@ -10,6 +10,7 @@ import NotFoundEntity from '../../components/report/NotFoundEntity.tsx';
 import { Page, PageHeader } from '../../components/ui/index.ts';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
 import UkRepeaterVerify from '../../components/UkRepeaterVerify/UkRepeaterVerify.tsx';
+import BrandMeisterVerify from '../../components/BrandMeisterVerify/BrandMeisterVerify.tsx';
 import {
   externalChannelLinks,
   findEntityById,
@@ -355,6 +356,9 @@ export default function ChannelDetail() {
           </Anchor>
           <Group gap="sm" align="flex-start">
             <UkRepeaterVerify channel={channel} />
+            {isDmrMode(channel.mode) || channel.multiMode ? (
+              <BrandMeisterVerify channel={channel} />
+            ) : null}
             <Button
               component={Link}
               to={`/channels/${channel.id}/edit`}
