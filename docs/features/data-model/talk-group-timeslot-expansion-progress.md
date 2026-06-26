@@ -7,7 +7,7 @@
 
 ## Overall status
 
-**Status:** Complete
+**Status:** Complete (pending merge)
 
 **Branch:** `142/pskillen/talk-group-timeslot-expansion`
 
@@ -70,3 +70,12 @@
 ## Semantic round-trip tests
 
 **Status:** Complete — fidelity contract wired; `opengd77RoundTrip.system.test.ts` asserts Tier 3 model stability.
+
+---
+
+## Verify (pre-merge)
+
+- [x] `npm run format:check && npm run lint && npm run test && npm run build`
+- [x] Schema v17 migration (`codeplugStorage.test.ts`)
+- [x] OpenGD77 + DM32 roundtrip tests green
+- [x] No wire-stash export paths (`meta.imported.*Wire` replay)
