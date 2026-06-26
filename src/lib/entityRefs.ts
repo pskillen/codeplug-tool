@@ -43,6 +43,8 @@ export function entityRefsEqual(a: EntityRef | null, b: EntityRef | null): boole
 
 function parseMemberTimeslot(value: unknown): ChannelTimeslot | null {
   if (value === 1 || value === 2) return value;
+  if (value === '1') return 1;
+  if (value === '2') return 2;
   return null;
 }
 
@@ -239,6 +241,8 @@ export function resolveRxGroupListMemberRefs(
   return rxGroupLists.map((rgl) => {
     const wireNames = rgl.meta?.imported?.memberWireNames;
     if (wireNames === undefined) return rgl;
+    // Persisted memberRefs are authoritative; wire names are import/merge hints only.
+    if (rgl.memberRefs.length > 0) return rgl;
     const { memberRefs } = resolveMemberRefsByWireNames(wireNames, talkGroups, contacts);
     if (rxGroupListMembersEqual(rgl.memberRefs, memberRefs)) {
       return rgl;
