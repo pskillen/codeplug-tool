@@ -1,8 +1,6 @@
-/** Remote repeater directory sources (ukrepeater.net, future RepeaterBook, etc.). */
+/** Remote repeater directory sources (ukrepeater.net, BrandMeister, etc.). */
 
-import type { EtccListing } from './ukrepeater/types.ts';
-
-export type RepeaterDirectorySourceId = 'ukrepeater';
+export type RepeaterDirectorySourceId = 'ukrepeater' | 'brandmeister';
 
 export interface RepeaterDirectoryListing {
   sourceId: RepeaterDirectorySourceId;
@@ -11,7 +9,7 @@ export interface RepeaterDirectoryListing {
   band: string;
   town: string;
   status: string;
-  raw: EtccListing;
+  raw: unknown;
 }
 
 export interface RepeaterDirectorySource {
