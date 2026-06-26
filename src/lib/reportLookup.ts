@@ -201,12 +201,22 @@ export function formatReferenceCount(count: number): string {
   return count === 0 ? '' : String(count);
 }
 
-export function externalChannelLinks(callsign: string): { label: string; url: string }[] {
+export function externalChannelLinks(
+  callsign: string,
+  options?: { brandMeisterDeviceId?: number | null },
+): { label: string; url: string }[] {
   const q = encodeURIComponent(callsign);
-  return [
+  const links: { label: string; url: string }[] = [
     {
       label: 'ukrepeater.net',
       url: `https://ukrepeater.net/repeaterlist.html?filter=${q}`,
+    },
+    {
+      label: 'BrandMeister',
+      url:
+        options?.brandMeisterDeviceId != null
+          ? `https://brandmeister.network/?Page=devices&ID=${options.brandMeisterDeviceId}`
+          : `https://brandmeister.network/?Page=devices&Call=${q}`,
     },
     {
       label: 'RepeaterBook',
@@ -215,4 +225,5 @@ export function externalChannelLinks(callsign: string): { label: string; url: st
     { label: 'RadioReference', url: `https://www.radioreference.com/db/search/?q=${q}` },
     { label: 'QRZ', url: `https://www.qrz.com/db/${q}` },
   ];
+  return links;
 }

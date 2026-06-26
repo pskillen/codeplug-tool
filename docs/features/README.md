@@ -27,7 +27,7 @@ Agent skills for documentation and execution tracking:
 | UI (component kit) | `src/components/ui/` | [ui/component-kit-progress.md](ui/component-kit-progress.md) | Shipped ([#105](https://github.com/pskillen/codeplug-tool/issues/105)) |
 | UI (datatables) | `src/components/ui/DataTable.tsx`, `src/lib/dataTable/` | [ui/datatable-progress.md](ui/datatable-progress.md) | Shipped ([#138](https://github.com/pskillen/codeplug-tool/issues/138)) |
 | Operator distance | `src/lib/geoDistance.ts`, `src/state/operatorPosition.tsx` | [operator-distance/](operator-distance/) | Shipped ([#70](https://github.com/pskillen/codeplug-tool/issues/70)) |
-| Repeater directories | `src/lib/repeaterDirectories/` | [repeater-directories/](repeater-directories/) | In progress ([#92](https://github.com/pskillen/codeplug-tool/issues/92) ukrepeater) |
+| Repeater directories | `src/lib/repeaterDirectories/` | [repeater-directories/](repeater-directories/) | BrandMeister [#167](https://github.com/pskillen/codeplug-tool/issues/167) PR [#174](https://github.com/pskillen/codeplug-tool/pull/174); ukrepeater [#92](https://github.com/pskillen/codeplug-tool/issues/92) shipped |
 
 ## Reference
 
@@ -37,6 +37,7 @@ Agent skills for documentation and execution tracking:
 | Channel modes | [reference/channel-modes.md](../reference/channel-modes.md) |
 | OpenGD77 CPS CSV (one format of several) | [reference/opengd77/](../reference/opengd77/README.md) — generic wire format + per-radio [variant profiles](../reference/opengd77/radios/README.md) |
 | CHIRP CSV (analogue FM/AM) | [reference/chirp/](../reference/chirp/README.md) — shipped ([#103](https://github.com/pskillen/codeplug-tool/issues/103)) |
+| BrandMeister Halligan API | [reference/brandmeister/](../reference/brandmeister/README.md) — [#167](https://github.com/pskillen/codeplug-tool/issues/167) |
 | Sibling formats (planned) | DM32 CSV, qDMR YAML — each gets its own `reference/<format>/` tree; native YAML [#10](https://github.com/pskillen/codeplug-tool/issues/10) — [reference/native-yaml/](../reference/native-yaml/README.md); see [import-export hub](import-export/README.md) |
 
 Add a row when a new feature is created. Reference trees are **per format** (OpenGD77, DM32, …); OpenGD77 is the first, not the default.

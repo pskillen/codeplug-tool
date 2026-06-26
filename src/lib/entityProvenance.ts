@@ -37,10 +37,10 @@ export interface ImportedProvenance {
 
 /** Remote repeater directory snapshot — verify/display only, not export source of truth. */
 export interface RepeaterDirectoryProvenance {
-  sourceId: 'ukrepeater';
+  sourceId: 'ukrepeater' | 'brandmeister';
   remoteListingId: number;
   fetchedAt: string;
-  /** Opaque ETCC listing fields at fetch time — typed in ukrepeater module. */
+  /** Opaque remote listing fields at fetch time — typed in directory modules. */
   snapshot: Record<string, unknown>;
 }
 
@@ -50,7 +50,7 @@ export interface EntityMeta {
 }
 
 export interface StampRepeaterDirectoryInput {
-  sourceId: 'ukrepeater';
+  sourceId: 'ukrepeater' | 'brandmeister';
   remoteListingId: number;
   fetchedAt: string;
   snapshot: Record<string, unknown>;

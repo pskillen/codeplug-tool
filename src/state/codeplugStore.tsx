@@ -15,6 +15,8 @@ import {
 } from '../lib/importMerge.ts';
 import {
   addChannel as addChannelMutation,
+  addBrandMeisterRepeaterBundle,
+  applyBrandMeisterRxListCorrection,
   addContact as addContactMutation,
   addRxGroupList as addRxGroupListMutation,
   addTalkGroup as addTalkGroupMutation,
@@ -32,6 +34,8 @@ import {
   updateTalkGroup as updateTalkGroupMutation,
   updateZone as updateZoneMutation,
   type ChannelInput,
+  type BrandMeisterRepeaterBundleInput,
+  type BrandMeisterRxListCorrectionInput,
   type ContactInput,
   type RxGroupListInput,
   type TalkGroupInput,
@@ -79,6 +83,12 @@ type ProjectsAction =
   | { type: 'UPDATE_CONTACT'; contactId: string; patch: Partial<ContactInput> }
   | { type: 'DELETE_CONTACT'; contactId: string }
   | { type: 'ADD_RX_GROUP_LIST'; input: RxGroupListInput }
+  | { type: 'ADD_BRANDMEISTER_BUNDLE'; input: BrandMeisterRepeaterBundleInput }
+  | {
+      type: 'APPLY_BRANDMEISTER_RXLIST_CORRECTION';
+      input: BrandMeisterRxListCorrectionInput;
+      channelId?: string;
+    }
   | { type: 'UPDATE_RX_GROUP_LIST'; rglId: string; patch: Partial<RxGroupListInput> }
   | { type: 'DELETE_RX_GROUP_LIST'; rglId: string }
   | { type: 'SET_RX_GROUP_LIST_MEMBERS'; rglId: string; memberRefs: RxGroupListMember[] }
@@ -284,6 +294,20 @@ function projectsReducer(state: ProjectsState, action: ProjectsAction): Projects
     case 'ADD_RX_GROUP_LIST':
       return updateActiveCodeplug(state, (cp) => addRxGroupListMutation(cp, action.input));
 
+    case 'ADD_BRANDMEISTER_BUNDLE':
+      return updateActiveCodeplug(state, (cp) => addBrandMeisterRepeaterBundle(cp, action.input));
+
+    case 'APPLY_BRANDMEISTER_RXLIST_CORRECTION':
+      return updateActiveCodeplug(state, (cp) => {
+        const result = applyBrandMeisterRxListCorrection(cp, action.input);
+        if (action.channelId && result.rxGroupListId && action.input.action === 'create') {
+          return updateChannelMutation(result.codeplug, action.channelId, {
+            rxGroupListId: result.rxGroupListId,
+          });
+        }
+        return result.codeplug;
+      });
+
     case 'UPDATE_RX_GROUP_LIST':
       return updateActiveCodeplug(state, (cp) =>
         updateRxGroupListMutation(cp, action.rglId, action.patch),
@@ -355,6 +379,11 @@ interface CodeplugContextValue {
   updateContact: (contactId: string, patch: Partial<ContactInput>) => void;
   deleteContact: (contactId: string) => void;
   addRxGroupList: (input: RxGroupListInput) => void;
+  addBrandMeisterBundle: (input: BrandMeisterRepeaterBundleInput) => void;
+  applyBrandMeisterRxListCorrection: (
+    input: BrandMeisterRxListCorrectionInput,
+    channelId?: string,
+  ) => void;
   updateRxGroupList: (rglId: string, patch: Partial<RxGroupListInput>) => void;
   deleteRxGroupList: (rglId: string) => void;
   setRxGroupListMembers: (rglId: string, memberRefs: RxGroupListMember[]) => void;
@@ -527,6 +556,19 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'ADD_RX_GROUP_LIST', input });
   }, []);
 
+  const addBrandMeisterBundle = useCallback((input: BrandMeisterRepeaterBundleInput) => {
+    setPersistenceError(null);
+    dispatch({ type: 'ADD_BRANDMEISTER_BUNDLE', input });
+  }, []);
+
+  const applyBrandMeisterRxListCorrectionAction = useCallback(
+    (input: BrandMeisterRxListCorrectionInput, channelId?: string) => {
+      setPersistenceError(null);
+      dispatch({ type: 'APPLY_BRANDMEISTER_RXLIST_CORRECTION', input, channelId });
+    },
+    [],
+  );
+
   const updateRxGroupList = useCallback((rglId: string, patch: Partial<RxGroupListInput>) => {
     setPersistenceError(null);
     dispatch({ type: 'UPDATE_RX_GROUP_LIST', rglId, patch });
@@ -580,6 +622,8 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
       updateContact,
       deleteContact,
       addRxGroupList,
+      addBrandMeisterBundle,
+      applyBrandMeisterRxListCorrection: applyBrandMeisterRxListCorrectionAction,
       updateRxGroupList,
       deleteRxGroupList,
       setRxGroupListMembers,
@@ -606,6 +650,8 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
       updateContact,
       deleteContact,
       addRxGroupList,
+      addBrandMeisterBundle,
+      applyBrandMeisterRxListCorrectionAction,
       updateRxGroupList,
       deleteRxGroupList,
       setRxGroupListMembers,

@@ -6,10 +6,12 @@ import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import ConfirmDeleteModal from '../../components/crud/ConfirmDeleteModal.tsx';
 import { BandPillForChannel } from '../../components/crud/BandPill.tsx';
 import DetailSections, { DetailLinkList } from '../../components/report/DetailSections.tsx';
+import { RxGroupListDetailValue } from '../../components/report/RxGroupListMembersTable.tsx';
 import NotFoundEntity from '../../components/report/NotFoundEntity.tsx';
 import { Page, PageHeader } from '../../components/ui/index.ts';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
 import UkRepeaterVerify from '../../components/UkRepeaterVerify/UkRepeaterVerify.tsx';
+import BrandMeisterVerify from '../../components/BrandMeisterVerify/BrandMeisterVerify.tsx';
 import {
   externalChannelLinks,
   findEntityById,
@@ -76,9 +78,20 @@ export default function ChannelDetail() {
     channel.contactRef?.kind === 'talkGroup'
       ? findEntityById(codeplug.talkGroups, channel.contactRef.id)
       : null;
-  const rxList = channel.rxGroupListId
-    ? findEntityById(codeplug.rxGroupLists, channel.rxGroupListId)
-    : null;
+
+  const renderRxGroupListValue = (rxGroupListId: string | null | undefined) => {
+    if (!rxGroupListId) return '—';
+    const list = findEntityById(codeplug.rxGroupLists, rxGroupListId);
+    if (!list) return '—';
+    return (
+      <RxGroupListDetailValue
+        rxGroupList={list}
+        talkGroups={codeplug.talkGroups}
+        contacts={codeplug.contacts}
+        compact
+      />
+    );
+  };
 
   const vendorExtraFields = Object.entries(channel.opengd77Extras).map(([label, value]) => ({
     label,
@@ -259,10 +272,8 @@ export default function ChannelDetail() {
                   },
                   {
                     label: 'RX group list',
-                    value: profile.rxGroupListId
-                      ? (codeplug.rxGroupLists.find((r) => r.id === profile.rxGroupListId)?.name ??
-                        '—')
-                      : '—',
+                    span: 'full' as const,
+                    value: renderRxGroupListValue(profile.rxGroupListId),
                   },
                 ]
               : []),
@@ -304,13 +315,8 @@ export default function ChannelDetail() {
               },
               {
                 label: 'RX group list',
-                value: rxList ? (
-                  <Anchor component={Link} to={`/rx-group-lists/${rxList.id}`}>
-                    {rxList.name}
-                  </Anchor>
-                ) : (
-                  '—'
-                ),
+                span: 'full' as const,
+                value: renderRxGroupListValue(channel.rxGroupListId),
               },
             ],
           },
@@ -329,7 +335,12 @@ export default function ChannelDetail() {
       : []),
   ];
 
-  const externalLinks = externalChannelLinks(channel.callsign);
+  const externalLinks = externalChannelLinks(channel.callsign, {
+    brandMeisterDeviceId:
+      channel.meta?.repeaterDirectory?.sourceId === 'brandmeister'
+        ? channel.meta.repeaterDirectory.remoteListingId
+        : null,
+  });
   const memberZones = zonesContainingChannel(channel.id, codeplug.zones);
   const zoneWarning =
     memberZones.length > 0
@@ -355,6 +366,9 @@ export default function ChannelDetail() {
           </Anchor>
           <Group gap="sm" align="flex-start">
             <UkRepeaterVerify channel={channel} />
+            {isDmrMode(channel.mode) || channel.multiMode ? (
+              <BrandMeisterVerify channel={channel} />
+            ) : null}
             <Button
               component={Link}
               to={`/channels/${channel.id}/edit`}

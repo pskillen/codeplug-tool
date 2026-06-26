@@ -6,6 +6,7 @@ import ConfirmDeleteModal from '../components/crud/ConfirmDeleteModal.tsx';
 import { DataTable, Page, PageHeader } from '../components/ui/index.ts';
 import DetailSections from '../components/report/DetailSections.tsx';
 import NotFoundEntity from '../components/report/NotFoundEntity.tsx';
+import BrandMeisterTalkGroupVerify from '../components/BrandMeisterVerify/BrandMeisterTalkGroupVerify.tsx';
 
 import { formatFrequencyHz } from '../lib/formatFrequency.ts';
 import {
@@ -70,7 +71,8 @@ export default function TalkGroupDetail() {
               Talk groups
             </Group>
           </Anchor>
-          <Group gap="sm">
+          <Group gap="sm" align="flex-start">
+            <BrandMeisterTalkGroupVerify talkGroup={talkGroup} />
             <Button
               component={Link}
               to={`/talk-groups/${talkGroup.id}/edit`}

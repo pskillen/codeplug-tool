@@ -49,9 +49,15 @@ import {
   type Channel,
   type ChannelExportNameMode,
   type ChannelMode,
+  type EntityMeta,
 } from '../../models/codeplug.ts';
 import { entityRefKey, parseEntityRefKey } from '../../lib/entityRefs.ts';
 import { findEntityById } from '../../lib/reportLookup.ts';
+import BrandMeisterChannelLookup, {
+  type BrandMeisterFormPatch,
+} from '../../components/BrandMeisterChannelLookup/BrandMeisterChannelLookup.tsx';
+import BrandMeisterVerify from '../../components/BrandMeisterVerify/BrandMeisterVerify.tsx';
+import type { ChannelInput } from '../../lib/codeplugMutations.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 
 type ChannelFormValues = {
@@ -314,6 +320,7 @@ export default function ChannelEdit() {
   const [values, setValues] = useState<ChannelFormValues>(() =>
     existing ? channelToForm(existing) : emptyForm(),
   );
+  const [pendingMeta, setPendingMeta] = useState<EntityMeta | undefined>(undefined);
   const [formError, setFormError] = useState<string | null>(null);
   const abbreviationSuggestions = useMemo(
     () => channelAbbreviationSuggestions(values.name),
@@ -354,6 +361,15 @@ export default function ChannelEdit() {
     values.txFrequencyMhz,
     existing,
   ]);
+
+  const verifyChannel = useMemo((): Channel => {
+    const input = formToChannelInput(values);
+    return {
+      ...input,
+      id: existing?.id ?? '__draft__',
+      meta: { ...existing?.meta, ...pendingMeta },
+    };
+  }, [values, existing, pendingMeta]);
 
   if (!isNew && !existing) {
     return (
@@ -432,23 +448,47 @@ export default function ChannelEdit() {
     setFormError(null);
 
     const input = formToChannelInput(values);
-    const issues = validateChannel(input, codeplug, existing?.id);
+    const withMeta =
+      pendingMeta != null ? { ...input, meta: { ...existing?.meta, ...pendingMeta } } : input;
+    const issues = validateChannel(withMeta, codeplug, existing?.id);
     if (hasValidationErrors(issues)) {
       setFormError(issues.find((i) => i.severity === 'error')?.message ?? 'Validation failed');
       return;
     }
 
     if (isNew) {
-      addChannel(input);
+      addChannel(withMeta);
       navigate('/channels');
     } else if (existing) {
-      updateChannel(existing.id, input);
+      updateChannel(existing.id, withMeta);
       navigate(`/channels/${existing.id}`);
     }
   };
 
   const showSingleModeAnalogFields = !values.multiMode && isAnalogMode(values.mode);
   const showDmrFields = !values.multiMode && isDmrMode(values.mode);
+
+  const applyBrandMeisterPatch = (patch: BrandMeisterFormPatch) => {
+    setValues((prev) => ({
+      ...prev,
+      callsign: patch.callsign || prev.callsign,
+      name: patch.name || prev.name,
+      rxFrequencyMhz: patch.rxFrequencyMhz || prev.rxFrequencyMhz,
+      txFrequencyMhz: patch.txFrequencyMhz || prev.txFrequencyMhz,
+      colourCode: patch.colourCode || prev.colourCode,
+      comment: patch.comment || prev.comment,
+      lat: patch.lat || prev.lat,
+      lon: patch.lon || prev.lon,
+      useLocation: patch.useLocation || prev.useLocation,
+      locator:
+        patch.lat && patch.lon
+          ? coordsToLocator(parseFloat(patch.lat), parseFloat(patch.lon))
+          : prev.locator,
+    }));
+    if (patch.meta) {
+      setPendingMeta((prev) => ({ ...prev, ...patch.meta }));
+    }
+  };
 
   const cancelPath = isNew ? '/channels' : `/channels/${existing?.id}`;
 
@@ -463,6 +503,36 @@ export default function ChannelEdit() {
     : [existing?.callsign, existing?.name].filter(Boolean).join(' — ') ||
       existing?.name ||
       'channel';
+
+  const applyVerifyChannelPatch = (patch: Partial<ChannelInput>, meta?: EntityMeta) => {
+    setValues((prev) => ({
+      ...prev,
+      callsign: patch.callsign ?? prev.callsign,
+      name: patch.name ?? prev.name,
+      rxFrequencyMhz:
+        patch.rxFrequency != null ? hzToMhzInput(patch.rxFrequency) : prev.rxFrequencyMhz,
+      txFrequencyMhz:
+        patch.txFrequency != null ? hzToMhzInput(patch.txFrequency) : prev.txFrequencyMhz,
+      colourCode: patch.colourCode != null ? String(patch.colourCode) : prev.colourCode,
+      comment: patch.comment ?? prev.comment,
+      lat:
+        patch.location?.lat != null && Number.isFinite(patch.location.lat)
+          ? String(patch.location.lat)
+          : prev.lat,
+      lon:
+        patch.location?.lon != null && Number.isFinite(patch.location.lon)
+          ? String(patch.location.lon)
+          : prev.lon,
+      useLocation: patch.useLocation ?? prev.useLocation,
+      locator:
+        patch.location?.lat != null && patch.location?.lon != null
+          ? coordsToLocator(patch.location.lat, patch.location.lon)
+          : prev.locator,
+    }));
+    if (meta) {
+      setPendingMeta((prev) => ({ ...prev, ...meta }));
+    }
+  };
 
   return (
     <FormPage
@@ -556,6 +626,12 @@ export default function ChannelEdit() {
             value={wirePreview}
             readOnly
           />
+          {showDmrFields ? (
+            <BrandMeisterChannelLookup
+              initialQuery={values.callsign}
+              onApply={applyBrandMeisterPatch}
+            />
+          ) : null}
           <TextInput
             label="Comment"
             description="Internal notes only — not exported to CPS"
@@ -815,6 +891,14 @@ export default function ChannelEdit() {
               onChange={(v) => set('rxGroupListId', v ?? '')}
               searchable
               clearable
+            />
+            <BrandMeisterVerify
+              channel={verifyChannel}
+              editBindings={{
+                rxGroupListId: values.rxGroupListId || null,
+                onChannelPatch: applyVerifyChannelPatch,
+                onRxGroupListIdChange: (id) => set('rxGroupListId', id),
+              }}
             />
           </Stack>
         ) : null}

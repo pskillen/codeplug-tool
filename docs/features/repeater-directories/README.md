@@ -2,17 +2,18 @@
 
 Network-backed repeater lookup sources that populate the internal codeplug model — siblings to CPS file import, not another CSV format.
 
-**Tracking:** [codeplug-tool#92](https://github.com/pskillen/codeplug-tool/issues/92) (ukrepeater.net)
+**Tracking:** [codeplug-tool#92](https://github.com/pskillen/codeplug-tool/issues/92) (ukrepeater.net) · [#167](https://github.com/pskillen/codeplug-tool/issues/167) (BrandMeister)
 
 ## Problem
 
-Operators hand-type repeater frequencies, tones, and locations. Authoritative UK listings live on [ukrepeater.net](https://ukrepeater.net) (RSGB ETCC API). The app should fetch listings by callsign, locator, band, or town and add or verify channels in the active codeplug.
+Operators hand-type repeater frequencies, tones, talk groups, and locations. Authoritative listings live on network directories (ukrepeater.net for UK analogue/DMR, BrandMeister for DMR repeaters worldwide). The app should fetch listings and add or verify entities in the active codeplug.
 
 ## Implementation status
 
 | Area | Status | Notes |
 | --- | --- | --- |
 | ukrepeater.net (ETCC API) | Shipped | [#92](https://github.com/pskillen/codeplug-tool/issues/92) — search/add + verify |
+| BrandMeister (Halligan API v2) | Shipped (PR [#174](https://github.com/pskillen/codeplug-tool/pull/174)) | [#167](https://github.com/pskillen/codeplug-tool/issues/167) — search/add, verify, RX correction |
 | RepeaterBook / other directories | Deferred | Generic `RepeaterDirectorySource` interface for future sources |
 | Shared reference library target | Blocked | [#30](https://github.com/pskillen/codeplug-tool/issues/30) |
 
@@ -20,9 +21,13 @@ Operators hand-type repeater frequencies, tones, and locations. Authoritative UK
 
 | Doc | Role |
 | --- | --- |
-| [ukrepeater-progress.md](ukrepeater-progress.md) | Execution log |
-| [ukrepeater-outstanding.md](ukrepeater-outstanding.md) | Discovered debt |
+| [ukrepeater-progress.md](ukrepeater-progress.md) | ukrepeater execution log |
+| [ukrepeater-outstanding.md](ukrepeater-outstanding.md) | ukrepeater debt |
+| [brandmeister.md](brandmeister.md) | BrandMeister flows, TG/RX matching, verify behaviour |
+| [brandmeister-progress.md](brandmeister-progress.md) | BrandMeister execution log |
+| [brandmeister-outstanding.md](brandmeister-outstanding.md) | BrandMeister debt |
 | [reference/ukrepeater/](../../reference/ukrepeater/README.md) | ETCC API field mapping |
+| [reference/brandmeister/](../../reference/brandmeister/README.md) | Halligan API field mapping |
 | [data-model](../data-model/README.md) | Internal `Channel` model |
 | [import-export](../import-export/README.md) | CPS file import (separate concern) |
 | [crud](../crud/README.md) | Channel create/edit routes |
@@ -30,21 +35,31 @@ Operators hand-type repeater frequencies, tones, and locations. Authoritative UK
 ## Concepts
 
 - **Directory vs CPS import:** CPS adapters parse local files; directory sources `fetch` remote JSON and map at the boundary via [`src/lib/repeaterDirectories/`](../../../src/lib/repeaterDirectories/).
-- **Internal FKs:** Zone membership uses UUID `memberChannelIds`. Renaming a channel does not break zone membership — `updateChannel` refreshes export wire names in provenance only.
-- **Provenance:** `meta.repeaterDirectory` stores remote listing id, fetch time, and snapshot metadata for verify/refresh — not export source of truth.
+- **Internal FKs:** Zone membership uses UUID `memberChannelIds`. Talk groups dedupe by DMR id (`TalkGroup.number`). RX lists use `memberRefs` with UUID ids.
+- **Provenance:** `meta.repeaterDirectory` stores remote listing/device id, fetch time, and snapshot metadata for verify/refresh — not export source of truth.
 - **Vendor-neutral model:** No radio profile caps in mapper, mutations, or CRUD UI.
 
 ## Flows
 
-### Search and add (Flow A)
+### ukrepeater.net
 
-Route: `/channels/add-from-ukrepeater`. Search → select listings → `addChannel` with stamped provenance.
+| Flow | Route / UI |
+| --- | --- |
+| Search and add | `/channels/add-from-ukrepeater` |
+| Verify | Channel detail → **Check ukrepeater.net** |
 
-### Verify existing (Flow B)
+### BrandMeister ([#167](https://github.com/pskillen/codeplug-tool/issues/167))
 
-Channel detail → **Check ukrepeater.net** → diff remote vs local → selective apply via `updateChannel`.
+See [brandmeister.md](brandmeister.md) for full behaviour.
 
-Name apply: no zone-membership warning (UUID FKs). Block duplicate names via validation. Optional note that export label changes.
+| Flow | Route / UI |
+| --- | --- |
+| Search and add DMR channel | `/channels/add-from-brandmeister` — optional talk groups + RX list |
+| Pre-fill on edit | DMR channel editor → **Look up** |
+| Verify channel | DMR channel detail or edit → **Check BrandMeister** (channel fields + optional RX list correction) |
+| Verify talk group | Talk group detail → **Check BrandMeister** (catalogue name) |
+| Verify RX list | RX list detail → **Check BrandMeister** (static TG membership vs linked repeater) |
+| RX list preview | Channel detail → DMR → RX group list (members + timeslot overrides) |
 
 ## Related
 
