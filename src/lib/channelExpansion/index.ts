@@ -1167,7 +1167,11 @@ export function resolveMultiModeChannelProfiles(
 
       let opengd77Extras = profile.opengd77Extras;
       if (wire.opengd77Extras && Object.keys(wire.opengd77Extras).length > 0) {
-        opengd77Extras = { ...ch.opengd77Extras, ...wire.opengd77Extras, ...profile.opengd77Extras };
+        opengd77Extras = {
+          ...ch.opengd77Extras,
+          ...wire.opengd77Extras,
+          ...profile.opengd77Extras,
+        };
       }
 
       return { ...profile, contactRef, rxGroupListId, opengd77Extras };

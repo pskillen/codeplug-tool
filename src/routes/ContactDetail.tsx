@@ -7,6 +7,7 @@ import { DataTable, Page, PageHeader } from '../components/ui/index.ts';
 import DetailSections from '../components/report/DetailSections.tsx';
 import NotFoundEntity from '../components/report/NotFoundEntity.tsx';
 
+import { formatFrequencyHz } from '../lib/formatFrequency.ts';
 import {
   channelsReferencingContactId,
   findEntityById,

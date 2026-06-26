@@ -470,7 +470,7 @@ describe('channelExpansion', () => {
     expect(resolved.modeProfiles.find((p) => p.mode === 'dmr')?.opengd77Extras).toEqual({
       'DMR ID': '123',
     });
-    const rows = expandChannelForExport(resolved, buildCodeplug({ channels: [resolved] }));
+    const rows = expandChannelForExport(resolved);
     const fmRow = rows.find((r) => r.mode === 'fm');
     expect(fmRow?.opengd77Extras).toEqual({ 'Scan List': 'Z1' });
   });
