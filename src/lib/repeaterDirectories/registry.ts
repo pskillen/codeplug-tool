@@ -91,3 +91,9 @@ export type {
   BrandMeisterTalkgroupMeta,
 } from './brandmeister/types.ts';
 export { mhzStringToHz, parseMhz, deviceToSnapshot } from './brandmeister/types.ts';
+export {
+  mapDeviceToChannelInput,
+  isMapDeviceSkip,
+} from './brandmeister/mapToChannel.ts';
+export type { MapDeviceResult, MapDeviceSkip, MapDeviceOptions } from './brandmeister/mapToChannel.ts';
+export { matchDeviceForChannel } from './brandmeister/matchDevice.ts';

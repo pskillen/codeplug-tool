@@ -63,6 +63,16 @@ export default function ChannelsListSectionNav({ variant }: SectionNavProps) {
       </Button>
 
       <Button
+        component={Link}
+        to="/channels/add-from-brandmeister"
+        variant="light"
+        leftSection={<IconWorldSearch size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+        fullWidth={isSidebar}
+      >
+        Add from BrandMeister
+      </Button>
+
+      <Button
         variant="light"
         leftSection={<IconGitMerge size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
         fullWidth={isSidebar}
