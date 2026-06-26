@@ -1,4 +1,5 @@
-import type { TalkGroup, TalkGroupInput } from '../../../models/codeplug.ts';
+import type { TalkGroup } from '../../../models/codeplug.ts';
+import type { TalkGroupInput } from '../../codeplugMutations.ts';
 import type { ChannelTimeslot } from '../../channelFields/index.ts';
 import { fetchTalkgroupMeta } from './client.ts';
 import type { BrandMeisterStaticTalkgroup } from './types.ts';

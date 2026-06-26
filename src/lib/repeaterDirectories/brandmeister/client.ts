@@ -76,7 +76,9 @@ export async function fetchStaticTalkgroups(
   return Array.isArray(result) ? result : [];
 }
 
-export async function fetchTalkgroupMeta(talkgroupId: string): Promise<BrandMeisterTalkgroupMeta | null> {
+export async function fetchTalkgroupMeta(
+  talkgroupId: string,
+): Promise<BrandMeisterTalkgroupMeta | null> {
   const id = talkgroupId.trim();
   if (!id) return null;
   try {

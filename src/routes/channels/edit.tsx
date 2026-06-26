@@ -438,9 +438,7 @@ export default function ChannelEdit() {
 
     const input = formToChannelInput(values);
     const withMeta =
-      pendingMeta != null
-        ? { ...input, meta: { ...existing?.meta, ...pendingMeta } }
-        : input;
+      pendingMeta != null ? { ...input, meta: { ...existing?.meta, ...pendingMeta } } : input;
     const issues = validateChannel(withMeta, codeplug, existing?.id);
     if (hasValidationErrors(issues)) {
       setFormError(issues.find((i) => i.severity === 'error')?.message ?? 'Validation failed');

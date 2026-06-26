@@ -77,8 +77,7 @@ describe('BrandMeister client', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        text: async () =>
-          JSON.stringify([{ talkgroup: '9', slot: '1', repeaterid: '235226' }]),
+        text: async () => JSON.stringify([{ talkgroup: '9', slot: '1', repeaterid: '235226' }]),
       }),
     );
 

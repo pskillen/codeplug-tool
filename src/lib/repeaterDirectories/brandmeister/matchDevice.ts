@@ -9,10 +9,7 @@ export function matchDeviceForChannel(
   if (devices.length === 0) return null;
 
   const remoteId = channel.meta?.repeaterDirectory?.remoteListingId;
-  if (
-    remoteId != null &&
-    channel.meta?.repeaterDirectory?.sourceId === 'brandmeister'
-  ) {
+  if (remoteId != null && channel.meta?.repeaterDirectory?.sourceId === 'brandmeister') {
     const byId = devices.find((d) => d.id === remoteId);
     if (byId) return byId;
   }
@@ -22,9 +19,7 @@ export function matchDeviceForChannel(
     const byCall = devices.filter((d) => d.callsign.trim().toLowerCase() === callsign);
     if (byCall.length === 1) return byCall[0];
     if (byCall.length > 1 && channel.rxFrequency != null) {
-      const match = byCall.find(
-        (d) => mhzStringToHz(d.tx) === channel.rxFrequency,
-      );
+      const match = byCall.find((d) => mhzStringToHz(d.tx) === channel.rxFrequency);
       if (match) return match;
     }
     if (byCall.length > 0) return byCall[0];

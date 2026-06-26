@@ -5,11 +5,7 @@ import type { ChannelDiffField, ChannelDiffRow } from '../channelDiff.ts';
 import { diffHasChanges } from '../channelDiff.ts';
 import type { BrandMeisterDevice } from './types.ts';
 import { deviceToSnapshot } from './types.ts';
-import {
-  isMapDeviceSkip,
-  mapDeviceToChannelInput,
-  type MapDeviceOptions,
-} from './mapToChannel.ts';
+import { isMapDeviceSkip, mapDeviceToChannelInput, type MapDeviceOptions } from './mapToChannel.ts';
 
 export type { ChannelDiffField, ChannelDiffRow };
 export { diffHasChanges };

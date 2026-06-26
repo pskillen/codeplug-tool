@@ -7,7 +7,7 @@
 
 ## Overall status
 
-**Status:** In progress
+**Status:** Complete — pending PR
 
 ---
 
@@ -15,4 +15,10 @@
 
 | Slice | Commit | Notes |
 | --- | --- | --- |
-| API spike + docs scaffold | — | Reference, progress/outstanding; CORS confirmed; `getRepeater` auth-gated |
+| API spike + docs scaffold | `e4659f8` | Reference, progress/outstanding; CORS confirmed; `getRepeater` auth-gated |
+| Client + registry | `a66af58` | Halligan API client, cache, types generalised |
+| Search/add UI (Flow A) | `3018e65` | `/channels/add-from-brandmeister`, mapToChannel |
+| Channel edit pre-fill (Flow A) | `60c33d1` | BrandMeisterChannelLookup on DMR editor |
+| TG + RX auto-create (Flow B) | `338ca3e` | Bundle mutation, search-add checkbox |
+| Verify UI (Flow C) | `7d3d280` | Channel, talk group, RX list verify components |
+| Feature docs | — | Hub, CRUD routes, external links |

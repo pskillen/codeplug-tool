@@ -48,9 +48,7 @@ export const brandmeisterSource: RepeaterDirectorySource = {
 
 const sources: RepeaterDirectorySource[] = [ukrepeaterSource, brandmeisterSource];
 
-export function getRepeaterDirectorySource(
-  id: RepeaterDirectorySourceId,
-): RepeaterDirectorySource {
+export function getRepeaterDirectorySource(id: RepeaterDirectorySourceId): RepeaterDirectorySource {
   const source = sources.find((s) => s.id === id);
   if (!source) throw new Error(`Unknown repeater directory: ${id}`);
   return source;
@@ -91,9 +89,10 @@ export type {
   BrandMeisterTalkgroupMeta,
 } from './brandmeister/types.ts';
 export { mhzStringToHz, parseMhz, deviceToSnapshot } from './brandmeister/types.ts';
-export {
-  mapDeviceToChannelInput,
-  isMapDeviceSkip,
+export { mapDeviceToChannelInput, isMapDeviceSkip } from './brandmeister/mapToChannel.ts';
+export type {
+  MapDeviceResult,
+  MapDeviceSkip,
+  MapDeviceOptions,
 } from './brandmeister/mapToChannel.ts';
-export type { MapDeviceResult, MapDeviceSkip, MapDeviceOptions } from './brandmeister/mapToChannel.ts';
 export { matchDeviceForChannel } from './brandmeister/matchDevice.ts';

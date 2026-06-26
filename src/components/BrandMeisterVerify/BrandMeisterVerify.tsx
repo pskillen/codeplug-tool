@@ -13,8 +13,14 @@ import {
   diffChannelFromDevice,
   diffHasChanges,
 } from '../../lib/repeaterDirectories/brandmeister/channelDiff.ts';
-import type { ChannelDiffField, ChannelDiffRow } from '../../lib/repeaterDirectories/brandmeister/channelDiff.ts';
-import { isMapDeviceSkip, mapDeviceToChannelInput } from '../../lib/repeaterDirectories/brandmeister/mapToChannel.ts';
+import type {
+  ChannelDiffField,
+  ChannelDiffRow,
+} from '../../lib/repeaterDirectories/brandmeister/channelDiff.ts';
+import {
+  isMapDeviceSkip,
+  mapDeviceToChannelInput,
+} from '../../lib/repeaterDirectories/brandmeister/mapToChannel.ts';
 import { toTitleCase } from '../../lib/titleCase.ts';
 import { validateChannel } from '../../lib/validation/channel.ts';
 import type { Channel } from '../../models/codeplug.ts';
@@ -70,10 +76,7 @@ export default function BrandMeisterVerify({ channel }: BrandMeisterVerifyProps)
     try {
       let results: BrandMeisterDevice[] = [];
       const remoteId = channel.meta?.repeaterDirectory?.remoteListingId;
-      if (
-        remoteId != null &&
-        channel.meta?.repeaterDirectory?.sourceId === 'brandmeister'
-      ) {
+      if (remoteId != null && channel.meta?.repeaterDirectory?.sourceId === 'brandmeister') {
         const byId = await fetchDeviceById(remoteId);
         if (byId) results = [byId];
       }

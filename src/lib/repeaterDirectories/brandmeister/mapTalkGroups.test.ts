@@ -43,17 +43,17 @@ describe('mapTalkGroups', () => {
 
   it('assignNewTalkGroupIds maps numbers to ids', () => {
     let n = 0;
-    const map = assignNewTalkGroupIds(
-      [{ name: 'TG 9', number: '9' }],
-      () => `new-${++n}`,
-    );
+    const map = assignNewTalkGroupIds([{ name: 'TG 9', number: '9' }], () => `new-${++n}`);
     expect(map.get('9')).toBe('new-1');
   });
 });
 
 describe('mapRxGroupList', () => {
   it('builds RX list with timeslots', () => {
-    const idByNumber = new Map([['9', 'tg-9'], ['2350', 'tg-2350']]);
+    const idByNumber = new Map([
+      ['9', 'tg-9'],
+      ['2350', 'tg-2350'],
+    ]);
     const input = buildRepeaterRxGroupListInput(
       { id: 1, callsign: 'GB7HH' },
       [
@@ -64,7 +64,7 @@ describe('mapRxGroupList', () => {
     );
     expect(input?.name).toBe('GB7HH RX');
     expect(input?.memberRefs).toHaveLength(2);
-    expect(input?.memberRefs[0]).toEqual({
+    expect(input?.memberRefs?.[0]).toEqual({
       ref: { kind: 'talkGroup', id: 'tg-9' },
       timeslot: 1,
     });

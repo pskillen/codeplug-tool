@@ -38,15 +38,12 @@ export function diffRxGroupListFromBrandMeister(
     .map((s) => `TG ${s.number}${s.timeslot ? ` TS${s.timeslot}` : ''}`)
     .join(', ');
   const localLabel =
-    localMembers.map((m) => `${m.name} (${m.number})${m.timeslot ? ` TS${m.timeslot}` : ''}`).join(', ') ||
-    '—';
+    localMembers
+      .map((m) => `${m.name} (${m.number})${m.timeslot ? ` TS${m.timeslot}` : ''}`)
+      .join(', ') || '—';
 
-  const remoteSet = new Set(
-    remoteSlots.map((s) => `${s.number}:${s.timeslot ?? ''}`),
-  );
-  const localSet = new Set(
-    localMembers.map((m) => `${m.number}:${m.timeslot ?? ''}`),
-  );
+  const remoteSet = new Set(remoteSlots.map((s) => `${s.number}:${s.timeslot ?? ''}`));
+  const localSet = new Set(localMembers.map((m) => `${m.number}:${m.timeslot ?? ''}`));
 
   const changed =
     remoteSet.size !== localSet.size ||

@@ -29,6 +29,7 @@ describe('brandmeister channelDiff', () => {
   it('detects frequency drift', () => {
     const channel = buildChannel({
       id: 'c1',
+      name: 'GB7HH',
       mode: 'dmr',
       callsign: 'GB7HH',
       rxFrequency: 430_000_000,

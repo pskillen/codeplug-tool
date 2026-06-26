@@ -108,8 +108,6 @@ export function mapDeviceToChannelInput(
   return { input, meta, warnings };
 }
 
-export function isMapDeviceSkip(
-  result: MapDeviceResult | MapDeviceSkip,
-): result is MapDeviceSkip {
+export function isMapDeviceSkip(result: MapDeviceResult | MapDeviceSkip): result is MapDeviceSkip {
   return 'reason' in result;
 }

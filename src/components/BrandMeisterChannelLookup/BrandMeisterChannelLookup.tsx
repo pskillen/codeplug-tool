@@ -1,17 +1,8 @@
-import {
-  Alert,
-  Anchor,
-  Button,
-  Group,
-  Modal,
-  Radio,
-  Stack,
-  Text,
-  TextInput,
-} from '@mantine/core';
+import { Alert, Anchor, Button, Group, Modal, Radio, Stack, Text, TextInput } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
 import { useState } from 'react';
-import { frequencyHzToMhz, formatMhzNumber } from '../../lib/formatFrequency.ts';
+import { frequencyHzToMhz } from '../../lib/channelFields/index.ts';
+import { formatMhzNumber } from '../../lib/formatFrequency.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import {
   BrandMeisterDirectoryError,
@@ -43,9 +34,7 @@ function hzToMhzInput(hz: number | null): string {
   return mhz != null ? formatMhzNumber(mhz) : '';
 }
 
-export function deviceResultToFormPatch(
-  device: BrandMeisterDevice,
-): BrandMeisterFormPatch | null {
+export function deviceResultToFormPatch(device: BrandMeisterDevice): BrandMeisterFormPatch | null {
   const mapped = mapDeviceToChannelInput(device);
   if (isMapDeviceSkip(mapped)) return null;
 
@@ -57,8 +46,7 @@ export function deviceResultToFormPatch(
     name: mapped.input.name,
     rxFrequencyMhz: hzToMhzInput(mapped.input.rxFrequency),
     txFrequencyMhz: hzToMhzInput(mapped.input.txFrequency),
-    colourCode:
-      mapped.input.colourCode != null ? String(mapped.input.colourCode) : '',
+    colourCode: mapped.input.colourCode != null ? String(mapped.input.colourCode) : '',
     comment: mapped.input.comment,
     lat: lat != null && Number.isFinite(lat) ? String(lat) : '',
     lon: lon != null && Number.isFinite(lon) ? String(lon) : '',

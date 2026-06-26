@@ -330,7 +330,12 @@ export default function ChannelDetail() {
       : []),
   ];
 
-  const externalLinks = externalChannelLinks(channel.callsign);
+  const externalLinks = externalChannelLinks(channel.callsign, {
+    brandMeisterDeviceId:
+      channel.meta?.repeaterDirectory?.sourceId === 'brandmeister'
+        ? channel.meta.repeaterDirectory.remoteListingId
+        : null,
+  });
   const memberZones = zonesContainingChannel(channel.id, codeplug.zones);
   const zoneWarning =
     memberZones.length > 0

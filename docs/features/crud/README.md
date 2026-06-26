@@ -8,7 +8,7 @@ Create, edit, and delete codeplug entities against the internal vendor-neutral m
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| Channel CRUD | Complete | `src/routes/channels/` — multi-mode editor ([#46](https://github.com/pskillen/codeplug-tool/issues/46)); ukrepeater import ([#92](https://github.com/pskillen/codeplug-tool/issues/92)) |
+| Channel CRUD | Complete | `src/routes/channels/` — multi-mode editor ([#46](https://github.com/pskillen/codeplug-tool/issues/46)); ukrepeater ([#92](https://github.com/pskillen/codeplug-tool/issues/92)); BrandMeister ([#167](https://github.com/pskillen/codeplug-tool/issues/167)) |
 | Zone CRUD | Complete | `src/routes/zones/` + `ZoneMemberPicker` |
 | Talk group CRUD | Complete | `TalkGroupEdit`, list/detail |
 | RX group list CRUD | Complete | `RxGroupListEdit`, `RxGroupListMemberPicker` |
@@ -37,7 +37,7 @@ TG/RGL/contact CRUD follows the same rule: unlimited RGL members in the internal
 | [bands reference](../../reference/bands.md) | UK band ranges and pill colours |
 | [maidenhead](../maidenhead.md) | Locator conversion behaviour |
 | [report](../report/README.md) | Read-only list/detail pages extended by CRUD |
-| [repeater-directories](../repeater-directories/README.md) | ukrepeater.net search/add and verify ([#92](https://github.com/pskillen/codeplug-tool/issues/92)) |
+| [repeater-directories](../repeater-directories/README.md) | ukrepeater.net ([#92](https://github.com/pskillen/codeplug-tool/issues/92)); BrandMeister ([#167](https://github.com/pskillen/codeplug-tool/issues/167)) |
 
 ## Concepts
 
@@ -51,6 +51,7 @@ TG/RGL/contact CRUD follows the same rule: unlimited RGL members in the internal
 | Path | Page |
 | --- | --- |
 | `/channels/add-from-ukrepeater` | Search ukrepeater.net and add channels ([#92](https://github.com/pskillen/codeplug-tool/issues/92)) |
+| `/channels/add-from-brandmeister` | Search BrandMeister and add DMR channels ([#167](https://github.com/pskillen/codeplug-tool/issues/167)) |
 | `/channels/new` | Create channel |
 | `/channels/:id/edit` | Edit channel |
 | `/channels/:id` | Detail + edit/delete |

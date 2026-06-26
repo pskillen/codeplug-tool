@@ -1,4 +1,5 @@
-import type { RxGroupListInput, RxGroupListMember } from '../../../models/codeplug.ts';
+import type { RxGroupListMember } from '../../../models/codeplug.ts';
+import type { RxGroupListInput } from '../../codeplugMutations.ts';
 import type { ChannelTimeslot } from '../../channelFields/index.ts';
 import type { BrandMeisterDevice } from './types.ts';
 import type { BrandMeisterStaticTalkgroup } from './types.ts';

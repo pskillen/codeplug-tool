@@ -193,11 +193,7 @@ export default function BrandMeisterSearch() {
         {search.error ? (
           <Alert color="red" title="Search">
             {search.error}{' '}
-            <Anchor
-              href="https://brandmeister.network"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Anchor href="https://brandmeister.network" target="_blank" rel="noopener noreferrer">
               BrandMeister
             </Anchor>
           </Alert>
@@ -304,7 +300,11 @@ export default function BrandMeisterSearch() {
             ) : null}
 
             <Group justify="space-between">
-              <Button disabled={selected.size === 0 || adding} loading={adding} onClick={() => void handleAdd()}>
+              <Button
+                disabled={selected.size === 0 || adding}
+                loading={adding}
+                onClick={() => void handleAdd()}
+              >
                 Add selected ({selected.size})
               </Button>
             </Group>

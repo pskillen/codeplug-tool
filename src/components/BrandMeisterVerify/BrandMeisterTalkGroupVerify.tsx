@@ -15,7 +15,9 @@ export interface BrandMeisterTalkGroupVerifyProps {
   talkGroup: TalkGroup;
 }
 
-export default function BrandMeisterTalkGroupVerify({ talkGroup }: BrandMeisterTalkGroupVerifyProps) {
+export default function BrandMeisterTalkGroupVerify({
+  talkGroup,
+}: BrandMeisterTalkGroupVerifyProps) {
   const { updateTalkGroup } = useCodeplug();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +81,12 @@ export default function BrandMeisterTalkGroupVerify({ talkGroup }: BrandMeisterT
         ) : null}
       </Stack>
 
-      <Modal opened={diffOpen} onClose={() => setDiffOpen(false)} title="BrandMeister vs local" size="lg">
+      <Modal
+        opened={diffOpen}
+        onClose={() => setDiffOpen(false)}
+        title="BrandMeister vs local"
+        size="lg"
+      >
         {!entityDiffHasChanges(diffRows) ? (
           <Text size="sm">Local talk group matches BrandMeister catalogue.</Text>
         ) : (

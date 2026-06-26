@@ -113,7 +113,12 @@ export default function BrandMeisterRxListVerify({ rxGroupList }: BrandMeisterRx
         ) : null}
       </Stack>
 
-      <Modal opened={diffOpen} onClose={() => setDiffOpen(false)} title="BrandMeister vs local" size="lg">
+      <Modal
+        opened={diffOpen}
+        onClose={() => setDiffOpen(false)}
+        title="BrandMeister vs local"
+        size="lg"
+      >
         {!entityDiffHasChanges(diffRows) ? (
           <Text size="sm">RX group list membership matches the repeater static talk groups.</Text>
         ) : (
