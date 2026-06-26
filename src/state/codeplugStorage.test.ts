@@ -432,9 +432,7 @@ describe('codeplugStorage', () => {
 
     const state = deserializeProjects(json);
     const rgl = state!.projects[0].codeplug.rxGroupLists[0];
-    expect(rgl.memberRefs).toEqual([
-      { ref: { kind: 'talkGroup', id: 'tg-1' }, timeslot: 1 },
-    ]);
+    expect(rgl.memberRefs).toEqual([{ ref: { kind: 'talkGroup', id: 'tg-1' }, timeslot: 1 }]);
   });
 
   it('isPersistableProjects is false for an empty set', () => {

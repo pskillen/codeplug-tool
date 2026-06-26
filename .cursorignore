@@ -1,8 +1,6 @@
 # Keep local test exports and scratch out of AI context
-sample-exports/
 fixtures/
 local/
-tmp/
 
 # Git metadata
 .git/

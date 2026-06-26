@@ -171,8 +171,7 @@ export default function TalkGroupDetail() {
                     formatTalkGroupTimeslotsInList(
                       talkGroupMemberTimeslotsInList(rgl, talkGroup.id),
                     ),
-                  sortValue: (rgl) =>
-                    talkGroupMemberTimeslotsInList(rgl, talkGroup.id).join(','),
+                  sortValue: (rgl) => talkGroupMemberTimeslotsInList(rgl, talkGroup.id).join(','),
                 },
               ]}
             />
