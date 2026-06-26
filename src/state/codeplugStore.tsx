@@ -47,6 +47,11 @@ import {
   type ChannelMergeSelection,
 } from '../lib/channelMergeCandidates.ts';
 import {
+  applyTalkGroupMerges,
+  type TalkGroupMergeCandidateGroup,
+  type TalkGroupMergeSelection,
+} from '../lib/talkGroupMergeCandidates.ts';
+import {
   clearProjectsStorage,
   loadProjectsFromStorage,
   saveProjectsToStorage,
@@ -81,6 +86,11 @@ type ProjectsAction =
       type: 'APPLY_CHANNEL_MERGES';
       selections: ChannelMergeSelection[];
       candidates: ChannelMergeCandidateGroup[];
+    }
+  | {
+      type: 'APPLY_TALK_GROUP_MERGES';
+      selections: TalkGroupMergeSelection[];
+      candidates: TalkGroupMergeCandidateGroup[];
     }
   | { type: 'UPDATE_PROJECT'; id: string; patch: ProjectMetadataPatch }
   | { type: 'COMMIT_NEW_PROJECT'; metadata: ProjectMetadataPatch };
@@ -293,6 +303,12 @@ function projectsReducer(state: ProjectsState, action: ProjectsAction): Projects
         (cp) => applyChannelMerges(cp, action.selections, action.candidates).codeplug,
       );
 
+    case 'APPLY_TALK_GROUP_MERGES':
+      return updateActiveCodeplug(
+        state,
+        (cp) => applyTalkGroupMerges(cp, action.selections, action.candidates).codeplug,
+      );
+
     case 'UPDATE_PROJECT': {
       const { id, patch } = action;
       return {
@@ -345,6 +361,10 @@ interface CodeplugContextValue {
   applyChannelMerges: (
     selections: ChannelMergeSelection[],
     candidates: ChannelMergeCandidateGroup[],
+  ) => void;
+  applyTalkGroupMerges: (
+    selections: TalkGroupMergeSelection[],
+    candidates: TalkGroupMergeCandidateGroup[],
   ) => void;
   persistenceError: string | null;
   clearPersistenceError: () => void;
@@ -530,6 +550,14 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const applyTalkGroupMergesAction = useCallback(
+    (selections: TalkGroupMergeSelection[], candidates: TalkGroupMergeCandidateGroup[]) => {
+      setPersistenceError(null);
+      dispatch({ type: 'APPLY_TALK_GROUP_MERGES', selections, candidates });
+    },
+    [],
+  );
+
   const current = activeProject(projectsState);
   const codeplug = current?.codeplug ?? emptyCodeplug();
 
@@ -556,6 +584,7 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
       deleteRxGroupList,
       setRxGroupListMembers,
       applyChannelMerges: applyChannelMergesAction,
+      applyTalkGroupMerges: applyTalkGroupMergesAction,
       persistenceError,
       clearPersistenceError,
     }),
@@ -581,6 +610,7 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
       deleteRxGroupList,
       setRxGroupListMembers,
       applyChannelMergesAction,
+      applyTalkGroupMergesAction,
       persistenceError,
       clearPersistenceError,
     ],
