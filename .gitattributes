@@ -1,0 +1,13 @@
+# LF in the repo and working tree (overrides Windows core.autocrlf).
+* text=auto eol=lf
+
+# Definite binaries — never apply text normalization.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.zip binary

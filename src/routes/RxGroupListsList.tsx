@@ -13,7 +13,8 @@ import { useCodeplug } from '../state/codeplugStore.tsx';
 export default function RxGroupListsList() {
   const { codeplug } = useCodeplug();
   const { channels, rxGroupLists } = codeplug;
-  const { nameFilter, setNameFilter } = useListNameQuery('rx-group-lists');
+  const { nameFilter, nameFilterInput, nameFilterPending, setNameFilter } =
+    useListNameQuery('rx-group-lists');
   const [sort, setSort] = usePersistedEntityListSort('rx-group-lists', {
     columnKey: DATATABLE_NAME_SORT_KEY,
     direction: 'asc',
@@ -28,7 +29,8 @@ export default function RxGroupListsList() {
         variant="list"
         rows={filtered}
         totalRowCount={rxGroupLists.length}
-        search={nameFilter}
+        search={nameFilterInput}
+        searchPending={nameFilterPending}
         onSearchChange={setNameFilter}
         searchPlaceholder="Filter name…"
         sort={sort}

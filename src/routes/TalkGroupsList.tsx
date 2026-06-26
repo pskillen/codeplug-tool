@@ -12,7 +12,8 @@ import { useCodeplug } from '../state/codeplugStore.tsx';
 export default function TalkGroupsList() {
   const { codeplug } = useCodeplug();
   const { channels, talkGroups, rxGroupLists } = codeplug;
-  const { nameFilter, setNameFilter } = useListNameQuery('talk-groups');
+  const { nameFilter, nameFilterInput, nameFilterPending, setNameFilter } =
+    useListNameQuery('talk-groups');
   const [sort, setSort] = usePersistedEntityListSort('talk-groups', {
     columnKey: DATATABLE_NAME_SORT_KEY,
     direction: 'asc',
@@ -27,7 +28,8 @@ export default function TalkGroupsList() {
         variant="list"
         rows={filtered}
         totalRowCount={talkGroups.length}
-        search={nameFilter}
+        search={nameFilterInput}
+        searchPending={nameFilterPending}
         onSearchChange={setNameFilter}
         searchPlaceholder="Filter name…"
         sort={sort}

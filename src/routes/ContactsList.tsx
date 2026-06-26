@@ -13,7 +13,8 @@ import { useCodeplug } from '../state/codeplugStore.tsx';
 export default function ContactsList() {
   const { codeplug } = useCodeplug();
   const { channels, contacts, rxGroupLists } = codeplug;
-  const { nameFilter, setNameFilter } = useListNameQuery('contacts');
+  const { nameFilter, nameFilterInput, nameFilterPending, setNameFilter } =
+    useListNameQuery('contacts');
   const [sort, setSort] = usePersistedEntityListSort('contacts', {
     columnKey: DATATABLE_NAME_SORT_KEY,
     direction: 'asc',
@@ -28,7 +29,8 @@ export default function ContactsList() {
         variant="list"
         rows={filtered}
         totalRowCount={contacts.length}
-        search={nameFilter}
+        search={nameFilterInput}
+        searchPending={nameFilterPending}
         onSearchChange={setNameFilter}
         searchPlaceholder="Filter name…"
         sort={sort}

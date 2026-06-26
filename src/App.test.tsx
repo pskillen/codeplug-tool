@@ -1,5 +1,5 @@
 import { MantineProvider } from '@mantine/core';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App.tsx';
@@ -10,6 +10,7 @@ import { CODEPLUG_STORAGE_KEY, serializeProjects } from './state/codeplugStorage
 import { CodeplugProvider } from './state/codeplugStore.tsx';
 import { OperatorPositionProvider } from './state/operatorPosition.tsx';
 import { theme } from './theme.ts';
+import { LIST_NAME_FILTER_DEBOUNCE_MS } from './hooks/useDebouncedNameFilter.ts';
 
 vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: { children: React.ReactNode }) => (
@@ -243,19 +244,28 @@ describe('App', () => {
     expect(screen.getByText('Coming soon')).toBeInTheDocument();
   });
 
-  it('filters channels from secondary nav search', () => {
-    seedActiveProjectWithChannels();
+  it('filters channels from secondary nav search', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      seedActiveProjectWithChannels();
 
-    renderApp('/channels');
+      renderApp('/channels');
 
-    expect(screen.getByRole('link', { name: 'Edinburgh' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Inverness' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Edinburgh' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Inverness' })).toBeInTheDocument();
 
-    const searchFields = screen.getAllByLabelText('Search');
-    fireEvent.change(searchFields[0], { target: { value: 'GB3SE' } });
+      const searchFields = screen.getAllByLabelText('Search');
+      fireEvent.change(searchFields[0], { target: { value: 'GB3SE' } });
 
-    expect(screen.getByRole('link', { name: 'Edinburgh' })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Inverness' })).not.toBeInTheDocument();
+      await act(async () => {
+        vi.advanceTimersByTime(LIST_NAME_FILTER_DEBOUNCE_MS + 50);
+      });
+
+      expect(screen.getByRole('link', { name: 'Edinburgh' })).toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Inverness' })).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('shows New entity actions in secondary nav on list routes', () => {
