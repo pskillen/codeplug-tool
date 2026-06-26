@@ -110,6 +110,8 @@ Monitor the **Actions** tab for the “Deploy GitHub Pages” workflow. When it 
 
 ## Local development
 
+**Line endings:** the repo stores LF (`.gitattributes`, `.editorconfig`, Prettier). On Windows, prefer `git config core.autocrlf false` so Git does not fight those rules; after pulling `.gitattributes` changes, run `git restore .` once if `git status` shows phantom edits with empty diffs.
+
 | Goal | Command / action |
 | --- | --- |
 | Dev server | `npm install` then `npm run dev` — visit `http://localhost:5173/codeplug-tool/` |
