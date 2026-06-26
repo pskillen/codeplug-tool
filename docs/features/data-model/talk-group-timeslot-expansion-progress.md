@@ -9,7 +9,8 @@
 
 **Status:** Complete (pending merge)
 
-**Branch:** `142/pskillen/talk-group-timeslot-expansion`
+**Branch:** `142/pskillen/talk-group-timeslot-expansion`  
+**PR:** [#169](https://github.com/pskillen/codeplug-tool/pull/169)
 
 ---
 
