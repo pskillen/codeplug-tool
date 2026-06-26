@@ -74,7 +74,7 @@ function buildAbsorbMap(talkGroups: TalkGroup[]): Map<string, AbsorbEntry> {
       const parsed = parseTalkGroupSlotWireName(tg.name);
       absorb.set(tg.id, {
         survivorId: survivor.id,
-        slot: tg.id === survivor.id ? null : parsed.slot,
+        slot: parsed.slot,
       });
     }
   }

@@ -83,8 +83,8 @@ function memberOptions(talkGroups: TalkGroup[], contacts: Contact[]): MemberOpti
 
 const TIMESLOT_OPTIONS = [
   { value: '', label: '—' },
-  { value: '1', label: 'Slot 1' },
-  { value: '2', label: 'Slot 2' },
+  { value: '1', label: '1' },
+  { value: '2', label: '2' },
 ];
 
 function parseTimeslotValue(value: string | null): ChannelTimeslot | null {
