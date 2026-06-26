@@ -12,6 +12,7 @@ import NotFoundEntity from '../components/report/NotFoundEntity.tsx';
 import {
   channelsReferencingRxGroupListId,
   findEntityById,
+  formatRglMemberTimeslot,
   resolveRxGroupListMembers,
 } from '../lib/reportLookup.ts';
 import type { Contact, TalkGroup } from '../models/codeplug.ts';
@@ -93,7 +94,7 @@ export default function RxGroupListDetail() {
           <DataTable
             variant="embedded"
             rows={members}
-            rowKey={(m) => m.name}
+            rowKey={(m) => `${m.kind}:${m.name}:${m.timeslot ?? ''}`}
             nameColumn={{
               header: 'Name',
               getName: (m) => m.name,
@@ -126,6 +127,22 @@ export default function RxGroupListDetail() {
                   );
                 },
                 sortValue: (m) => m.kind,
+              },
+              {
+                key: 'timeslot',
+                header: 'Timeslot',
+                render: (m) => {
+                  if (m.kind === 'talkGroup') return formatRglMemberTimeslot(m.timeslot);
+                  if (m.kind === 'contact' && m.entity) {
+                    const override = (m.entity as Contact).timeslotOverride?.trim();
+                    return override || '—';
+                  }
+                  return '—';
+                },
+                sortValue: (m) =>
+                  m.kind === 'talkGroup'
+                    ? (m.timeslot ?? 0)
+                    : ((m.entity as Contact | null)?.timeslotOverride ?? ''),
               },
             ]}
           />

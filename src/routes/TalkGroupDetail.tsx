@@ -7,13 +7,13 @@ import { DataTable, Page, PageHeader } from '../components/ui/index.ts';
 import DetailSections from '../components/report/DetailSections.tsx';
 import NotFoundEntity from '../components/report/NotFoundEntity.tsx';
 
-import { getMemberWireNames } from '../lib/entityProvenance.ts';
 import { formatFrequencyHz } from '../lib/formatFrequency.ts';
 import {
   channelsReferencingTalkGroupId,
   findEntityById,
-  formatReferenceCount,
+  formatTalkGroupTimeslotsInList,
   rxGroupListsContainingMemberRef,
+  talkGroupMemberTimeslotsInList,
 } from '../lib/reportLookup.ts';
 import { useCodeplug } from '../state/codeplugStore.tsx';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
@@ -165,10 +165,14 @@ export default function TalkGroupDetail() {
               }}
               columns={[
                 {
-                  key: 'members',
-                  header: 'Members',
-                  render: (rgl) => formatReferenceCount(getMemberWireNames(rgl).length),
-                  sortValue: (rgl) => getMemberWireNames(rgl).length,
+                  key: 'timeslot',
+                  header: 'Timeslot',
+                  render: (rgl) =>
+                    formatTalkGroupTimeslotsInList(
+                      talkGroupMemberTimeslotsInList(rgl, talkGroup.id),
+                    ),
+                  sortValue: (rgl) =>
+                    talkGroupMemberTimeslotsInList(rgl, talkGroup.id).join(','),
                 },
               ]}
             />
