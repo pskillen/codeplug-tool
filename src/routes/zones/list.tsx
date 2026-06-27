@@ -1,7 +1,9 @@
 import { Button, Group, Stack, Text } from '@mantine/core';
 import { useMemo } from 'react';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
-import { DataTable, ListPage } from '../../components/ui/index.ts';
+import { HelpAlert } from '../../components/help/index.ts';
+import { DataTable, EmptyState, ListPage } from '../../components/ui/index.ts';
+import { getHelpShort } from '../../content/help/manifest.ts';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
 import { filterRowsByName, useListNameQuery } from '../../hooks/useListNameQuery.ts';
 import { usePersistedEntityListSort } from '../../hooks/usePersistedEntityListSort.ts';
@@ -32,6 +34,7 @@ export default function ZonesList() {
   return (
     <ListPage title="Zones">
       <Stack gap="lg">
+        <HelpAlert helpId="zone.membership" color="gray" />
         <DataTable
           variant="list"
           rows={filtered}
@@ -43,6 +46,7 @@ export default function ZonesList() {
           sort={sort}
           onSortChange={setSort}
           rowKey={(z) => z.id}
+          emptyState={<EmptyState message={getHelpShort('empty.zones')} />}
           nameColumn={{
             getName: (z) => z.name,
             getPath: (z) => `/zones/${z.id}`,

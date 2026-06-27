@@ -14,6 +14,7 @@ import { IconArrowLeft, IconSearch } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FormPage } from '../ui/index.ts';
+import { getHelpShort } from '../../content/help/manifest.ts';
 import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { toTitleCase } from '../../lib/titleCase.ts';
@@ -142,10 +143,7 @@ export default function BrandMeisterSearch() {
         : null;
 
   return (
-    <FormPage
-      title="Add from BrandMeister"
-      description="Search BrandMeister network devices and add DMR repeaters to your codeplug."
-    >
+    <FormPage title="Add from BrandMeister" description={getHelpShort('repeater.brandmeister')}>
       <Stack gap="md">
         <Anchor component={Link} to="/channels" size="sm">
           <Group gap={4} wrap="nowrap">

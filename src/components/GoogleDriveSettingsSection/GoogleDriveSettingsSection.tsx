@@ -1,5 +1,6 @@
 import { Alert, Button, Group, Stack, Text } from '@mantine/core';
 import { useGoogleDriveConnection } from '../../hooks/useGoogleDriveConnection.ts';
+import { getHelpShort } from '../../content/help/manifest.ts';
 import { PageSection } from '../ui/index.ts';
 
 export default function GoogleDriveSettingsSection() {
@@ -21,10 +22,7 @@ export default function GoogleDriveSettingsSection() {
   }
 
   return (
-    <PageSection
-      title="Google Drive"
-      description="Connect to open and save codeplug files in Google Drive. OAuth tokens stay in this browser only."
-    >
+    <PageSection title="Google Drive" description={getHelpShort('settings.googleDrive')}>
       <Stack gap="sm">
         <Text size="sm">Status: {connected ? 'Connected' : 'Not connected'}</Text>
         {error ? <Alert color="red">{error}</Alert> : null}

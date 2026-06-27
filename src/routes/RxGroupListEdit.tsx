@@ -3,6 +3,8 @@ import { IconArrowLeft, IconDeviceFloppy } from '@tabler/icons-react';
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import RxGroupListMemberPicker from '../components/crud/RxGroupListMemberPicker.tsx';
+import FormatVarianceTable from '../components/help/FormatVarianceTable.tsx';
+import { HelpAlert } from '../components/help/index.ts';
 import { FormPage, FormSection } from '../components/ui/index.ts';
 import type { RxGroupListMember } from '../models/codeplug.ts';
 import { findEntityById } from '../lib/reportLookup.ts';
@@ -108,6 +110,8 @@ export default function RxGroupListEdit() {
         </FormSection>
 
         <FormSection title="Members">
+          <HelpAlert helpId="rxGroupList.promiscuous" color="gray" />
+          <FormatVarianceTable varianceId="rxGroupListExport" />
           <RxGroupListMemberPicker
             talkGroups={codeplug.talkGroups}
             contacts={codeplug.contacts}

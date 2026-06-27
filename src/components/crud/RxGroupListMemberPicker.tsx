@@ -14,6 +14,7 @@ import { IconArrowLeft, IconArrowRight } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
 import { entityRefKey } from '../../lib/entityRefs.ts';
 import type { EntityRef } from '../../lib/entityRefs.ts';
+import { getHelpShort } from '../../content/help/manifest.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { sortByName } from '../../lib/reportLookup.ts';
 import type { ChannelTimeslot } from '../../lib/channelFields/index.ts';
@@ -337,6 +338,9 @@ export default function RxGroupListMemberPicker({
           />
           <Text size="sm" fw={500}>
             In list (export order)
+          </Text>
+          <Text size="xs" c="dimmed">
+            {getHelpShort('rxGroupList.memberTimeslot')}
           </Text>
           <ScrollArea
             h={240}

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { DataTable, ListPage } from '../components/ui/index.ts';
+import { DataTable, EmptyState, ListPage } from '../components/ui/index.ts';
+import { getHelpShort } from '../content/help/manifest.ts';
 import { filterRowsByName, useListNameQuery } from '../hooks/useListNameQuery.ts';
 import { usePersistedEntityListSort } from '../hooks/usePersistedEntityListSort.ts';
 import { DATATABLE_NAME_SORT_KEY } from '../lib/dataTable/sort.ts';
@@ -36,6 +37,7 @@ export default function RxGroupListsList() {
         sort={sort}
         onSortChange={setSort}
         rowKey={(r) => r.id}
+        emptyState={<EmptyState message={getHelpShort('empty.rxGroupLists')} />}
         nameColumn={{
           getName: (r) => r.name,
           getPath: (r) => `/rx-group-lists/${r.id}`,

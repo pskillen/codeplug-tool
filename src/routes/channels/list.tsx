@@ -1,8 +1,10 @@
 import { Button, Group, Stack, Text } from '@mantine/core';
 import { useCallback, useMemo } from 'react';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
+import { HelpAlert } from '../../components/help/index.ts';
 import { BandPillForChannel } from '../../components/crud/BandPill.tsx';
-import { DataTable, ListPage } from '../../components/ui/index.ts';
+import { DataTable, EmptyState, ListPage } from '../../components/ui/index.ts';
+import { getHelpShort } from '../../content/help/manifest.ts';
 import type { DataTableColumn, DataTableSortState } from '../../components/ui/DataTable.tsx';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
 import { applyFilters, channelHasGeolocation } from '../../lib/channels.ts';
@@ -221,6 +223,7 @@ export default function ChannelsList() {
   return (
     <ListPage title="Channels">
       <Stack gap="lg">
+        <HelpAlert helpId="channel.mapFilters" color="gray" />
         {distanceSortPending ? (
           <Text size="sm" c="dimmed">
             Distance sort needs your location. Sorted by name until set — use the Distance column
@@ -240,6 +243,7 @@ export default function ChannelsList() {
           callsignColumn={sortCtx.callsignColumn}
           nameColumn={sortCtx.nameColumn}
           columns={tableColumns}
+          emptyState={<EmptyState message={getHelpShort('empty.channels')} />}
         />
 
         {skipped.length > 0 ? (

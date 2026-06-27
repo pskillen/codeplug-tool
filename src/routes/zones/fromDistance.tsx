@@ -19,6 +19,7 @@ import { BandPillForChannel } from '../../components/crud/BandPill.tsx';
 import ModePill from '../../components/crud/ModePill.tsx';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
 import { DataTable, FormPage } from '../../components/ui/index.ts';
+import { HelpAlert } from '../../components/help/index.ts';
 import { defaultMaxDistanceKm } from '../../hooks/channelListQueryUtils.ts';
 import { useMapSettings } from '../../hooks/useMapSettings.ts';
 import { resolveChannelModeProfiles } from '../../lib/channelExpansion/index.ts';
@@ -162,6 +163,8 @@ export default function ZoneFromDistance() {
             Zones
           </Group>
         </Anchor>
+
+        <HelpAlert helpId="zone.fromDistance" color="gray" />
 
         <Stack gap="sm">
           <Title order={3}>Search centre</Title>

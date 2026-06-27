@@ -3,6 +3,9 @@ import { IconArrowLeft, IconDeviceFloppy } from '@tabler/icons-react';
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ZoneMemberPicker from '../../components/crud/ZoneMemberPicker.tsx';
+import HelpHint from '../../components/help/HelpHint.tsx';
+import FormatVarianceTable from '../../components/help/FormatVarianceTable.tsx';
+import { getHelpShort } from '../../content/help/manifest.ts';
 import { FormPage, FormSection } from '../../components/ui/index.ts';
 import { findEntityById } from '../../lib/reportLookup.ts';
 import { hasValidationErrors } from '../../lib/validation/channel.ts';
@@ -132,25 +135,29 @@ export default function ZoneEdit() {
 
         <FormSection
           title="DM32 export options"
-          description="Honoured on Baofeng DM32 export when the matching master toggle is enabled on the export page. OpenGD77 uses zone-as-scan; CHIRP has no scan lists."
+          description={getHelpShort('importExport.dm32ZoneExport')}
         >
           <Stack gap="sm">
             <Checkbox
-              label="Export a scratch channel"
-              description="Emit a companion scratch channel for field ad-hoc talk groups."
+              label={
+                <HelpHint label="Export a scratch channel" helpId="zone.exportScratchChannel" />
+              }
+              description={getHelpShort('zone.exportScratchChannel')}
               checked={exportScratchChannel}
               onChange={(e) => setExportScratchChannel(e.currentTarget.checked)}
             />
             <Checkbox
-              label="Export a scan list / scan channel"
-              description="Emit Scan.csv, a scan carrier channel, and wire the carrier as first zone member."
+              label={
+                <HelpHint label="Export a scan list / scan channel" helpId="zone.exportScanList" />
+              }
+              description={getHelpShort('zone.exportScanList')}
               checked={exportScanList}
               onChange={(e) => setExportScanList(e.currentTarget.checked)}
             />
             {exportScanList ? (
               <NumberInput
-                label="Scan carrier frequency (MHz)"
-                description="Default 145.500 MHz simplex when unset."
+                label={<HelpHint label="Scan carrier frequency (MHz)" helpId="zone.scanCarrier" />}
+                description={getHelpShort('zone.scanCarrier')}
                 value={scanCarrierMhz}
                 onChange={(value) => {
                   if (value === '' || value == null) setScanCarrierMhz('');
@@ -161,10 +168,11 @@ export default function ZoneEdit() {
                 step={0.00625}
               />
             ) : null}
+            <FormatVarianceTable varianceId="zoneAndScan" />
           </Stack>
         </FormSection>
 
-        <FormSection title="Member channels">
+        <FormSection title="Member channels" description={getHelpShort('zone.membership')}>
           <ZoneMemberPicker
             channels={codeplug.channels}
             members={members}

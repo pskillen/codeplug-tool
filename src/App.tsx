@@ -39,6 +39,8 @@ import Settings from './routes/Settings.tsx';
 import DebugIndex from './routes/debug/index.tsx';
 import DebugLocalStorage from './routes/debug/localStorage.tsx';
 import DebugLocalStorageViewer from './routes/debug/localStorageViewer.tsx';
+import HelpIndex from './routes/help/index.tsx';
+import HelpTopicPage from './routes/help/topic.tsx';
 import ReferenceIndex from './routes/reference/index.tsx';
 import BandPlan from './routes/reference/band-plan.tsx';
 import MaidenheadConverter from './routes/reference/maidenhead.tsx';
@@ -96,6 +98,8 @@ export default function App() {
           <Route path="/debug" element={<DebugIndex />} />
           <Route path="/debug/local-storage" element={<DebugLocalStorage />} />
           <Route path="/debug/local-storage/:storageKey" element={<DebugLocalStorageViewer />} />
+          <Route path="/help" element={<HelpIndex />} />
+          <Route path="/help/:topicId" element={<HelpTopicPage />} />
           <Route path="/reference" element={<ReferenceIndex />} />
           <Route path="/reference/band-plan" element={<BandPlan />} />
           <Route path="/reference/maidenhead" element={<MaidenheadConverter />} />

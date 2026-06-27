@@ -1,6 +1,7 @@
 import { Alert, Box, Button, Group, Stack, Text } from '@mantine/core';
 import { IconFile, IconFolder, IconUpload } from '@tabler/icons-react';
 import { useCallback, useRef, useState } from 'react';
+import { HelpAlert } from '../help/index.ts';
 import { collectFilesFromDataTransfer, importFiles } from '../../lib/import/index.ts';
 import type { ImportResult } from '../../lib/import/types.ts';
 import { ICON_SIZE_ACTION, ICON_STROKE, ICON_SIZE_NAV } from '../../lib/iconSizes.ts';
@@ -92,9 +93,13 @@ export default function ImportDropzone({
       </Text>
 
       {persistenceError ? (
-        <Alert color="yellow" onClose={onDismissPersistenceError} withCloseButton>
-          {persistenceError}
-        </Alert>
+        persistenceError.toLowerCase().includes('quota') ? (
+          <HelpAlert helpId="empty.quota" color="yellow" />
+        ) : (
+          <Alert color="yellow" onClose={onDismissPersistenceError} withCloseButton>
+            {persistenceError}
+          </Alert>
+        )
       ) : null}
 
       {error ? (

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import ChannelMergeCandidatesModal from '../../ChannelMergeCandidatesModal/ChannelMergeCandidatesModal.tsx';
 import UseMyLocationButton from '../../UseMyLocationButton/UseMyLocationButton.tsx';
+import { getHelpShort } from '../../../content/help/manifest.ts';
 import { DISTANCE_FILTER_MARKS_KM } from '../../../lib/channels.ts';
 import { ALL_BANDS, bandsFromFrequencies } from '../../../lib/bands.ts';
 import { modeFilterOptions } from '../../../lib/channelModes.ts';
@@ -83,6 +84,9 @@ export default function ChannelsListSectionNav({ variant }: SectionNavProps) {
       >
         Find merge candidates
       </Button>
+      <Text size="xs" c="dimmed">
+        {getHelpShort('channel.mergeCandidates')}
+      </Text>
 
       <ChannelMergeCandidatesModal
         key={mergeSession}
