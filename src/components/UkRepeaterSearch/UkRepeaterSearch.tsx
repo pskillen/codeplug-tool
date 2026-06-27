@@ -19,6 +19,7 @@ import { FormPage } from '../ui/index.ts';
 import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { toTitleCase } from '../../lib/titleCase.ts';
+import type { UkRepeaterSearchMode } from '../../lib/repeaterDirectories/ukrepeater/queryRouter.ts';
 import {
   formatModeCodesSummary,
   isMapListingSkip,
@@ -28,6 +29,7 @@ import {
 import type { EtccListing } from '../../lib/repeaterDirectories/registry.ts';
 import { useUkRepeaterSearch } from '../../hooks/useUkRepeaterSearch.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
+import { rowAddStatus } from './rowAddStatus.ts';
 
 const BAND_OPTIONS = [
   { value: '2M', label: '2 m' },
@@ -37,8 +39,34 @@ const BAND_OPTIONS = [
   { value: '23CM', label: '23 cm' },
 ];
 
+const SEARCH_MODE_OPTIONS: { value: UkRepeaterSearchMode; label: string }[] = [
+  { value: 'auto', label: 'Auto' },
+  { value: 'postcode', label: 'Postcode' },
+  { value: 'address', label: 'Address' },
+  { value: 'town', label: 'Town' },
+  { value: 'callsign', label: 'Repeater callsign' },
+  { value: 'keeper', label: 'Keeper callsign' },
+  { value: 'locator', label: 'Locator' },
+  { value: 'band', label: 'Band' },
+];
+
+const SEARCH_PLACEHOLDERS: Record<UkRepeaterSearchMode, string> = {
+  auto: 'Callsign, locator, band (2m), postcode, address, or town',
+  postcode: 'DE1 1AA',
+  address: '10 High Street, Derby',
+  town: 'Derby',
+  callsign: 'GB7DC',
+  keeper: 'G7NPW',
+  locator: 'IO92 or IO92PP',
+  band: '2m or 70cm',
+};
+
 function listingKey(listing: EtccListing): string {
   return String(listing.id);
+}
+
+function formatProviderLabel(provider: string): string {
+  return provider === 'mapbox' ? 'Mapbox' : 'Photon';
 }
 
 export default function UkRepeaterSearch() {
@@ -51,8 +79,8 @@ export default function UkRepeaterSearch() {
 
   const mapOptions = useMemo(() => ({ titleCaseText: titleCaseNames }), [titleCaseNames]);
 
-  const existingNames = useMemo(
-    () => new Set(codeplug.channels.map((ch) => ch.name)),
+  const existingCallsigns = useMemo(
+    () => new Set(codeplug.channels.map((ch) => ch.callsign.trim().toUpperCase()).filter(Boolean)),
     [codeplug.channels],
   );
 
@@ -60,18 +88,18 @@ export default function UkRepeaterSearch() {
     return search.listings.map((listing) => {
       const mapped = mapListingToChannelInput(listing, undefined, mapOptions);
       const skip = isMapListingSkip(mapped);
-      const name = skip ? listing.repeater : mapped.input.name;
+      const callsign = listing.repeater.trim().toUpperCase();
       return {
         listing,
         key: listingKey(listing),
         skip,
         skipReason: skip ? mapped.reason : undefined,
         warnings: skip ? mapped.warnings : mapped.warnings,
-        nameCollision: !skip && existingNames.has(name),
+        callsignCollision: !skip && existingCallsigns.has(callsign),
         mappable: !skip,
       };
     });
-  }, [search.listings, existingNames, mapOptions]);
+  }, [search.listings, existingCallsigns, mapOptions]);
 
   const toggleRow = (key: string, checked: boolean) => {
     setSelected((prev) => {
@@ -87,7 +115,7 @@ export default function UkRepeaterSearch() {
       setSelected(new Set());
       return;
     }
-    const keys = rows.filter((r) => r.mappable && !r.nameCollision).map((r) => r.key);
+    const keys = rows.filter((r) => r.mappable && !r.callsignCollision).map((r) => r.key);
     setSelected(new Set(keys));
   };
 
@@ -96,7 +124,7 @@ export default function UkRepeaterSearch() {
     let skipped = 0;
     for (const row of rows) {
       if (!selected.has(row.key)) continue;
-      if (!row.mappable || row.nameCollision) {
+      if (!row.mappable || row.callsignCollision) {
         skipped++;
         continue;
       }
@@ -120,15 +148,19 @@ export default function UkRepeaterSearch() {
   };
 
   const kindHint =
-    search.kind === 'callsign'
-      ? 'Searching by callsign'
-      : search.kind === 'locator'
-        ? 'Searching by locator'
-        : search.kind === 'band'
-          ? 'Searching by band'
-          : search.kind === 'town'
-            ? 'Searching by town (geocoded to locator)'
-            : null;
+    search.resolvedLocation != null
+      ? `${formatProviderLabel(search.resolvedLocation.provider)} resolved "${search.resolvedLocation.label}" → locator ${search.resolvedLocation.locator.toUpperCase()}`
+      : search.kind === 'callsign'
+        ? 'Searching by repeater callsign'
+        : search.kind === 'keeper'
+          ? 'Searching by keeper callsign'
+          : search.kind === 'locator'
+            ? 'Searching by locator'
+            : search.kind === 'band'
+              ? 'Searching by band'
+              : search.kind === 'location'
+                ? 'Searching by location (geocoded to locator)'
+                : null;
 
   return (
     <FormPage
@@ -144,9 +176,16 @@ export default function UkRepeaterSearch() {
         </Anchor>
 
         <Group align="flex-end" wrap="wrap">
+          <Select
+            label="Search mode"
+            data={SEARCH_MODE_OPTIONS}
+            value={search.searchMode}
+            onChange={(value) => search.setSearchMode((value as UkRepeaterSearchMode) ?? 'auto')}
+            style={{ minWidth: 160 }}
+          />
           <TextInput
             label="Search"
-            placeholder="Callsign, locator, band (2m), or town"
+            placeholder={SEARCH_PLACEHOLDERS[search.searchMode]}
             value={search.query}
             onChange={(e) => search.setQuery(e.currentTarget.value)}
             onKeyDown={(e) => {
@@ -188,6 +227,12 @@ export default function UkRepeaterSearch() {
           </Text>
         ) : null}
 
+        {search.kind === 'band' && search.listings.length > 0 ? (
+          <Alert color="blue" title="Large result set">
+            Band searches can return many listings. Keep operational-only enabled to reduce noise.
+          </Alert>
+        ) : null}
+
         {search.error ? (
           <Alert color="red" title="Search">
             {search.error}{' '}
@@ -213,15 +258,15 @@ export default function UkRepeaterSearch() {
                       <Checkbox
                         aria-label="Select all mappable"
                         checked={
-                          rows.filter((r) => r.mappable && !r.nameCollision).length > 0 &&
+                          rows.filter((r) => r.mappable && !r.callsignCollision).length > 0 &&
                           rows
-                            .filter((r) => r.mappable && !r.nameCollision)
+                            .filter((r) => r.mappable && !r.callsignCollision)
                             .every((r) => selected.has(r.key))
                         }
                         indeterminate={
                           selected.size > 0 &&
                           !rows
-                            .filter((r) => r.mappable && !r.nameCollision)
+                            .filter((r) => r.mappable && !r.callsignCollision)
                             .every((r) => selected.has(r.key))
                         }
                         onChange={(e) => toggleAll(e.currentTarget.checked)}
@@ -230,6 +275,7 @@ export default function UkRepeaterSearch() {
                     <Table.Th>Callsign</Table.Th>
                     <Table.Th>Band</Table.Th>
                     <Table.Th>Town</Table.Th>
+                    <Table.Th>Repeater status</Table.Th>
                     <Table.Th>Status</Table.Th>
                     <Table.Th>Modes</Table.Th>
                     <Table.Th>RX</Table.Th>
@@ -238,7 +284,8 @@ export default function UkRepeaterSearch() {
                 </Table.Thead>
                 <Table.Tbody>
                   {rows.map((row) => {
-                    const disabled = !row.mappable || row.nameCollision;
+                    const disabled = !row.mappable || row.callsignCollision;
+                    const addStatus = rowAddStatus(row);
                     return (
                       <Table.Tr key={row.key} opacity={disabled ? 0.6 : 1}>
                         <Table.Td>
@@ -266,6 +313,11 @@ export default function UkRepeaterSearch() {
                             {titleCaseNames ? toTitleCase(row.listing.status) : row.listing.status}
                           </Text>
                         </Table.Td>
+                        <Table.Td>
+                          <Text size="sm" c={addStatus.color}>
+                            {addStatus.label}
+                          </Text>
+                        </Table.Td>
                         <Table.Td>{formatModeCodesSummary(row.listing.modeCodes ?? [])}</Table.Td>
                         <Table.Td>
                           {formatFrequencyHz(row.listing.tx).replace(' MHz', '') || '—'}
@@ -277,25 +329,6 @@ export default function UkRepeaterSearch() {
                 </Table.Tbody>
               </Table>
             </ScrollArea>
-
-            {rows.some((r) => r.skipReason || r.nameCollision) ? (
-              <Stack gap={4}>
-                {rows
-                  .filter((r) => r.skipReason)
-                  .map((r) => (
-                    <Text key={r.key} size="xs" c="dimmed">
-                      {r.listing.repeater}: {r.skipReason}
-                    </Text>
-                  ))}
-                {rows
-                  .filter((r) => r.nameCollision)
-                  .map((r) => (
-                    <Text key={`dup-${r.key}`} size="xs" c="orange">
-                      {r.listing.repeater}: channel name already exists in this codeplug
-                    </Text>
-                  ))}
-              </Stack>
-            ) : null}
 
             <Group justify="space-between">
               <Button disabled={selected.size === 0} onClick={handleAdd}>

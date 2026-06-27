@@ -13,10 +13,12 @@ import UkRepeaterSearch from '../components/UkRepeaterSearch/UkRepeaterSearch.ts
 
 ## Behaviour
 
-- Auto-detects query kind: callsign, Maidenhead locator, band token, or town (geocode → locator).
+- Search mode `Select`: Auto, Postcode, Address, Town, Repeater callsign, Keeper callsign, Locator, Band.
+- Auto-detects query kind when mode is Auto (postcode before callsign; locator; band; etc.).
+- Location modes geocode via Mapbox (when Settings token set) or Photon, then query `/locator/`; shows resolved address and locator square.
 - Operational-only filter on by default.
 - Title case names on by default (DERBY → Derby for channel qualifier and comment).
-- Skips listings without FM/DMR; blocks name collisions with existing channels.
+- Skips listings without FM/DMR; blocks duplicate **callsigns** (not channel name qualifiers). Results table **Status** column shows add eligibility (Ready, duplicate callsign, skip reason).
 - Multi-mode FM+DMR listings map to one `multiMode` channel.
 
 ## Related
