@@ -71,6 +71,13 @@ describe('ExportFromActivePanel', () => {
     expect(screen.getByText('Use talk group abbreviations')).toBeInTheDocument();
   });
 
+  it('shows DM32 zone-derived export toggles', () => {
+    renderPanel(vendorFormatById('dm32'));
+    expect(screen.getByText('Zone-derived export')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Export scratch channels when enabled for zone/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Export scan lists when enabled for zone/i)).toBeInTheDocument();
+  });
+
   it('renders CHIRP profile picker and single download', () => {
     renderPanel(vendorFormatById('chirp'));
     expect(screen.getByRole('combobox', { name: 'Radio profile' })).toBeInTheDocument();

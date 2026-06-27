@@ -12,6 +12,10 @@ export const STORAGE_KEY_EXPORT_USE_CHANNEL_ABBREVIATION =
   'mm9pdy-codeplug-tool.export.useChannelAbbreviation';
 export const STORAGE_KEY_EXPORT_MULTI_TG_NAME_MODE =
   'mm9pdy-codeplug-tool.export.multiTalkGroupExportNameMode';
+export const STORAGE_KEY_EXPORT_SCRATCH_CHANNELS =
+  'mm9pdy-codeplug-tool.export.exportScratchChannels';
+export const STORAGE_KEY_EXPORT_ZONE_DERIVED_SCAN_LISTS =
+  'mm9pdy-codeplug-tool.export.exportZoneDerivedScanLists';
 
 /** Sentinel for "respect each channel's stored exportNameMode". */
 export const EXPORT_NAME_MODE_RESPECT_PER_CHANNEL = '';
@@ -27,6 +31,10 @@ export interface ExportSettings {
   useTalkGroupAbbreviation: boolean;
   useChannelAbbreviation: boolean;
   multiTalkGroupExportNameMode: MultiTalkGroupExportNameMode;
+  /** Master gate for zone exportScratchChannel flags (default on). */
+  exportScratchChannels: boolean;
+  /** Master gate for zone exportScanList flags (default on). */
+  exportZoneDerivedScanLists: boolean;
 }
 
 function readShortenNames(): boolean {
@@ -79,6 +87,14 @@ function readMultiTalkGroupExportNameMode(): MultiTalkGroupExportNameMode {
   return DEFAULT_MULTI_TG_EXPORT_NAME_MODE;
 }
 
+function readExportScratchChannels(): boolean {
+  return localStorage.getItem(STORAGE_KEY_EXPORT_SCRATCH_CHANNELS) !== 'false';
+}
+
+function readExportZoneDerivedScanLists(): boolean {
+  return localStorage.getItem(STORAGE_KEY_EXPORT_ZONE_DERIVED_SCAN_LISTS) !== 'false';
+}
+
 /** Merge persisted export settings with per-download options (profile id, etc.). */
 export function exportOptionsFromSettings(
   settings: ExportSettings,
@@ -92,6 +108,8 @@ export function exportOptionsFromSettings(
     useTalkGroupAbbreviation: settings.useTalkGroupAbbreviation,
     useChannelAbbreviation: settings.useChannelAbbreviation,
     multiTalkGroupExportNameMode: settings.multiTalkGroupExportNameMode,
+    exportScratchChannels: settings.exportScratchChannels,
+    exportZoneDerivedScanLists: settings.exportZoneDerivedScanLists,
   };
 }
 
@@ -108,6 +126,10 @@ export function useExportSettings() {
   );
   const [multiTalkGroupExportNameMode, setMultiTalkGroupExportNameModeState] = useState(
     readMultiTalkGroupExportNameMode,
+  );
+  const [exportScratchChannels, setExportScratchChannelsState] = useState(readExportScratchChannels);
+  const [exportZoneDerivedScanLists, setExportZoneDerivedScanListsState] = useState(
+    readExportZoneDerivedScanLists,
   );
 
   const setShortenNames = useCallback((value: boolean) => {
@@ -148,6 +170,16 @@ export function useExportSettings() {
     localStorage.setItem(STORAGE_KEY_EXPORT_MULTI_TG_NAME_MODE, value);
   }, []);
 
+  const setExportScratchChannels = useCallback((value: boolean) => {
+    setExportScratchChannelsState(value);
+    localStorage.setItem(STORAGE_KEY_EXPORT_SCRATCH_CHANNELS, String(value));
+  }, []);
+
+  const setExportZoneDerivedScanLists = useCallback((value: boolean) => {
+    setExportZoneDerivedScanListsState(value);
+    localStorage.setItem(STORAGE_KEY_EXPORT_ZONE_DERIVED_SCAN_LISTS, String(value));
+  }, []);
+
   const settings: ExportSettings = {
     shortenNames,
     maxNameLength,
@@ -155,6 +187,8 @@ export function useExportSettings() {
     useTalkGroupAbbreviation,
     useChannelAbbreviation,
     multiTalkGroupExportNameMode,
+    exportScratchChannels,
+    exportZoneDerivedScanLists,
   };
 
   return {
@@ -171,6 +205,10 @@ export function useExportSettings() {
     setUseChannelAbbreviation,
     multiTalkGroupExportNameMode,
     setMultiTalkGroupExportNameMode,
+    exportScratchChannels,
+    setExportScratchChannels,
+    exportZoneDerivedScanLists,
+    setExportZoneDerivedScanLists,
     exportOptionsFromSettings: (base: ExportOptions = {}) =>
       exportOptionsFromSettings(settings, base),
   };
