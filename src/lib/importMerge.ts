@@ -416,10 +416,7 @@ function resolveZones(
 ): { zones: Zone[]; unresolved: UnresolvedZoneMembers[] } {
   const unresolved: UnresolvedZoneMembers[] = [];
   const resolved = zones.map((zone) => {
-    const { members, unresolved: missing } = resolveZoneMembers(
-      getMemberWireNames(zone),
-      nameToId,
-    );
+    const { members, unresolved: missing } = resolveZoneMembers(getMemberWireNames(zone), nameToId);
     if (missing.length) {
       unresolved.push({ zoneName: zone.name, memberNames: missing });
     }

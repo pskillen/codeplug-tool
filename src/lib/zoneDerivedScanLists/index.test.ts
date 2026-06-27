@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   buildChannel,
   buildCodeplug,
-  buildTalkGroup,
   buildZone,
 } from '../../test/builders/codeplug.ts';
 import { buildZoneScanExportPlan } from './index.ts';

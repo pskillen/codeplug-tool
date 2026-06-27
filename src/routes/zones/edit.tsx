@@ -152,7 +152,10 @@ export default function ZoneEdit() {
                 label="Scan carrier frequency (MHz)"
                 description="Default 145.500 MHz simplex when unset."
                 value={scanCarrierMhz}
-                onChange={setScanCarrierMhz}
+                onChange={(value) => {
+                  if (value === '' || value == null) setScanCarrierMhz('');
+                  else setScanCarrierMhz(typeof value === 'number' ? value : Number(value));
+                }}
                 min={0}
                 decimalScale={6}
                 step={0.00625}

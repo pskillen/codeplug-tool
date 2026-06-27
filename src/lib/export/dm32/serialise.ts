@@ -93,13 +93,16 @@ export function serialiseDm32Files(codeplug: Codeplug, options?: ExportOptions):
     'RXGroupLists.csv': serialiseRxGroupLists(codeplug, talkGroupWireNames),
     'DTMFContacts.csv': serialiseDtmfContacts(codeplug),
     'Scan.csv':
-      scanPlan.scanLists.length > 0 ? serialiseDerivedScanLists(scanPlan.scanLists) : formatCsv(SCAN_HEADERS, []),
+      scanPlan.scanLists.length > 0
+        ? serialiseDerivedScanLists(scanPlan.scanLists)
+        : formatCsv(SCAN_HEADERS, []),
   };
   return files;
 }
 
 function syntheticSourceChannel(row: ExpandedChannelRow): Channel {
   return {
+    ...channelFieldDefaults(),
     id: row.sourceChannelId,
     name: row.wireName,
     callsign: '',
@@ -119,7 +122,6 @@ function syntheticSourceChannel(row: ExpandedChannelRow): Channel {
     txTone: row.txTone,
     squelch: row.squelch,
     power: row.power,
-    ...channelFieldDefaults(),
     opengd77Extras: row.opengd77Extras,
     multiMode: false,
     modeProfiles: [],
@@ -145,9 +147,7 @@ export function serialiseChannels(
   const byId = new Map(codeplug.channels.map((ch) => [ch.id, ch]));
   const rows = expanded.map((row, i) => {
     const source = byId.get(row.sourceChannelId) ?? syntheticSourceChannel(row);
-    const scanListName = scanPlan
-      ? scanListNameForCarrierWireName(scanPlan, row.wireName)
-      : null;
+    const scanListName = scanPlan ? scanListNameForCarrierWireName(scanPlan, row.wireName) : null;
     return padRow(
       CHANNEL_HEADERS,
       serialiseDm32ChannelRow(

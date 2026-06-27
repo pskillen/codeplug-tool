@@ -74,7 +74,9 @@ describe('ExportFromActivePanel', () => {
   it('shows DM32 zone-derived export toggles', () => {
     renderPanel(vendorFormatById('dm32'));
     expect(screen.getByText('Zone-derived export')).toBeInTheDocument();
-    expect(screen.getByLabelText(/Export scratch channels when enabled for zone/i)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/Export scratch channels when enabled for zone/i),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText(/Export scan lists when enabled for zone/i)).toBeInTheDocument();
   });
 

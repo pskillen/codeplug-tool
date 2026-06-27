@@ -22,10 +22,7 @@ describe('resolveZoneMembers', () => {
       buildGeolocatedChannel({ id: 'id-a', name: 'A' }),
       buildGeolocatedChannel({ id: 'id-b', name: 'B' }),
     ]);
-    const { members, unresolved } = resolveZoneMembers(
-      ['A', 'B', 'Missing', 'A'],
-      nameToId,
-    );
+    const { members, unresolved } = resolveZoneMembers(['A', 'B', 'Missing', 'A'], nameToId);
     expect(zoneMemberChannelIds({ id: '', name: '', members })).toEqual(['id-a', 'id-b']);
     expect(unresolved).toEqual(['Missing']);
   });

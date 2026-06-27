@@ -603,7 +603,7 @@ function scratchWireNamesForZone(
   const names: string[] = [];
 
   for (const member of zone.members) {
-    const ch = byId.get(member.channelId);
+    const ch = channelById.get(member.channelId);
     if (!ch || !isDmrMode(ch.mode) || !ch.rxGroupListId) continue;
 
     const rgl = codeplug.rxGroupLists.find((r) => r.id === ch.rxGroupListId);

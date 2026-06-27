@@ -127,7 +127,8 @@ export function useExportSettings() {
   const [multiTalkGroupExportNameMode, setMultiTalkGroupExportNameModeState] = useState(
     readMultiTalkGroupExportNameMode,
   );
-  const [exportScratchChannels, setExportScratchChannelsState] = useState(readExportScratchChannels);
+  const [exportScratchChannels, setExportScratchChannelsState] =
+    useState(readExportScratchChannels);
   const [exportZoneDerivedScanLists, setExportZoneDerivedScanListsState] = useState(
     readExportZoneDerivedScanLists,
   );

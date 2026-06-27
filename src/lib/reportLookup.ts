@@ -2,6 +2,7 @@ import type { Channel, Contact, RxGroupList, TalkGroup, Zone } from '../models/c
 import type { ChannelTimeslot } from './channelFields/index.ts';
 import { buildNameToChannelId } from './codeplug.ts';
 import { getMemberWireNames } from './entityProvenance.ts';
+import type { EntityRef } from './entityRefs.ts';
 import {
   entityRefDisplayName,
   entityRefsEqual,
@@ -76,9 +77,7 @@ export function channelsWithTalkGroupName(
 
 export function channelsForZone(zone: Zone, channels: Channel[]): Channel[] {
   const byId = new Map(channels.map((ch) => [ch.id, ch]));
-  return zone.members
-    .map((m) => byId.get(m.channelId))
-    .filter((ch): ch is Channel => ch != null);
+  return zone.members.map((m) => byId.get(m.channelId)).filter((ch): ch is Channel => ch != null);
 }
 
 export interface ResolvedRxMember {

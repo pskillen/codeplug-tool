@@ -1,8 +1,5 @@
-import {
-  membersFromChannelIds,
-  zoneMemberChannelIds,
-  zoneMembersFromChannelIds,
-} from '../lib/zones.ts';
+import type { Channel, Codeplug, Zone, ZoneMemberEntry } from '../models/codeplug.ts';
+import { zoneMemberChannelIds } from './zones.ts';
 import { channelImportMergeKeys, composeChannelWireName } from './channelNaming.ts';
 import {
   expandAllChannelsForExport,

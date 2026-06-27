@@ -5,7 +5,6 @@ import {
   type ExpandChannelOptions,
   type ExpandedChannelRow,
 } from '../channelExpansion/index.ts';
-import { isAnalogMode } from '../channelModes.ts';
 import { memberIncludesInScanList } from '../zones.ts';
 
 export const DEFAULT_SCAN_CARRIER_FREQUENCY_HZ = 145_500_000;
@@ -25,9 +24,7 @@ export interface ZoneScanExportPlan {
 }
 
 function scanExportEnabled(zone: Zone, options?: ExportOptions): boolean {
-  return (
-    zone.exportScanList === true && options?.exportZoneDerivedScanLists !== false
-  );
+  return zone.exportScanList === true && options?.exportZoneDerivedScanLists !== false;
 }
 
 function uniqueWireName(base: string, reserved: Set<string>): string {

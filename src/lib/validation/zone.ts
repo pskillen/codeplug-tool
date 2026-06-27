@@ -1,4 +1,4 @@
-import type { Codeplug, ZoneMemberEntry } from '../models/codeplug.ts';
+import type { Codeplug, ZoneMemberEntry } from '../../models/codeplug.ts';
 import type { ValidationIssue } from './channel.ts';
 
 export function validateZone(

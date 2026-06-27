@@ -94,11 +94,7 @@ function ChannelList({
     <Stack gap={4} p="xs">
       {items.map((ch) => (
         <Stack key={ch.id} gap={2}>
-          <Checkbox
-            label={ch.name}
-            checked={checked.has(ch.id)}
-            onChange={() => onToggle(ch.id)}
-          />
+          <Checkbox label={ch.name} checked={checked.has(ch.id)} onChange={() => onToggle(ch.id)} />
           {showScanInclusion && members && onScanInclusionChange ? (
             <Checkbox
               ml="lg"
@@ -182,9 +178,7 @@ export default function ZoneMemberPicker({
   const setScanInclusion = (channelId: string, include: boolean) => {
     onChange(
       members.map((m) =>
-        m.channelId === channelId
-          ? { ...m, includeInScanList: include ? undefined : false }
-          : m,
+        m.channelId === channelId ? { ...m, includeInScanList: include ? undefined : false } : m,
       ),
     );
   };

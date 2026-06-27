@@ -37,7 +37,10 @@ export function buildChannel(overrides: Partial<Channel> & Pick<Channel, 'id' | 
   };
 }
 
-export function buildZone(overrides: Partial<Zone> & Pick<Zone, 'id' | 'name'>): Zone {
+export type ZoneBuildInput = Partial<Zone> &
+  Pick<Zone, 'id' | 'name'> & { memberChannelIds?: string[] };
+
+export function buildZone(overrides: ZoneBuildInput): Zone {
   const legacyIds = (overrides as { memberChannelIds?: string[] }).memberChannelIds;
   const members = overrides.members ?? (legacyIds ? membersFromChannelIds(legacyIds) : []);
   return {
@@ -48,7 +51,7 @@ export function buildZone(overrides: Partial<Zone> & Pick<Zone, 'id' | 'name'>):
 
 /** Zone with member wire names in provenance (import/round-trip tests). */
 export function buildImportedZone(
-  overrides: Partial<Zone> & Pick<Zone, 'id' | 'name'>,
+  overrides: ZoneBuildInput,
   memberWireNames: string[] = [],
 ): Zone {
   const zone = buildZone(overrides);

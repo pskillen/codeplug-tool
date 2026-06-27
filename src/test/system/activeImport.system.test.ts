@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { applyImportToCodeplug } from '../../lib/importMerge.ts';
 import { zoneMemberChannelIds } from '../../lib/zones.ts';
 import { emptyCodeplug, resetIdGenerator, setIdGenerator } from '../../models/codeplug.ts';
 import { newProject } from '../../models/codeplugProject.ts';

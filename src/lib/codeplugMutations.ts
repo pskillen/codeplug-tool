@@ -22,10 +22,10 @@ import {
 } from './entityRefs.ts';
 import { parseTalkGroupSlotWireName } from './import/opengd77/collapseTalkGroupTimeslotDuplicates.ts';
 import {
-  membersFromChannelIds,
-  zoneMemberChannelIds,
-  zoneMembersFromChannelIds,
-} from './zones.ts';
+  normalizeTalkGroupNumber,
+  talkGroupIdByNormalizedNumber,
+} from './repeaterDirectories/brandmeister/mapTalkGroups.ts';
+import { membersFromChannelIds, zoneMemberChannelIds, zoneMembersFromChannelIds } from './zones.ts';
 
 export type ChannelInput = Omit<Channel, 'id'>;
 
@@ -56,11 +56,7 @@ export function channelNamesForIds(channels: Channel[], ids: string[]): string[]
   return names;
 }
 
-export function zoneWithMembers(
-  zone: Zone,
-  members: ZoneMemberEntry[],
-  channels: Channel[],
-): Zone {
+export function zoneWithMembers(zone: Zone, members: ZoneMemberEntry[], channels: Channel[]): Zone {
   return setMemberWireNames(
     { ...zone, members },
     channelNamesForIds(channels, zoneMemberChannelIds({ ...zone, members })),
@@ -73,11 +69,7 @@ export function zoneWithMemberIds(
   memberChannelIds: string[],
   channels: Channel[],
 ): Zone {
-  return zoneWithMembers(
-    zone,
-    zoneMembersFromChannelIds(memberChannelIds, zone.members),
-    channels,
-  );
+  return zoneWithMembers(zone, zoneMembersFromChannelIds(memberChannelIds, zone.members), channels);
 }
 
 /** Refresh export wire names for all zones from current channel ids. */
@@ -153,9 +145,7 @@ function replaceZoneMembers(
     const nextId = absorbedIds.has(member.channelId) ? survivorId : member.channelId;
     if (seen.has(nextId)) continue;
     seen.add(nextId);
-    result.push(
-      nextId === member.channelId ? member : { ...member, channelId: nextId },
-    );
+    result.push(nextId === member.channelId ? member : { ...member, channelId: nextId });
   }
   return result;
 }
@@ -190,8 +180,7 @@ export function mergeChannelsIntoOne(
 }
 
 export function addZone(codeplug: Codeplug, input: ZoneInput): Codeplug {
-  const members =
-    input.members ?? membersFromChannelIds(input.memberChannelIds ?? []);
+  const members = input.members ?? membersFromChannelIds(input.memberChannelIds ?? []);
   const channelIds = new Set(codeplug.channels.map((ch) => ch.id));
   for (const m of members) {
     if (!channelIds.has(m.channelId)) {
