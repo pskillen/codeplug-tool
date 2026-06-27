@@ -28,6 +28,7 @@ import {
   setIdGenerator,
 } from '../models/codeplug.ts';
 import { getMemberWireNames } from './entityProvenance.ts';
+import { membersFromChannelIds, zoneMemberChannelIds } from './zones.ts';
 import {
   buildChannel,
   buildImportedRxGroupList,
@@ -129,7 +130,7 @@ describe('codeplugMutations', () => {
     const next = updateChannel(cp, 'ch-1', { name: 'New Name' });
     expect(next.channels[0].name).toBe('New Name');
     expect(getMemberWireNames(next.zones[0])).toEqual(['New Name']);
-    expect(next.zones[0].memberChannelIds).toEqual(['ch-1']);
+    expect(zoneMemberChannelIds(next.zones[0])).toEqual(['ch-1']);
   });
 
   it('deleteChannel removes id from zones', () => {
@@ -150,7 +151,7 @@ describe('codeplugMutations', () => {
 
     const next = deleteChannel(cp, 'ch-1');
     expect(next.channels).toHaveLength(1);
-    expect(next.zones[0].memberChannelIds).toEqual(['ch-2']);
+    expect(zoneMemberChannelIds(next.zones[0])).toEqual(['ch-2']);
     expect(getMemberWireNames(next.zones[0])).toEqual(['B']);
   });
 
@@ -163,8 +164,8 @@ describe('codeplugMutations', () => {
     };
 
     const ids = channels.map((ch) => ch.id);
-    const next = setZoneMembers(cp, 'z-1', ids);
-    expect(next.zones[0].memberChannelIds).toHaveLength(81);
+    const next = setZoneMembers(cp, 'z-1', membersFromChannelIds(ids));
+    expect(zoneMemberChannelIds(next.zones[0])).toHaveLength(81);
   });
 
   it('setZoneMembers rejects unknown channel ids', () => {
@@ -174,7 +175,9 @@ describe('codeplugMutations', () => {
       zones: [buildZone({ id: 'z-1', name: 'Z' })],
     };
 
-    expect(() => setZoneMembers(cp, 'z-1', ['missing'])).toThrow(/Unknown channel/);
+    expect(() => setZoneMembers(cp, 'z-1', membersFromChannelIds(['missing']))).toThrow(
+      /Unknown channel/,
+    );
   });
 
   it('setZoneMembers preserves order and derives names', () => {
@@ -184,8 +187,8 @@ describe('codeplugMutations', () => {
       zones: [buildZone({ id: 'z-1', name: 'Z' })],
     };
 
-    const next = setZoneMembers(cp, 'z-1', ['ch-2', 'ch-1']);
-    expect(next.zones[0].memberChannelIds).toEqual(['ch-2', 'ch-1']);
+    const next = setZoneMembers(cp, 'z-1', membersFromChannelIds(['ch-2', 'ch-1']));
+    expect(zoneMemberChannelIds(next.zones[0])).toEqual(['ch-2', 'ch-1']);
     expect(getMemberWireNames(next.zones[0])).toEqual(['B', 'A']);
   });
 
@@ -363,7 +366,7 @@ describe('codeplugMutations', () => {
     const next = mergeChannelsIntoOne(cp, 'fm', ['dmr'], merged);
     expect(next.channels).toHaveLength(1);
     expect(next.channels[0].name).toBe('GB7GL');
-    expect(next.zones[0].memberChannelIds).toEqual(['fm']);
-    expect(next.zones[1].memberChannelIds).toEqual(['fm']);
+    expect(zoneMemberChannelIds(next.zones[0])).toEqual(['fm']);
+    expect(zoneMemberChannelIds(next.zones[1])).toEqual(['fm']);
   });
 });

@@ -75,8 +75,11 @@ describe('validateChannel', () => {
 
 describe('validateZone', () => {
   it('rejects unknown member channel ids', () => {
-    const issues = validateZone({ name: 'Z', memberChannelIds: ['missing'] }, emptyCodeplug());
-    expect(issues.some((i) => i.field === 'memberChannelIds' && i.severity === 'error')).toBe(true);
+    const issues = validateZone(
+      { name: 'Z', members: [{ channelId: 'missing' }] },
+      emptyCodeplug(),
+    );
+    expect(issues.some((i) => i.field === 'members' && i.severity === 'error')).toBe(true);
   });
 });
 

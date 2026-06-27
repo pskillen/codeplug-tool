@@ -8,7 +8,11 @@ import { findEntityById } from '../../lib/reportLookup.ts';
 import { hasValidationErrors } from '../../lib/validation/channel.ts';
 import { validateZone } from '../../lib/validation/zone.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
-import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
+import {
+  membersFromChannelIds,
+  zoneMemberChannelIds,
+  zoneMembersFromChannelIds,
+} from '../../lib/zones.ts';
 
 export default function ZoneEdit() {
   const { id } = useParams<{ id: string }>();
@@ -18,7 +22,9 @@ export default function ZoneEdit() {
   const existing = !isNew && id ? findEntityById(codeplug.zones, id) : null;
 
   const [name, setName] = useState(existing?.name ?? '');
-  const [memberIds, setMemberIds] = useState<string[]>(existing?.memberChannelIds ?? []);
+  const [memberIds, setMemberIds] = useState<string[]>(
+    existing ? zoneMemberChannelIds(existing) : [],
+  );
   const [formError, setFormError] = useState<string | null>(null);
 
   if (!isNew && !existing) {
@@ -38,7 +44,11 @@ export default function ZoneEdit() {
     e.preventDefault();
     setFormError(null);
 
-    const issues = validateZone({ name, memberChannelIds: memberIds }, codeplug, existing?.id);
+    const issues = validateZone(
+      { name, members: membersFromChannelIds(memberIds) },
+      codeplug,
+      existing?.id,
+    );
     if (hasValidationErrors(issues)) {
       setFormError(issues.find((i) => i.severity === 'error')?.message ?? 'Validation failed');
       return;
@@ -52,7 +62,10 @@ export default function ZoneEdit() {
         if (name.trim() !== existing.name) {
           updateZone(existing.id, { name: name.trim() });
         }
-        setZoneMembers(existing.id, memberIds);
+        setZoneMembers(
+          existing.id,
+          zoneMembersFromChannelIds(memberIds, existing.members),
+        );
         navigate(`/zones/${existing.id}`);
       }
     } catch (err) {

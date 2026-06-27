@@ -7,6 +7,7 @@ import { chirpMinimalBundle } from '../test/chirp/bundles.ts';
 import { parseChannels as parseChirpChannels } from './import/chirp/parse.ts';
 import { applyImportToCodeplug, emptyEntityStats, previewImportMerge } from './importMerge.ts';
 import { stampImported } from './entityProvenance.ts';
+import { zoneMemberChannelIds } from './zones.ts';
 
 function channelsResult(channels: Channel[]): ImportResult {
   return { channels, recognised: ['Channels.csv'], skipped: [], errors: [] };
@@ -202,7 +203,7 @@ describe('importMerge', () => {
 
       expect(reimport.report.zones).toEqual({ added: 0, updated: 0, unchanged: 1, removed: 0 });
       expect(reimport.codeplug.zones[0].id).toBe(zoneId);
-      expect(reimport.codeplug.zones[0].memberChannelIds).toEqual(['ch-1', 'ch-2']);
+      expect(zoneMemberChannelIds(reimport.codeplug.zones[0])).toEqual(['ch-1', 'ch-2']);
     });
   });
 

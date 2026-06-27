@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { RxGroupListMember } from '../models/codeplug.ts';
+import type { RxGroupListMember, ZoneMemberEntry } from '../models/codeplug.ts';
 import {
   applyImportToCodeplug as mergeImportIntoCodeplug,
   type ImportApplyMode,
@@ -75,7 +75,7 @@ type ProjectsAction =
   | { type: 'ADD_ZONE'; input: ZoneInput }
   | { type: 'UPDATE_ZONE'; zoneId: string; patch: Partial<ZoneInput> }
   | { type: 'DELETE_ZONE'; zoneId: string }
-  | { type: 'SET_ZONE_MEMBERS'; zoneId: string; memberChannelIds: string[] }
+  | { type: 'SET_ZONE_MEMBERS'; zoneId: string; members: ZoneMemberEntry[] }
   | { type: 'ADD_TALK_GROUP'; input: TalkGroupInput }
   | { type: 'UPDATE_TALK_GROUP'; talkGroupId: string; patch: Partial<TalkGroupInput> }
   | { type: 'DELETE_TALK_GROUP'; talkGroupId: string }
@@ -266,7 +266,7 @@ function projectsReducer(state: ProjectsState, action: ProjectsAction): Projects
 
     case 'SET_ZONE_MEMBERS':
       return updateActiveCodeplug(state, (cp) =>
-        setZoneMembersMutation(cp, action.zoneId, action.memberChannelIds),
+        setZoneMembersMutation(cp, action.zoneId, action.members),
       );
 
     case 'ADD_TALK_GROUP':
@@ -371,7 +371,7 @@ interface CodeplugContextValue {
   addZone: (input: ZoneInput) => void;
   updateZone: (zoneId: string, patch: Partial<ZoneInput>) => void;
   deleteZone: (zoneId: string) => void;
-  setZoneMembers: (zoneId: string, memberChannelIds: string[]) => void;
+  setZoneMembers: (zoneId: string, members: ZoneMemberEntry[]) => void;
   addTalkGroup: (input: TalkGroupInput) => void;
   updateTalkGroup: (talkGroupId: string, patch: Partial<TalkGroupInput>) => void;
   deleteTalkGroup: (talkGroupId: string) => void;
@@ -516,9 +516,9 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'DELETE_ZONE', zoneId });
   }, []);
 
-  const setZoneMembers = useCallback((zoneId: string, memberChannelIds: string[]) => {
+  const setZoneMembers = useCallback((zoneId: string, members: ZoneMemberEntry[]) => {
     setPersistenceError(null);
-    dispatch({ type: 'SET_ZONE_MEMBERS', zoneId, memberChannelIds });
+    dispatch({ type: 'SET_ZONE_MEMBERS', zoneId, members });
   }, []);
 
   const addTalkGroup = useCallback((input: TalkGroupInput) => {

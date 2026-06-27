@@ -10,7 +10,7 @@ import {
 } from '../../channelExpansion/talkGroupTimeslotExpansion.ts';
 import { expandZoneMemberWireNames } from '../../channelExpansion/index.ts';
 import { isDmrMode } from '../../channelModes.ts';
-import type { Codeplug, RxGroupList } from '../../../models/codeplug.ts';
+import type { Codeplug, RxGroupList, Zone } from '../../../models/codeplug.ts';
 import type { ExportOptions } from '../../import-export/types.ts';
 import { findContactById, findTalkGroupById } from '../../entityRefs.ts';
 import { getOpenGd77Profile, DEFAULT_OPENGD77_PROFILE_ID } from '../../opengd77/profiles.ts';
@@ -37,14 +37,14 @@ export function openGd77TalkGroupWireMap(
 
 /** Zone member channel names for OpenGD77 export — expands multi-mode members. */
 export function zoneExportMemberNames(
-  zone: { memberChannelIds: string[]; name: string },
+  zone: Pick<Zone, 'name' | 'members'>,
   codeplug: Codeplug,
   options?: ExportOptions,
 ): string[] {
   const profile = getOpenGd77Profile(options?.profileId ?? DEFAULT_OPENGD77_PROFILE_ID);
   const expandOpts = expandOptionsFromExport(codeplug, options);
   const { names } = expandZoneMemberWireNames(
-    { id: '', name: zone.name, memberChannelIds: zone.memberChannelIds },
+    { id: '', name: zone.name, members: zone.members },
     codeplug.channels,
     {
       ...expandOpts,

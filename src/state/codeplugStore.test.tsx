@@ -2,6 +2,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { getMemberWireNames } from '../lib/entityProvenance.ts';
+import { zoneMemberChannelIds } from '../lib/zones.ts';
 import type { ImportResult } from '../lib/import/types.ts';
 import {
   channelFieldDefaults,
@@ -74,7 +75,7 @@ describe('codeplug import merge semantics', () => {
       errors: [],
     });
     expect(state.zones).toHaveLength(1);
-    expect(state.zones[0].memberChannelIds).toEqual(['ch-1', 'ch-2']);
+    expect(zoneMemberChannelIds(state.zones[0])).toEqual(['ch-1', 'ch-2']);
     expect(getMemberWireNames(state.zones[0])).toEqual(['A', 'B']);
   });
 
@@ -108,7 +109,7 @@ describe('codeplug import merge semantics', () => {
 
     expect(state.zones[0].id).toBe(zoneId);
     expect(state.channels.find((c) => c.name === 'A')?.id).toBe('ch-1');
-    expect(state.zones[0].memberChannelIds).toEqual(['ch-1', 'ch-2']);
+    expect(zoneMemberChannelIds(state.zones[0])).toEqual(['ch-1', 'ch-2']);
   });
 });
 

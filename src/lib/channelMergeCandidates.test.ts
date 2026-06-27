@@ -12,6 +12,7 @@ import {
   previewChannelMerges,
   type ChannelMergeSelection,
 } from './channelMergeCandidates.ts';
+import { zoneMemberChannelIds } from './zones.ts';
 
 describe('channelMergeCandidates', () => {
   it('findChannelMergeCandidates groups GB7GL-F / GB7GL-D style split rows', () => {
@@ -301,7 +302,7 @@ describe('channelMergeCandidates', () => {
     expect(report.mergedCount).toBe(1);
     expect(merged.channels).toHaveLength(1);
     expect(merged.channels[0].multiMode).toBe(true);
-    expect(merged.zones[0].memberChannelIds).toEqual(['fm']);
+    expect(zoneMemberChannelIds(merged.zones[0])).toEqual(['fm']);
   });
 
   it('findChannelMergeCandidates groups flat per-TG DMR rows as multiTalkgroup', () => {
@@ -389,6 +390,6 @@ describe('channelMergeCandidates', () => {
     expect(merged.channels[0].rxGroupListId).toBeTruthy();
     expect(merged.rxGroupLists).toHaveLength(1);
     expect(merged.rxGroupLists[0].memberRefs).toHaveLength(2);
-    expect(merged.zones[0].memberChannelIds).toEqual(['1']);
+    expect(zoneMemberChannelIds(merged.zones[0])).toEqual(['1']);
   });
 });

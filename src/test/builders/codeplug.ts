@@ -11,6 +11,7 @@ import {
   type Zone,
 } from '../../models/codeplug.ts';
 import { setMemberWireNames, stampImported } from '../../lib/entityProvenance.ts';
+import { membersFromChannelIds } from '../../lib/zones.ts';
 
 export function buildChannel(overrides: Partial<Channel> & Pick<Channel, 'id' | 'name'>): Channel {
   const {
@@ -37,9 +38,11 @@ export function buildChannel(overrides: Partial<Channel> & Pick<Channel, 'id' | 
 }
 
 export function buildZone(overrides: Partial<Zone> & Pick<Zone, 'id' | 'name'>): Zone {
+  const legacyIds = (overrides as { memberChannelIds?: string[] }).memberChannelIds;
+  const members = overrides.members ?? (legacyIds ? membersFromChannelIds(legacyIds) : []);
   return {
-    memberChannelIds: [],
     ...overrides,
+    members,
   };
 }
 

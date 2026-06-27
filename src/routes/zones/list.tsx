@@ -6,6 +6,7 @@ import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocat
 import { filterRowsByName, useListNameQuery } from '../../hooks/useListNameQuery.ts';
 import { usePersistedEntityListSort } from '../../hooks/usePersistedEntityListSort.ts';
 import { DATATABLE_NAME_SORT_KEY } from '../../lib/dataTable/sort.ts';
+import { zoneMemberChannelIds } from '../../lib/zones.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 import { useOperatorPosition } from '../../state/operatorPosition.tsx';
 
@@ -45,8 +46,8 @@ export default function ZonesList() {
             {
               key: 'members',
               header: 'Members',
-              render: (z) => z.memberChannelIds.length,
-              sortValue: (z) => z.memberChannelIds.length,
+              render: (z) => zoneMemberChannelIds(z).length,
+              sortValue: (z) => zoneMemberChannelIds(z).length,
             },
           ]}
         />

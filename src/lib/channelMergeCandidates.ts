@@ -16,6 +16,7 @@ import { isAnalogMode, isDmrMode } from './channelModes.ts';
 import { formatMhzNumber } from './formatFrequency.ts';
 import { mergeChannelsIntoOne } from './codeplugMutations.ts';
 import type { Channel, Codeplug, RxGroupList } from '../models/codeplug.ts';
+import { zoneMemberChannelIds } from './zones.ts';
 import { validateChannel, type ValidationIssue } from './validation/channel.ts';
 
 export type ChannelMergeKind = 'multiMode' | 'multiTalkgroup' | 'ambiguous';
@@ -368,7 +369,7 @@ function zoneImpactsForMerge(
   const impacts: ChannelMergeZoneImpact[] = [];
 
   for (const zone of codeplug.zones) {
-    const absorbedInZone = zone.memberChannelIds.filter((id) => absorbed.has(id));
+    const absorbedInZone = zoneMemberChannelIds(zone).filter((id) => absorbed.has(id));
     if (absorbedInZone.length === 0) continue;
     impacts.push({
       zoneId: zone.id,

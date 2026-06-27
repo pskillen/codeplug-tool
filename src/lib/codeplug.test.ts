@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildNameToChannelId, resolveZoneMembers } from './codeplug.ts';
+import { zoneMemberChannelIds } from './zones.ts';
 import { buildGeolocatedChannel } from '../test/builders/index.ts';
 
 describe('buildNameToChannelId', () => {
@@ -21,11 +22,11 @@ describe('resolveZoneMembers', () => {
       buildGeolocatedChannel({ id: 'id-a', name: 'A' }),
       buildGeolocatedChannel({ id: 'id-b', name: 'B' }),
     ]);
-    const { memberChannelIds, unresolved } = resolveZoneMembers(
+    const { members, unresolved } = resolveZoneMembers(
       ['A', 'B', 'Missing', 'A'],
       nameToId,
     );
-    expect(memberChannelIds).toEqual(['id-a', 'id-b']);
+    expect(zoneMemberChannelIds({ id: '', name: '', members })).toEqual(['id-a', 'id-b']);
     expect(unresolved).toEqual(['Missing']);
   });
 });

@@ -576,7 +576,8 @@ export function expandZoneMemberWireNames(
   const channelById = new Map(options.channelById ?? byId);
   const withLookup = { ...options, channelById, warnings: options.warnings ?? warnings };
 
-  for (const memberId of zone.memberChannelIds) {
+  for (const member of zone.members) {
+    const memberId = member.channelId;
     const ch = byId.get(memberId);
     if (!ch) continue;
     channelById.set(ch.id, ch);
