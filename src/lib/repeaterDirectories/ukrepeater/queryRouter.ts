@@ -2,6 +2,7 @@ import { isValidLocator } from '../../maidenhead.ts';
 import { coordsToLocator } from '../../maidenhead.ts';
 import { geocodeQuery } from '../../geocode.ts';
 import type { GeocodeProvider } from '../../geocode.ts';
+import { looksLikeTownName, looksLikeUkPostcode } from '../../ukPostcode.ts';
 import { fetchByBand, fetchByCallsign, fetchByLocator } from './client.ts';
 import type { EtccListing } from './types.ts';
 
@@ -32,11 +33,21 @@ export interface SearchFilters {
 export function detectQueryKind(query: string): QueryKind {
   const trimmed = query.trim();
   if (!trimmed) return 'town';
-  if (isValidLocator(trimmed)) return 'locator';
   const lower = trimmed.toLowerCase();
   if (BAND_TOKENS.has(lower)) return 'band';
+  if (/\s/.test(trimmed) && looksLikeUkPostcode(trimmed)) return 'town';
+  if (isValidLocator(trimmed)) return 'locator';
+  if (looksLikeUkPostcode(trimmed)) return 'town';
   if (looksLikeCallsign(trimmed)) return 'callsign';
   return 'town';
+}
+
+/** Whether auto-mode geocode results should be narrowed by listing town substring. */
+export function shouldApplyTownSubstringForAuto(query: string): boolean {
+  const trimmed = query.trim();
+  if (!trimmed) return false;
+  if (looksLikeUkPostcode(trimmed)) return false;
+  return looksLikeTownName(trimmed);
 }
 
 export function filterListings(

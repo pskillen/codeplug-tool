@@ -20,6 +20,12 @@ describe('detectQueryKind', () => {
   it('defaults to town for free text', () => {
     expect(detectQueryKind('Derby')).toBe('town');
   });
+
+  it('detects UK postcodes as town (geocode path), not callsign', () => {
+    expect(detectQueryKind('DE1 1AA')).toBe('town');
+    expect(detectQueryKind('SW1A 1AA')).toBe('town');
+    expect(detectQueryKind('M1 1AE')).toBe('town');
+  });
 });
 
 describe('filterListings', () => {
