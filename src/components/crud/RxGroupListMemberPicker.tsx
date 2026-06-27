@@ -191,8 +191,7 @@ export default function RxGroupListMemberPicker({
   const availableMembers = useMemo(
     () =>
       allOptions.filter(
-        (o) =>
-          !selectedRefKeys.has(o.key) && memberOptionMatchesFilter(o, availableFilterLower),
+        (o) => !selectedRefKeys.has(o.key) && memberOptionMatchesFilter(o, availableFilterLower),
       ),
     [allOptions, selectedRefKeys, availableFilterLower],
   );

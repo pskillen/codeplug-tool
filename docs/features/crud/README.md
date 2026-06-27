@@ -8,11 +8,12 @@ Create, edit, and delete codeplug entities against the internal vendor-neutral m
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| Channel CRUD | Complete | `src/routes/channels/` — multi-mode editor ([#46](https://github.com/pskillen/codeplug-tool/issues/46)); ukrepeater ([#92](https://github.com/pskillen/codeplug-tool/issues/92)); BrandMeister ([#167](https://github.com/pskillen/codeplug-tool/issues/167)) |
-| Zone CRUD | Complete | `src/routes/zones/` + `ZoneMemberPicker` |
-| Talk group CRUD | Complete | `TalkGroupEdit`, list/detail |
-| RX group list CRUD | Complete | `RxGroupListEdit`, `RxGroupListMemberPicker` |
-| Contact CRUD | Complete | `ContactEdit`, list/detail |
+| Channel CRUD | Complete | `src/routes/channels/` — multi-mode editor ([#46](https://github.com/pskillen/codeplug-tool/issues/46)); ukrepeater ([#92](https://github.com/pskillen/codeplug-tool/issues/92)); BrandMeister ([#167](https://github.com/pskillen/codeplug-tool/issues/167)); duplicate ([#179](https://github.com/pskillen/codeplug-tool/issues/179)) |
+| Zone CRUD | Complete | `src/routes/zones/` + `ZoneMemberPicker`; zone from distance ([#180](https://github.com/pskillen/codeplug-tool/issues/180)); duplicate ([#179](https://github.com/pskillen/codeplug-tool/issues/179)) |
+| Talk group CRUD | Complete | `TalkGroupEdit`, list/detail; duplicate ([#179](https://github.com/pskillen/codeplug-tool/issues/179)) |
+| RX group list CRUD | Complete | `RxGroupListEdit`, `RxGroupListMemberPicker`; duplicate ([#179](https://github.com/pskillen/codeplug-tool/issues/179)) |
+| Contact CRUD | Complete | `ContactEdit`, list/detail; duplicate ([#179](https://github.com/pskillen/codeplug-tool/issues/179)) |
+| Member picker labels | Complete | Callsign in zone picker; DMR ID in RGL picker ([#182](https://github.com/pskillen/codeplug-tool/issues/182)) |
 | Store mutations | Complete | `codeplugMutations.ts`, `codeplugStore` |
 | Validation | Complete | `src/lib/validation/` |
 | Channel merge candidates | Complete | [#116](https://github.com/pskillen/codeplug-tool/issues/116) — post-hoc multi-mode merge detection and apply |
@@ -54,19 +55,20 @@ TG/RGL/contact CRUD follows the same rule: unlimited RGL members in the internal
 | `/channels/add-from-brandmeister` | Search BrandMeister and add DMR channels ([#167](https://github.com/pskillen/codeplug-tool/issues/167)) |
 | `/channels/new` | Create channel |
 | `/channels/:id/edit` | Edit channel |
-| `/channels/:id` | Detail + edit/delete |
+| `/channels/:id` | Detail + edit/duplicate/delete |
+| `/zones/from-distance` | Build a zone from channels within range ([#180](https://github.com/pskillen/codeplug-tool/issues/180)) |
 | `/zones/new` | Create zone |
 | `/zones/:id/edit` | Edit zone + members |
-| `/zones/:id` | Detail + edit/delete |
+| `/zones/:id` | Detail + edit/duplicate/delete |
 | `/talk-groups/new` | Create talk group |
 | `/talk-groups/:id/edit` | Edit talk group |
-| `/talk-groups/:id` | Detail + edit/delete |
+| `/talk-groups/:id` | Detail + edit/duplicate/delete |
 | `/rx-group-lists/new` | Create RX group list |
 | `/rx-group-lists/:id/edit` | Edit list + members |
-| `/rx-group-lists/:id` | Detail + edit/delete |
+| `/rx-group-lists/:id` | Detail + edit/duplicate/delete |
 | `/contacts/new` | Create contact |
 | `/contacts/:id/edit` | Edit contact |
-| `/contacts/:id` | Detail + edit/delete |
+| `/contacts/:id` | Detail + edit/duplicate/delete |
 
 ## Related
 

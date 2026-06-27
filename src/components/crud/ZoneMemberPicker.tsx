@@ -159,9 +159,7 @@ export default function ZoneMemberPicker({
   const availableChannels = useMemo(
     () =>
       sortByName(channels).filter(
-        (ch) =>
-          !selectedSet.has(ch.id) &&
-          channelMatchesFilter(ch, availableFilterLower),
+        (ch) => !selectedSet.has(ch.id) && channelMatchesFilter(ch, availableFilterLower),
       ),
     [channels, selectedIds, availableFilterLower],
   );
