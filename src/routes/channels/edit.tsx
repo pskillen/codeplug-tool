@@ -13,6 +13,9 @@ import { IconArrowLeft, IconDeviceFloppy } from '@tabler/icons-react';
 import { useState, useMemo, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FormPage, PercentLevelSlider } from '../../components/ui/index.ts';
+import HelpHint from '../../components/help/HelpHint.tsx';
+import FormatVarianceTable from '../../components/help/FormatVarianceTable.tsx';
+import { getHelpShort } from '../../content/help/manifest.ts';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
 import {
@@ -611,8 +614,8 @@ export default function ChannelEdit() {
             </Stack>
           ) : null}
           <Select
-            label="Export name mode"
-            description="How CPS export composes the channel name column"
+            label={<HelpHint label="Export name mode" helpId="channel.exportNameMode" />}
+            description={getHelpShort('channel.exportNameMode')}
             data={EXPORT_NAME_MODE_OPTIONS.map((o) => ({
               value: o.value,
               label: `${o.label} — ${o.description}`,
@@ -639,8 +642,8 @@ export default function ChannelEdit() {
             onChange={(e) => set('comment', e.currentTarget.value)}
           />
           <Checkbox
-            label="Multi-mode channel"
-            description="One logical site with separate settings per RF mode"
+            label={<HelpHint label="Multi-mode channel" helpId="channel.multiMode" />}
+            description={getHelpShort('channel.multiMode')}
             checked={values.multiMode}
             onChange={(e) => {
               const checked = e.currentTarget.checked;
@@ -877,7 +880,8 @@ export default function ChannelEdit() {
               allowDecimal={false}
             />
             <Select
-              label="TX contact"
+              label={<HelpHint label="TX contact" helpId="channel.txContact" />}
+              description={getHelpShort('channel.txContact')}
               data={contactOptions}
               value={values.contactRefKey || ''}
               onChange={(v) => set('contactRefKey', v ?? '')}
@@ -885,13 +889,15 @@ export default function ChannelEdit() {
               clearable
             />
             <Select
-              label="RX group list"
+              label={<HelpHint label="RX group list" helpId="channel.rxGroupList" />}
+              description={getHelpShort('channel.rxGroupList')}
               data={rglOptions}
               value={values.rxGroupListId || ''}
               onChange={(v) => set('rxGroupListId', v ?? '')}
               searchable
               clearable
             />
+            <FormatVarianceTable varianceId="rxGroupListExport" />
             <BrandMeisterVerify
               channel={verifyChannel}
               editBindings={{

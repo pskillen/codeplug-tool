@@ -16,6 +16,7 @@ import { IconArrowLeft, IconSearch } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FormPage } from '../ui/index.ts';
+import { getHelpShort } from '../../content/help/manifest.ts';
 import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { toTitleCase } from '../../lib/titleCase.ts';
@@ -171,10 +172,7 @@ export default function UkRepeaterSearch() {
   const showTextInput = TEXT_INPUT_MODES.has(search.searchMode);
 
   return (
-    <FormPage
-      title="Add from ukrepeater.net"
-      description="Search RSGB ETCC listings and add repeaters to your codeplug."
-    >
+    <FormPage title="Add from ukrepeater.net" description={getHelpShort('repeater.ukrepeater')}>
       <Stack gap="md">
         <Anchor component={Link} to="/channels" size="sm">
           <Group gap={4} wrap="nowrap">
