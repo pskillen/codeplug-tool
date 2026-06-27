@@ -1,6 +1,6 @@
 import { Anchor, Button, Group, Stack, Text, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconArrowLeft, IconPencil, IconTrash } from '@tabler/icons-react';
+import { IconArrowLeft, IconCopy, IconPencil, IconTrash } from '@tabler/icons-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ConfirmDeleteModal from '../components/crud/ConfirmDeleteModal.tsx';
 import { BandPillForChannel } from '../components/crud/BandPill.tsx';
@@ -22,7 +22,7 @@ import { ICON_SIZE_NAV, ICON_STROKE } from '../lib/iconSizes.ts';
 export default function RxGroupListDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { codeplug, deleteRxGroupList } = useCodeplug();
+  const { codeplug, deleteRxGroupList, duplicateRxGroupList } = useCodeplug();
   const [deleteOpen, { open: openDelete, close: closeDelete }] = useDisclosure(false);
   const rgl = id ? findEntityById(codeplug.rxGroupLists, id) : null;
 
@@ -42,6 +42,11 @@ export default function RxGroupListDetail() {
     deleteRxGroupList(rgl.id);
     closeDelete();
     navigate('/rx-group-lists');
+  };
+
+  const handleDuplicate = () => {
+    const newId = duplicateRxGroupList(rgl.id);
+    if (newId) navigate(`/rx-group-lists/${newId}`);
   };
 
   return (
@@ -65,6 +70,14 @@ export default function RxGroupListDetail() {
               leftSection={<IconPencil size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
             >
               Edit
+            </Button>
+            <Button
+              variant="light"
+              size="sm"
+              onClick={handleDuplicate}
+              leftSection={<IconCopy size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+            >
+              Duplicate
             </Button>
             <Button
               color="red"

@@ -1,6 +1,6 @@
 import { Anchor, Button, Group, Stack, Text, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconArrowLeft, IconPencil, IconTrash } from '@tabler/icons-react';
+import { IconArrowLeft, IconCopy, IconPencil, IconTrash } from '@tabler/icons-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import ConfirmDeleteModal from '../../components/crud/ConfirmDeleteModal.tsx';
@@ -45,7 +45,7 @@ function formatLocation(lat: number | undefined, lon: number | undefined): strin
 export default function ChannelDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { codeplug, deleteChannel } = useCodeplug();
+  const { codeplug, deleteChannel, duplicateChannel } = useCodeplug();
   const { position, setPosition, clearPosition } = useOperatorPosition();
   const [deleteOpen, { open: openDelete, close: closeDelete }] = useDisclosure(false);
   const channel = id ? findEntityById(codeplug.channels, id) : null;
@@ -353,6 +353,11 @@ export default function ChannelDetail() {
     navigate('/channels');
   };
 
+  const handleDuplicate = () => {
+    const newId = duplicateChannel(channel.id);
+    if (newId) navigate(`/channels/${newId}`);
+  };
+
   return (
     <Page>
       <PageHeader title={channelDisplayLabel(channel, true) || channel.name || 'Channel'} />
@@ -377,6 +382,14 @@ export default function ChannelDetail() {
               leftSection={<IconPencil size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
             >
               Edit
+            </Button>
+            <Button
+              variant="light"
+              size="sm"
+              onClick={handleDuplicate}
+              leftSection={<IconCopy size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+            >
+              Duplicate
             </Button>
             <Button
               color="red"

@@ -10,6 +10,11 @@ import {
   deleteRxGroupList,
   deleteTalkGroup,
   deleteZone,
+  duplicateChannel,
+  duplicateContact,
+  duplicateRxGroupList,
+  duplicateTalkGroup,
+  duplicateZone,
   mergeChannelsIntoOne,
   normalizeChannelForSave,
   setRxGroupListMembers,
@@ -28,13 +33,16 @@ import {
   setIdGenerator,
 } from '../models/codeplug.ts';
 import { getMemberWireNames } from './entityProvenance.ts';
+import { stampRepeaterDirectory } from './entityProvenance.ts';
 import { membersFromChannelIds, zoneMemberChannelIds } from './zones.ts';
 import {
   buildChannel,
+  buildContact,
   buildImportedRxGroupList,
   buildImportedZone,
   buildRglMember,
   buildRxGroupList,
+  buildTalkGroup,
   buildZone,
 } from '../test/builders/index.ts';
 import type { Channel } from '../models/codeplug.ts';
@@ -368,5 +376,65 @@ describe('codeplugMutations', () => {
     expect(next.channels[0].name).toBe('GB7GL');
     expect(zoneMemberChannelIds(next.zones[0])).toEqual(['fm']);
     expect(zoneMemberChannelIds(next.zones[1])).toEqual(['fm']);
+  });
+
+  it('duplicateChannel assigns new id and strips directory provenance', () => {
+    const ch = stampRepeaterDirectory(makeChannel('ch-1', 'Derby'), {
+      sourceId: 'ukrepeater',
+      remoteListingId: 1,
+      fetchedAt: '2026-01-01T00:00:00Z',
+      snapshot: {},
+    });
+    const cp = { ...emptyCodeplug(), channels: [ch] };
+    const result = duplicateChannel(cp, 'ch-1');
+    expect(result).not.toBeNull();
+    expect(result!.id).not.toBe('ch-1');
+    expect(result!.codeplug.channels).toHaveLength(2);
+    const copy = result!.codeplug.channels.find((c) => c.id === result!.id)!;
+    expect(copy.name).toBe('Derby (copy)');
+    expect(copy.callsign).toBe(ch.callsign);
+    expect(copy.meta?.repeaterDirectory).toBeUndefined();
+    expect(copy.meta?.imported).toBeUndefined();
+  });
+
+  it('duplicateZone keeps member channel ids', () => {
+    const cp = {
+      ...emptyCodeplug(),
+      channels: [makeChannel('ch-1', 'A'), makeChannel('ch-2', 'B')],
+      zones: [buildZone({ id: 'z-1', name: 'Home', memberChannelIds: ['ch-1', 'ch-2'] })],
+    };
+    const result = duplicateZone(cp, 'z-1');
+    expect(result).not.toBeNull();
+    const copy = result!.codeplug.zones.find((z) => z.id === result!.id)!;
+    expect(copy.name).toBe('Home (copy)');
+    expect(zoneMemberChannelIds(copy)).toEqual(['ch-1', 'ch-2']);
+  });
+
+  it('duplicateTalkGroup suffixes name in shared namespace', () => {
+    const cp = {
+      ...emptyCodeplug(),
+      talkGroups: [buildTalkGroup({ id: 'tg-1', name: 'Scotland', number: '2355' })],
+      contacts: [buildContact({ id: 'c-1', name: 'Scotland', identifier: '1234567' })],
+    };
+    const result = duplicateTalkGroup(cp, 'tg-1');
+    expect(result!.codeplug.talkGroups.find((tg) => tg.id === result!.id)?.name).toBe(
+      'Scotland (copy)',
+    );
+  });
+
+  it('duplicateContact and duplicateRxGroupList assign unique names', () => {
+    const cp = {
+      ...emptyCodeplug(),
+      contacts: [buildContact({ id: 'c-1', name: 'Dave', identifier: '1234567' })],
+      rxGroupLists: [buildRxGroupList({ id: 'rgl-1', name: 'Local', memberRefs: [] })],
+    };
+    const contactResult = duplicateContact(cp, 'c-1');
+    expect(contactResult!.codeplug.contacts.find((c) => c.id === contactResult!.id)?.name).toBe(
+      'Dave (copy)',
+    );
+    const rglResult = duplicateRxGroupList(contactResult!.codeplug, 'rgl-1');
+    expect(rglResult!.codeplug.rxGroupLists.find((r) => r.id === rglResult!.id)?.name).toBe(
+      'Local (copy)',
+    );
   });
 });

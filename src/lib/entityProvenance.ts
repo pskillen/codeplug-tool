@@ -120,6 +120,15 @@ export function setMemberWireNames<T extends WithEntityMeta>(entity: T, names: s
   };
 }
 
+/** Remove import and directory provenance when duplicating an entity for operator edit. */
+export function stripCopyProvenance(meta?: EntityMeta): EntityMeta | undefined {
+  if (!meta) return undefined;
+  const next = { ...meta };
+  delete next.imported;
+  delete next.repeaterDirectory;
+  return Object.keys(next).length > 0 ? next : undefined;
+}
+
 export function stampImported<T extends WithEntityMeta>(entity: T, input: StampImportedInput): T {
   return {
     ...entity,

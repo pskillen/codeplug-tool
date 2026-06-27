@@ -21,6 +21,11 @@ import {
   addRxGroupList as addRxGroupListMutation,
   addTalkGroup as addTalkGroupMutation,
   addZone as addZoneMutation,
+  duplicateChannel as duplicateChannelMutation,
+  duplicateContact as duplicateContactMutation,
+  duplicateRxGroupList as duplicateRxGroupListMutation,
+  duplicateTalkGroup as duplicateTalkGroupMutation,
+  duplicateZone as duplicateZoneMutation,
   deleteChannel as deleteChannelMutation,
   deleteContact as deleteContactMutation,
   deleteRxGroupList as deleteRxGroupListMutation,
@@ -69,6 +74,7 @@ type ProjectsAction =
   | { type: 'SET_ACTIVE_PROJECT'; id: string }
   | { type: 'DELETE_PROJECT'; id: string }
   | { type: 'CLEAR' }
+  | { type: 'REPLACE_ACTIVE_CODEPLUG'; codeplug: Codeplug }
   | { type: 'ADD_CHANNEL'; input: ChannelInput }
   | { type: 'UPDATE_CHANNEL'; channelId: string; patch: Partial<ChannelInput> }
   | { type: 'DELETE_CHANNEL'; channelId: string }
@@ -242,6 +248,9 @@ function projectsReducer(state: ProjectsState, action: ProjectsAction): Projects
       };
     }
 
+    case 'REPLACE_ACTIVE_CODEPLUG':
+      return updateActiveCodeplug(state, () => action.codeplug);
+
     case 'ADD_CHANNEL':
       return updateActiveCodeplug(state, (cp) => addChannelMutation(cp, action.input));
 
@@ -368,16 +377,20 @@ interface CodeplugContextValue {
   addChannel: (input: ChannelInput) => void;
   updateChannel: (channelId: string, patch: Partial<ChannelInput>) => void;
   deleteChannel: (channelId: string) => void;
-  addZone: (input: ZoneInput) => void;
+  duplicateChannel: (channelId: string) => string | null;
+  addZone: (input: ZoneInput) => string | null;
   updateZone: (zoneId: string, patch: Partial<ZoneInput>) => void;
   deleteZone: (zoneId: string) => void;
+  duplicateZone: (zoneId: string) => string | null;
   setZoneMembers: (zoneId: string, members: ZoneMemberEntry[]) => void;
   addTalkGroup: (input: TalkGroupInput) => void;
   updateTalkGroup: (talkGroupId: string, patch: Partial<TalkGroupInput>) => void;
   deleteTalkGroup: (talkGroupId: string) => void;
+  duplicateTalkGroup: (talkGroupId: string) => string | null;
   addContact: (input: ContactInput) => void;
   updateContact: (contactId: string, patch: Partial<ContactInput>) => void;
   deleteContact: (contactId: string) => void;
+  duplicateContact: (contactId: string) => string | null;
   addRxGroupList: (input: RxGroupListInput) => void;
   addBrandMeisterBundle: (input: BrandMeisterRepeaterBundleInput) => void;
   applyBrandMeisterRxListCorrection: (
@@ -386,6 +399,7 @@ interface CodeplugContextValue {
   ) => void;
   updateRxGroupList: (rglId: string, patch: Partial<RxGroupListInput>) => void;
   deleteRxGroupList: (rglId: string) => void;
+  duplicateRxGroupList: (rglId: string) => string | null;
   setRxGroupListMembers: (rglId: string, memberRefs: RxGroupListMember[]) => void;
   applyChannelMerges: (
     selections: ChannelMergeSelection[],
@@ -501,10 +515,32 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'DELETE_CHANNEL', channelId });
   }, []);
 
-  const addZone = useCallback((input: ZoneInput) => {
-    setPersistenceError(null);
-    dispatch({ type: 'ADD_ZONE', input });
-  }, []);
+  const duplicateChannel = useCallback(
+    (channelId: string): string | null => {
+      const project = activeProject(projectsState);
+      if (!project) return null;
+      const result = duplicateChannelMutation(project.codeplug, channelId);
+      if (!result) return null;
+      setPersistenceError(null);
+      dispatch({ type: 'REPLACE_ACTIVE_CODEPLUG', codeplug: result.codeplug });
+      return result.id;
+    },
+    [projectsState],
+  );
+
+  const addZone = useCallback(
+    (input: ZoneInput): string | null => {
+      const project = activeProject(projectsState);
+      if (!project) return null;
+      const next = addZoneMutation(project.codeplug, input);
+      const added = next.zones[next.zones.length - 1];
+      if (!added) return null;
+      setPersistenceError(null);
+      dispatch({ type: 'REPLACE_ACTIVE_CODEPLUG', codeplug: next });
+      return added.id;
+    },
+    [projectsState],
+  );
 
   const updateZone = useCallback((zoneId: string, patch: Partial<ZoneInput>) => {
     setPersistenceError(null);
@@ -515,6 +551,19 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
     setPersistenceError(null);
     dispatch({ type: 'DELETE_ZONE', zoneId });
   }, []);
+
+  const duplicateZone = useCallback(
+    (zoneId: string): string | null => {
+      const project = activeProject(projectsState);
+      if (!project) return null;
+      const result = duplicateZoneMutation(project.codeplug, zoneId);
+      if (!result) return null;
+      setPersistenceError(null);
+      dispatch({ type: 'REPLACE_ACTIVE_CODEPLUG', codeplug: result.codeplug });
+      return result.id;
+    },
+    [projectsState],
+  );
 
   const setZoneMembers = useCallback((zoneId: string, members: ZoneMemberEntry[]) => {
     setPersistenceError(null);
@@ -536,6 +585,19 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'DELETE_TALK_GROUP', talkGroupId });
   }, []);
 
+  const duplicateTalkGroup = useCallback(
+    (talkGroupId: string): string | null => {
+      const project = activeProject(projectsState);
+      if (!project) return null;
+      const result = duplicateTalkGroupMutation(project.codeplug, talkGroupId);
+      if (!result) return null;
+      setPersistenceError(null);
+      dispatch({ type: 'REPLACE_ACTIVE_CODEPLUG', codeplug: result.codeplug });
+      return result.id;
+    },
+    [projectsState],
+  );
+
   const addContact = useCallback((input: ContactInput) => {
     setPersistenceError(null);
     dispatch({ type: 'ADD_CONTACT', input });
@@ -550,6 +612,19 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
     setPersistenceError(null);
     dispatch({ type: 'DELETE_CONTACT', contactId });
   }, []);
+
+  const duplicateContact = useCallback(
+    (contactId: string): string | null => {
+      const project = activeProject(projectsState);
+      if (!project) return null;
+      const result = duplicateContactMutation(project.codeplug, contactId);
+      if (!result) return null;
+      setPersistenceError(null);
+      dispatch({ type: 'REPLACE_ACTIVE_CODEPLUG', codeplug: result.codeplug });
+      return result.id;
+    },
+    [projectsState],
+  );
 
   const addRxGroupList = useCallback((input: RxGroupListInput) => {
     setPersistenceError(null);
@@ -578,6 +653,19 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
     setPersistenceError(null);
     dispatch({ type: 'DELETE_RX_GROUP_LIST', rglId });
   }, []);
+
+  const duplicateRxGroupList = useCallback(
+    (rglId: string): string | null => {
+      const project = activeProject(projectsState);
+      if (!project) return null;
+      const result = duplicateRxGroupListMutation(project.codeplug, rglId);
+      if (!result) return null;
+      setPersistenceError(null);
+      dispatch({ type: 'REPLACE_ACTIVE_CODEPLUG', codeplug: result.codeplug });
+      return result.id;
+    },
+    [projectsState],
+  );
 
   const setRxGroupListMembers = useCallback((rglId: string, memberRefs: RxGroupListMember[]) => {
     setPersistenceError(null);
@@ -611,21 +699,26 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
       addChannel,
       updateChannel,
       deleteChannel,
+      duplicateChannel,
       addZone,
       updateZone,
       deleteZone,
+      duplicateZone,
       setZoneMembers,
       addTalkGroup,
       updateTalkGroup,
       deleteTalkGroup,
+      duplicateTalkGroup,
       addContact,
       updateContact,
       deleteContact,
+      duplicateContact,
       addRxGroupList,
       addBrandMeisterBundle,
       applyBrandMeisterRxListCorrection: applyBrandMeisterRxListCorrectionAction,
       updateRxGroupList,
       deleteRxGroupList,
+      duplicateRxGroupList,
       setRxGroupListMembers,
       applyChannelMerges: applyChannelMergesAction,
       applyTalkGroupMerges: applyTalkGroupMergesAction,
@@ -639,21 +732,26 @@ export function CodeplugProvider({ children }: { children: ReactNode }) {
       addChannel,
       updateChannel,
       deleteChannel,
+      duplicateChannel,
       addZone,
       updateZone,
       deleteZone,
+      duplicateZone,
       setZoneMembers,
       addTalkGroup,
       updateTalkGroup,
       deleteTalkGroup,
+      duplicateTalkGroup,
       addContact,
       updateContact,
       deleteContact,
+      duplicateContact,
       addRxGroupList,
       addBrandMeisterBundle,
       applyBrandMeisterRxListCorrectionAction,
       updateRxGroupList,
       deleteRxGroupList,
+      duplicateRxGroupList,
       setRxGroupListMembers,
       applyChannelMergesAction,
       applyTalkGroupMergesAction,
