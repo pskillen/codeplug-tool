@@ -3,6 +3,8 @@ import { IconArrowLeft, IconDeviceFloppy } from '@tabler/icons-react';
 import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FormPage, FormSection } from '../components/ui/index.ts';
+import HelpHint from '../components/help/HelpHint.tsx';
+import { getHelpShort } from '../content/help/manifest.ts';
 import { findEntityById } from '../lib/reportLookup.ts';
 import { talkGroupAbbreviationSuggestions } from '../lib/talkGroupAbbreviationSuggestions.ts';
 import { hasValidationErrors } from '../lib/validation/channel.ts';
@@ -122,14 +124,15 @@ export default function TalkGroupEdit() {
 
         <FormSection title="Talk group details">
           <TextInput
-            label="Name"
+            label={<HelpHint label="Name" helpId="talkGroup.namespace" />}
+            description={getHelpShort('talkGroup.namespace')}
             required
             value={values.name}
             onChange={(e) => set('name', e.currentTarget.value)}
           />
           <TextInput
-            label="Abbreviation"
-            description="Optional shorter label used when export names are shortened"
+            label={<HelpHint label="Abbreviation" helpId="talkGroup.abbreviation" />}
+            description={getHelpShort('talkGroup.abbreviation')}
             value={values.abbreviation ?? ''}
             onChange={(e) => set('abbreviation', e.currentTarget.value)}
           />

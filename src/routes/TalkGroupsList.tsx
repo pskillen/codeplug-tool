@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { DataTable, ListPage } from '../components/ui/index.ts';
+import { DataTable, EmptyState, ListPage } from '../components/ui/index.ts';
+import { getHelpShort } from '../content/help/manifest.ts';
 import { filterRowsByName, useListNameQuery } from '../hooks/useListNameQuery.ts';
 import { usePersistedEntityListSort } from '../hooks/usePersistedEntityListSort.ts';
 import { DATATABLE_NAME_SORT_KEY } from '../lib/dataTable/sort.ts';
@@ -35,6 +36,7 @@ export default function TalkGroupsList() {
         sort={sort}
         onSortChange={setSort}
         rowKey={(tg) => tg.id}
+        emptyState={<EmptyState message={getHelpShort('empty.talkGroups')} />}
         nameColumn={{
           getName: (tg) => tg.name,
           getPath: (tg) => `/talk-groups/${tg.id}`,

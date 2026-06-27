@@ -1,8 +1,9 @@
-import { Button, Stack } from '@mantine/core';
+import { Button, Stack, Text } from '@mantine/core';
 import { IconGitMerge, IconPlus } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import TalkGroupMergeCandidatesModal from '../../TalkGroupMergeCandidatesModal/TalkGroupMergeCandidatesModal.tsx';
+import { getHelpShort } from '../../../content/help/manifest.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../../lib/iconSizes.ts';
 import type { SectionNavProps } from '../../../nav/sectionNavTypes.ts';
 
@@ -33,6 +34,9 @@ export default function TalkGroupsSectionNav({ variant }: SectionNavProps) {
       >
         Find merge candidates
       </Button>
+      <Text size="xs" c="dimmed">
+        {getHelpShort('talkGroup.mergeCandidates')}
+      </Text>
 
       <TalkGroupMergeCandidatesModal
         key={mergeSession}

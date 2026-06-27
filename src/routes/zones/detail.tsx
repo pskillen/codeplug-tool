@@ -4,6 +4,7 @@ import { IconArrowLeft, IconCopy, IconPencil, IconTrash } from '@tabler/icons-re
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import ConfirmDeleteModal from '../../components/crud/ConfirmDeleteModal.tsx';
+import HelpPopover from '../../components/help/HelpPopover.tsx';
 import { DataTable, Page, PageHeader } from '../../components/ui/index.ts';
 import DetailSections from '../../components/report/DetailSections.tsx';
 import NotFoundEntity from '../../components/report/NotFoundEntity.tsx';
@@ -85,14 +86,17 @@ export default function ZoneDetail() {
             >
               Edit
             </Button>
-            <Button
-              variant="light"
-              size="sm"
-              onClick={handleDuplicate}
-              leftSection={<IconCopy size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
-            >
-              Duplicate
-            </Button>
+            <Group gap={4} wrap="nowrap">
+              <Button
+                variant="light"
+                size="sm"
+                onClick={handleDuplicate}
+                leftSection={<IconCopy size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+              >
+                Duplicate
+              </Button>
+              <HelpPopover helpId="entity.duplicate" />
+            </Group>
             <Button
               color="red"
               variant="light"
