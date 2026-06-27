@@ -284,6 +284,7 @@ export default function ZoneFromDistance() {
               onSelectedKeysChange={setSelectedKeys}
               callsignColumn={{
                 getName: (ch: Channel) => ch.callsign || '—',
+                getPath: (ch: Channel) => `/channels/${ch.id}`,
                 sortValue: (ch: Channel) => ch.callsign || '',
               }}
               nameColumn={{
