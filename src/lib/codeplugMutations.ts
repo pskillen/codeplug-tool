@@ -12,7 +12,7 @@ import {
   type Zone,
   type ZoneMemberEntry,
 } from '../models/codeplug.ts';
-import { getMemberWireNames, setMemberWireNames } from './entityProvenance.ts';
+import { getMemberWireNames, setMemberWireNames, stripCopyProvenance } from './entityProvenance.ts';
 import type { EntityRefKind } from './entityRefs.ts';
 import {
   entityRefKey,
@@ -26,6 +26,18 @@ import {
   talkGroupIdByNormalizedNumber,
 } from './repeaterDirectories/brandmeister/mapTalkGroups.ts';
 import { membersFromChannelIds, zoneMemberChannelIds, zoneMembersFromChannelIds } from './zones.ts';
+import {
+  collectChannelNames,
+  collectRxGroupListNames,
+  collectTalkGroupContactNames,
+  collectZoneNames,
+  uniqueDisplayName,
+} from './uniqueDisplayName.ts';
+
+export interface DuplicateEntityResult {
+  codeplug: Codeplug;
+  id: string;
+}
 
 export type ChannelInput = Omit<Channel, 'id'>;
 
@@ -649,4 +661,93 @@ export function applyBrandMeisterRxListCorrection(
   cp = addRxGroupList(cp, { name: input.newListName, memberRefs });
   const rxGroupListId = cp.rxGroupLists[cp.rxGroupLists.length - 1]?.id ?? null;
   return { codeplug: cp, rxGroupListId };
+}
+
+export function duplicateChannel(
+  codeplug: Codeplug,
+  channelId: string,
+): DuplicateEntityResult | null {
+  const source = codeplug.channels.find((ch) => ch.id === channelId);
+  if (!source) return null;
+
+  const { id: _id, meta, name, ...rest } = source;
+  const baseName = name.trim() || source.callsign.trim() || 'Channel';
+  const nextName = uniqueDisplayName(baseName, collectChannelNames(codeplug));
+  const next = addChannel(codeplug, {
+    ...rest,
+    name: nextName,
+    meta: stripCopyProvenance(meta),
+  });
+  const added = next.channels[next.channels.length - 1];
+  return { codeplug: next, id: added.id };
+}
+
+export function duplicateZone(codeplug: Codeplug, zoneId: string): DuplicateEntityResult | null {
+  const source = codeplug.zones.find((z) => z.id === zoneId);
+  if (!source) return null;
+
+  const nextName = uniqueDisplayName(source.name, collectZoneNames(codeplug));
+  const members = source.members.map((m) => ({ ...m }));
+  const next = addZone(codeplug, {
+    name: nextName,
+    members,
+    exportScratchChannel: source.exportScratchChannel,
+    exportScanList: source.exportScanList,
+    scanCarrierFrequencyHz: source.scanCarrierFrequencyHz,
+  });
+  const added = next.zones[next.zones.length - 1];
+  return { codeplug: next, id: added.id };
+}
+
+export function duplicateTalkGroup(
+  codeplug: Codeplug,
+  talkGroupId: string,
+): DuplicateEntityResult | null {
+  const source = codeplug.talkGroups.find((tg) => tg.id === talkGroupId);
+  if (!source) return null;
+
+  const { id: _id, meta, name, ...rest } = source;
+  const nextName = uniqueDisplayName(name, collectTalkGroupContactNames(codeplug));
+  const next = addTalkGroup(codeplug, {
+    ...rest,
+    name: nextName,
+    meta: stripCopyProvenance(meta),
+  });
+  const added = next.talkGroups[next.talkGroups.length - 1];
+  return { codeplug: next, id: added.id };
+}
+
+export function duplicateContact(
+  codeplug: Codeplug,
+  contactId: string,
+): DuplicateEntityResult | null {
+  const source = codeplug.contacts.find((c) => c.id === contactId);
+  if (!source) return null;
+
+  const { id: _id, meta, name, ...rest } = source;
+  const nextName = uniqueDisplayName(name, collectTalkGroupContactNames(codeplug));
+  const next = addContact(codeplug, {
+    ...rest,
+    name: nextName,
+    meta: stripCopyProvenance(meta),
+  });
+  const added = next.contacts[next.contacts.length - 1];
+  return { codeplug: next, id: added.id };
+}
+
+export function duplicateRxGroupList(
+  codeplug: Codeplug,
+  rglId: string,
+): DuplicateEntityResult | null {
+  const source = codeplug.rxGroupLists.find((r) => r.id === rglId);
+  if (!source) return null;
+
+  const nextName = uniqueDisplayName(source.name, collectRxGroupListNames(codeplug));
+  const memberRefs = source.memberRefs.map((m) => ({
+    ref: { ...m.ref },
+    ...(m.timeslot != null ? { timeslot: m.timeslot } : {}),
+  }));
+  const next = addRxGroupList(codeplug, { name: nextName, memberRefs });
+  const added = next.rxGroupLists[next.rxGroupLists.length - 1];
+  return { codeplug: next, id: added.id };
 }
