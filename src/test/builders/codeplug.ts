@@ -50,10 +50,7 @@ export function buildZone(overrides: ZoneBuildInput): Zone {
 }
 
 /** Zone with member wire names in provenance (import/round-trip tests). */
-export function buildImportedZone(
-  overrides: ZoneBuildInput,
-  memberWireNames: string[] = [],
-): Zone {
+export function buildImportedZone(overrides: ZoneBuildInput, memberWireNames: string[] = []): Zone {
   const zone = buildZone(overrides);
   if (memberWireNames.length === 0) return zone;
   return setMemberWireNames(

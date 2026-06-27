@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  buildChannel,
-  buildCodeplug,
-  buildZone,
-} from '../../test/builders/codeplug.ts';
+import { buildChannel, buildCodeplug, buildZone } from '../../test/builders/codeplug.ts';
 import { buildZoneScanExportPlan } from './index.ts';
 
 describe('buildZoneScanExportPlan', () => {
