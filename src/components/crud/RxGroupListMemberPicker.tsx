@@ -29,6 +29,7 @@ export interface RxGroupListMemberPickerProps {
 interface MemberOption {
   ref: EntityRef;
   name: string;
+  dmrId: string;
   key: string;
 }
 
@@ -71,14 +72,23 @@ function memberOptions(talkGroups: TalkGroup[], contacts: Contact[]): MemberOpti
   const tg = sortByName(talkGroups).map((t) => ({
     ref: { kind: 'talkGroup' as const, id: t.id },
     name: t.name,
+    dmrId: t.number.trim(),
     key: entityRefKey({ kind: 'talkGroup', id: t.id }),
   }));
   const ct = sortByName(contacts).map((c) => ({
     ref: { kind: 'contact' as const, id: c.id },
     name: c.name,
+    dmrId: c.identifier.trim(),
     key: entityRefKey({ kind: 'contact', id: c.id }),
   }));
   return [...tg, ...ct];
+}
+
+function memberOptionMatchesFilter(option: MemberOption, filterLower: string): boolean {
+  if (!filterLower) return true;
+  if (option.name.toLowerCase().includes(filterLower)) return true;
+  if (option.dmrId.toLowerCase().includes(filterLower)) return true;
+  return false;
 }
 
 const TIMESLOT_OPTIONS = [
@@ -97,6 +107,28 @@ function timeslotToValue(timeslot: ChannelTimeslot | null | undefined): string {
   if (timeslot === 1) return '1';
   if (timeslot === 2) return '2';
   return '';
+}
+
+function MemberKindBadge({ kind }: { kind: EntityRef['kind'] }) {
+  if (kind === 'talkGroup') {
+    return <Badge size="sm">Talk group</Badge>;
+  }
+  return (
+    <Badge size="sm" color="grape">
+      Private
+    </Badge>
+  );
+}
+
+function MemberRowLabel({ option }: { option: MemberOption }) {
+  return (
+    <Stack gap={0}>
+      <Text size="sm">{option.name}</Text>
+      <Text size="xs" c="dimmed" ff="monospace">
+        {option.dmrId || '—'}
+      </Text>
+    </Stack>
+  );
 }
 
 function MemberList({
@@ -121,20 +153,14 @@ function MemberList({
   return (
     <Stack gap={4} p="xs">
       {items.map((item) => (
-        <Group key={item.key} gap="xs" wrap="nowrap">
+        <Group key={item.key} gap="xs" wrap="nowrap" align="flex-start">
           <Checkbox
-            label={item.name}
+            label={<MemberRowLabel option={item} />}
             checked={checked.has(item.key)}
             onChange={() => onToggle(item.key)}
             style={{ flex: 1 }}
           />
-          {item.ref.kind === 'talkGroup' ? (
-            <Badge size="sm">Talk group</Badge>
-          ) : (
-            <Badge size="sm" color="grape">
-              Private
-            </Badge>
-          )}
+          <MemberKindBadge kind={item.ref.kind} />
         </Group>
       ))}
     </Stack>
@@ -166,8 +192,7 @@ export default function RxGroupListMemberPicker({
     () =>
       allOptions.filter(
         (o) =>
-          !selectedRefKeys.has(o.key) &&
-          (!availableFilterLower || o.name.toLowerCase().includes(availableFilterLower)),
+          !selectedRefKeys.has(o.key) && memberOptionMatchesFilter(o, availableFilterLower),
       ),
     [allOptions, selectedRefKeys, availableFilterLower],
   );
@@ -180,12 +205,18 @@ export default function RxGroupListMemberPicker({
           const option = optionByKey.get(key);
           return {
             member,
-            name: option?.name ?? key,
+            option: option ?? {
+              ref: member.ref,
+              name: key,
+              dmrId: '',
+              key,
+            },
             key: memberKey(member),
-            refKey: key,
           };
         })
-        .filter((o) => !inListFilterLower || o.name.toLowerCase().includes(inListFilterLower)),
+        .filter(
+          (row) => !inListFilterLower || memberOptionMatchesFilter(row.option, inListFilterLower),
+        ),
     [selectedRefs, optionByKey, inListFilterLower],
   );
 
@@ -252,7 +283,7 @@ export default function RxGroupListMemberPicker({
         <Stack gap="xs">
           <TextInput
             label="Filter available"
-            placeholder="Search by name…"
+            placeholder="Search by name or DMR ID…"
             value={availableFilter}
             onChange={(e) => setAvailableFilter(e.currentTarget.value)}
           />
@@ -301,7 +332,7 @@ export default function RxGroupListMemberPicker({
         <Stack gap="xs">
           <TextInput
             label="Filter in list"
-            placeholder="Search by name…"
+            placeholder="Search by name or DMR ID…"
             value={inListFilter}
             onChange={(e) => setInListFilter(e.currentTarget.value)}
           />
@@ -324,23 +355,26 @@ export default function RxGroupListMemberPicker({
             ) : (
               <Stack gap={4} p="xs">
                 {inListMembers.map((item) => (
-                  <Group key={item.key} gap="xs" wrap="nowrap" align="flex-end">
+                  <Group key={item.key} gap="xs" wrap="nowrap" align="flex-start">
                     <Checkbox
-                      label={item.name}
+                      label={<MemberRowLabel option={item.option} />}
                       checked={inListSelected.includes(item.key)}
                       onChange={() => toggleInList(item.key)}
                       style={{ flex: 1 }}
                     />
-                    {item.member.ref.kind === 'talkGroup' ? (
-                      <Select
-                        aria-label={`Timeslot for ${item.name}`}
-                        data={TIMESLOT_OPTIONS}
-                        value={timeslotToValue(item.member.timeslot)}
-                        onChange={(value) => setMemberTimeslot(item.key, value)}
-                        w={100}
-                        size="xs"
-                      />
-                    ) : null}
+                    <Stack gap={4} align="flex-end">
+                      <MemberKindBadge kind={item.member.ref.kind} />
+                      {item.member.ref.kind === 'talkGroup' ? (
+                        <Select
+                          aria-label={`Timeslot for ${item.option.name}`}
+                          data={TIMESLOT_OPTIONS}
+                          value={timeslotToValue(item.member.timeslot)}
+                          onChange={(value) => setMemberTimeslot(item.key, value)}
+                          w={100}
+                          size="xs"
+                        />
+                      ) : null}
+                    </Stack>
                   </Group>
                 ))}
               </Stack>

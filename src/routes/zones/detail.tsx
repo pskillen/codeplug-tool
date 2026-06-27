@@ -113,6 +113,12 @@ export default function ZoneDetail() {
             }}
             columns={[
               {
+                key: 'callsign',
+                header: 'Callsign',
+                render: (ch) => ch.callsign.trim() || '—',
+                sortValue: (ch) => ch.callsign.trim(),
+              },
+              {
                 key: 'mode',
                 header: 'Mode',
                 render: (ch) => modeLabel(ch.mode),

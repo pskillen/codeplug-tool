@@ -44,6 +44,24 @@ export default function RxGroupListMembersTable({
       }}
       columns={[
         {
+          key: 'dmrId',
+          header: 'ID',
+          render: (m) => {
+            if (m.kind === 'talkGroup' && m.entity) {
+              return (m.entity as TalkGroup).number.trim() || '—';
+            }
+            if (m.kind === 'contact' && m.entity) {
+              return (m.entity as Contact).identifier.trim() || '—';
+            }
+            return '—';
+          },
+          sortValue: (m) => {
+            if (m.kind === 'talkGroup' && m.entity) return (m.entity as TalkGroup).number;
+            if (m.kind === 'contact' && m.entity) return (m.entity as Contact).identifier;
+            return '';
+          },
+        },
+        {
           key: 'kind',
           header: 'Type',
           render: (m) => {

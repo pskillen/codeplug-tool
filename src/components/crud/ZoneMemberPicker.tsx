@@ -10,11 +10,37 @@ import {
 } from '@mantine/core';
 import { IconArrowLeft, IconArrowRight } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
+import { channelDisplayLabel } from '../../lib/channelNaming.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 import { memberIncludesInScanList } from '../../lib/zones.ts';
 import { sortByName } from '../../lib/reportLookup.ts';
 import type { Channel } from '../../models/codeplug.ts';
 import type { ZoneMemberEntry } from '../../models/codeplug.ts';
+
+function channelMatchesFilter(channel: Channel, filterLower: string): boolean {
+  if (!filterLower) return true;
+  if (channel.name.toLowerCase().includes(filterLower)) return true;
+  if (channel.callsign.toLowerCase().includes(filterLower)) return true;
+  return channelDisplayLabel(channel, true).toLowerCase().includes(filterLower);
+}
+
+function ChannelCheckboxLabel({ channel }: { channel: Channel }) {
+  const callsign = channel.callsign.trim();
+  const name = channel.name.trim();
+  if (callsign && name) {
+    return (
+      <Group gap={4} wrap="nowrap">
+        <Text size="sm" component="span">
+          {callsign}
+        </Text>
+        <Text size="sm" c="dimmed" component="span">
+          — {name}
+        </Text>
+      </Group>
+    );
+  }
+  return <Text size="sm">{callsign || name || '—'}</Text>;
+}
 
 export interface ZoneMemberPickerProps {
   channels: Channel[];
@@ -94,7 +120,11 @@ function ChannelList({
     <Stack gap={4} p="xs">
       {items.map((ch) => (
         <Stack key={ch.id} gap={2}>
-          <Checkbox label={ch.name} checked={checked.has(ch.id)} onChange={() => onToggle(ch.id)} />
+          <Checkbox
+            label={<ChannelCheckboxLabel channel={ch} />}
+            checked={checked.has(ch.id)}
+            onChange={() => onToggle(ch.id)}
+          />
           {showScanInclusion && members && onScanInclusionChange ? (
             <Checkbox
               ml="lg"
@@ -131,7 +161,7 @@ export default function ZoneMemberPicker({
       sortByName(channels).filter(
         (ch) =>
           !selectedSet.has(ch.id) &&
-          (!availableFilterLower || ch.name.toLowerCase().includes(availableFilterLower)),
+          channelMatchesFilter(ch, availableFilterLower),
       ),
     [channels, selectedIds, availableFilterLower],
   );
@@ -141,7 +171,7 @@ export default function ZoneMemberPicker({
       selectedIds
         .map((id) => channels.find((ch) => ch.id === id))
         .filter((ch): ch is Channel => ch != null)
-        .filter((ch) => !inZoneFilterLower || ch.name.toLowerCase().includes(inZoneFilterLower)),
+        .filter((ch) => channelMatchesFilter(ch, inZoneFilterLower)),
     [channels, selectedIds, inZoneFilterLower],
   );
 
@@ -199,7 +229,7 @@ export default function ZoneMemberPicker({
         <Stack gap="xs">
           <TextInput
             label="Filter available"
-            placeholder="Search by name…"
+            placeholder="Search by callsign or name…"
             value={availableFilter}
             onChange={(e) => setAvailableFilter(e.currentTarget.value)}
           />
@@ -248,7 +278,7 @@ export default function ZoneMemberPicker({
         <Stack gap="xs">
           <TextInput
             label="Filter in zone"
-            placeholder="Search by name…"
+            placeholder="Search by callsign or name…"
             value={inZoneFilter}
             onChange={(e) => setInZoneFilter(e.currentTarget.value)}
           />
