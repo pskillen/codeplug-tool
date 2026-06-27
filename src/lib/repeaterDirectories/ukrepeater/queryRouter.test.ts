@@ -17,6 +17,7 @@ import {
   filterListings,
   routeQuery,
   searchUkRepeaters,
+  searchUkRepeatersAtCoords,
   shouldApplyTownSubstring,
   shouldApplyTownSubstringForAuto,
 } from './queryRouter.ts';
@@ -147,16 +148,38 @@ describe('routeQuery', () => {
     expect(result.listings).toHaveLength(0);
   });
 
-  it('geocodes postcode mode and returns resolvedLocation', async () => {
+  it('geocodes postcode mode and returns resolvedLocation with pipeline', async () => {
     const result = await routeQuery('DE1 1AA', { mode: 'postcode' });
     expect(geocodeQuery).toHaveBeenCalled();
     expect(fetchByLocator).toHaveBeenCalled();
     expect(result.kind).toBe('location');
     expect(result.resolvedLocation).toMatchObject({
+      source: 'geocode',
       provider: 'photon',
       label: 'Derby, United Kingdom',
       locator: expect.any(String),
     });
+    expect(result.pipeline.some((s) => s.text.includes('Photon'))).toBe(true);
+    expect(result.pipeline.some((s) => s.text.includes('response:'))).toBe(true);
+    expect(result.pipeline.some((s) => s.text.includes('/locator/'))).toBe(true);
+  });
+});
+
+describe('searchUkRepeatersAtCoords', () => {
+  beforeEach(() => {
+    vi.mocked(fetchByLocator).mockResolvedValue([sampleListing]);
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('searches by browser coordinates', async () => {
+    const result = await searchUkRepeatersAtCoords(52.92, -1.48, {}, { accuracyMeters: 12 });
+    expect(fetchByLocator).toHaveBeenCalled();
+    expect(result.resolvedLocation?.source).toBe('browser');
+    expect(result.pipeline[0]?.text).toContain('Browser geolocation');
+    expect(result.listings).toHaveLength(1);
   });
 });
 

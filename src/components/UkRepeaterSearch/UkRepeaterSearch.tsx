@@ -29,6 +29,7 @@ import {
 import type { EtccListing } from '../../lib/repeaterDirectories/registry.ts';
 import { useUkRepeaterSearch } from '../../hooks/useUkRepeaterSearch.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
+import UseMyLocationButton from '../UseMyLocationButton/UseMyLocationButton.tsx';
 import { rowAddStatus } from './rowAddStatus.ts';
 
 const BAND_OPTIONS = [
@@ -44,6 +45,7 @@ const SEARCH_MODE_OPTIONS: { value: UkRepeaterSearchMode; label: string }[] = [
   { value: 'postcode', label: 'Postcode' },
   { value: 'address', label: 'Address' },
   { value: 'town', label: 'Town' },
+  { value: 'myLocation', label: 'My location' },
   { value: 'callsign', label: 'Repeater callsign' },
   { value: 'keeper', label: 'Keeper callsign' },
   { value: 'locator', label: 'Locator' },
@@ -55,18 +57,26 @@ const SEARCH_PLACEHOLDERS: Record<UkRepeaterSearchMode, string> = {
   postcode: 'DE1 1AA',
   address: '10 High Street, Derby',
   town: 'Derby',
+  myLocation: 'Use the button below',
   callsign: 'GB7DC',
   keeper: 'G7NPW',
   locator: 'IO92 or IO92PP',
   band: '2m or 70cm',
 };
 
+const TEXT_INPUT_MODES = new Set<UkRepeaterSearchMode>([
+  'auto',
+  'postcode',
+  'address',
+  'town',
+  'callsign',
+  'keeper',
+  'locator',
+  'band',
+]);
+
 function listingKey(listing: EtccListing): string {
   return String(listing.id);
-}
-
-function formatProviderLabel(provider: string): string {
-  return provider === 'mapbox' ? 'Mapbox' : 'Photon';
 }
 
 export default function UkRepeaterSearch() {
@@ -148,19 +158,17 @@ export default function UkRepeaterSearch() {
   };
 
   const kindHint =
-    search.resolvedLocation != null
-      ? `${formatProviderLabel(search.resolvedLocation.provider)} resolved "${search.resolvedLocation.label}" → locator ${search.resolvedLocation.locator.toUpperCase()}`
-      : search.kind === 'callsign'
-        ? 'Searching by repeater callsign'
-        : search.kind === 'keeper'
-          ? 'Searching by keeper callsign'
-          : search.kind === 'locator'
-            ? 'Searching by locator'
-            : search.kind === 'band'
-              ? 'Searching by band'
-              : search.kind === 'location'
-                ? 'Searching by location (geocoded to locator)'
-                : null;
+    search.kind === 'callsign'
+      ? 'Direct ukrepeater.net callsign lookup — no geocoding'
+      : search.kind === 'keeper'
+        ? 'Direct ukrepeater.net keeper lookup — no geocoding'
+        : search.kind === 'locator'
+          ? 'Direct ukrepeater.net locator lookup — no geocoding'
+          : search.kind === 'band'
+            ? 'Direct ukrepeater.net band lookup — no geocoding'
+            : null;
+
+  const showTextInput = TEXT_INPUT_MODES.has(search.searchMode);
 
   return (
     <FormPage
@@ -192,6 +200,7 @@ export default function UkRepeaterSearch() {
               if (e.key === 'Enter') void search.search();
             }}
             style={{ flex: 1, minWidth: 200 }}
+            disabled={!showTextInput}
           />
           <Select
             label="Band filter"
@@ -216,15 +225,38 @@ export default function UkRepeaterSearch() {
             leftSection={<IconSearch size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
             loading={search.loading}
             onClick={() => void search.search()}
+            disabled={!showTextInput}
           >
             Search
           </Button>
         </Group>
 
+        {search.searchMode === 'myLocation' ? (
+          <UseMyLocationButton
+            label="Use my location"
+            disabled={search.loading}
+            onLocation={(lat, lon, accuracyMeters) => {
+              void search.searchAtCoords(lat, lon, accuracyMeters);
+            }}
+          />
+        ) : null}
+
         {kindHint ? (
           <Text size="sm" c="dimmed">
             {kindHint}
           </Text>
+        ) : null}
+
+        {search.pipeline.length > 0 ? (
+          <Alert color="blue" title="How this search ran">
+            <Stack gap={4}>
+              {search.pipeline.map((step, index) => (
+                <Text key={`${index}-${step.text}`} size="sm">
+                  {index + 1}. {step.text}
+                </Text>
+              ))}
+            </Stack>
+          </Alert>
         ) : null}
 
         {search.kind === 'band' && search.listings.length > 0 ? (

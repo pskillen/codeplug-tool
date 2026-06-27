@@ -54,12 +54,18 @@ export function getRepeaterDirectorySource(id: RepeaterDirectorySourceId): Repea
   return source;
 }
 
-export { searchUkRepeaters, filterListings, detectQueryKind } from './ukrepeater/queryRouter.ts';
+export {
+  searchUkRepeaters,
+  searchUkRepeatersAtCoords,
+  filterListings,
+  detectQueryKind,
+} from './ukrepeater/queryRouter.ts';
 export type {
   UkRepeaterSearchMode,
   QueryKind,
   ResolvedLocation,
 } from './ukrepeater/queryRouter.ts';
+export type { SearchPipelineStep } from './ukrepeater/searchPipeline.ts';
 export { mapListingToChannelInput, isMapListingSkip } from './ukrepeater/mapToChannel.ts';
 export type {
   MapListingResult,
