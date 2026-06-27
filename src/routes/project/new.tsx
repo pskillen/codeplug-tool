@@ -14,10 +14,7 @@ export default function NewCodeplug() {
 
   return (
     <Page width="narrow">
-      <PageHeader
-        title="New codeplug"
-        description={getHelpShort('import.newProjectOnly')}
-      />
+      <PageHeader title="New codeplug" description={getHelpShort('import.newProjectOnly')} />
       <Stack gap="lg">
         <Button
           component={Link}
