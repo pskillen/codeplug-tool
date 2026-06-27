@@ -20,3 +20,17 @@
 | Search & add UI | `2fdca1d` | `/channels/add-from-ukrepeater` |
 | Verify UI | `ea3593e` | UkRepeaterVerify on channel detail |
 | Docs + tests | `f554c31`, `fe18f76` | CRUD cross-link, system test, external link |
+
+---
+
+## #181 — search modes and postcode routing
+
+**Tracking:** [codeplug-tool#181](https://github.com/pskillen/codeplug-tool/issues/181)
+**Branch:** `181/pskillen/ukrepeater-search-fixes`
+
+| Slice | Notes |
+| --- | --- |
+| UK postcode detection | `looksLikeUkPostcode`; formatted postcodes before callsign/locator in auto mode |
+| Search modes + keeper | `UkRepeaterSearchMode`, `fetchByKeeper`, `ResolvedLocation`, town-filter rules |
+| Hook + UI | Mode Select, geocode feedback line, callsign dedupe |
+| Tests + docs | Router mode tests, reference doc search modes table |

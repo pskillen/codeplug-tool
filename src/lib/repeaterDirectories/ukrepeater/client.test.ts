@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { fetchByCallsign, EtccDirectoryError } from './client.ts';
+import { fetchByCallsign, fetchByKeeper, EtccDirectoryError } from './client.ts';
 
 const GB7DC_RESPONSE = JSON.stringify({
   data: [
@@ -44,5 +44,23 @@ describe('fetchByCallsign', () => {
   it('throws EtccDirectoryError on HTTP failure', async () => {
     vi.mocked(fetch).mockResolvedValue(new Response('error', { status: 503 }));
     await expect(fetchByCallsign('GB7DC')).rejects.toBeInstanceOf(EtccDirectoryError);
+  });
+});
+
+describe('fetchByKeeper', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn());
+    sessionStorage.clear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('fetches keeper listings', async () => {
+    vi.mocked(fetch).mockResolvedValue(new Response(GB7DC_RESPONSE, { status: 200 }));
+    const listings = await fetchByKeeper('G7NPW');
+    expect(listings).toHaveLength(1);
+    expect(fetch).toHaveBeenCalledWith(expect.stringContaining('/keeper/g7npw'));
   });
 });

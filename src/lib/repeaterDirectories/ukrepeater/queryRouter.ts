@@ -68,10 +68,7 @@ export function detectQueryKind(query: string): QueryKind {
 }
 
 /** Whether geocode results should be narrowed by listing town substring. */
-export function shouldApplyTownSubstring(
-  query: string,
-  mode: UkRepeaterSearchMode,
-): boolean {
+export function shouldApplyTownSubstring(query: string, mode: UkRepeaterSearchMode): boolean {
   if (mode === 'town') return true;
   if (mode !== 'auto') return false;
   return shouldApplyTownSubstringForAuto(query);
@@ -179,8 +176,7 @@ export async function searchUkRepeaters(
 ): Promise<QueryRouteResult> {
   const mode = opts?.mode ?? 'auto';
   const { kind, listings, resolvedLocation } = await routeQuery(query, opts);
-  const townNeedle =
-    shouldApplyTownSubstring(query, mode) ? query.trim() : filters.townSubstring;
+  const townNeedle = shouldApplyTownSubstring(query, mode) ? query.trim() : filters.townSubstring;
   return {
     kind,
     resolvedLocation,

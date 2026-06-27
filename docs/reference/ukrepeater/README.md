@@ -25,7 +25,20 @@ This is a **remote directory API**, not a CPS wire format. Mapping to the intern
 | `/keeper/{call}` | `/keeper/g7npw` | Listings for keeper callsign |
 | `/all/systems` | — | All public listings |
 
-There is **no town/QTH endpoint**. Town search geocodes to a 4-character locator, then calls `/locator/`.
+There is **no town/QTH endpoint**. Postcode, address, and town searches geocode (Mapbox when a Settings token is set; Photon otherwise) to a 4-character locator, then call `/locator/`. The search UI shows the resolved address and locator square.
+
+### Search modes (UI)
+
+| Mode | API path |
+| --- | --- |
+| Auto | Heuristic routing (postcode before callsign; locator; band; geocode) |
+| Postcode / Address / Town | geocode → `/locator/{4-char}` |
+| Repeater callsign | `/callsign/{call}` |
+| Keeper callsign | `/keeper/{call}` |
+| Locator | `/locator/{4-or-6}` |
+| Band | `/band/{band}` |
+
+Town mode applies a client-side town substring filter after the locator query; postcode and address modes do not.
 
 ## Listing record (sample)
 

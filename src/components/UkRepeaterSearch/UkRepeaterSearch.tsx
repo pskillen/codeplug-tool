@@ -228,8 +228,7 @@ export default function UkRepeaterSearch() {
 
         {search.kind === 'band' && search.listings.length > 0 ? (
           <Alert color="blue" title="Large result set">
-            Band searches can return many listings. Keep operational-only enabled to reduce
-            noise.
+            Band searches can return many listings. Keep operational-only enabled to reduce noise.
           </Alert>
         ) : null}
 

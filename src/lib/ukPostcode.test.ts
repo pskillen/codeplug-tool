@@ -27,7 +27,7 @@ describe('looksLikeUkPostcode', () => {
 describe('looksLikeTownName', () => {
   it('matches plain town names', () => {
     expect(looksLikeTownName('Derby')).toBe(true);
-    expect(looksLikeTownName("St Albans")).toBe(true);
+    expect(looksLikeTownName('St Albans')).toBe(true);
     expect(looksLikeTownName("King's Lynn")).toBe(true);
   });
 
