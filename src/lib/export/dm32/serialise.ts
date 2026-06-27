@@ -1,7 +1,9 @@
-import type { Codeplug } from '../../../models/codeplug.ts';
+import type { Codeplug, Channel } from '../../../models/codeplug.ts';
+import { channelFieldDefaults } from '../../../models/codeplug.ts';
 import {
   expandAllChannelsForExport,
   expandZoneMemberWireNames,
+  type ExpandedChannelRow,
 } from '../../channelExpansion/index.ts';
 import {
   expandOptionsFromExport,
@@ -24,11 +26,17 @@ import {
   TALKGROUP_HEADERS,
   ZONE_COL,
   ZONE_HEADERS,
+  SCAN_HEADERS,
   type Dm32ExportFileName,
 } from '../../import/dm32/columns.ts';
 import { serialiseDm32ChannelRow } from './channelWire.ts';
+import { serialiseDerivedScanLists } from './scanWire.ts';
 import { rxGroupListExportMemberNames } from './listWire.ts';
 import { buildDm32TalkGroupWireNameMap } from './talkGroupWire.ts';
+import {
+  buildZoneScanExportPlan,
+  scanListNameForCarrierWireName,
+} from '../../zoneDerivedScanLists/index.ts';
 
 export type Dm32ExportFiles = Record<Dm32ExportFileName, string>;
 
@@ -51,6 +59,8 @@ function dm32ExpandOptions(codeplug: Codeplug, options?: ExportOptions, warnings
       useTalkGroupAbbreviation: options?.useTalkGroupAbbreviation,
       useChannelAbbreviation: options?.useChannelAbbreviation,
       multiTalkGroupExportNameMode: options?.multiTalkGroupExportNameMode,
+      exportScratchChannels: options?.exportScratchChannels,
+      exportZoneDerivedScanLists: options?.exportZoneDerivedScanLists,
     },
     warnings,
   );
@@ -62,14 +72,57 @@ function dm32MaxNameLength(options: ExportOptions | undefined, profileId: string
 }
 
 export function serialiseDm32Files(codeplug: Codeplug, options?: ExportOptions): Dm32ExportFiles {
+  const warnings: string[] = [];
   const talkGroupWireNames = buildDm32TalkGroupWireNameMap(codeplug.talkGroups, options);
-  return {
-    'Channels.csv': serialiseChannels(codeplug, options, talkGroupWireNames),
-    'Zones.csv': serialiseZones(codeplug, options),
+  const profileId = options?.profileId ?? DEFAULT_DM32_PROFILE_ID;
+  const profile = getDm32Profile(profileId);
+  const expandOpts = dm32ExpandOptions(codeplug, options, warnings);
+  const scanPlan = buildZoneScanExportPlan(
+    codeplug,
+    { ...expandOpts, maxNameLength: dm32MaxNameLength(options, profileId) },
+    options,
+    profile.scanListMembers,
+  );
+  warnings.push(...scanPlan.warnings);
+
+  const files: Dm32ExportFiles = {
+    'Channels.csv': serialiseChannels(codeplug, options, talkGroupWireNames, scanPlan, warnings),
+    'Zones.csv': serialiseZones(codeplug, options, scanPlan),
     'Talkgroups.csv': serialiseTalkGroups(codeplug, talkGroupWireNames),
     'Contacts.csv': serialiseDmrContacts(codeplug),
     'RXGroupLists.csv': serialiseRxGroupLists(codeplug, talkGroupWireNames),
     'DTMFContacts.csv': serialiseDtmfContacts(codeplug),
+    'Scan.csv':
+      scanPlan.scanLists.length > 0 ? serialiseDerivedScanLists(scanPlan.scanLists) : formatCsv(SCAN_HEADERS, []),
+  };
+  return files;
+}
+
+function syntheticSourceChannel(row: ExpandedChannelRow): Channel {
+  return {
+    id: row.sourceChannelId,
+    name: row.wireName,
+    callsign: '',
+    exportNameMode: 'name_only',
+    mode: row.mode,
+    rxFrequency: row.rxFrequency,
+    txFrequency: row.txFrequency,
+    contactRef: row.contactRef,
+    rxGroupListId: row.rxGroupListId,
+    location: row.location,
+    useLocation: row.useLocation,
+    bandwidthKHz: row.bandwidthKHz,
+    colourCode: row.colourCode,
+    timeslot: row.timeslot,
+    dmrId: row.dmrId,
+    rxTone: row.rxTone,
+    txTone: row.txTone,
+    squelch: row.squelch,
+    power: row.power,
+    ...channelFieldDefaults(),
+    opengd77Extras: row.opengd77Extras,
+    multiMode: false,
+    modeProfiles: [],
   };
 }
 
@@ -77,26 +130,45 @@ export function serialiseChannels(
   codeplug: Codeplug,
   options?: ExportOptions,
   talkGroupWireNames?: ReturnType<typeof buildDm32TalkGroupWireNameMap>,
+  scanPlan?: ReturnType<typeof buildZoneScanExportPlan>,
+  warnings?: string[],
 ): string {
   const profileId = options?.profileId ?? DEFAULT_DM32_PROFILE_ID;
-  const expandOpts = dm32ExpandOptions(codeplug, options);
-  const expanded = expandAllChannelsForExport(codeplug.channels, {
-    ...expandOpts,
-    maxNameLength: dm32MaxNameLength(options, profileId),
-  });
+  const expandOpts = dm32ExpandOptions(codeplug, options, warnings);
+  const expanded = [
+    ...expandAllChannelsForExport(codeplug.channels, {
+      ...expandOpts,
+      maxNameLength: dm32MaxNameLength(options, profileId),
+    }),
+    ...(scanPlan?.carrierRows ?? []),
+  ];
   const byId = new Map(codeplug.channels.map((ch) => [ch.id, ch]));
   const rows = expanded.map((row, i) => {
-    const source = byId.get(row.sourceChannelId);
-    if (!source) throw new Error(`Missing source channel ${row.sourceChannelId}`);
+    const source = byId.get(row.sourceChannelId) ?? syntheticSourceChannel(row);
+    const scanListName = scanPlan
+      ? scanListNameForCarrierWireName(scanPlan, row.wireName)
+      : null;
     return padRow(
       CHANNEL_HEADERS,
-      serialiseDm32ChannelRow(row, source, codeplug, profileId, i + 1, talkGroupWireNames),
+      serialiseDm32ChannelRow(
+        row,
+        source,
+        codeplug,
+        profileId,
+        i + 1,
+        talkGroupWireNames,
+        scanListName,
+      ),
     );
   });
   return formatCsv(CHANNEL_HEADERS, rows);
 }
 
-export function serialiseZones(codeplug: Codeplug, options?: ExportOptions): string {
+export function serialiseZones(
+  codeplug: Codeplug,
+  options?: ExportOptions,
+  scanPlan?: ReturnType<typeof buildZoneScanExportPlan>,
+): string {
   const profileId = options?.profileId ?? DEFAULT_DM32_PROFILE_ID;
   const expandOpts = dm32ExpandOptions(codeplug, options);
   const rows = codeplug.zones.map((zone, i) => {
@@ -104,10 +176,12 @@ export function serialiseZones(codeplug: Codeplug, options?: ExportOptions): str
       ...expandOpts,
       maxNameLength: dm32MaxNameLength(options, profileId),
     });
+    const carrier = scanPlan?.carrierWireNameByZoneId.get(zone.id);
+    const memberNames = carrier ? [carrier, ...names] : names;
     return padRow(ZONE_HEADERS, {
       [ZONE_COL.number]: String(i + 1),
       [ZONE_COL.name]: zone.name,
-      [ZONE_COL.members]: names.join('|'),
+      [ZONE_COL.members]: memberNames.join('|'),
     });
   });
   return formatCsv(ZONE_HEADERS, rows);

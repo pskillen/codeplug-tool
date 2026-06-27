@@ -29,6 +29,7 @@ export function serialiseDm32ChannelRow(
   profileId: string = DEFAULT_DM32_PROFILE_ID,
   rowNumber: number,
   talkGroupWireNames?: Dm32TalkGroupWireNameMap,
+  scanListName: string | null = null,
 ): Record<string, string> {
   const profile = getDm32Profile(profileId);
   const profiles = resolveChannelModeProfiles(sourceChannel);
@@ -61,7 +62,7 @@ export function serialiseDm32ChannelRow(
     [CHANNEL_COL.bandwidth]: formatDm32BandwidthWire(
       row.bandwidthKHz ?? sourceChannel.bandwidthKHz,
     ),
-    [CHANNEL_COL.scanList]: 'None',
+    [CHANNEL_COL.scanList]: scanListName ?? 'None',
     [CHANNEL_COL.txAdmit]: formatDm32TxAdmitWire(sourceChannel.txAdmit),
     [CHANNEL_COL.emergencySystem]: 'None',
     [CHANNEL_COL.squelch]: formatDm32SquelchWire(row.squelch ?? sourceChannel.squelch, profileId, {

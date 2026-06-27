@@ -622,7 +622,7 @@ function scratchWireNamesForZone(
   return names;
 }
 
-function expandChannelRowsForExport(
+export function expandChannelRowsForExport(
   channel: Channel,
   options: ExpandChannelOptions,
   reserved: Set<string>,

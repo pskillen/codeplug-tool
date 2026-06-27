@@ -7,6 +7,7 @@ export interface Dm32RadioProfile {
   label: string;
   maxChannels: number;
   rxGroupListMembers: number;
+  scanListMembers: number;
   /** Default max channel wire name length (LCD limit). */
   nameLimit: number;
   powerLadder: readonly PowerLadderEntry[];
@@ -32,6 +33,7 @@ export const DM32_PROFILES: readonly Dm32RadioProfile[] = [
     label: 'Baofeng DM-32UV',
     maxChannels: 1000,
     rxGroupListMembers: 32,
+    scanListMembers: 16,
     nameLimit: 16,
     powerLadder: DM32_POWER_LADDER,
     squelchLadder: DM32_SQUELCH_LADDER,
