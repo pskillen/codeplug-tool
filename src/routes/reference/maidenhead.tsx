@@ -16,6 +16,7 @@ import { useCallback, useMemo, useState } from 'react';
 import MapLocationPicker from '../../components/MapLocationPicker/MapLocationPicker.tsx';
 import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocationButton.tsx';
 import { Page, PageHeader, PageSection } from '../../components/ui/index.ts';
+import { getHelpShort } from '../../content/help/manifest.ts';
 import { useMapSettings } from '../../hooks/useMapSettings.ts';
 import { GeocodeError, geocodeQuery, type GeocodeProvider } from '../../lib/geocode.ts';
 import {
@@ -185,10 +186,7 @@ export default function MaidenheadConverter() {
 
   return (
     <Page>
-      <PageHeader
-        title="Maidenhead converter"
-        description="Convert between Maidenhead grid locators and WGS84 coordinates. Updates live as you type."
-      />
+      <PageHeader title="Maidenhead converter" description={getHelpShort('reference.maidenhead')} />
 
       <PageSection title="Converter">
         <Stack gap="lg">

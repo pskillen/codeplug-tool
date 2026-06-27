@@ -2,6 +2,7 @@ import { Alert, Button, Group, PasswordInput, Select } from '@mantine/core';
 import { Page, PageHeader, PageSection } from '../components/ui/index.ts';
 import ExportNameSettingsFields from '../components/ExportNameSettingsFields/ExportNameSettingsFields.tsx';
 import GoogleDriveSettingsSection from '../components/GoogleDriveSettingsSection/GoogleDriveSettingsSection.tsx';
+import { getHelpShort } from '../content/help/manifest.ts';
 import { useMapSettings } from '../hooks/useMapSettings.ts';
 import type { MaidenheadGridMode } from '../lib/maidenheadGrid.ts';
 import type { TileProvider } from '../lib/mapTiles.ts';
@@ -32,7 +33,7 @@ export default function Settings() {
         </Alert>
       ) : null}
 
-      <PageSection title="Map tiles" description="Base map layer for channel maps.">
+      <PageSection title="Map tiles" description={getHelpShort('settings.mapTiles')}>
         <Select
           label="Provider"
           data={[
@@ -47,6 +48,7 @@ export default function Settings() {
         />
         <PasswordInput
           label="Mapbox access token"
+          description={getHelpShort('settings.mapboxToken')}
           placeholder="pk.… (saved in localStorage)"
           value={mapboxToken}
           onChange={(e) => setMapboxToken(e.currentTarget.value)}
@@ -62,10 +64,7 @@ export default function Settings() {
         </Group>
       </PageSection>
 
-      <PageSection
-        title="Maidenhead grid"
-        description="Maximum Maidenhead resolution. Finer grid detail appears as you zoom in."
-      >
+      <PageSection title="Maidenhead grid" description={getHelpShort('map.overview')}>
         <Select
           label="Grid overlay"
           data={[
@@ -84,7 +83,7 @@ export default function Settings() {
 
       <PageSection
         title="Export name shortening"
-        description="Controls for abbreviating channel names at CPS export. Applies to OpenGD77, DM32, and CHIRP exports."
+        description={getHelpShort('settings.exportPrefs')}
       >
         <ExportNameSettingsFields />
       </PageSection>
