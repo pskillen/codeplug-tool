@@ -13,9 +13,10 @@ import UkRepeaterSearch from '../components/UkRepeaterSearch/UkRepeaterSearch.ts
 
 ## Behaviour
 
-- Search mode `Select`: Auto, Postcode, Address, Town, Repeater callsign, Keeper callsign, Locator, Band.
+- Search mode `Select`: Auto, Postcode, Address, Town, **My location**, Repeater callsign, Keeper callsign, Locator, Band.
 - Auto-detects query kind when mode is Auto (postcode before callsign; locator; band; etc.).
-- Location modes geocode via Mapbox (when Settings token set) or Photon, then query `/locator/`; shows resolved address and locator square.
+- Location modes geocode via Mapbox (when Settings token set) or Photon; **How this search ran** panel lists each step (geocoder choice, provider response, locator conversion, ukrepeater.net API path, filters).
+- My location mode uses browser geolocation → locator → `/locator/` (same pipeline visibility).
 - Operational-only filter on by default.
 - Title case names on by default (DERBY → Derby for channel qualifier and comment).
 - Skips listings without FM/DMR; blocks duplicate **callsigns** (not channel name qualifiers). Results table **Status** column shows add eligibility (Ready, duplicate callsign, skip reason).

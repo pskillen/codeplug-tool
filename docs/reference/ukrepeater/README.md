@@ -33,12 +33,15 @@ There is **no town/QTH endpoint**. Postcode, address, and town searches geocode 
 | --- | --- |
 | Auto | Heuristic routing (postcode before callsign; locator; band; geocode) |
 | Postcode / Address / Town | geocode → `/locator/{4-char}` |
+| My location | browser geolocation → `/locator/{4-char}` |
 | Repeater callsign | `/callsign/{call}` |
 | Keeper callsign | `/keeper/{call}` |
 | Locator | `/locator/{4-or-6}` |
 | Band | `/band/{band}` |
 
 Town mode applies a client-side town substring filter after the locator query; postcode and address modes do not.
+
+Each search shows a **How this search ran** step list in the UI: geocoder used (Photon or Mapbox and why), provider response, Maidenhead locator conversion, ukrepeater.net endpoint, and any filters applied.
 
 ## Listing record (sample)
 
