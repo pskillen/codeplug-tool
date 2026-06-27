@@ -1,6 +1,9 @@
-import { Stack } from '@mantine/core';
+import { Button, Stack } from '@mantine/core';
+import { IconMapPin } from '@tabler/icons-react';
 import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { sortByName } from '../../../lib/reportLookup.ts';
+import { ICON_SIZE_NAV, ICON_STROKE } from '../../../lib/iconSizes.ts';
 import { useCodeplug } from '../../../state/codeplugStore.tsx';
 import { filterRowsByName, useListNameQuery } from '../../../hooks/useListNameQuery.ts';
 import type { SectionNavProps } from '../../../nav/sectionNavTypes.ts';
@@ -17,6 +20,15 @@ export default function ZonesSectionNav({ variant }: SectionNavProps) {
   return (
     <Stack gap="sm">
       <EntityListSectionNav variant={variant} newPath="/zones/new" newLabel="New zone" />
+      <Button
+        component={Link}
+        to="/zones/from-distance"
+        variant="light"
+        leftSection={<IconMapPin size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+        fullWidth={variant === 'sidebar'}
+      >
+        Zone from distance…
+      </Button>
       <EntityZoneLinks zones={zones} variant={variant} />
     </Stack>
   );

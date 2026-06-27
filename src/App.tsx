@@ -25,6 +25,7 @@ import AddFromBrandmeister from './routes/channels/addFromBrandmeister.tsx';
 import ZonesList from './routes/zones/list.tsx';
 import ZoneDetail from './routes/zones/detail.tsx';
 import ZoneEdit from './routes/zones/edit.tsx';
+import ZoneFromDistance from './routes/zones/fromDistance.tsx';
 import TalkGroupsList from './routes/TalkGroupsList.tsx';
 import TalkGroupDetail from './routes/TalkGroupDetail.tsx';
 import TalkGroupEdit from './routes/TalkGroupEdit.tsx';
@@ -111,6 +112,7 @@ export default function App() {
             <Route path="/channels/:id/edit" element={<ChannelEdit />} />
             <Route path="/channels/:id" element={<ChannelDetail />} />
             <Route path="/zones" element={<ZonesList />} />
+            <Route path="/zones/from-distance" element={<ZoneFromDistance />} />
             <Route path="/zones/new" element={<ZoneEdit />} />
             <Route path="/zones/:id/edit" element={<ZoneEdit />} />
             <Route path="/zones/:id" element={<ZoneDetail />} />
