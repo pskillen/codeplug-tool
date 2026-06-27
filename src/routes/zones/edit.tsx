@@ -1,4 +1,4 @@
-import { Button, Stack, Text, TextInput } from '@mantine/core';
+import { Button, Checkbox, NumberInput, Stack, Text, TextInput } from '@mantine/core';
 import { IconArrowLeft, IconDeviceFloppy } from '@tabler/icons-react';
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -8,7 +8,9 @@ import { findEntityById } from '../../lib/reportLookup.ts';
 import { hasValidationErrors } from '../../lib/validation/channel.ts';
 import { validateZone } from '../../lib/validation/zone.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
+import type { ZoneMemberEntry } from '../../models/codeplug.ts';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
+import { DEFAULT_SCAN_CARRIER_FREQUENCY_HZ } from '../../lib/zoneDerivedScanLists/index.ts';
 
 export default function ZoneEdit() {
   const { id } = useParams<{ id: string }>();
@@ -18,7 +20,16 @@ export default function ZoneEdit() {
   const existing = !isNew && id ? findEntityById(codeplug.zones, id) : null;
 
   const [name, setName] = useState(existing?.name ?? '');
-  const [memberIds, setMemberIds] = useState<string[]>(existing?.memberChannelIds ?? []);
+  const [members, setMembers] = useState<ZoneMemberEntry[]>(existing?.members ?? []);
+  const [exportScratchChannel, setExportScratchChannel] = useState(
+    existing?.exportScratchChannel ?? false,
+  );
+  const [exportScanList, setExportScanList] = useState(existing?.exportScanList ?? false);
+  const [scanCarrierMhz, setScanCarrierMhz] = useState<number | ''>(
+    existing?.scanCarrierFrequencyHz != null
+      ? existing.scanCarrierFrequencyHz / 1_000_000
+      : DEFAULT_SCAN_CARRIER_FREQUENCY_HZ / 1_000_000,
+  );
   const [formError, setFormError] = useState<string | null>(null);
 
   if (!isNew && !existing) {
@@ -38,7 +49,12 @@ export default function ZoneEdit() {
     e.preventDefault();
     setFormError(null);
 
-    const issues = validateZone({ name, memberChannelIds: memberIds }, codeplug, existing?.id);
+    const scanCarrierFrequencyHz =
+      exportScanList && typeof scanCarrierMhz === 'number' && scanCarrierMhz > 0
+        ? Math.round(scanCarrierMhz * 1_000_000)
+        : null;
+
+    const issues = validateZone({ name, members }, codeplug, existing?.id);
     if (hasValidationErrors(issues)) {
       setFormError(issues.find((i) => i.severity === 'error')?.message ?? 'Validation failed');
       return;
@@ -46,13 +62,22 @@ export default function ZoneEdit() {
 
     try {
       if (isNew) {
-        addZone({ name: name.trim(), memberChannelIds: memberIds });
+        addZone({
+          name: name.trim(),
+          members,
+          exportScratchChannel,
+          exportScanList,
+          scanCarrierFrequencyHz,
+        });
         navigate('/zones');
       } else if (existing) {
-        if (name.trim() !== existing.name) {
-          updateZone(existing.id, { name: name.trim() });
-        }
-        setZoneMembers(existing.id, memberIds);
+        updateZone(existing.id, {
+          name: name.trim(),
+          exportScratchChannel,
+          exportScanList,
+          scanCarrierFrequencyHz,
+        });
+        setZoneMembers(existing.id, members);
         navigate(`/zones/${existing.id}`);
       }
     } catch (err) {
@@ -105,11 +130,46 @@ export default function ZoneEdit() {
           />
         </FormSection>
 
+        <FormSection
+          title="DM32 export options"
+          description="Honoured on Baofeng DM32 export when the matching master toggle is enabled on the export page. OpenGD77 uses zone-as-scan; CHIRP has no scan lists."
+        >
+          <Stack gap="sm">
+            <Checkbox
+              label="Export a scratch channel"
+              description="Emit a companion scratch channel for field ad-hoc talk groups."
+              checked={exportScratchChannel}
+              onChange={(e) => setExportScratchChannel(e.currentTarget.checked)}
+            />
+            <Checkbox
+              label="Export a scan list / scan channel"
+              description="Emit Scan.csv, a scan carrier channel, and wire the carrier as first zone member."
+              checked={exportScanList}
+              onChange={(e) => setExportScanList(e.currentTarget.checked)}
+            />
+            {exportScanList ? (
+              <NumberInput
+                label="Scan carrier frequency (MHz)"
+                description="Default 145.500 MHz simplex when unset."
+                value={scanCarrierMhz}
+                onChange={(value) => {
+                  if (value === '' || value == null) setScanCarrierMhz('');
+                  else setScanCarrierMhz(typeof value === 'number' ? value : Number(value));
+                }}
+                min={0}
+                decimalScale={6}
+                step={0.00625}
+              />
+            ) : null}
+          </Stack>
+        </FormSection>
+
         <FormSection title="Member channels">
           <ZoneMemberPicker
             channels={codeplug.channels}
-            selectedIds={memberIds}
-            onChange={setMemberIds}
+            members={members}
+            onChange={setMembers}
+            showScanInclusion
           />
         </FormSection>
       </Stack>

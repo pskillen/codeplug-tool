@@ -1,8 +1,11 @@
-import type { Codeplug } from '../../models/codeplug.ts';
+import type { Codeplug, ZoneMemberEntry } from '../../models/codeplug.ts';
 import type { ValidationIssue } from './channel.ts';
 
 export function validateZone(
-  input: { name: string; memberChannelIds?: string[] },
+  input: {
+    name: string;
+    members?: ZoneMemberEntry[];
+  },
   codeplug: Codeplug,
   zoneId?: string,
 ): ValidationIssue[] {
@@ -21,13 +24,13 @@ export function validateZone(
     }
   }
 
-  const members = input.memberChannelIds;
+  const members = input.members;
   if (members) {
     const channelIds = new Set(codeplug.channels.map((ch) => ch.id));
-    for (const id of members) {
-      if (!channelIds.has(id)) {
+    for (const m of members) {
+      if (!channelIds.has(m.channelId)) {
         issues.push({
-          field: 'memberChannelIds',
+          field: 'members',
           message: 'One or more selected channels no longer exist',
           severity: 'error',
         });

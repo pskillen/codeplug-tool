@@ -7,6 +7,7 @@ import { getMemberWireNames } from './entityProvenance.ts';
 import { resolveChannelModeProfiles } from './channelExpansion/index.ts';
 import { modeColor, modeLabel } from './channelModes.ts';
 import { haversineDistanceM } from './geoDistance.ts';
+import { zoneMemberChannelIds } from './zones.ts';
 
 export interface FilterOptions {
   requireUseLocation: boolean;
@@ -139,7 +140,7 @@ export function zoneGeolocatedPoints(
     }
   }
 
-  for (const memberId of zone.memberChannelIds) {
+  for (const memberId of zoneMemberChannelIds(zone)) {
     if (seenIds.has(memberId)) continue;
     seenIds.add(memberId);
 

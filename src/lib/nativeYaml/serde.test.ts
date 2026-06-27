@@ -11,6 +11,7 @@ import {
   type Zone,
 } from '../../models/codeplug.ts';
 import { newProject } from '../../models/codeplugProject.ts';
+import { zoneMemberChannelIds } from '../zones.ts';
 import {
   NATIVE_YAML_FORMAT,
   NATIVE_YAML_FORMAT_VERSION,
@@ -66,7 +67,7 @@ function sampleProject() {
   const zone: Zone = {
     id: zoneId,
     name: 'Home',
-    memberChannelIds: [channelId],
+    members: [{ channelId }],
   };
 
   const codeplug = {
@@ -113,7 +114,7 @@ describe('nativeYaml serde', () => {
     expect(parsed.targetRadios).toEqual(['Baofeng 1701']);
     expect(parsed.codeplug.channels).toHaveLength(1);
     expect(parsed.codeplug.channels[0]?.contactRef).toEqual({ kind: 'talkGroup', id: 'tg-1' });
-    expect(parsed.codeplug.zones[0]?.memberChannelIds).toEqual(['ch-1']);
+    expect(zoneMemberChannelIds(parsed.codeplug.zones[0]!)).toEqual(['ch-1']);
     expect(parsed.codeplug.rxGroupLists[0]?.memberRefs).toHaveLength(2);
   });
 

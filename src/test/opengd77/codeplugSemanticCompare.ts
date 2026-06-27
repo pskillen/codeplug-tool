@@ -27,7 +27,7 @@ function stripImportedWireProvenance(
 
 function withoutZoneIds(zone: Codeplug['zones'][number]) {
   const copy = withoutId(zone) as Codeplug['zones'][number];
-  delete (copy as { memberChannelIds?: string[] }).memberChannelIds;
+  delete (copy as { members?: unknown }).members;
   if (copy.meta?.imported) {
     copy.meta = { ...copy.meta, imported: stripImportedWireProvenance(copy.meta.imported) };
   }

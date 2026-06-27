@@ -10,6 +10,7 @@ import {
   type RxGroupListMember,
   type TalkGroup,
   type Zone,
+  type ZoneMemberEntry,
 } from '../models/codeplug.ts';
 import { getMemberWireNames, setMemberWireNames } from './entityProvenance.ts';
 import type { EntityRefKind } from './entityRefs.ts';
@@ -24,10 +25,14 @@ import {
   normalizeTalkGroupNumber,
   talkGroupIdByNormalizedNumber,
 } from './repeaterDirectories/brandmeister/mapTalkGroups.ts';
+import { membersFromChannelIds, zoneMemberChannelIds, zoneMembersFromChannelIds } from './zones.ts';
 
 export type ChannelInput = Omit<Channel, 'id'>;
 
-export type ZoneInput = Pick<Zone, 'name'> & { memberChannelIds?: string[] };
+export type ZoneInput = Pick<
+  Zone,
+  'name' | 'exportScratchChannel' | 'exportScanList' | 'scanCarrierFrequencyHz'
+> & { members?: ZoneMemberEntry[]; memberChannelIds?: string[] };
 
 export type TalkGroupInput = Omit<TalkGroup, 'id'>;
 
@@ -51,22 +56,25 @@ export function channelNamesForIds(channels: Channel[], ids: string[]): string[]
   return names;
 }
 
+export function zoneWithMembers(zone: Zone, members: ZoneMemberEntry[], channels: Channel[]): Zone {
+  return setMemberWireNames(
+    { ...zone, members },
+    channelNamesForIds(channels, zoneMemberChannelIds({ ...zone, members })),
+  );
+}
+
+/** @deprecated Use zoneWithMembers */
 export function zoneWithMemberIds(
   zone: Zone,
   memberChannelIds: string[],
   channels: Channel[],
 ): Zone {
-  return setMemberWireNames(
-    { ...zone, memberChannelIds },
-    channelNamesForIds(channels, memberChannelIds),
-  );
+  return zoneWithMembers(zone, zoneMembersFromChannelIds(memberChannelIds, zone.members), channels);
 }
 
 /** Refresh export wire names for all zones from current channel ids. */
 export function refreshAllZoneSourceNames(codeplug: Codeplug): Zone[] {
-  return codeplug.zones.map((zone) =>
-    zoneWithMemberIds(zone, zone.memberChannelIds, codeplug.channels),
-  );
+  return codeplug.zones.map((zone) => zoneWithMembers(zone, zone.members, codeplug.channels));
 }
 
 /** Normalise multi-mode flags and sync primary profile ↔ top-level fields. */
@@ -120,24 +128,24 @@ export function updateChannel(
 export function deleteChannel(codeplug: Codeplug, channelId: string): Codeplug {
   const channels = codeplug.channels.filter((ch) => ch.id !== channelId);
   const zones = codeplug.zones.map((zone) => {
-    const memberChannelIds = zone.memberChannelIds.filter((id) => id !== channelId);
-    return zoneWithMemberIds({ ...zone, memberChannelIds }, memberChannelIds, channels);
+    const members = zone.members.filter((m) => m.channelId !== channelId);
+    return zoneWithMembers(zone, members, channels);
   });
   return { ...codeplug, channels, zones };
 }
 
-function replaceZoneMemberIds(
-  memberChannelIds: string[],
+function replaceZoneMembers(
+  members: ZoneMemberEntry[],
   survivorId: string,
   absorbedIds: Set<string>,
-): string[] {
+): ZoneMemberEntry[] {
   const seen = new Set<string>();
-  const result: string[] = [];
-  for (const id of memberChannelIds) {
-    const next = absorbedIds.has(id) ? survivorId : id;
-    if (seen.has(next)) continue;
-    seen.add(next);
-    result.push(next);
+  const result: ZoneMemberEntry[] = [];
+  for (const member of members) {
+    const nextId = absorbedIds.has(member.channelId) ? survivorId : member.channelId;
+    if (seen.has(nextId)) continue;
+    seen.add(nextId);
+    result.push(nextId === member.channelId ? member : { ...member, channelId: nextId });
   }
   return result;
 }
@@ -160,8 +168,8 @@ export function mergeChannelsIntoOne(
     .map((ch) => (ch.id === survivorId ? normalized : ch));
 
   const zones = codeplug.zones.map((zone) => {
-    const memberChannelIds = replaceZoneMemberIds(zone.memberChannelIds, survivorId, absorbed);
-    return zoneWithMemberIds(zone, memberChannelIds, channels);
+    const members = replaceZoneMembers(zone.members, survivorId, absorbed);
+    return zoneWithMembers(zone, members, channels);
   });
 
   const withChannels = { ...codeplug, channels, zones };
@@ -172,21 +180,24 @@ export function mergeChannelsIntoOne(
 }
 
 export function addZone(codeplug: Codeplug, input: ZoneInput): Codeplug {
-  const memberChannelIds = input.memberChannelIds ?? [];
+  const members = input.members ?? membersFromChannelIds(input.memberChannelIds ?? []);
   const channelIds = new Set(codeplug.channels.map((ch) => ch.id));
-  for (const id of memberChannelIds) {
-    if (!channelIds.has(id)) {
-      throw new Error(`Unknown channel id: ${id}`);
+  for (const m of members) {
+    if (!channelIds.has(m.channelId)) {
+      throw new Error(`Unknown channel id: ${m.channelId}`);
     }
   }
 
-  const zone: Zone = zoneWithMemberIds(
+  const zone: Zone = zoneWithMembers(
     {
       id: newId(),
       name: input.name,
-      memberChannelIds,
+      members,
+      exportScratchChannel: input.exportScratchChannel ?? false,
+      exportScanList: input.exportScanList ?? false,
+      scanCarrierFrequencyHz: input.scanCarrierFrequencyHz ?? null,
     },
-    memberChannelIds,
+    members,
     codeplug.channels,
   );
   return { ...codeplug, zones: [...codeplug.zones, zone] };
@@ -211,18 +222,18 @@ export function deleteZone(codeplug: Codeplug, zoneId: string): Codeplug {
 export function setZoneMembers(
   codeplug: Codeplug,
   zoneId: string,
-  memberChannelIds: string[],
+  members: ZoneMemberEntry[],
 ): Codeplug {
   const channelIds = new Set(codeplug.channels.map((ch) => ch.id));
-  for (const id of memberChannelIds) {
-    if (!channelIds.has(id)) {
-      throw new Error(`Unknown channel id: ${id}`);
+  for (const m of members) {
+    if (!channelIds.has(m.channelId)) {
+      throw new Error(`Unknown channel id: ${m.channelId}`);
     }
   }
 
   const zones = codeplug.zones.map((zone) => {
     if (zone.id !== zoneId) return zone;
-    return zoneWithMemberIds(zone, memberChannelIds, codeplug.channels);
+    return zoneWithMembers(zone, members, codeplug.channels);
   });
   return { ...codeplug, zones };
 }

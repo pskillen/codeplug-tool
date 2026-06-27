@@ -147,11 +147,24 @@ export interface Channel {
   meta?: EntityMeta;
 }
 
+/** One zone membership — channel id plus optional scan-list export policy. */
+export interface ZoneMemberEntry {
+  channelId: string;
+  /** When false, channel stays in zone but is omitted from derived scan lists. Default true. */
+  includeInScanList?: boolean;
+}
+
 export interface Zone {
   id: string;
   name: string;
-  /** Resolved channel memberships by internal id. */
-  memberChannelIds: string[];
+  /** Ordered zone memberships. */
+  members: ZoneMemberEntry[];
+  /** When true, DM32-style export may emit a scratch channel for this zone's sites. */
+  exportScratchChannel?: boolean;
+  /** When true, DM32-style export may emit scan list + scan carrier for this zone. */
+  exportScanList?: boolean;
+  /** Optional carrier RF override (Hz); export default 145.500 MHz simplex. */
+  scanCarrierFrequencyHz?: number | null;
   meta?: EntityMeta;
 }
 
@@ -208,7 +221,7 @@ export interface Codeplug {
   meta: CodeplugMeta;
 }
 
-export const CODEPLUG_SCHEMA_VERSION = 17;
+export const CODEPLUG_SCHEMA_VERSION = 18;
 
 let idGenerator: () => string = () => crypto.randomUUID();
 

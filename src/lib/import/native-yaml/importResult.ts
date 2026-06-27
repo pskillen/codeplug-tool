@@ -1,5 +1,6 @@
 import type { CodeplugProject } from '../../../models/codeplugProject.ts';
 import type { EntityRef } from '../../entityRefs.ts';
+import { zoneMemberChannelIds } from '../../zones.ts';
 import type { ImportResult } from '../../import/types.ts';
 import type { VendorFormatId } from '../../import-export/types.ts';
 
@@ -24,7 +25,7 @@ export function importResultFromNativeProject(
     channels: cp.channels,
     zones: cp.zones.map((zone) => ({
       name: zone.name,
-      memberNames: zone.memberChannelIds
+      memberNames: zoneMemberChannelIds(zone)
         .map((id) => channelById.get(id)?.name ?? '')
         .filter((name) => name.length > 0),
     })),

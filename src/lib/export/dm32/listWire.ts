@@ -1,4 +1,4 @@
-import type { Codeplug, RxGroupList } from '../../../models/codeplug.ts';
+import type { Codeplug, RxGroupList, Zone } from '../../../models/codeplug.ts';
 import { memberRefsToWireNames } from '../../entityRefs.ts';
 import {
   expandZoneMemberWireNames,
@@ -23,12 +23,12 @@ export function rxGroupListExportMemberNames(
 }
 
 export function zoneExportMemberNames(
-  zone: { memberChannelIds: string[]; name: string },
+  zone: Pick<Zone, 'name' | 'members'>,
   channels: Codeplug['channels'],
   expandOptions: ExpandChannelOptions,
 ): string[] {
   const { names } = expandZoneMemberWireNames(
-    { id: '', name: zone.name, memberChannelIds: zone.memberChannelIds },
+    { id: '', name: zone.name, members: zone.members },
     channels,
     expandOptions,
   );

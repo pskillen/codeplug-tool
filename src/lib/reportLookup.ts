@@ -2,19 +2,20 @@ import type { Channel, Contact, RxGroupList, TalkGroup, Zone } from '../models/c
 import type { ChannelTimeslot } from './channelFields/index.ts';
 import { buildNameToChannelId } from './codeplug.ts';
 import { getMemberWireNames } from './entityProvenance.ts';
+import type { EntityRef } from './entityRefs.ts';
 import {
   entityRefDisplayName,
   entityRefsEqual,
   resolveContactRefByWireName,
 } from './entityRefs.ts';
-import type { EntityRef } from './entityRefs.ts';
+import { zoneMemberChannelIds } from './zones.ts';
 
 export function findEntityById<T extends { id: string }>(entities: T[], id: string): T | null {
   return entities.find((e) => e.id === id) ?? null;
 }
 
 export function zonesContainingChannel(channelId: string, zones: Zone[]): Zone[] {
-  return zones.filter((z) => z.memberChannelIds.includes(channelId));
+  return zones.filter((z) => zoneMemberChannelIds(z).includes(channelId));
 }
 
 export function channelsReferencingContactId(contactId: string, channels: Channel[]): Channel[] {
@@ -76,7 +77,7 @@ export function channelsWithTalkGroupName(
 
 export function channelsForZone(zone: Zone, channels: Channel[]): Channel[] {
   const byId = new Map(channels.map((ch) => [ch.id, ch]));
-  return zone.memberChannelIds.map((id) => byId.get(id)).filter((ch): ch is Channel => ch != null);
+  return zone.members.map((m) => byId.get(m.channelId)).filter((ch): ch is Channel => ch != null);
 }
 
 export interface ResolvedRxMember {
@@ -158,7 +159,7 @@ export function resolveRxGroupListMembers(
 
 export function unresolvedZoneMemberCount(zone: Zone, channels: Channel[]): number {
   const nameToId = buildNameToChannelId(channels);
-  const resolved = new Set(zone.memberChannelIds);
+  const resolved = new Set(zoneMemberChannelIds(zone));
   let count = 0;
   for (const name of getMemberWireNames(zone)) {
     const id = nameToId.get(name);

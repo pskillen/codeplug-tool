@@ -15,6 +15,8 @@ import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
 
 import { formatFrequencyHz } from '../../lib/formatFrequency.ts';
 import { modeLabel } from '../../lib/channelModes.ts';
+import { memberIncludesInScanList } from '../../lib/zones.ts';
+import { DEFAULT_SCAN_CARRIER_FREQUENCY_HZ } from '../../lib/zoneDerivedScanLists/index.ts';
 export default function ZoneDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -33,6 +35,23 @@ export default function ZoneDetail() {
   }
 
   const members = channelsForZone(zone, codeplug.channels);
+  const memberByChannelId = new Map(zone.members.map((m) => [m.channelId, m]));
+
+  const exportFields: { label: string; value: string }[] = [
+    { label: 'Name', value: zone.name },
+    { label: 'Member channels', value: String(members.length) },
+  ];
+  if (zone.exportScratchChannel) {
+    exportFields.push({ label: 'Export scratch channel', value: 'Yes' });
+  }
+  if (zone.exportScanList) {
+    const carrierHz = zone.scanCarrierFrequencyHz ?? DEFAULT_SCAN_CARRIER_FREQUENCY_HZ;
+    exportFields.push({ label: 'Export scan list', value: 'Yes' });
+    exportFields.push({
+      label: 'Scan carrier',
+      value: formatFrequencyHz(carrierHz).replace(' MHz', ' MHz'),
+    });
+  }
 
   const confirmDelete = () => {
     deleteZone(zone.id);
@@ -77,10 +96,7 @@ export default function ZoneDetail() {
           sections={[
             {
               title: 'Overview',
-              fields: [
-                { label: 'Name', value: zone.name },
-                { label: 'Member channels', value: String(members.length) },
-              ],
+              fields: exportFields,
             },
           ]}
         />
@@ -108,6 +124,18 @@ export default function ZoneDetail() {
                 render: (ch) =>
                   ch.rxFrequency ? formatFrequencyHz(ch.rxFrequency).replace(' MHz', '') : '—',
                 sortValue: (ch) => ch.rxFrequency,
+              },
+              {
+                key: 'scan',
+                header: 'In scan list',
+                render: (ch) => {
+                  const member = memberByChannelId.get(ch.id);
+                  return member && !memberIncludesInScanList(member) ? 'No' : 'Yes';
+                },
+                sortValue: (ch) => {
+                  const member = memberByChannelId.get(ch.id);
+                  return member && !memberIncludesInScanList(member) ? 0 : 1;
+                },
               },
             ]}
           />

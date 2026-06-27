@@ -1,4 +1,5 @@
-import type { Channel, Codeplug } from '../models/codeplug.ts';
+import type { Channel, Codeplug, Zone, ZoneMemberEntry } from '../models/codeplug.ts';
+import { zoneMemberChannelIds } from './zones.ts';
 import { channelImportMergeKeys, composeChannelWireName } from './channelNaming.ts';
 import {
   expandAllChannelsForExport,
@@ -51,8 +52,8 @@ export function buildNameToChannelId(
 export function resolveZoneMembers(
   sourceMemberNames: string[],
   nameToId: Map<string, string>,
-): { memberChannelIds: string[]; unresolved: string[] } {
-  const memberChannelIds: string[] = [];
+): { members: ZoneMemberEntry[]; unresolved: string[] } {
+  const members: ZoneMemberEntry[] = [];
   const unresolved: string[] = [];
   const seenIds = new Set<string>();
   const seenNames = new Set<string>();
@@ -68,9 +69,14 @@ export function resolveZoneMembers(
     }
     if (!seenIds.has(id)) {
       seenIds.add(id);
-      memberChannelIds.push(id);
+      members.push({ channelId: id });
     }
   }
 
-  return { memberChannelIds, unresolved };
+  return { members, unresolved };
+}
+
+/** @deprecated Use zoneMemberChannelIds from zones.ts */
+export function resolveZoneMemberChannelIds(zone: Zone): string[] {
+  return zoneMemberChannelIds(zone);
 }

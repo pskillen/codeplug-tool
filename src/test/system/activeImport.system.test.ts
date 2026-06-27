@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { applyImportToCodeplug } from '../../lib/importMerge.ts';
+import { zoneMemberChannelIds } from '../../lib/zones.ts';
 import { emptyCodeplug, resetIdGenerator, setIdGenerator } from '../../models/codeplug.ts';
 import { newProject } from '../../models/codeplugProject.ts';
 import {
@@ -62,7 +63,7 @@ describe('active import system workflow', () => {
         mode: 'merge',
       });
       expect(step2.applyReport.zones.added).toBe(1);
-      expect(step2.codeplugAfter.zones[0].memberChannelIds).toHaveLength(2);
+      expect(zoneMemberChannelIds(step2.codeplugAfter.zones[0])).toHaveLength(2);
       cp = step2.codeplugAfter;
 
       const step3 = await runActiveImportWorkflow({
@@ -223,7 +224,7 @@ describe('active import system workflow', () => {
       });
 
       expect(result.codeplugAfterReload?.channels).toHaveLength(2);
-      expect(result.codeplugAfterReload?.zones[0].memberChannelIds).toHaveLength(2);
+      expect(zoneMemberChannelIds(result.codeplugAfterReload!.zones[0])).toHaveLength(2);
     });
   });
 

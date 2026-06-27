@@ -61,6 +61,10 @@ export interface ExportOptions {
   useChannelAbbreviation?: boolean;
   /** How multi-TG expanded rows compose wire names. Default `callsign_tg_abbrev`. */
   multiTalkGroupExportNameMode?: MultiTalkGroupExportNameMode;
+  /** When false, skip scratch channels even if zones have exportScratchChannel. Default true. */
+  exportScratchChannels?: boolean;
+  /** When false, skip zone-derived scan lists even if zones have exportScanList. Default true. */
+  exportZoneDerivedScanLists?: boolean;
 }
 
 export interface ExportResult {

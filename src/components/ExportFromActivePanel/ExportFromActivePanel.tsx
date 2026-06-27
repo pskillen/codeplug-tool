@@ -2,6 +2,7 @@ import { Alert, Button, Select, Stack, Text } from '@mantine/core';
 import { IconDownload, IconPackage } from '@tabler/icons-react';
 import { useState } from 'react';
 import ExportNameSettingsFields from '../ExportNameSettingsFields/ExportNameSettingsFields.tsx';
+import Dm32ZoneExportSettingsFields from '../Dm32ZoneExportSettingsFields/Dm32ZoneExportSettingsFields.tsx';
 import { useExportSettings } from '../../hooks/useExportSettings.ts';
 import CloudFileActions from '../CloudFileActions/CloudFileActions.tsx';
 import {
@@ -121,6 +122,8 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
           showMultiTalkGroupOptions={vendorFormat.id !== 'opengd77'}
         />
 
+        {vendorFormat.id === 'dm32' ? <Dm32ZoneExportSettingsFields /> : null}
+
         <Stack gap="xs">
           {adapter.fileNames.map((fileName) => (
             <Button
@@ -164,8 +167,9 @@ export default function ExportFromActivePanel({ vendorFormat }: ExportFromActive
           </Text>
         ) : vendorFormat.id === 'dm32' ? (
           <Text size="sm" c="dimmed">
-            Scan lists and <code>DMR-ID.csv</code> are not included — import a full CPS folder for
-            those files if your radio needs them.
+            Zone-derived <code>Scan.csv</code> and scratch channels export when enabled per zone and
+            above. <code>DMR-ID.csv</code> is not included — import a full CPS folder if your radio
+            needs it.
           </Text>
         ) : null}
 

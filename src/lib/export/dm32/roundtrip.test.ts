@@ -12,6 +12,7 @@ import {
   buildRxGroupList,
   buildRglMember,
   buildTalkGroup,
+  buildZone,
 } from '../../../test/builders/codeplug.ts';
 
 describe('DM32 synthetic round-trip', () => {
@@ -109,5 +110,31 @@ describe('DM32 synthetic round-trip', () => {
     expect(lines.some((line) => line.includes('Scot West TS1') && line.includes('Slot 1'))).toBe(
       true,
     );
+  });
+
+  it('emits Scan.csv and carrier when zone.exportScanList is set', () => {
+    const ch = buildChannel({
+      id: 'c1',
+      name: 'Glasgow',
+      callsign: 'GB7GL',
+      mode: 'dmr',
+      rxFrequency: 430_912_500,
+      txFrequency: 438_512_500,
+    });
+    const zone = buildZone({
+      id: 'z1',
+      name: 'Local',
+      members: [{ channelId: 'c1' }],
+      exportScanList: true,
+    });
+    const codeplug = buildCodeplug({ channels: [ch], zones: [zone] });
+    const exported = serialiseDm32Files(codeplug, {
+      profileId: DEFAULT_DM32_PROFILE_ID,
+      exportZoneDerivedScanLists: true,
+    });
+    expect(exported['Scan.csv']).toContain('Local');
+    expect(exported['Scan.csv']).toContain('Last Actived Channel');
+    expect(exported['Channels.csv']).toContain('Local Scan');
+    expect(exported['Zones.csv']).toMatch(/Local Scan\|/);
   });
 });

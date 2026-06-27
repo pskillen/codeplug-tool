@@ -11,6 +11,7 @@ import {
   type Zone,
 } from '../../models/codeplug.ts';
 import { setMemberWireNames, stampImported } from '../../lib/entityProvenance.ts';
+import { membersFromChannelIds } from '../../lib/zones.ts';
 
 export function buildChannel(overrides: Partial<Channel> & Pick<Channel, 'id' | 'name'>): Channel {
   const {
@@ -36,18 +37,20 @@ export function buildChannel(overrides: Partial<Channel> & Pick<Channel, 'id' | 
   };
 }
 
-export function buildZone(overrides: Partial<Zone> & Pick<Zone, 'id' | 'name'>): Zone {
+export type ZoneBuildInput = Partial<Zone> &
+  Pick<Zone, 'id' | 'name'> & { memberChannelIds?: string[] };
+
+export function buildZone(overrides: ZoneBuildInput): Zone {
+  const legacyIds = (overrides as { memberChannelIds?: string[] }).memberChannelIds;
+  const members = overrides.members ?? (legacyIds ? membersFromChannelIds(legacyIds) : []);
   return {
-    memberChannelIds: [],
     ...overrides,
+    members,
   };
 }
 
 /** Zone with member wire names in provenance (import/round-trip tests). */
-export function buildImportedZone(
-  overrides: Partial<Zone> & Pick<Zone, 'id' | 'name'>,
-  memberWireNames: string[] = [],
-): Zone {
+export function buildImportedZone(overrides: ZoneBuildInput, memberWireNames: string[] = []): Zone {
   const zone = buildZone(overrides);
   if (memberWireNames.length === 0) return zone;
   return setMemberWireNames(

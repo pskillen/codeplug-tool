@@ -40,7 +40,9 @@ import {
   type RxGroupList,
   type TalkGroup,
   type Zone,
+  type ZoneMemberEntry,
 } from '../models/codeplug.ts';
+import { zoneMemberChannelIds } from './zones.ts';
 
 export type ImportApplyMode = 'merge' | 'overwrite';
 
@@ -112,6 +114,13 @@ function memberIdsEqual(a: string[], b: string[]): boolean {
     if (a[i] !== b[i]) return false;
   }
   return true;
+}
+
+function zoneMembersChannelIdsEqual(a: ZoneMemberEntry[], b: ZoneMemberEntry[]): boolean {
+  return memberIdsEqual(
+    zoneMemberChannelIds({ id: '', name: '', members: a }),
+    zoneMemberChannelIds({ id: '', name: '', members: b }),
+  );
 }
 
 function computeHasChanges(report: Omit<ImportMergeReport, 'hasChanges'>): boolean {
@@ -338,7 +347,7 @@ function zoneFromParsed(parsed: ParsedZone, importedAt: string, formatId: string
   const base: Zone = {
     id: newId(),
     name: parsed.name,
-    memberChannelIds: [],
+    members: [],
   };
   return stampImported(setMemberWireNames(base, parsed.memberNames), {
     formatId,
@@ -407,17 +416,14 @@ function resolveZones(
 ): { zones: Zone[]; unresolved: UnresolvedZoneMembers[] } {
   const unresolved: UnresolvedZoneMembers[] = [];
   const resolved = zones.map((zone) => {
-    const { memberChannelIds, unresolved: missing } = resolveZoneMembers(
-      getMemberWireNames(zone),
-      nameToId,
-    );
+    const { members, unresolved: missing } = resolveZoneMembers(getMemberWireNames(zone), nameToId);
     if (missing.length) {
       unresolved.push({ zoneName: zone.name, memberNames: missing });
     }
-    if (memberIdsEqual(zone.memberChannelIds, memberChannelIds)) {
+    if (zoneMembersChannelIdsEqual(zone.members, members)) {
       return zone;
     }
-    return { ...zone, memberChannelIds };
+    return { ...zone, members };
   });
   return { zones: resolved, unresolved };
 }

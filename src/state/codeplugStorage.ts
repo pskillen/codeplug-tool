@@ -29,6 +29,7 @@ import {
 import type { ChannelExportNameMode } from '../models/codeplug.ts';
 import type { CodeplugProject } from '../models/codeplugProject.ts';
 import { newProject } from '../models/codeplugProject.ts';
+import { membersFromChannelIds } from '../lib/zones.ts';
 
 export const CODEPLUG_STORAGE_KEY = 'mm9pdy-codeplug-tool.codeplug';
 export const CODEPLUG_STORAGE_VERSION = 1;
@@ -211,15 +212,29 @@ function migrateZone(raw: Record<string, unknown>, projectImportedAt: string | n
   const legacyNames = Array.isArray(raw.sourceMemberNames)
     ? (raw.sourceMemberNames as string[])
     : [];
-  const memberChannelIds = Array.isArray(raw.memberChannelIds)
-    ? (raw.memberChannelIds as string[])
-    : [];
   const existingMeta = raw.meta as EntityMeta | undefined;
+
+  let members = Array.isArray(raw.members)
+    ? (raw.members as { channelId?: string; includeInScanList?: boolean }[])
+        .filter((m) => typeof m.channelId === 'string')
+        .map((m) => ({
+          channelId: m.channelId as string,
+          ...(m.includeInScanList === false ? { includeInScanList: false } : {}),
+        }))
+    : [];
+
+  if (members.length === 0 && Array.isArray(raw.memberChannelIds)) {
+    members = membersFromChannelIds(raw.memberChannelIds as string[]);
+  }
 
   const zone: Zone = {
     id: String(raw.id ?? ''),
     name: String(raw.name ?? ''),
-    memberChannelIds,
+    members,
+    exportScratchChannel: raw.exportScratchChannel === true,
+    exportScanList: raw.exportScanList === true,
+    scanCarrierFrequencyHz:
+      typeof raw.scanCarrierFrequencyHz === 'number' ? raw.scanCarrierFrequencyHz : null,
     meta: existingMeta,
   };
 

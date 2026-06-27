@@ -11,13 +11,21 @@ import {
 import { IconArrowLeft, IconArrowRight } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
 import { ICON_SIZE_NAV, ICON_STROKE } from '../../lib/iconSizes.ts';
+import { memberIncludesInScanList } from '../../lib/zones.ts';
 import { sortByName } from '../../lib/reportLookup.ts';
 import type { Channel } from '../../models/codeplug.ts';
+import type { ZoneMemberEntry } from '../../models/codeplug.ts';
 
 export interface ZoneMemberPickerProps {
   channels: Channel[];
-  selectedIds: string[];
-  onChange: (ids: string[]) => void;
+  members: ZoneMemberEntry[];
+  onChange: (members: ZoneMemberEntry[]) => void;
+  /** Show per-member scan list inclusion (DM32-style export). */
+  showScanInclusion?: boolean;
+}
+
+function memberChannelIds(members: ZoneMemberEntry[]): string[] {
+  return members.map((m) => m.channelId);
 }
 
 function moveSelectedBlock(
@@ -50,16 +58,27 @@ function moveSelectedBlock(
   return next;
 }
 
+function reorderMembers(members: ZoneMemberEntry[], orderedIds: string[]): ZoneMemberEntry[] {
+  const byId = new Map(members.map((m) => [m.channelId, m]));
+  return orderedIds.map((id) => byId.get(id)!).filter(Boolean);
+}
+
 function ChannelList({
   items,
   checked,
   onToggle,
   emptyLabel,
+  members,
+  onScanInclusionChange,
+  showScanInclusion,
 }: {
   items: Channel[];
   checked: Set<string>;
   onToggle: (id: string) => void;
   emptyLabel: string;
+  members?: ZoneMemberEntry[];
+  onScanInclusionChange?: (channelId: string, include: boolean) => void;
+  showScanInclusion?: boolean;
 }) {
   if (!items.length) {
     return (
@@ -69,15 +88,23 @@ function ChannelList({
     );
   }
 
+  const memberById = new Map(members?.map((m) => [m.channelId, m]) ?? []);
+
   return (
     <Stack gap={4} p="xs">
       {items.map((ch) => (
-        <Checkbox
-          key={ch.id}
-          label={ch.name}
-          checked={checked.has(ch.id)}
-          onChange={() => onToggle(ch.id)}
-        />
+        <Stack key={ch.id} gap={2}>
+          <Checkbox label={ch.name} checked={checked.has(ch.id)} onChange={() => onToggle(ch.id)} />
+          {showScanInclusion && members && onScanInclusionChange ? (
+            <Checkbox
+              ml="lg"
+              size="xs"
+              label="Include in scan list"
+              checked={memberIncludesInScanList(memberById.get(ch.id) ?? { channelId: ch.id })}
+              onChange={(e) => onScanInclusionChange(ch.id, e.currentTarget.checked)}
+            />
+          ) : null}
+        </Stack>
       ))}
     </Stack>
   );
@@ -85,9 +112,11 @@ function ChannelList({
 
 export default function ZoneMemberPicker({
   channels,
-  selectedIds,
+  members,
   onChange,
+  showScanInclusion = false,
 }: ZoneMemberPickerProps) {
+  const selectedIds = memberChannelIds(members);
   const [availableFilter, setAvailableFilter] = useState('');
   const [inZoneFilter, setInZoneFilter] = useState('');
   const [availableSelected, setAvailableSelected] = useState<string[]>([]);
@@ -129,20 +158,29 @@ export default function ZoneMemberPicker({
   const addSelected = () => {
     const toAdd = availableSelected.filter((id) => !selectedSet.has(id));
     if (!toAdd.length) return;
-    onChange([...selectedIds, ...toAdd]);
+    onChange([...members, ...toAdd.map((channelId) => ({ channelId }))]);
     setAvailableSelected([]);
   };
 
   const removeSelected = () => {
     if (!inZoneSelected.length) return;
     const remove = new Set(inZoneSelected);
-    onChange(selectedIds.filter((id) => !remove.has(id)));
+    onChange(members.filter((m) => !remove.has(m.channelId)));
     setInZoneSelected([]);
   };
 
   const moveSelected = (direction: 'up' | 'down') => {
     if (!inZoneSelected.length) return;
-    onChange(moveSelectedBlock(selectedIds, new Set(inZoneSelected), direction));
+    const nextIds = moveSelectedBlock(selectedIds, new Set(inZoneSelected), direction);
+    onChange(reorderMembers(members, nextIds));
+  };
+
+  const setScanInclusion = (channelId: string, include: boolean) => {
+    onChange(
+      members.map((m) =>
+        m.channelId === channelId ? { ...m, includeInScanList: include ? undefined : false } : m,
+      ),
+    );
   };
 
   const canMoveUp = inZoneSelected.some((id) => selectedIds.indexOf(id) > 0);
@@ -231,6 +269,9 @@ export default function ZoneMemberPicker({
               checked={new Set(inZoneSelected)}
               onToggle={toggleInZone}
               emptyLabel="No channels in zone"
+              members={members}
+              showScanInclusion={showScanInclusion}
+              onScanInclusionChange={setScanInclusion}
             />
           </ScrollArea>
           <Group gap="xs">
