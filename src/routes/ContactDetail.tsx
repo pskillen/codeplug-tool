@@ -1,6 +1,6 @@
 import { Anchor, Button, Group, Stack, Text, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconArrowLeft, IconPencil, IconTrash } from '@tabler/icons-react';
+import { IconArrowLeft, IconCopy, IconPencil, IconTrash } from '@tabler/icons-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ConfirmDeleteModal from '../components/crud/ConfirmDeleteModal.tsx';
 import { DataTable, Page, PageHeader } from '../components/ui/index.ts';
@@ -22,7 +22,7 @@ import { modeLabel } from '../lib/channelModes.ts';
 export default function ContactDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { codeplug, deleteContact } = useCodeplug();
+  const { codeplug, deleteContact, duplicateContact } = useCodeplug();
   const [deleteOpen, { open: openDelete, close: closeDelete }] = useDisclosure(false);
   const contact = id ? findEntityById(codeplug.contacts, id) : null;
 
@@ -59,6 +59,11 @@ export default function ContactDetail() {
     navigate('/contacts');
   };
 
+  const handleDuplicate = () => {
+    const newId = duplicateContact(contact.id);
+    if (newId) navigate(`/contacts/${newId}`);
+  };
+
   return (
     <Page>
       <PageHeader title={contact.name} />
@@ -79,6 +84,14 @@ export default function ContactDetail() {
               leftSection={<IconPencil size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
             >
               Edit
+            </Button>
+            <Button
+              variant="light"
+              size="sm"
+              onClick={handleDuplicate}
+              leftSection={<IconCopy size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+            >
+              Duplicate
             </Button>
             <Button
               color="red"

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { emptyCodeplug } from '../models/codeplug.ts';
-import { buildChannel, buildContact, buildTalkGroup, buildZone } from '../test/builders/index.ts';
+import { buildChannel, buildContact, buildTalkGroup } from '../test/builders/index.ts';
 import {
   collectChannelNames,
   collectTalkGroupContactNames,

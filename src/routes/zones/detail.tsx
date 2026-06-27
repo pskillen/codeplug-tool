@@ -1,6 +1,6 @@
 import { Anchor, Button, Group, Stack, Text, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconArrowLeft, IconPencil, IconTrash } from '@tabler/icons-react';
+import { IconArrowLeft, IconCopy, IconPencil, IconTrash } from '@tabler/icons-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import CodeplugMap from '../../components/CodeplugMap/CodeplugMap.tsx';
 import ConfirmDeleteModal from '../../components/crud/ConfirmDeleteModal.tsx';
@@ -20,7 +20,7 @@ import { DEFAULT_SCAN_CARRIER_FREQUENCY_HZ } from '../../lib/zoneDerivedScanList
 export default function ZoneDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { codeplug, deleteZone } = useCodeplug();
+  const { codeplug, deleteZone, duplicateZone } = useCodeplug();
   const { position, setPosition, clearPosition } = useOperatorPosition();
   const [deleteOpen, { open: openDelete, close: closeDelete }] = useDisclosure(false);
   const zone = id ? findEntityById(codeplug.zones, id) : null;
@@ -59,6 +59,11 @@ export default function ZoneDetail() {
     navigate('/zones');
   };
 
+  const handleDuplicate = () => {
+    const newId = duplicateZone(zone.id);
+    if (newId) navigate(`/zones/${newId}`);
+  };
+
   return (
     <Page>
       <PageHeader title={zone.name} />
@@ -79,6 +84,14 @@ export default function ZoneDetail() {
               leftSection={<IconPencil size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
             >
               Edit
+            </Button>
+            <Button
+              variant="light"
+              size="sm"
+              onClick={handleDuplicate}
+              leftSection={<IconCopy size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+            >
+              Duplicate
             </Button>
             <Button
               color="red"

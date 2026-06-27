@@ -1,6 +1,6 @@
 import { Anchor, Button, Group, Stack, Text, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconArrowLeft, IconPencil, IconTrash } from '@tabler/icons-react';
+import { IconArrowLeft, IconCopy, IconPencil, IconTrash } from '@tabler/icons-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ConfirmDeleteModal from '../components/crud/ConfirmDeleteModal.tsx';
 import { DataTable, Page, PageHeader } from '../components/ui/index.ts';
@@ -23,7 +23,7 @@ import { modeLabel } from '../lib/channelModes.ts';
 export default function TalkGroupDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { codeplug, deleteTalkGroup } = useCodeplug();
+  const { codeplug, deleteTalkGroup, duplicateTalkGroup } = useCodeplug();
   const [deleteOpen, { open: openDelete, close: closeDelete }] = useDisclosure(false);
   const talkGroup = id ? findEntityById(codeplug.talkGroups, id) : null;
 
@@ -60,6 +60,11 @@ export default function TalkGroupDetail() {
     navigate('/talk-groups');
   };
 
+  const handleDuplicate = () => {
+    const newId = duplicateTalkGroup(talkGroup.id);
+    if (newId) navigate(`/talk-groups/${newId}`);
+  };
+
   return (
     <Page>
       <PageHeader title={talkGroup.name} />
@@ -81,6 +86,14 @@ export default function TalkGroupDetail() {
               leftSection={<IconPencil size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
             >
               Edit
+            </Button>
+            <Button
+              variant="light"
+              size="sm"
+              onClick={handleDuplicate}
+              leftSection={<IconCopy size={ICON_SIZE_NAV} stroke={ICON_STROKE} />}
+            >
+              Duplicate
             </Button>
             <Button
               color="red"

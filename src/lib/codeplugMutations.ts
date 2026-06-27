@@ -670,7 +670,8 @@ export function duplicateChannel(
   const source = codeplug.channels.find((ch) => ch.id === channelId);
   if (!source) return null;
 
-  const { id: _id, meta, name, ...rest } = source;
+  const { id: _omitId, meta, name, ...rest } = source;
+  void _omitId;
   const baseName = name.trim() || source.callsign.trim() || 'Channel';
   const nextName = uniqueDisplayName(baseName, collectChannelNames(codeplug));
   const next = addChannel(codeplug, {
@@ -706,7 +707,8 @@ export function duplicateTalkGroup(
   const source = codeplug.talkGroups.find((tg) => tg.id === talkGroupId);
   if (!source) return null;
 
-  const { id: _id, meta, name, ...rest } = source;
+  const { id: _omitId, meta, name, ...rest } = source;
+  void _omitId;
   const nextName = uniqueDisplayName(name, collectTalkGroupContactNames(codeplug));
   const next = addTalkGroup(codeplug, {
     ...rest,
@@ -724,7 +726,8 @@ export function duplicateContact(
   const source = codeplug.contacts.find((c) => c.id === contactId);
   if (!source) return null;
 
-  const { id: _id, meta, name, ...rest } = source;
+  const { id: _omitId, meta, name, ...rest } = source;
+  void _omitId;
   const nextName = uniqueDisplayName(name, collectTalkGroupContactNames(codeplug));
   const next = addContact(codeplug, {
     ...rest,
