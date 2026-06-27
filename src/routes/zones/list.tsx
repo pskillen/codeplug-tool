@@ -6,7 +6,12 @@ import UseMyLocationButton from '../../components/UseMyLocationButton/UseMyLocat
 import { filterRowsByName, useListNameQuery } from '../../hooks/useListNameQuery.ts';
 import { usePersistedEntityListSort } from '../../hooks/usePersistedEntityListSort.ts';
 import { DATATABLE_NAME_SORT_KEY } from '../../lib/dataTable/sort.ts';
-import { zoneMemberChannelIds } from '../../lib/zones.ts';
+import {
+  zoneMemberChannelIds,
+  formatZoneScanListColumn,
+  formatZoneScratchColumn,
+  zoneScanEligibleMemberCount,
+} from '../../lib/zones.ts';
 import { useCodeplug } from '../../state/codeplugStore.tsx';
 import { useOperatorPosition } from '../../state/operatorPosition.tsx';
 
@@ -48,6 +53,19 @@ export default function ZonesList() {
               header: 'Members',
               render: (z) => zoneMemberChannelIds(z).length,
               sortValue: (z) => zoneMemberChannelIds(z).length,
+            },
+            {
+              key: 'scanList',
+              header: 'Scan list',
+              render: (z) => formatZoneScanListColumn(z, channels),
+              sortValue: (z) =>
+                (z.exportScanList ? 1_000 : 0) + zoneScanEligibleMemberCount(z, channels),
+            },
+            {
+              key: 'scratch',
+              header: 'Scratch channel',
+              render: (z) => formatZoneScratchColumn(z),
+              sortValue: (z) => (z.exportScratchChannel ? 1 : 0),
             },
           ]}
         />

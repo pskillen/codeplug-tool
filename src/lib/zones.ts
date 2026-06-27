@@ -1,4 +1,4 @@
-import type { Zone, ZoneMemberEntry } from '../models/codeplug.ts';
+import type { Channel, Zone, ZoneMemberEntry } from '../models/codeplug.ts';
 
 /** Ordered channel ids for a zone. */
 export function zoneMemberChannelIds(zone: Zone): string[] {
@@ -24,4 +24,26 @@ export function zoneMembersFromChannelIds(
 
 export function memberIncludesInScanList(member: ZoneMemberEntry): boolean {
   return member.includeInScanList !== false;
+}
+
+/** Zone members that would be included in a derived scan list (before TG expansion). */
+export function zoneScanEligibleMemberCount(zone: Zone, channels: Channel[]): number {
+  const byId = new Map(channels.map((ch) => [ch.id, ch]));
+  let count = 0;
+  for (const member of zone.members) {
+    if (!memberIncludesInScanList(member)) continue;
+    const ch = byId.get(member.channelId);
+    if (!ch || ch.scanSkip) continue;
+    count++;
+  }
+  return count;
+}
+
+export function formatZoneScanListColumn(zone: Zone, channels: Channel[]): string {
+  if (!zone.exportScanList) return '—';
+  return `Enabled / ${zoneScanEligibleMemberCount(zone, channels)}`;
+}
+
+export function formatZoneScratchColumn(zone: Zone): string {
+  return zone.exportScratchChannel ? 'Enabled' : '—';
 }
